@@ -59,6 +59,11 @@ You are responsible for:
 
 WorldView intentionally excludes private camera scraping, individual search, and hidden analytics.
 
+
+## Troubleshooting
+
+- **Hydration mismatch warning with `webcrx` attribute**: this is usually caused by browser extensions injecting attributes before React hydrates. The app now suppresses root hydration warnings and uses a client-safe HUD clock initialization. If you still see warnings, test in Incognito or disable DOM-modifying extensions for `localhost`.
+
 ## Testing
 
 ```bash

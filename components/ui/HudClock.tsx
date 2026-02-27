@@ -3,15 +3,15 @@
 import { useEffect, useState } from "react";
 
 export function HudClock() {
-  const [iso, setIso] = useState<string>(new Date().toISOString());
+  const [iso, setIso] = useState<string>("--:--:--Z");
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setIso(new Date().toISOString());
-    }, 1000);
+    const tick = () => setIso(new Date().toISOString());
+    tick();
 
+    const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
   }, []);
 
-  return <>{iso}</>;
+  return <span suppressHydrationWarning>{iso}</span>;
 }
