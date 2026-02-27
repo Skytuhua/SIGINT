@@ -1,0 +1,10 @@
+[
+  {
+    "city": "Tokyo",
+    "landmarks": [
+      { "name": "Shibuya Crossing", "lat": 35.6595, "lon": 139.7004, "height": 2200, "heading": 0, "pitch": -45, "range": 6000 },
+      { "name": "Tokyo Tower", "lat": 35.6586, "lon": 139.7454, "height": 2400, "heading": 20, "pitch": -50, "range": 7000 },
+      { "name": "Akihabara", "lat": 35.6984, "lon": 139.773, "height": 2200, "heading": 45, "pitch": -45, "range": 6500 }
+    ]
+  }
+]

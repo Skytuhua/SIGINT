@@ -1,0 +1,5 @@
+{
+  "tokyo-01": { "heading": 0, "pitch": -25, "fov": 45, "range": 300, "height": 10, "north": 0, "east": 0 },
+  "seattle-01": { "heading": 20, "pitch": -15, "fov": 50, "range": 500, "height": 12, "north": 0, "east": 0 },
+  "london-01": { "heading": 10, "pitch": -20, "fov": 55, "range": 350, "height": 8, "north": 0, "east": 0 }
+}

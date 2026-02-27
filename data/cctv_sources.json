@@ -1,0 +1,32 @@
+[
+  {
+    "id": "tokyo-01",
+    "city": "Tokyo",
+    "name": "Shibuya Scramble",
+    "lat": 35.6595,
+    "lon": 139.7004,
+    "snapshotUrl": "/cctv/sample1.jpg",
+    "refreshSeconds": 60,
+    "notes": "Placeholder image. Replace with official traffic camera endpoint."
+  },
+  {
+    "id": "seattle-01",
+    "city": "Seattle",
+    "name": "I-5 Pine St",
+    "lat": 47.6137,
+    "lon": -122.3281,
+    "snapshotUrl": "/cctv/sample2.jpg",
+    "refreshSeconds": 60,
+    "notes": "Public-traffic only."
+  },
+  {
+    "id": "london-01",
+    "city": "London",
+    "name": "A3212 Westminster",
+    "lat": 51.5011,
+    "lon": -0.1246,
+    "snapshotUrl": "/cctv/sample3.jpg",
+    "refreshSeconds": 60,
+    "notes": "Demo source."
+  }
+]

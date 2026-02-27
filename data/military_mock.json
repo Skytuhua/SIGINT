@@ -1,0 +1,4 @@
+[
+  {"icao24":"m001","callsign":"MIL-01","lat":34.7,"lon":-117.2,"altitudeM":9600,"velocityMS":225,"headingDeg":31,"onGround":false},
+  {"icao24":"m002","callsign":"MIL-02","lat":36.1,"lon":-115.1,"altitudeM":7800,"velocityMS":260,"headingDeg":180,"onGround":false}
+]

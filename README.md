@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WorldView
 
-## Getting Started
+WorldView is an intel-style geospatial dashboard built with Next.js + CesiumJS. It renders a 3D globe, tactical UI controls, and pluggable data layers including satellites, flights, earthquakes, traffic simulation, and curated public CCTV mesh.
 
-First, run the development server:
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env.local
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`.env.local`
 
-## Learn More
+```bash
+NEXT_PUBLIC_CESIUM_ION_TOKEN=
+OPENSKY_USERNAME=
+OPENSKY_PASSWORD=
+MILITARY_PROVIDER_KEY=
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Implemented MVP layers
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **3D Tiles / Globe**: Cesium viewer with ion token support and tactical scope viewport.
+- **Satellites**: CelesTrak TLE feed proxied by `/api/satellites`, rendered as orbit points and selectable entities.
+- **Commercial flights**: OpenSky via `/api/opensky` with server caching + token-bucket limits.
+- **Military flights**: `/api/military` mock provider (OFF by default) using normalized aircraft schema.
+- **Earthquakes**: USGS 24h GeoJSON through `/api/earthquakes` with magnitude ring markers.
+- **Street traffic**: Overpass major roads via `/api/overpass`, drawn as tactical road overlays.
+- **CCTV mesh**: Curated list in `data/cctv_sources.json` with local placeholder snapshots.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Controls
 
-## Deploy on Vercel
+- Layer toggles: left panel
+- Style preset (Normal / CRT / NVG / FLIR): right panel
+- Detect labels (sparse / full): right panel
+- Landmark jumps: **Q/W/E/R/T**
+- Entity tracking: click a satellite/flight marker
+- Perf debug panel: add `?debug=1`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Security and compliance
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- API keys stay server-side only.
+- Route handlers apply in-memory caching and per-IP token-bucket limits.
+- Military data provider is opt-in and defaults to mock data.
+- CCTV usage must be official public traffic cameras only.
+
+## Data Source Compliance
+
+You are responsible for:
+1. Complying with each provider Terms of Service.
+2. Supplying your own authorized credentials.
+3. Avoiding private camera ingestion.
+4. Avoiding re-identification or personal tracking.
+
+WorldView intentionally excludes private camera scraping, individual search, and hidden analytics.
+
+## Testing
+
+```bash
+pnpm test
+pnpm build
+```
+
+## How it works
+
+1. Tactical UI shell + scoped Cesium viewport.
+2. Provider adapters normalize source payloads into app contracts.
+3. Cesium entities are refreshed on polling intervals per layer.
+4. Post-process style stage swaps shader behavior for CRT/NVG/FLIR.
+5. Extension path: add a provider and map payloads into Cesium entity collections.
+
+See `docs/ROADMAP.md` for MVP, v1, v2 milestones.
