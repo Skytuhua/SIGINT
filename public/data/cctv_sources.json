@@ -1,0 +1,110 @@
+[
+  {
+    "id": "nyc_dot_001",
+    "city": "New York",
+    "name": "Times Square (W 42nd St)",
+    "lat": 40.758,
+    "lon": -73.9855,
+    "snapshotUrl": "https://webcams.nyctmc.org/api/cameras/04b0abf0-a0c2-4d51-849e-bab5b7e43e5f/image",
+    "refreshSeconds": 30
+  },
+  {
+    "id": "nyc_dot_002",
+    "city": "New York",
+    "name": "Brooklyn Bridge",
+    "lat": 40.7061,
+    "lon": -73.9969,
+    "snapshotUrl": "https://webcams.nyctmc.org/api/cameras/65f49093-b33c-46fb-9434-ef6c0e2b5f33/image",
+    "refreshSeconds": 30
+  },
+  {
+    "id": "nyc_dot_003",
+    "city": "New York",
+    "name": "Lincoln Tunnel Approach",
+    "lat": 40.7637,
+    "lon": -74.0005,
+    "snapshotUrl": "https://webcams.nyctmc.org/api/cameras/8eb9ab9e-0512-4b0a-8d80-61c2bff17fbd/image",
+    "refreshSeconds": 30
+  },
+  {
+    "id": "nyc_dot_004",
+    "city": "New York",
+    "name": "Holland Tunnel",
+    "lat": 40.7277,
+    "lon": -74.0087,
+    "snapshotUrl": "https://webcams.nyctmc.org/api/cameras/1db8c2d1-2249-4f1c-a2e0-4b4dd9f1c7b1/image",
+    "refreshSeconds": 30
+  },
+  {
+    "id": "la_dot_001",
+    "city": "Los Angeles",
+    "name": "I-405 at Wilshire",
+    "lat": 34.0549,
+    "lon": -118.4413,
+    "snapshotUrl": "https://cwwp2.dot.ca.gov/data/d7/cctv/image/d7main_q405_s_wilshire/d7main_q405_s_wilshire.jpg",
+    "refreshSeconds": 60
+  },
+  {
+    "id": "la_dot_002",
+    "city": "Los Angeles",
+    "name": "US-101 at Hollywood",
+    "lat": 34.1016,
+    "lon": -118.3411,
+    "snapshotUrl": "https://cwwp2.dot.ca.gov/data/d7/cctv/image/d7main_q101_s_highland/d7main_q101_s_highland.jpg",
+    "refreshSeconds": 60
+  },
+  {
+    "id": "chi_cdot_001",
+    "city": "Chicago",
+    "name": "Lake Shore Drive / Wacker",
+    "lat": 41.887,
+    "lon": -87.6238,
+    "snapshotUrl": "https://www.chicago.gov/dam/city/depts/cdot/trafficSignals/cameras/placeholder.jpg",
+    "refreshSeconds": 60
+  },
+  {
+    "id": "uk_ha_001",
+    "city": "London",
+    "name": "M25 J10 (Wisley)",
+    "lat": 51.3211,
+    "lon": -0.4435,
+    "snapshotUrl": "https://static.highwaysengland.co.uk/roadimages/M25J10.jpg",
+    "refreshSeconds": 60
+  },
+  {
+    "id": "uk_ha_002",
+    "city": "London",
+    "name": "A1(M) J3 Barnet",
+    "lat": 51.6516,
+    "lon": -0.2036,
+    "snapshotUrl": "https://static.highwaysengland.co.uk/roadimages/A1MJ3.jpg",
+    "refreshSeconds": 60
+  },
+  {
+    "id": "seattle_001",
+    "city": "Seattle",
+    "name": "I-5 at Mercer",
+    "lat": 47.6247,
+    "lon": -122.3283,
+    "snapshotUrl": "https://images.wsdot.wa.gov/nw/005vc00100.jpg",
+    "refreshSeconds": 30
+  },
+  {
+    "id": "sf_511_001",
+    "city": "San Francisco",
+    "name": "Bay Bridge (W Span)",
+    "lat": 37.7943,
+    "lon": -122.3994,
+    "snapshotUrl": "https://bav.mtc.ca.gov/bav/BayBridgeWest.jpg",
+    "refreshSeconds": 60
+  },
+  {
+    "id": "va_vdot_001",
+    "city": "Washington DC",
+    "name": "I-495 at American Legion Bridge",
+    "lat": 38.9712,
+    "lon": -77.1274,
+    "snapshotUrl": "https://www.vdot.virginia.gov/travel/cameras/8495ALB.jpg",
+    "refreshSeconds": 60
+  }
+]

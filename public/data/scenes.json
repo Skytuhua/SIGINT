@@ -1,0 +1,101 @@
+[
+  {
+    "name": "New York City",
+    "city": "New York",
+    "lat": 40.7128,
+    "lon": -74.006,
+    "altM": 6000,
+    "heading": 0,
+    "pitch": -40
+  },
+  {
+    "name": "London",
+    "city": "London",
+    "lat": 51.5074,
+    "lon": -0.1278,
+    "altM": 5000,
+    "heading": 0,
+    "pitch": -45
+  },
+  {
+    "name": "Tokyo",
+    "city": "Tokyo",
+    "lat": 35.6762,
+    "lon": 139.6503,
+    "altM": 6000,
+    "heading": 0,
+    "pitch": -40
+  },
+  {
+    "name": "Los Angeles",
+    "city": "Los Angeles",
+    "lat": 34.0522,
+    "lon": -118.2437,
+    "altM": 6000,
+    "heading": 0,
+    "pitch": -40
+  },
+  {
+    "name": "Paris",
+    "city": "Paris",
+    "lat": 48.8566,
+    "lon": 2.3522,
+    "altM": 5000,
+    "heading": 0,
+    "pitch": -45
+  },
+  {
+    "name": "Sydney",
+    "city": "Sydney",
+    "lat": -33.8688,
+    "lon": 151.2093,
+    "altM": 6000,
+    "heading": 0,
+    "pitch": -40
+  },
+  {
+    "name": "Dubai",
+    "city": "Dubai",
+    "lat": 25.2048,
+    "lon": 55.2708,
+    "altM": 5000,
+    "heading": 0,
+    "pitch": -40
+  },
+  {
+    "name": "Singapore",
+    "city": "Singapore",
+    "lat": 1.3521,
+    "lon": 103.8198,
+    "altM": 5000,
+    "heading": 0,
+    "pitch": -45
+  },
+  {
+    "name": "Chicago",
+    "city": "Chicago",
+    "lat": 41.8781,
+    "lon": -87.6298,
+    "altM": 5000,
+    "heading": 0,
+    "pitch": -45
+  },
+  {
+    "name": "São Paulo",
+    "city": "São Paulo",
+    "lat": -23.5505,
+    "lon": -46.6333,
+    "altM": 5000,
+    "heading": 0,
+    "pitch": -45
+  },
+  {
+    "name": "Global Overview",
+    "city": null,
+    "lat": 20.0,
+    "lon": 0.0,
+    "altM": 25000000,
+    "heading": 0,
+    "pitch": -90
+  }
+]
