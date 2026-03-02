@@ -1,0 +1,45 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature", "id": "ws-mena",
+      "geometry": { "type": "Polygon", "coordinates": [[[25,10],[65,10],[65,38],[25,38],[25,10]]] },
+      "properties": { "name": "MENA Extreme Water Stress", "level": "extremely high", "source": "WRI Aqueduct", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "ws-indus",
+      "geometry": { "type": "Polygon", "coordinates": [[[62,22],[82,22],[82,36],[62,36],[62,22]]] },
+      "properties": { "name": "Indus Basin Water Stress", "level": "extremely high", "source": "WRI Aqueduct", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "ws-ncp",
+      "geometry": { "type": "Polygon", "coordinates": [[[110,30],[122,30],[122,42],[110,42],[110,30]]] },
+      "properties": { "name": "North China Plain", "level": "high", "source": "WRI Aqueduct", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "ws-swus",
+      "geometry": { "type": "Polygon", "coordinates": [[[-120,31],[-100,31],[-100,40],[-120,40],[-120,31]]] },
+      "properties": { "name": "US Southwest / Colorado Basin", "level": "high", "source": "WRI Aqueduct", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "ws-mex",
+      "geometry": { "type": "Polygon", "coordinates": [[[-115,20],[-95,20],[-95,32],[-115,32],[-115,20]]] },
+      "properties": { "name": "Northern Mexico", "level": "high", "source": "WRI Aqueduct", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "ws-sahel",
+      "geometry": { "type": "Polygon", "coordinates": [[[-15,10],[38,10],[38,18],[-15,18],[-15,10]]] },
+      "properties": { "name": "Sahel Belt", "level": "high", "source": "WRI Aqueduct", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "ws-southern-africa",
+      "geometry": { "type": "Polygon", "coordinates": [[[16,-30],[34,-30],[34,-20],[16,-20],[16,-30]]] },
+      "properties": { "name": "Southern Africa Dry Zone", "level": "medium-high", "source": "WRI Aqueduct", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "ws-casia",
+      "geometry": { "type": "Polygon", "coordinates": [[[55,36],[70,36],[70,46],[55,46],[55,36]]] },
+      "properties": { "name": "Central Asia Aral Basin", "level": "extremely high", "source": "WRI Aqueduct", "ts": 1772435598914 }
+    }
+  ]
+}

@@ -23,4 +23,34 @@
  * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
  */
 
-import{a as r}from"./chunk-G2BB42Z6.js";import"./chunk-6GG6EJBW.js";import"./chunk-TXLODGLR.js";import"./chunk-RHEGXTJ5.js";import"./chunk-CWBIOT2C.js";import"./chunk-PPN6SLYU.js";import"./chunk-SOWUYSYI.js";import"./chunk-I36V6CKP.js";import"./chunk-WG62ICZK.js";import"./chunk-EEN7GMYN.js";import"./chunk-SXYTVHGU.js";import"./chunk-RAWIUDJR.js";import"./chunk-KGKDCW56.js";import"./chunk-G4IO3CPJ.js";import{e as o}from"./chunk-GBRF7ES3.js";function i(e,t){return o(t)&&(e=r.unpack(e,t)),r.createGeometry(e)}var a=i;export{a as default};
+import {
+  BoxGeometry_default
+} from "./chunk-ACRTCBN5.js";
+import "./chunk-GNHZH7HP.js";
+import "./chunk-LSSWVB2X.js";
+import "./chunk-JYQNWIQQ.js";
+import "./chunk-IUROUBPA.js";
+import "./chunk-ELI4BUOT.js";
+import "./chunk-OXALEQPI.js";
+import "./chunk-FQPSOOPH.js";
+import "./chunk-T6LPN7RI.js";
+import "./chunk-R4OIEIPE.js";
+import "./chunk-RHBWXX7C.js";
+import "./chunk-ZIKGV7EL.js";
+import "./chunk-BAVI3ZS2.js";
+import "./chunk-TGY6H6N6.js";
+import {
+  defined_default
+} from "./chunk-N4QEHO3U.js";
+
+// packages/engine/Source/Workers/createBoxGeometry.js
+function createBoxGeometry(boxGeometry, offset) {
+  if (defined_default(offset)) {
+    boxGeometry = BoxGeometry_default.unpack(boxGeometry, offset);
+  }
+  return BoxGeometry_default.createGeometry(boxGeometry);
+}
+var createBoxGeometry_default = createBoxGeometry;
+export {
+  createBoxGeometry_default as default
+};

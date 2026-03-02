@@ -6,6 +6,7 @@ import type {
   PropagatedSat,
   Flight,
   Earthquake,
+  DisasterAlert,
   Vehicle,
   CctvCamera,
   CameraCalibration,
@@ -20,6 +21,8 @@ type LayerHandle = {
   remove: () => void;
   billboards?: import('cesium').BillboardCollection;
   labels?: import('cesium').LabelCollection;
+  dataSource?: import("cesium").CustomDataSource;
+  entityById?: Map<string, import("cesium").Entity>;
 };
 
 const layerCollections = new WeakMap<object, Map<string, LayerHandle>>();
@@ -228,21 +231,21 @@ export type GetFlightPosition = (
   icao: string
 ) => { lon: number; lat: number; altM: number } | null;
 
-/** Update flight billboard/label positions from interpolated positions (e.g. each frame). */
-export async function updateFlightPositions(
+/** Update flight billboard/label positions from interpolated positions. Cesium must be passed for sync use (e.g. preRender). */
+export function updateFlightPositions(
   viewer: import('cesium').Viewer,
-  getPosition: GetFlightPosition
-): Promise<void> {
+  getPosition: GetFlightPosition,
+  Cesium: typeof import('cesium')
+): void {
   if (!isViewerAlive(viewer)) return;
   const map = getLayerMap(viewer);
   const handle = map.get('flights');
   if (!handle?.billboards) return;
+  if (handle.billboards.isDestroyed()) return;
 
-  const Cesium = await import('cesium');
+  const Ces = Cesium;
   const billboards = handle.billboards;
   const labels = handle.labels;
-
-  if (billboards.isDestroyed()) return;
 
   for (let i = 0; i < billboards.length; i++) {
     const b = billboards.get(i);
@@ -252,7 +255,7 @@ export async function updateFlightPositions(
     const p = getPosition(icao);
     if (!p) continue;
     const renderAltM = Math.max(80, p.altM);
-    b.position = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, renderAltM);
+    b.position = Ces.Cartesian3.fromDegrees(p.lon, p.lat, renderAltM);
   }
 
   if (labels && !labels.isDestroyed()) {
@@ -264,7 +267,7 @@ export async function updateFlightPositions(
       const p = getPosition(icao);
       if (!p) continue;
       const renderAltM = Math.max(180, p.altM);
-      label.position = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, renderAltM);
+      label.position = Ces.Cartesian3.fromDegrees(p.lon, p.lat, renderAltM);
     }
   }
 }
@@ -293,6 +296,7 @@ export async function renderEarthquakes(
       scaleByDistance: new Cesium.NearFarScalar(5e3, 1.4, 1.2e7, 0.45),
       translucencyByDistance: new Cesium.NearFarScalar(5e3, 1.0, 1.5e7, 0.6),
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
       heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
     });
   }
@@ -311,6 +315,118 @@ function quakeColor(mag: number): string {
   if (mag < 3) return '#ffeb3b'; // yellow
   if (mag < 5) return '#ff9800'; // orange
   return '#f44336';              // red
+}
+
+function disasterColor(level?: string): string {
+  const normalized = String(level ?? "").toLowerCase();
+  if (normalized.includes("green")) return "#7ddf64";
+  if (normalized.includes("orange")) return "#ffab40";
+  if (normalized.includes("red")) return "#ff5a5f";
+  return "#ffd166";
+}
+
+export async function renderDisasterAlerts(
+  viewer: import("cesium").Viewer,
+  alerts: DisasterAlert[]
+): Promise<void> {
+  if (!isViewerAlive(viewer)) return;
+  const Cesium = await import("cesium");
+  if (!isViewerAlive(viewer)) return;
+
+  const map = getLayerMap(viewer);
+  let handle = map.get("disasters");
+  if (!handle?.dataSource) {
+    const dataSource = new Cesium.CustomDataSource("disasters");
+    await viewer.dataSources.add(dataSource);
+    handle = {
+      remove: () => {
+        if (!isViewerAlive(viewer)) return;
+        viewer.dataSources.remove(dataSource, true);
+      },
+      dataSource,
+      entityById: new Map<string, import("cesium").Entity>(),
+    };
+    map.set("disasters", handle);
+  }
+
+  const dataSource = handle.dataSource;
+  const entityById = handle.entityById ?? new Map<string, import("cesium").Entity>();
+  handle.entityById = entityById;
+  const incoming = new Set<string>();
+
+  alerts.slice(0, 500).forEach((alert) => {
+    const id = alert.id;
+    if (!id) return;
+    incoming.add(id);
+    const color = disasterColor(alert.alertLevel);
+    const pointColor = Cesium.Color.fromCssColorString(color);
+    const existing = entityById.get(id);
+    const labelText = `${alert.eventType.toUpperCase()} ${alert.alertLevel ?? "UNSET"}`;
+    const position = Cesium.Cartesian3.fromDegrees(alert.lon, alert.lat, 50);
+    if (existing) {
+      const mutable = existing as unknown as {
+        position: unknown;
+        billboard?: {
+          image?: unknown;
+          verticalOrigin?: import("cesium").VerticalOrigin;
+          heightReference?: import("cesium").HeightReference;
+          disableDepthTestDistance?: number;
+        };
+        label?: { text?: unknown };
+      };
+      mutable.position = position;
+      if (mutable.billboard) {
+        mutable.billboard.image = createDotCanvas(6, color);
+        mutable.billboard.verticalOrigin = Cesium.VerticalOrigin.BOTTOM;
+        mutable.billboard.heightReference = Cesium.HeightReference.RELATIVE_TO_GROUND;
+        mutable.billboard.disableDepthTestDistance = Number.POSITIVE_INFINITY;
+      }
+      if (mutable.label) {
+        mutable.label.text = labelText;
+      }
+      return;
+    }
+
+    const entity = dataSource.entities.add({
+      id,
+      position,
+      billboard: {
+        image: createDotCanvas(6, color),
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        scaleByDistance: new Cesium.NearFarScalar(100_000, 1.4, 18_000_000, 0.36),
+      },
+      label: {
+        text: labelText,
+        font: "10px monospace",
+        fillColor: pointColor,
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        outlineColor: Cesium.Color.BLACK,
+        outlineWidth: 2,
+        pixelOffset: new Cesium.Cartesian2(9, -8),
+        distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 1_800_000),
+        scaleByDistance: new Cesium.NearFarScalar(80_000, 1.0, 4_000_000, 0.0),
+      },
+      properties: {
+        type: "disaster",
+        id,
+        title: alert.title,
+        source: alert.source,
+        eventType: alert.eventType,
+        alertLevel: alert.alertLevel ?? null,
+        updatedAt: alert.updatedAt,
+        severity: alert.severity ?? null,
+      },
+    });
+    entityById.set(id, entity);
+  });
+
+  for (const [id, entity] of Array.from(entityById.entries())) {
+    if (incoming.has(id)) continue;
+    dataSource.entities.remove(entity);
+    entityById.delete(id);
+  }
 }
 
 // 閳光偓閳光偓閳光偓 Traffic layer 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
@@ -508,9 +624,12 @@ export async function renderNewsMarkers(
   });
 }
 
+const FLIGHT_HIGHLIGHT_ENTITY_ID = 'flight_highlight_entity';
+
 export async function renderFlightHighlight(
   viewer: import('cesium').Viewer,
-  flight: Flight
+  flight: Flight,
+  getPosition?: GetFlightPosition
 ): Promise<void> {
   if (!isViewerAlive(viewer)) return;
   const Cesium = await import('cesium');
@@ -519,12 +638,39 @@ export async function renderFlightHighlight(
 
   const altM = flight.altM ?? 0;
 
+  if (getPosition) {
+    const icao = flight.icao;
+    const entity = viewer.entities.add({
+      id: FLIGHT_HIGHLIGHT_ENTITY_ID,
+      position: new Cesium.CallbackProperty(() => {
+        const p = getPosition(icao);
+        if (!p) return Cesium.Cartesian3.fromDegrees(flight.lon, flight.lat, Math.max(0, altM));
+        return Cesium.Cartesian3.fromDegrees(p.lon, p.lat, Math.max(0, p.altM));
+      }, false) as unknown as import("cesium").PositionProperty,
+      billboard: {
+        image: createYellowBoxCanvas(32),
+        scaleByDistance: new Cesium.NearFarScalar(5e4, 2, 1e7, 0.45),
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      },
+    });
+    const map = getLayerMap(viewer);
+    map.set('flight_highlight', {
+      remove: () => {
+        try {
+          if (viewer.entities.contains(entity)) viewer.entities.remove(entity);
+        } catch {
+          // ignore if viewer destroyed
+        }
+      },
+    });
+    return;
+  }
+
   const billboards = new Cesium.BillboardCollection({ scene: viewer.scene });
   billboards.add({
     position: Cesium.Cartesian3.fromDegrees(flight.lon, flight.lat, altM),
     image: createYellowBoxCanvas(32),
     id: { type: 'flight_highlight', id: flight.icao },
-    // Smaller when zoomed out: scale down at far distance
     scaleByDistance: new Cesium.NearFarScalar(5e4, 2, 1e7, 0.45),
     disableDepthTestDistance: Number.POSITIVE_INFINITY,
   });
@@ -539,12 +685,13 @@ export async function renderFlightHighlight(
   });
 }
 
-/** Update the flight highlight (yellow box) position from interpolated position. Call each frame when tracking a flight. */
-export async function updateFlightHighlightPosition(
+/** Update the flight highlight (yellow box) position from interpolated position. Cesium must be passed for sync use (e.g. preRender). */
+export function updateFlightHighlightPosition(
   viewer: import('cesium').Viewer,
   getPosition: GetFlightPosition,
-  icao: string
-): Promise<void> {
+  icao: string,
+  Cesium: typeof import('cesium')
+): void {
   if (!isViewerAlive(viewer)) return;
   const map = getLayerMap(viewer);
   const handle = map.get('flight_highlight');
@@ -554,9 +701,9 @@ export async function updateFlightHighlightPosition(
   const p = getPosition(icao);
   if (!p) return;
 
-  const Cesium = await import('cesium');
+  const Ces = Cesium;
   const altM = Math.max(0, p.altM);
-  handle.billboards.get(0).position = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, altM);
+  handle.billboards.get(0).position = Ces.Cartesian3.fromDegrees(p.lon, p.lat, altM);
 }
 
 // 閳光偓閳光偓閳光偓 Satellite highlight (yellow box for selected satellite, same as flight) 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓

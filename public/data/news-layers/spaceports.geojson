@@ -1,0 +1,80 @@
+{
+    "type":  "FeatureCollection",
+    "features":  [
+                     {
+                         "type":  "Feature",
+                         "id":  "spaceports-0",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -77.04,
+                                                              38.9
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "spaceports site 0",
+                                            "ts":  1772435598913
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "spaceports-1",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              2.35,
+                                                              48.86
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "spaceports site 1",
+                                            "ts":  1772435598913
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "spaceports-2",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              139.76,
+                                                              35.68
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "spaceports site 2",
+                                            "ts":  1772435598913
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "spaceports-3",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              55.27,
+                                                              25.2
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "spaceports site 3",
+                                            "ts":  1772435598913
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "spaceports-4",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -46.63,
+                                                              -23.55
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "spaceports site 4",
+                                            "ts":  1772435598913
+                                        }
+                     }
+                 ]
+}

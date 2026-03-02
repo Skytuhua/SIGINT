@@ -30,6 +30,7 @@ type LayerName =
   | "flights"
   | "military"
   | "earthquakes"
+  | "disasters"
   | "traffic"
   | "cctv";
 
@@ -43,6 +44,7 @@ const layerRows: {
   { id: "flights", label: "Live Flights", source: "adsb.lol / AviationStack", accent: "#a7dfff" },
   { id: "military", label: "Military Flights", source: "adsb.lol", accent: "#d58a46" },
   { id: "earthquakes", label: "Earthquakes (24h)", source: "USGS", accent: "#f4b05a" },
+  { id: "disasters", label: "Disaster Alerts", source: "GDACS", accent: "#ff8f6b" },
   { id: "satellites", label: "Satellites", source: "CelesTrak", accent: "#6ad6ff" },
   { id: "traffic", label: "Street Traffic", source: "OpenStreetMap", accent: "#f17855" },
   { id: "weather", label: "Weather Radar", source: "NOAA NEXRAD", accent: "#8da3b8", disabled: true },

@@ -9,6 +9,8 @@ import type {
   Earthquake,
   PropagatedSat,
   Satellite,
+  DisasterAlert,
+  SpaceWeatherAlert,
 } from "../lib/providers/types";
 import type {
   DashboardDensity,
@@ -32,12 +34,15 @@ import type {
   QueryAST,
   SavedSearch,
 } from "../lib/news/types";
+import type { LayerHealthState } from "../lib/newsLayers/types";
+import { NEWS_LAYER_DEFAULT_TOGGLES } from "../lib/newsLayers/registry";
 
 interface LayerState {
   satellites: boolean;
   flights: boolean;
   military: boolean;
   earthquakes: boolean;
+  disasters: boolean;
   traffic: boolean;
   cctv: boolean;
   news: boolean;
@@ -84,6 +89,8 @@ interface CctvState {
   selectedCameraId: string | null;
   calibrations: Record<string, CameraCalibration>;
   floating: CctvFloatingState;
+  /** Cameras that have repeatedly failed snapshot/stream loads in this session. */
+  brokenIds: Record<string, boolean>;
 }
 
 interface DebugState {
@@ -108,6 +115,7 @@ interface NewsState {
   selectedStoryId: string | null;
   selectedCountry: string | null;
   highlightedMarkerId: string | null;
+  storyPopupArticle: NewsArticle | null;
   watchlist: NewsWatchlist;
   savedSearches: SavedSearch[];
   alerts: AlertRuleState[];
@@ -115,6 +123,8 @@ interface NewsState {
   panelLayouts: DashboardLayouts;
   panelVisibility: Record<string, boolean>;
   panelLocks: Record<string, boolean>;
+  /** Category feed panels with no articles are moved to bottom when true; id -> hasArticles */
+  categoryPanelHasArticles: Record<string, boolean>;
   panelZOrder: string[];
   panelFocusId: string | null;
   layoutPreset: NewsLayoutPreset;
@@ -123,6 +133,11 @@ interface NewsState {
     focusedPanel: string | null;
     statusLine: string;
     showHelpHints: boolean;
+    countryDock: {
+      pinned: boolean;
+      expanded: boolean;
+      showQuickActions: boolean;
+    };
   };
   video: NewsVideoState;
   searchInView: boolean;
@@ -133,6 +148,8 @@ interface NewsState {
     cursor: number;
   };
   backendHealth: Record<string, NewsBackendHealth>;
+  layerToggles: Record<string, boolean>;
+  layerHealth: Record<string, LayerHealthState>;
   lastUpdated: number | null;
 }
 
@@ -201,11 +218,17 @@ interface WorldViewStore {
   setLiveFlights(flights: Flight[]): void;
   setLiveMilitary(flights: Flight[]): void;
   setLiveEarthquakes(earthquakes: Earthquake[]): void;
+  setLiveDisasters(disasters: DisasterAlert[]): void;
+  setLiveSpaceWeather(alerts: SpaceWeatherAlert[]): void;
   setLiveSatellites(satellites: PropagatedSat[]): void;
   setSatelliteCatalog(satellites: Satellite[]): void;
   setLiveCctv(cctv: CctvCamera[]): void;
   setLiveScenes(scenes: Scene[]): void;
   setFeedHealth(source: string, health: LiveDataState["health"][string]): void;
+  setOpsSourceHealth(
+    source: string,
+    state: LiveDataState["sourceHealth"][string]
+  ): void;
   markFeedUpdated(source: string, ts?: number): void;
   pushFeedLog(item: Omit<FeedLogItem, "id" | "ts"> & { ts?: number }): void;
   appendTrendSnapshot(snapshot?: {
@@ -214,6 +237,10 @@ interface WorldViewStore {
     militaryCount?: number;
     quakeAvgMag?: number;
   }): void;
+
+  /** Mark CCTV cameras as healthy/unhealthy based on snapshot/stream errors. */
+  markCctvBroken(id: string): void;
+  resetCctvHealth(): void;
 
   setNewsQuery(query: string): void;
   setNewsQueryAst(ast: QueryAST): void;
@@ -224,6 +251,7 @@ interface WorldViewStore {
   setNewsMarkers(markers: GeoMarker[]): void;
   setNewsFacets(facets: NewsFacetState): void;
   setSelectedStory(id: string | null): void;
+  setStoryPopupArticle(article: NewsArticle | null): void;
   setSelectedCountry(country: string | null): void;
   setHighlightMarker(id: string | null): void;
   setSearchInView(enabled: boolean): void;
@@ -233,6 +261,7 @@ interface WorldViewStore {
   setNewsPanelLayouts(layouts: DashboardLayouts): void;
   setNewsPanelVisibility(panelId: string, visible: boolean): void;
   setNewsPanelLock(panelId: string, locked: boolean): void;
+  setNewsCategoryPanelHasArticles(panelId: string, hasArticles: boolean): void;
   setNewsPanelFocus(panelId: string | null): void;
   bringNewsPanelToFront(panelId: string): void;
   setNewsWatchlist(partial: Partial<NewsWatchlist>): void;
@@ -242,9 +271,12 @@ interface WorldViewStore {
   upsertNewsAlert(alert: AlertRuleState): void;
   ackNewsAlert(id: string): void;
   setNewsVideoState(partial: Partial<NewsVideoState>): void;
+  setNewsVideoPanelState(panelId: string, partial: Partial<NewsVideoState["byPanel"][string]>): void;
   setHeadlineTape(partial: Partial<NewsState["headlineTape"]>): void;
   advanceHeadlineTape(step?: number): void;
   setNewsBackendHealth(source: string, health: NewsBackendHealth): void;
+  setNewsLayerToggle(layerId: string, enabled: boolean): void;
+  setNewsLayerHealth(layerId: string, health: LayerHealthState): void;
   setNewsLastUpdated(ts?: number): void;
   clearNewsTransient(): void;
 }
@@ -275,6 +307,8 @@ const DEFAULT_PANEL_VISIBILITY: Record<string, boolean> = {
   "quake-table": true,
   "sat-list": true,
   feed: true,
+  "cctv-live": true,
+  "space-weather": true,
 };
 const DEFAULT_PANEL_LOCKS: Record<string, boolean> = {
   kpi: false,
@@ -282,92 +316,204 @@ const DEFAULT_PANEL_LOCKS: Record<string, boolean> = {
   "quake-table": false,
   "sat-list": false,
   feed: false,
+  "cctv-live": false,
+  "space-weather": false,
 };
 const DEFAULT_PANEL_ORDER = [...DEFAULT_PANEL_IDS];
+const LIVE_VIDEO_PANEL_IDS = [
+  "news-video-tech",
+  "news-video-business",
+  "news-video-general",
+  "news-video-financial",
+] as const;
+const LIVE_VIDEO_PANEL_ID_SET = new Set<string>(LIVE_VIDEO_PANEL_IDS as readonly string[]);
+
 const DEFAULT_NEWS_PANEL_IDS = [
   "news-terminal",
-  "news-story",
   "news-globe",
-  "news-video",
-  "news-watchlist",
+  ...LIVE_VIDEO_PANEL_IDS,
+  "news-cat-tech",
+  "news-cat-ai",
+  "news-cat-crypto",
+  "news-cat-markets",
+  "news-cat-cyber",
+  "news-cat-semis",
+  "news-cat-cloud",
+  "news-cat-startups",
+  "news-cat-ipo",
+  "news-cat-funding",
+  "news-cat-energy",
+  "news-cat-defense",
+  "news-cat-govt",
+  "news-cat-finance",
+  "news-cat-space",
+  "news-cat-biotech",
+  "news-predictions",
 ] as const;
 const DEFAULT_NEWS_PANEL_VISIBILITY: Record<string, boolean> = {
   "news-terminal": true,
-  "news-story": true,
   "news-globe": true,
-  "news-video": true,
-  "news-watchlist": true,
+  "news-video-tech": true,
+  "news-video-business": true,
+  "news-video-general": true,
+  "news-video-financial": true,
+  "news-cat-tech": true,
+  "news-cat-ai": true,
+  "news-cat-crypto": true,
+  "news-cat-markets": true,
+  "news-cat-cyber": true,
+  "news-cat-semis": true,
+  "news-cat-cloud": true,
+  "news-cat-startups": true,
+  "news-cat-ipo": true,
+  "news-cat-funding": true,
+  "news-cat-energy": true,
+  "news-cat-defense": true,
+  "news-cat-govt": true,
+  "news-cat-finance": true,
+  "news-cat-space": true,
+  "news-cat-biotech": true,
+  "news-predictions": true,
 };
 const DEFAULT_NEWS_PANEL_LOCKS: Record<string, boolean> = {
   "news-terminal": false,
-  "news-story": false,
   "news-globe": false,
-  "news-video": false,
-  "news-watchlist": false,
+  "news-video-tech": false,
+  "news-video-business": false,
+  "news-video-general": false,
+  "news-video-financial": false,
+  "news-cat-tech": false,
+  "news-cat-ai": false,
+  "news-cat-crypto": false,
+  "news-cat-markets": false,
+  "news-cat-cyber": false,
+  "news-cat-semis": false,
+  "news-cat-cloud": false,
+  "news-cat-startups": false,
+  "news-cat-ipo": false,
+  "news-cat-funding": false,
+  "news-cat-energy": false,
+  "news-cat-defense": false,
+  "news-cat-govt": false,
+  "news-cat-finance": false,
+  "news-cat-space": false,
+  "news-cat-biotech": false,
+  "news-predictions": false,
 };
 const DEFAULT_NEWS_PANEL_ORDER = [...DEFAULT_NEWS_PANEL_IDS];
+
+const CAT_PANEL_IDS = [
+  "news-cat-tech", "news-cat-ai", "news-cat-crypto", "news-cat-markets",
+  "news-cat-cyber", "news-cat-semis", "news-cat-cloud", "news-cat-startups",
+  "news-cat-ipo", "news-cat-funding", "news-cat-energy", "news-cat-defense",
+  "news-cat-govt", "news-cat-finance", "news-cat-space", "news-cat-biotech",
+  "news-predictions",
+];
+
+function buildVideoLayouts(startX: number, startY: number, totalW: number, totalH: number) {
+  const cellW = Math.floor(totalW / 2);
+  const cellH = Math.floor(totalH / 2);
+  return LIVE_VIDEO_PANEL_IDS.map((id, idx) => ({
+    i: id,
+    x: startX + (idx % 2) * cellW,
+    y: startY + Math.floor(idx / 2) * cellH,
+    w: cellW,
+    h: cellH,
+    minW: 60,
+    minH: 40,
+  }));
+}
+
+function buildVideoRowLayouts(startX: number, startY: number, totalW: number, totalH: number) {
+  const perRow = LIVE_VIDEO_PANEL_IDS.length;
+  const baseW = Math.floor(totalW / perRow);
+  const remainder = totalW - baseW * perRow;
+  return LIVE_VIDEO_PANEL_IDS.map((id, idx) => {
+    const extra = idx === perRow - 1 ? remainder : 0;
+    return {
+      i: id,
+      x: startX + idx * baseW,
+      y: startY,
+      w: baseW + extra,
+      h: totalH,
+      minW: 60,
+      minH: 40,
+    };
+  });
+}
+
+function buildCatLayouts(cols: number, startY: number, cellW: number, cellH: number) {
+  const perRow = Math.max(1, Math.floor(cols / cellW));
+  return CAT_PANEL_IDS.map((id, idx) => ({
+    i: id,
+    x: (idx % perRow) * cellW,
+    y: startY + Math.floor(idx / perRow) * cellH,
+    w: cellW,
+    h: cellH,
+    minW: Math.max(40, Math.round(cellW * 0.5)),
+    minH: Math.max(40, Math.round(cellH * 0.5)),
+  }));
+}
+
 const DEFAULT_NEWS_PANEL_LAYOUTS: DashboardLayouts = {
   lg: [
-    { i: "news-globe", x: 0, y: 0, w: 120, h: 130, minW: 80, minH: 80 },
-    { i: "news-story", x: 120, y: 0, w: 120, h: 120, minW: 80, minH: 84 },
-    { i: "news-terminal", x: 240, y: 0, w: 120, h: 80, minW: 100, minH: 64 },
-    { i: "news-video", x: 240, y: 80, w: 120, h: 130, minW: 80, minH: 60 },
-    { i: "news-watchlist", x: 0, y: 210, w: 360, h: 48, minW: 80, minH: 40 },
+    // Top row: world news globe map
+    { i: "news-globe", x: 0, y: 0, w: 360, h: 170, minW: 180, minH: 80 },
+    // Second row: four live video panels below the map
+    ...buildVideoRowLayouts(0, 170, 360, 105),
+    // Third row: terminal feed on the left, category panels below
+    { i: "news-terminal", x: 0, y: 275, w: 180, h: 80, minW: 100, minH: 64 },
+    ...buildCatLayouts(360, 355, 90, 80),
   ],
   md: [
-    { i: "news-globe", x: 0, y: 0, w: 100, h: 120, minW: 70, minH: 70 },
-    { i: "news-story", x: 100, y: 0, w: 100, h: 110, minW: 70, minH: 72 },
-    { i: "news-terminal", x: 200, y: 0, w: 100, h: 72, minW: 80, minH: 56 },
-    { i: "news-video", x: 200, y: 72, w: 100, h: 118, minW: 70, minH: 56 },
-    { i: "news-watchlist", x: 0, y: 190, w: 300, h: 48, minW: 70, minH: 40 },
+    { i: "news-globe", x: 0, y: 0, w: 300, h: 140, minW: 150, minH: 70 },
+    { i: "news-terminal", x: 0, y: 140, w: 150, h: 72, minW: 80, minH: 56 },
+    ...buildVideoLayouts(150, 140, 150, 80),
+    ...buildCatLayouts(300, 278, 75, 72),
   ],
   sm: [
-    { i: "news-globe", x: 0, y: 0, w: 90, h: 100, minW: 60, minH: 60 },
-    { i: "news-story", x: 90, y: 0, w: 90, h: 100, minH: 78 },
-    { i: "news-terminal", x: 0, y: 100, w: 90, h: 80, minH: 64 },
-    { i: "news-video", x: 0, y: 180, w: 90, h: 122, minH: 56 },
-    { i: "news-watchlist", x: 0, y: 302, w: 180, h: 48, minH: 40 },
+    { i: "news-globe", x: 0, y: 0, w: 180, h: 120, minW: 90, minH: 60 },
+    { i: "news-terminal", x: 0, y: 120, w: 90, h: 80, minH: 64 },
+    ...buildVideoLayouts(90, 120, 90, 90),
+    ...buildCatLayouts(180, 320, 60, 70),
   ],
   xs: [
-    { i: "news-globe", x: 0, y: 0, w: 60, h: 80, minH: 60 },
-    { i: "news-terminal", x: 0, y: 80, w: 60, h: 88, minH: 72 },
-    { i: "news-video", x: 0, y: 168, w: 60, h: 126, minH: 56 },
-    { i: "news-story", x: 0, y: 294, w: 60, h: 100, minH: 72 },
-    { i: "news-watchlist", x: 0, y: 394, w: 60, h: 48, minH: 40 },
+    { i: "news-globe", x: 0, y: 0, w: 60, h: 100, minH: 60 },
+    { i: "news-terminal", x: 0, y: 100, w: 60, h: 88, minH: 72 },
+    ...buildVideoLayouts(0, 188, 60, 110),
+    ...buildCatLayouts(60, 462, 60, 70),
   ],
 };
 const GLOBE_CENTRIC_NEWS_LAYOUTS: DashboardLayouts = {
   lg: [
-    { i: "news-globe", x: 0, y: 0, w: 150, h: 160, minW: 90, minH: 90 },
-    { i: "news-story", x: 150, y: 0, w: 105, h: 120, minW: 80, minH: 60 },
-    { i: "news-terminal", x: 255, y: 0, w: 105, h: 80, minW: 80, minH: 64 },
-    { i: "news-video", x: 255, y: 80, w: 105, h: 130, minW: 80, minH: 60 },
-    { i: "news-watchlist", x: 0, y: 250, w: 360, h: 48, minW: 80, minH: 40 },
+    { i: "news-globe", x: 0, y: 0, w: 360, h: 190, minW: 180, minH: 100 },
+    // Four live video panels directly under the globe, full-width row
+    ...buildVideoRowLayouts(0, 190, 360, 110),
+    { i: "news-terminal", x: 0, y: 300, w: 120, h: 80, minW: 80, minH: 64 },
+    ...buildCatLayouts(360, 380, 90, 80),
   ],
   md: [
-    { i: "news-globe", x: 0, y: 0, w: 130, h: 140, minW: 80, minH: 70 },
-    { i: "news-story", x: 130, y: 0, w: 85, h: 110, minW: 70, minH: 60 },
-    { i: "news-terminal", x: 215, y: 0, w: 85, h: 72, minW: 70, minH: 56 },
-    { i: "news-video", x: 215, y: 72, w: 85, h: 118, minW: 70, minH: 60 },
-    { i: "news-watchlist", x: 0, y: 220, w: 300, h: 48, minW: 70, minH: 40 },
+    { i: "news-globe", x: 0, y: 0, w: 300, h: 160, minW: 150, minH: 80 },
+    { i: "news-terminal", x: 0, y: 160, w: 100, h: 72, minW: 70, minH: 56 },
+    ...buildVideoLayouts(100, 160, 200, 80),
+    ...buildCatLayouts(300, 298, 75, 72),
   ],
   sm: DEFAULT_NEWS_PANEL_LAYOUTS.sm,
   xs: DEFAULT_NEWS_PANEL_LAYOUTS.xs,
 };
 const SPLIT_NEWS_LAYOUTS: DashboardLayouts = {
   lg: [
-    { i: "news-globe", x: 0, y: 0, w: 120, h: 120, minW: 80, minH: 80 },
-    { i: "news-terminal", x: 0, y: 120, w: 120, h: 80, minW: 90, minH: 64 },
-    { i: "news-video", x: 0, y: 200, w: 120, h: 120, minW: 80, minH: 56 },
-    { i: "news-story", x: 120, y: 0, w: 120, h: 200, minW: 90, minH: 84 },
-    { i: "news-watchlist", x: 0, y: 320, w: 360, h: 48, minW: 90, minH: 40 },
+    { i: "news-globe", x: 0, y: 0, w: 360, h: 165, minW: 180, minH: 80 },
+    // Split view: globe on top, then a full-width 4-video row
+    ...buildVideoRowLayouts(0, 165, 360, 110),
+    { i: "news-terminal", x: 0, y: 275, w: 180, h: 80, minW: 90, minH: 64 },
+    ...buildCatLayouts(360, 355, 90, 80),
   ],
   md: [
-    { i: "news-globe", x: 0, y: 0, w: 100, h: 110, minW: 70, minH: 70 },
-    { i: "news-terminal", x: 0, y: 110, w: 100, h: 72, minW: 80, minH: 56 },
-    { i: "news-video", x: 0, y: 182, w: 100, h: 108, minW: 70, minH: 50 },
-    { i: "news-story", x: 100, y: 0, w: 100, h: 200, minW: 80, minH: 72 },
-    { i: "news-watchlist", x: 0, y: 290, w: 300, h: 48, minW: 80, minH: 40 },
+    { i: "news-globe", x: 0, y: 0, w: 300, h: 140, minW: 150, minH: 70 },
+    { i: "news-terminal", x: 0, y: 140, w: 150, h: 72, minW: 80, minH: 56 },
+    ...buildVideoLayouts(150, 140, 150, 80),
+    ...buildCatLayouts(300, 278, 75, 72),
   ],
   sm: DEFAULT_NEWS_PANEL_LAYOUTS.sm,
   xs: DEFAULT_NEWS_PANEL_LAYOUTS.xs,
@@ -421,6 +567,7 @@ function defaultNewsState(): NewsState {
     selectedStoryId: null,
     selectedCountry: null,
     highlightedMarkerId: null,
+    storyPopupArticle: null,
     watchlist: {
       tickers: [],
       topics: [],
@@ -433,6 +580,7 @@ function defaultNewsState(): NewsState {
     panelLayouts: DEFAULT_NEWS_PANEL_LAYOUTS,
     panelVisibility: { ...DEFAULT_NEWS_PANEL_VISIBILITY },
     panelLocks: { ...DEFAULT_NEWS_PANEL_LOCKS },
+    categoryPanelHasArticles: {},
     panelZOrder: [...DEFAULT_NEWS_PANEL_ORDER],
     panelFocusId: null,
     layoutPreset: "news-centric",
@@ -441,6 +589,11 @@ function defaultNewsState(): NewsState {
       focusedPanel: null,
       statusLine: "Ready.",
       showHelpHints: true,
+      countryDock: {
+        pinned: true,
+        expanded: false,
+        showQuickActions: true,
+      },
     },
     video: {
       selectedVideoId: null,
@@ -452,6 +605,7 @@ function defaultNewsState(): NewsState {
       autoRotateMinutes: 10,
       autoRotatePaused: false,
       lastRotateAt: 0,
+      byPanel: {},
     },
     searchInView: false,
     cameraBounds: null,
@@ -470,6 +624,8 @@ function defaultNewsState(): NewsState {
       youtube: "idle",
       nominatim: "idle",
     },
+    layerToggles: { ...NEWS_LAYER_DEFAULT_TOGGLES },
+    layerHealth: {},
     lastUpdated: null,
   };
 }
@@ -479,6 +635,8 @@ function defaultLiveDataState(): LiveDataState {
     flights: [],
     military: [],
     earthquakes: [],
+    disasters: [],
+    spaceWeather: [],
     satellites: [],
     satelliteCatalog: [],
     cctv: [],
@@ -487,6 +645,8 @@ function defaultLiveDataState(): LiveDataState {
       opensky: null,
       military: null,
       earthquakes: null,
+      gdacs: null,
+      spaceWeather: null,
       satellites: null,
       cctv: null,
       scenes: null,
@@ -495,10 +655,13 @@ function defaultLiveDataState(): LiveDataState {
       opensky: "idle",
       military: "idle",
       earthquakes: "idle",
+      gdacs: "idle",
+      spaceWeather: "idle",
       satellites: "idle",
       cctv: "idle",
       scenes: "idle",
     },
+    sourceHealth: {},
     trendHistory: {
       timeline: [],
       entityCount: [],
@@ -703,9 +866,14 @@ function sanitizePanelZOrder(
 
 function sanitizeNewsPanelVisibility(input: Record<string, boolean> | undefined): Record<string, boolean> {
   if (!input) return { ...DEFAULT_NEWS_PANEL_VISIBILITY };
+  const entries = Object.entries(input).filter(([k]) => k !== "news-video").map(([k, v]) => [k, Boolean(v)]);
+  const hadVideo = Boolean(input["news-video"]);
+  if (hadVideo) {
+    LIVE_VIDEO_PANEL_IDS.forEach((id) => { entries.push([id, true]); });
+  }
   return {
     ...DEFAULT_NEWS_PANEL_VISIBILITY,
-    ...Object.fromEntries(Object.entries(input).map(([key, value]) => [key, Boolean(value)])),
+    ...Object.fromEntries(entries),
   };
 }
 
@@ -738,6 +906,103 @@ function sanitizeNewsPanelZOrder(
   }
 
   return next;
+}
+
+function sanitizePersistedNewsVideoState(
+  input: Partial<NewsVideoState> | undefined
+): Partial<NewsVideoState> {
+  const byPanelInput = input?.byPanel ?? {};
+  const byPanel = Object.fromEntries(
+    Object.entries(byPanelInput).map(([panelId, panelState]) => [
+      panelId,
+      {
+        ...(panelState ?? {}),
+        selectedVideoId: null,
+        selectedChannelFilter: null,
+        manualUrl: "",
+      },
+    ])
+  ) as NewsVideoState["byPanel"];
+
+  return {
+    ...(input ?? {}),
+    selectedVideoId: null,
+    selectedChannelId: null,
+    selectedChannelFilter: null,
+    manualUrl: "",
+    byPanel,
+  };
+}
+
+function normalizeTopOffset(layouts: DashboardLayouts): DashboardLayouts {
+  const breakpoints: Array<keyof DashboardLayouts> = ["lg", "md", "sm", "xs"];
+  const next = { ...layouts } as DashboardLayouts;
+
+  for (const bp of breakpoints) {
+    const items = (next[bp] ?? []).map((item) => ({ ...item }));
+    if (!items.length) {
+      next[bp] = items;
+      continue;
+    }
+
+    const minY = Math.min(
+      ...items.map((item) => (Number.isFinite(item.y) ? Number(item.y) : 0))
+    );
+    if (minY > 0) {
+      for (const item of items) {
+        item.y = Math.max(0, item.y - minY);
+      }
+    }
+    next[bp] = items;
+  }
+
+  return next;
+}
+
+function migrateVideoPanelsBelowMap(layouts: DashboardLayouts): DashboardLayouts {
+  const breakpoints: Array<keyof DashboardLayouts> = ["lg", "md", "sm", "xs"];
+  const next = { ...layouts } as DashboardLayouts;
+
+  for (const bp of breakpoints) {
+    const items = (next[bp] ?? []).map((item) => ({ ...item }));
+    const globe = items.find((item) => item.i === "news-globe");
+    if (!globe) {
+      next[bp] = items;
+      continue;
+    }
+
+    const videoItems = items.filter((item) => LIVE_VIDEO_PANEL_ID_SET.has(item.i));
+    if (!videoItems.length) {
+      next[bp] = items;
+      continue;
+    }
+
+    const globeBottom = globe.y + globe.h;
+    const videoMinY = Math.min(...videoItems.map((item) => item.y));
+    if (videoMinY >= globeBottom) {
+      next[bp] = items;
+      continue;
+    }
+
+    const videoMaxBottom = Math.max(...videoItems.map((item) => item.y + item.h));
+    const videoSpan = Math.max(0, videoMaxBottom - videoMinY);
+    const shiftToMapBottom = globeBottom - videoMinY;
+
+    for (const item of items) {
+      if (item.i === "news-globe") continue;
+      if (LIVE_VIDEO_PANEL_ID_SET.has(item.i)) {
+        item.y = Math.max(globeBottom, item.y + shiftToMapBottom);
+        continue;
+      }
+      if (item.y >= globeBottom) {
+        item.y += videoSpan;
+      }
+    }
+
+    next[bp] = items;
+  }
+
+  return normalizeTopOffset(next);
 }
 
 function readLegacyState(): Partial<WorldViewStore> | null {
@@ -776,6 +1041,7 @@ const baseState = {
     flights: true,
     military: false,
     earthquakes: true,
+    disasters: true,
     traffic: false,
     cctv: false,
     news: true,
@@ -813,6 +1079,7 @@ const baseState = {
     selectedCameraId: null,
     calibrations: {},
     floating: { open: false, camera: null },
+    brokenIds: {},
   },
   scenes: [],
   savedScenes: [],
@@ -839,6 +1106,7 @@ function withLegacyDefaults<T extends typeof baseState>(state: T): T {
       selectedCameraId: null,
       cameras: [],
       floating: { open: false, camera: null },
+      brokenIds: {},
     },
     dashboard: {
       ...state.dashboard,
@@ -917,7 +1185,18 @@ export const useWorldViewStore = create<WorldViewStore>()(
           })),
 
         setCameras: (cameras) =>
-          set((s) => ({ cctv: { ...s.cctv, cameras } })),
+          set((s) => ({
+            cctv: {
+              ...s.cctv,
+              cameras,
+              // Drop any broken markers for cameras that no longer exist.
+              brokenIds: Object.fromEntries(
+                Object.entries(s.cctv.brokenIds).filter(([id]) =>
+                  cameras.some((cam) => cam.id === id)
+                )
+              ),
+            },
+          })),
 
         selectCamera: (id) =>
           set((s) => ({ cctv: { ...s.cctv, selectedCameraId: id } })),
@@ -938,6 +1217,22 @@ export const useWorldViewStore = create<WorldViewStore>()(
 
         closeCctvFloating: () =>
           set((s) => ({ cctv: { ...s.cctv, floating: { open: false, camera: null } } })),
+
+        markCctvBroken: (id) =>
+          set((s) => ({
+            cctv: {
+              ...s.cctv,
+              brokenIds: { ...s.cctv.brokenIds, [id]: true },
+            },
+          })),
+
+        resetCctvHealth: () =>
+          set((s) => ({
+            cctv: {
+              ...s.cctv,
+              brokenIds: {},
+            },
+          })),
 
         setDebug: (partial) => set((s) => ({ debug: { ...s.debug, ...partial } })),
 
@@ -1148,6 +1443,22 @@ export const useWorldViewStore = create<WorldViewStore>()(
             },
           })),
 
+        setLiveDisasters: (disasters) =>
+          set((s) => ({
+            liveData: {
+              ...s.liveData,
+              disasters,
+            },
+          })),
+
+        setLiveSpaceWeather: (spaceWeather) =>
+          set((s) => ({
+            liveData: {
+              ...s.liveData,
+              spaceWeather,
+            },
+          })),
+
         setLiveSatellites: (satellites) =>
           set((s) => ({
             liveData: {
@@ -1188,6 +1499,17 @@ export const useWorldViewStore = create<WorldViewStore>()(
             },
           })),
 
+        setOpsSourceHealth: (source, state) =>
+          set((s) => ({
+            liveData: {
+              ...s.liveData,
+              sourceHealth: {
+                ...s.liveData.sourceHealth,
+                [source]: state,
+              },
+            },
+          })),
+
         markFeedUpdated: (source, ts = Date.now()) =>
           set((s) => ({
             liveData: {
@@ -1222,6 +1544,7 @@ export const useWorldViewStore = create<WorldViewStore>()(
               current.flights.length +
                 current.military.length +
                 current.earthquakes.length +
+                current.disasters.length +
                 current.satellites.length;
             const flightCount =
               snapshot.flightCount ?? current.flights.length + current.military.length;
@@ -1302,6 +1625,11 @@ export const useWorldViewStore = create<WorldViewStore>()(
             news: { ...s.news, selectedStoryId },
           })),
 
+        setStoryPopupArticle: (storyPopupArticle) =>
+          set((s) => ({
+            news: { ...s.news, storyPopupArticle },
+          })),
+
         setSelectedCountry: (selectedCountry) =>
           set((s) => ({
             news: { ...s.news, selectedCountry },
@@ -1376,6 +1704,14 @@ export const useWorldViewStore = create<WorldViewStore>()(
             news: {
               ...s.news,
               panelLocks: { ...s.news.panelLocks, [panelId]: locked },
+            },
+          })),
+
+        setNewsCategoryPanelHasArticles: (panelId, hasArticles) =>
+          set((s) => ({
+            news: {
+              ...s.news,
+              categoryPanelHasArticles: { ...s.news.categoryPanelHasArticles, [panelId]: hasArticles },
             },
           })),
 
@@ -1475,6 +1811,29 @@ export const useWorldViewStore = create<WorldViewStore>()(
             },
           })),
 
+        setNewsVideoPanelState: (panelId, partial) =>
+          set((s) => {
+            const byPanel = s.news.video.byPanel ?? {};
+            return {
+              news: {
+                ...s.news,
+                video: {
+                  ...s.news.video,
+                  byPanel: {
+                    ...byPanel,
+                    [panelId]: {
+                      selectedVideoId: null,
+                      selectedChannelFilter: null,
+                      manualUrl: "",
+                      ...byPanel[panelId],
+                      ...partial,
+                    },
+                  },
+                },
+              },
+            };
+          }),
+
         setHeadlineTape: (partial) =>
           set((s) => ({
             news: {
@@ -1503,6 +1862,22 @@ export const useWorldViewStore = create<WorldViewStore>()(
             },
           })),
 
+        setNewsLayerToggle: (layerId, enabled) =>
+          set((s) => ({
+            news: {
+              ...s.news,
+              layerToggles: { ...s.news.layerToggles, [layerId]: enabled },
+            },
+          })),
+
+        setNewsLayerHealth: (layerId, health) =>
+          set((s) => ({
+            news: {
+              ...s.news,
+              layerHealth: { ...s.news.layerHealth, [layerId]: health },
+            },
+          })),
+
         setNewsLastUpdated: (ts = Date.now()) =>
           set((s) => ({
             news: {
@@ -1520,10 +1895,12 @@ export const useWorldViewStore = create<WorldViewStore>()(
               threads: [],
               facets: defaultNewsState().facets,
               backendHealth: defaultNewsState().backendHealth,
+              layerHealth: {},
               lastUpdated: null,
               selectedStoryId: null,
               selectedCountry: null,
               highlightedMarkerId: null,
+              storyPopupArticle: null,
               queryState: defaultNewsState().queryState,
               ui: { ...s.news.ui, statusLine: "Ready." },
             },
@@ -1532,7 +1909,7 @@ export const useWorldViewStore = create<WorldViewStore>()(
     }),
     {
       name: "worldview-store-v2",
-      version: 13,
+      version: 14,
       migrate: (persistedState) => {
         const state = persistedState as
           | {
@@ -1583,10 +1960,21 @@ export const useWorldViewStore = create<WorldViewStore>()(
             : current.news.layoutPreset;
         const nextNewsVisibility = sanitizeNewsPanelVisibility(persistedNews.panelVisibility);
         const nextNewsLocks = sanitizeNewsPanelLocks(persistedNews.panelLocks);
+        const nextNewsLayouts = migrateVideoPanelsBelowMap(
+          sanitizeLayouts(
+            persistedNews.panelLayouts as DashboardLayouts | undefined,
+            NEWS_PANEL_LAYOUT_PRESETS[layoutPreset]
+          )
+        );
+        const persistedVideo = sanitizePersistedNewsVideoState(persistedNews.video);
 
         return {
           ...current,
           ...persisted,
+          layers: {
+            ...current.layers,
+            ...(persisted.layers ?? {}),
+          },
           dashboard: {
             ...current.dashboard,
             ...persistedDashboard,
@@ -1617,22 +2005,24 @@ export const useWorldViewStore = create<WorldViewStore>()(
             },
             video: {
               ...current.news.video,
-              ...(persistedNews.video ?? {}),
+              ...persistedVideo,
             },
             headlineTape: {
               ...current.news.headlineTape,
               ...(persistedNews.headlineTape ?? {}),
             },
-            panelLayouts: sanitizeLayouts(
-              persistedNews.panelLayouts as DashboardLayouts | undefined,
-              NEWS_PANEL_LAYOUT_PRESETS[layoutPreset]
-            ),
+            panelLayouts: nextNewsLayouts,
             panelVisibility: nextNewsVisibility,
             panelLocks: nextNewsLocks,
             panelZOrder: sanitizeNewsPanelZOrder(
               persistedNews.panelZOrder,
               nextNewsVisibility
             ),
+            layerToggles: {
+              ...current.news.layerToggles,
+              ...(persistedNews.layerToggles ?? {}),
+            },
+            layerHealth: {},
             feedItems: [],
             markers: [],
             threads: [],
@@ -1654,6 +2044,7 @@ export const useWorldViewStore = create<WorldViewStore>()(
           selectedCameraId: null,
           calibrations: s.cctv.calibrations,
           floating: { open: false, camera: null },
+          brokenIds: {},
         },
         dashboard: {
           activeView: s.dashboard.activeView,
@@ -1682,6 +2073,7 @@ export const useWorldViewStore = create<WorldViewStore>()(
             focusedPanel: null,
             statusLine: "Ready.",
             showHelpHints: s.news.ui.showHelpHints,
+            countryDock: s.news.ui.countryDock,
           },
           watchlist: s.news.watchlist,
           savedSearches: s.news.savedSearches,
@@ -1693,9 +2085,10 @@ export const useWorldViewStore = create<WorldViewStore>()(
           panelZOrder: s.news.panelZOrder,
           panelFocusId: s.news.panelFocusId,
           layoutPreset: s.news.layoutPreset,
-          video: s.news.video,
+          video: sanitizePersistedNewsVideoState(s.news.video),
           searchInView: s.news.searchInView,
           headlineTape: s.news.headlineTape,
+          layerToggles: s.news.layerToggles,
         },
       }),
       onRehydrateStorage: () => (_state, error) => {
@@ -1718,3 +2111,4 @@ function defaultCalibration(): CameraCalibration {
     eastM: 0,
   };
 }
+

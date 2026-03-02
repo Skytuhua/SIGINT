@@ -23,4 +23,1584 @@
  * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
  */
 
-import{a as _e}from"./chunk-NVJ64HSB.js";import{a as Z}from"./chunk-3FGVTQZT.js";import{a as _t}from"./chunk-AXCXHIZO.js";import{a as Oe}from"./chunk-O7LU3SZT.js";import{a as Le}from"./chunk-M6TFP6VU.js";import{a as te}from"./chunk-Q6IZOLLM.js";import{b as Qt}from"./chunk-WZ52TQTL.js";import{a as jt}from"./chunk-5KPQNVA2.js";import{c as Ce,d as zt}from"./chunk-CWBIOT2C.js";import{a as bt,d as G}from"./chunk-PPN6SLYU.js";import{d as xe,e as Ne,f as Kt,h as U}from"./chunk-SOWUYSYI.js";import{a as Bt}from"./chunk-I36V6CKP.js";import{a as t,b as u,c as Pt,d as z,e as vt}from"./chunk-WG62ICZK.js";import{a as p}from"./chunk-EEN7GMYN.js";import"./chunk-SXYTVHGU.js";import"./chunk-RAWIUDJR.js";import{a as O}from"./chunk-KGKDCW56.js";import{a as St,b as et}from"./chunk-G4IO3CPJ.js";import{e as g}from"./chunk-GBRF7ES3.js";function rt(e){e=O(e,O.EMPTY_OBJECT),this._ellipsoid=O(e.ellipsoid,z.default),this._rectangle=O(e.rectangle,U.MAX_VALUE),this._projection=new bt(this._ellipsoid),this._numberOfLevelZeroTilesX=O(e.numberOfLevelZeroTilesX,2),this._numberOfLevelZeroTilesY=O(e.numberOfLevelZeroTilesY,1)}Object.defineProperties(rt.prototype,{ellipsoid:{get:function(){return this._ellipsoid}},rectangle:{get:function(){return this._rectangle}},projection:{get:function(){return this._projection}}});rt.prototype.getNumberOfXTilesAtLevel=function(e){return this._numberOfLevelZeroTilesX<<e};rt.prototype.getNumberOfYTilesAtLevel=function(e){return this._numberOfLevelZeroTilesY<<e};rt.prototype.rectangleToNativeRectangle=function(e,i){et.defined("rectangle",e);let r=p.toDegrees(e.west),n=p.toDegrees(e.south),o=p.toDegrees(e.east),a=p.toDegrees(e.north);return g(i)?(i.west=r,i.south=n,i.east=o,i.north=a,i):new U(r,n,o,a)};rt.prototype.tileXYToNativeRectangle=function(e,i,r,n){let o=this.tileXYToRectangle(e,i,r,n);return o.west=p.toDegrees(o.west),o.south=p.toDegrees(o.south),o.east=p.toDegrees(o.east),o.north=p.toDegrees(o.north),o};rt.prototype.tileXYToRectangle=function(e,i,r,n){let o=this._rectangle,a=this.getNumberOfXTilesAtLevel(r),c=this.getNumberOfYTilesAtLevel(r),l=o.width/a,s=e*l+o.west,d=(e+1)*l+o.west,h=o.height/c,N=o.north-i*h,S=o.north-(i+1)*h;return g(n)||(n=new U(s,S,d,N)),n.west=s,n.south=S,n.east=d,n.north=N,n};rt.prototype.positionToTileXY=function(e,i,r){let n=this._rectangle;if(!U.contains(n,e))return;let o=this.getNumberOfXTilesAtLevel(i),a=this.getNumberOfYTilesAtLevel(i),c=n.width/o,l=n.height/a,s=e.longitude;n.east<n.west&&(s+=p.TWO_PI);let d=(s-n.west)/c|0;d>=o&&(d=o-1);let h=(n.north-e.latitude)/l|0;return h>=a&&(h=a-1),g(r)?(r.x=d,r.y=h,r):new Pt(d,h)};var De=rt;var Ie=new t,He=new t,ke=new u,ee=new t,hn=new t,ye=new G,pn=new De,Lt=[new u,new u,new u,new u],Ot=new Pt,w={};w.initialize=function(){let e=w._initPromise;return g(e)||(e=xe.fetchJson(Ne("Assets/approximateTerrainHeights.json")).then(function(i){w._terrainHeights=i}),w._initPromise=e),e};w.getMinimumMaximumHeights=function(e,i){if(et.defined("rectangle",e),!g(w._terrainHeights))throw new St("You must call ApproximateTerrainHeights.initialize and wait for the promise to resolve before using this function");i=O(i,z.default);let r=Ae(e),n=w._defaultMinTerrainHeight,o=w._defaultMaxTerrainHeight;if(g(r)){let a=`${r.level}-${r.x}-${r.y}`,c=w._terrainHeights[a];g(c)&&(n=c[0],o=c[1]),i.cartographicToCartesian(U.northeast(e,ke),Ie),i.cartographicToCartesian(U.southwest(e,ke),He),t.midpoint(He,Ie,ee);let l=i.scaleToGeodeticSurface(ee,hn);if(g(l)){let s=t.distance(ee,l);n=Math.min(n,-s)}else n=w._defaultMinTerrainHeight}return n=Math.max(w._defaultMinTerrainHeight,n),{minimumTerrainHeight:n,maximumTerrainHeight:o}};w.getBoundingSphere=function(e,i){if(et.defined("rectangle",e),!g(w._terrainHeights))throw new St("You must call ApproximateTerrainHeights.initialize and wait for the promise to resolve before using this function");i=O(i,z.default);let r=Ae(e),n=w._defaultMaxTerrainHeight;if(g(r)){let a=`${r.level}-${r.x}-${r.y}`,c=w._terrainHeights[a];g(c)&&(n=c[1])}let o=G.fromRectangle3D(e,i,0);return G.fromRectangle3D(e,i,n,ye),G.union(o,ye,o)};function Ae(e){u.fromRadians(e.east,e.north,0,Lt[0]),u.fromRadians(e.west,e.north,0,Lt[1]),u.fromRadians(e.east,e.south,0,Lt[2]),u.fromRadians(e.west,e.south,0,Lt[3]);let i=0,r=0,n=0,o=0,a=w._terrainHeightsMaxLevel,c;for(c=0;c<=a;++c){let l=!1;for(let s=0;s<4;++s){let d=Lt[s];if(pn.positionToTileXY(d,c,Ot),s===0)n=Ot.x,o=Ot.y;else if(n!==Ot.x||o!==Ot.y){l=!0;break}}if(l)break;i=n,r=o}if(c!==0)return{x:i,y:r,level:c>a?a:c-1}}w._terrainHeightsMaxLevel=6;w._defaultMaxTerrainHeight=9e3;w._defaultMinTerrainHeight=-1e5;w._terrainHeights=void 0;w._initPromise=void 0;Object.defineProperties(w,{initialized:{get:function(){return g(w._terrainHeights)}}});var Xt=w;var le=[bt,_e],dn=le.length,Ke=Math.cos(p.toRadians(30)),Me=Math.cos(p.toRadians(150)),Qe=0,tn=1e3;function ct(e){e=O(e,O.EMPTY_OBJECT);let i=e.positions;if(!g(i)||i.length<2)throw new St("At least two positions are required.");if(g(e.arcType)&&e.arcType!==Z.GEODESIC&&e.arcType!==Z.RHUMB)throw new St("Valid options for arcType are ArcType.GEODESIC and ArcType.RHUMB.");this.width=O(e.width,1),this._positions=i,this.granularity=O(e.granularity,9999),this.loop=O(e.loop,!1),this.arcType=O(e.arcType,Z.GEODESIC),this._ellipsoid=z.default,this._projectionIndex=0,this._workerName="createGroundPolylineGeometry",this._scene3DOnly=!1}Object.defineProperties(ct.prototype,{packedLength:{get:function(){return 1+this._positions.length*3+1+1+1+z.packedLength+1+1}}});ct.setProjectionAndEllipsoid=function(e,i){let r=0;for(let n=0;n<dn;n++)if(i instanceof le[n]){r=n;break}e._projectionIndex=r,e._ellipsoid=i.ellipsoid};var fn=new t,Re=new t,Pe=new t;function se(e,i,r,n,o){let a=P(n,e,0,fn),c=P(n,e,r,Re),l=P(n,i,0,Pe),s=nt(c,a,Re),d=nt(l,a,Pe);return t.cross(d,s,o),t.normalize(o,o)}var mn=new u,gn=new t,un=new t,wn=new t;function ne(e,i,r,n,o,a,c,l,s,d,h){if(o===0)return;let N;a===Z.GEODESIC?N=new Oe(e,i,c):a===Z.RHUMB&&(N=new te(e,i,c));let S=N.surfaceDistance;if(S<o)return;let R=se(e,i,n,c,wn),D=Math.ceil(S/o),I=S/D,j=I,q=D-1,f=l.length;for(let X=0;X<q;X++){let v=N.interpolateUsingSurfaceDistance(j,mn),y=P(c,v,r,gn),H=P(c,v,n,un);t.pack(R,l,f),t.pack(y,s,f),t.pack(H,d,f),h.push(v.latitude),h.push(v.longitude),f+=3,j+=I}}var oe=new u;function P(e,i,r,n){return u.clone(i,oe),oe.height=r,u.toCartesian(oe,e,n)}ct.pack=function(e,i,r){et.typeOf.object("value",e),et.defined("array",i);let n=O(r,0),o=e._positions,a=o.length;i[n++]=a;for(let c=0;c<a;++c){let l=o[c];t.pack(l,i,n),n+=3}return i[n++]=e.granularity,i[n++]=e.loop?1:0,i[n++]=e.arcType,z.pack(e._ellipsoid,i,n),n+=z.packedLength,i[n++]=e._projectionIndex,i[n++]=e._scene3DOnly?1:0,i};ct.unpack=function(e,i,r){et.defined("array",e);let n=O(i,0),o=e[n++],a=new Array(o);for(let S=0;S<o;S++)a[S]=t.unpack(e,n),n+=3;let c=e[n++],l=e[n++]===1,s=e[n++],d=z.unpack(e,n);n+=z.packedLength;let h=e[n++],N=e[n++]===1;return g(r)||(r=new ct({positions:a})),r._positions=a,r.granularity=c,r.loop=l,r.arcType=s,r._ellipsoid=d,r._projectionIndex=h,r._scene3DOnly=N,r};function nt(e,i,r){return t.subtract(e,i,r),t.normalize(r,r),r}function be(e,i,r,n){return n=nt(e,i,n),n=t.cross(n,r,n),n=t.normalize(n,n),n=t.cross(r,n,n),n}var Sn=new t,Tn=new t,En=new t,en=new t,xn=0,Nn=-1;function ie(e,i,r,n,o){let a=nt(r,i,en),c=be(e,i,a,Sn),l=be(n,i,a,Tn);if(p.equalsEpsilon(t.dot(c,l),Nn,p.EPSILON5))return o=t.cross(a,c,o),o=t.normalize(o,o),o;o=t.add(l,c,o),o=t.normalize(o,o);let s=t.cross(a,o,En);return t.dot(l,s)<xn&&(o=t.negate(o,o)),o}var Gt=jt.fromPointNormal(t.ZERO,t.UNIT_Y),Cn=new t,_n=new t,Ln=new t,On=new t,Dn=new t,Yt=new t,Ft=new u,ve=new u,Be=new u;ct.createGeometry=function(e){let i=!e._scene3DOnly,r=e.loop,n=e._ellipsoid,o=e.granularity,a=e.arcType,c=new le[e._projectionIndex](n),l=Qe,s=tn,d,h,N=e._positions,S=N.length;S===2&&(r=!1);let R,D,I,j,q=new te(void 0,void 0,n),f,X,v,y=[N[0]];for(h=0;h<S-1;h++)R=N[h],D=N[h+1],f=Qt.lineSegmentPlane(R,D,Gt,Yt),g(f)&&!t.equalsEpsilon(f,R,p.EPSILON7)&&!t.equalsEpsilon(f,D,p.EPSILON7)&&(e.arcType===Z.GEODESIC?y.push(t.clone(f)):e.arcType===Z.RHUMB&&(v=n.cartesianToCartographic(f,Ft).longitude,I=n.cartesianToCartographic(R,Ft),j=n.cartesianToCartographic(D,ve),q.setEndPoints(I,j),X=q.findIntersectionWithLongitude(v,Be),f=n.cartographicToCartesian(X,Yt),g(f)&&!t.equalsEpsilon(f,R,p.EPSILON7)&&!t.equalsEpsilon(f,D,p.EPSILON7)&&y.push(t.clone(f)))),y.push(D);r&&(R=N[S-1],D=N[0],f=Qt.lineSegmentPlane(R,D,Gt,Yt),g(f)&&!t.equalsEpsilon(f,R,p.EPSILON7)&&!t.equalsEpsilon(f,D,p.EPSILON7)&&(e.arcType===Z.GEODESIC?y.push(t.clone(f)):e.arcType===Z.RHUMB&&(v=n.cartesianToCartographic(f,Ft).longitude,I=n.cartesianToCartographic(R,Ft),j=n.cartesianToCartographic(D,ve),q.setEndPoints(I,j),X=q.findIntersectionWithLongitude(v,Be),f=n.cartographicToCartesian(X,Yt),g(f)&&!t.equalsEpsilon(f,R,p.EPSILON7)&&!t.equalsEpsilon(f,D,p.EPSILON7)&&y.push(t.clone(f)))));let H=y.length,C=new Array(H);for(h=0;h<H;h++){let F=u.fromCartesian(y[h],n);F.height=0,C[h]=F}if(C=Le(C,u.equalsEpsilon),H=C.length,H<2)return;let k=[],b=[],B=[],E=[],x=Cn,L=_n,_=Ln,Y=On,A=Dn,m=C[0],V=C[1],It=C[H-1];for(x=P(n,It,l,x),Y=P(n,V,l,Y),L=P(n,m,l,L),_=P(n,m,s,_),r?A=ie(x,L,_,Y,A):A=se(m,V,s,n,A),t.pack(A,b,0),t.pack(L,B,0),t.pack(_,E,0),k.push(m.latitude),k.push(m.longitude),ne(m,V,l,s,o,a,n,b,B,E,k),h=1;h<H-1;++h){x=t.clone(L,x),L=t.clone(Y,L);let F=C[h];P(n,F,s,_),P(n,C[h+1],l,Y),ie(x,L,_,Y,A),d=b.length,t.pack(A,b,d),t.pack(L,B,d),t.pack(_,E,d),k.push(F.latitude),k.push(F.longitude),ne(C[h],C[h+1],l,s,o,a,n,b,B,E,k)}let M=C[H-1],Tt=C[H-2];if(L=P(n,M,l,L),_=P(n,M,s,_),r){let F=C[0];x=P(n,Tt,l,x),Y=P(n,F,l,Y),A=ie(x,L,_,Y,A)}else A=se(Tt,M,s,n,A);if(d=b.length,t.pack(A,b,d),t.pack(L,B,d),t.pack(_,E,d),k.push(M.latitude),k.push(M.longitude),r){for(ne(M,m,l,s,o,a,n,b,B,E,k),d=b.length,h=0;h<3;++h)b[d+h]=b[h],B[d+h]=B[h],E[d+h]=E[h];k.push(m.latitude),k.push(m.longitude)}return Qn(r,c,B,E,b,k,i)};var In=new t,Hn=new vt,kn=new Kt;function ze(e,i,r,n){let o=nt(r,i,In),a=t.dot(o,e);if(a>Ke||a<Me){let c=nt(n,r,en),l=a<Me?p.PI_OVER_TWO:-p.PI_OVER_TWO,s=Kt.fromAxisAngle(c,l,kn),d=vt.fromQuaternion(s,Hn);return vt.multiplyByVector(d,e,e),!0}return!1}var je=new u,yn=new t,Xe=new t;function Dt(e,i,r,n,o){let a=u.toCartesian(i,e._ellipsoid,yn),c=t.add(a,r,Xe),l=!1,s=e._ellipsoid,d=s.cartesianToCartographic(c,je);Math.abs(i.longitude-d.longitude)>p.PI_OVER_TWO&&(l=!0,c=t.subtract(a,r,Xe),d=s.cartesianToCartographic(c,je)),d.height=0;let h=e.project(d,o);return o=t.subtract(h,n,o),o.z=0,o=t.normalize(o,o),l&&t.negate(o,o),o}var An=new t,Ye=new t;function Fe(e,i,r,n,o,a){let c=t.subtract(i,e,An);t.normalize(c,c);let l=r-Qe,s=t.multiplyByScalar(c,l,Ye);t.add(e,s,o);let d=n-tn;s=t.multiplyByScalar(c,d,Ye),t.add(i,s,a)}var Mn=new t;function Ut(e,i){let r=jt.getPointDistance(Gt,e),n=jt.getPointDistance(Gt,i),o=Mn;p.equalsEpsilon(r,0,p.EPSILON2)?(o=nt(i,e,o),t.multiplyByScalar(o,p.EPSILON2,o),t.add(e,o,e)):p.equalsEpsilon(n,0,p.EPSILON2)&&(o=nt(e,i,o),t.multiplyByScalar(o,p.EPSILON2,o),t.add(i,o,i))}function Rn(e,i){let r=Math.abs(e.longitude),n=Math.abs(i.longitude);if(p.equalsEpsilon(r,p.PI,p.EPSILON11)){let o=p.sign(i.longitude);return e.longitude=o*(r-p.EPSILON11),1}else if(p.equalsEpsilon(n,p.PI,p.EPSILON11)){let o=p.sign(e.longitude);return i.longitude=o*(n-p.EPSILON11),2}return 0}var nn=new u,on=new u,Ue=new t,re=new t,Ge=new t,qe=new t,Pn=new t,We=new t,bn=[nn,on],vn=new U,Bn=new t,zn=new t,jn=new t,Xn=new t,Yn=new t,Fn=new t,ae=new t,ce=new t,Un=new t,Gn=new t,qn=new t,Ze=new t,Wn=new t,Zn=new t,Vn=new _t,$n=new _t,Ve=new t,Jn=new t,$e=new t,Kn=[new G,new G],rn=[0,2,1,0,3,2,0,7,3,0,4,7,0,5,4,0,1,5,5,7,4,5,6,7,5,2,6,5,1,2,3,6,2,3,7,6],Je=rn.length;function Qn(e,i,r,n,o,a,c){let l,s,d=i._ellipsoid,h=r.length/3-1,N=h*8,S=N*4,R=h*36,D=N>65535?new Uint32Array(R):new Uint16Array(R),I=new Float64Array(N*3),j=new Float32Array(S),q=new Float32Array(S),f=new Float32Array(S),X=new Float32Array(S),v=new Float32Array(S),y,H,C,k;c&&(y=new Float32Array(S),H=new Float32Array(S),C=new Float32Array(S),k=new Float32Array(N*2));let b=a.length/2,B=0,E=nn;E.height=0;let x=on;x.height=0;let L=Ue,_=re;if(c)for(s=0,l=1;l<b;l++)E.latitude=a[s],E.longitude=a[s+1],x.latitude=a[s+2],x.longitude=a[s+3],L=i.project(E,L),_=i.project(x,_),B+=t.distance(L,_),s+=2;let Y=n.length/3;_=t.unpack(n,0,_);let A=0;for(s=3,l=1;l<Y;l++)L=t.clone(_,L),_=t.unpack(n,s,_),A+=t.distance(L,_),s+=3;let m;s=3;let V=0,It=0,M=0,Tt=0,F=!1,st=t.unpack(r,0,qe),lt=t.unpack(n,0,re),W=t.unpack(o,0,We);if(e){let ht=t.unpack(r,r.length-6,Ge);ze(W,ht,st,lt)&&(W=t.negate(W,W))}let pe=0,de=0,qt=0;for(l=0;l<h;l++){let ht=t.clone(st,Ge),Zt=t.clone(lt,Ue),mt=t.clone(W,Pn);F&&(mt=t.negate(mt,mt)),st=t.unpack(r,s,qe),lt=t.unpack(n,s,re),W=t.unpack(o,s,We),F=ze(W,ht,st,lt),E.latitude=a[V],E.longitude=a[V+1],x.latitude=a[V+2],x.longitude=a[V+3];let pt,gt,ot,it;if(c){let T=Rn(E,x);pt=i.project(E,Yn),gt=i.project(x,Fn);let wt=nt(gt,pt,Ve);wt.y=Math.abs(wt.y),ot=ae,it=ce,T===0||t.dot(wt,t.UNIT_Y)>Ke?(ot=Dt(i,E,mt,pt,ae),it=Dt(i,x,W,gt,ce)):T===1?(it=Dt(i,x,W,gt,ce),ot.x=0,ot.y=p.sign(E.longitude-Math.abs(x.longitude)),ot.z=0):(ot=Dt(i,E,mt,pt,ae),it.x=0,it.y=p.sign(E.longitude-x.longitude),it.z=0)}let ge=t.distance(Zt,lt),ue=_t.fromCartesian(ht,Vn),Ht=t.subtract(st,ht,Un),an=t.normalize(Ht,Ze),xt=t.subtract(Zt,ht,Gn);xt=t.normalize(xt,xt);let ut=t.cross(an,xt,Ze);ut=t.normalize(ut,ut);let kt=t.cross(xt,mt,Wn);kt=t.normalize(kt,kt);let yt=t.subtract(lt,st,qn);yt=t.normalize(yt,yt);let At=t.cross(W,yt,Zn);At=t.normalize(At,At);let cn=ge/A,sn=pe/A,Vt=0,Nt,Mt,dt,we=0,Se=0;if(c){Vt=t.distance(pt,gt),Nt=_t.fromCartesian(pt,$n),Mt=t.subtract(gt,pt,Ve),dt=t.normalize(Mt,Jn);let T=dt.x;dt.x=dt.y,dt.y=-T,we=Vt/B,Se=de/B}for(m=0;m<8;m++){let T=Tt+m*4,wt=It+m*2,Ct=T+3,Ee=m<4?1:-1,Rt=m===2||m===3||m===6||m===7?1:-1;t.pack(ue.high,j,T),j[Ct]=Ht.x,t.pack(ue.low,q,T),q[Ct]=Ht.y,t.pack(kt,f,T),f[Ct]=Ht.z,t.pack(At,X,T),X[Ct]=cn*Ee,t.pack(ut,v,T);let ft=sn*Rt;ft===0&&Rt<0&&(ft=9),v[Ct]=ft,c&&(y[T]=Nt.high.x,y[T+1]=Nt.high.y,y[T+2]=Nt.low.x,y[T+3]=Nt.low.y,C[T]=-ot.y,C[T+1]=ot.x,C[T+2]=it.y,C[T+3]=-it.x,H[T]=Mt.x,H[T+1]=Mt.y,H[T+2]=dt.x,H[T+3]=dt.y,k[wt]=we*Ee,ft=Se*Rt,ft===0&&Rt<0&&(ft=9),k[wt+1]=ft)}let $=jn,J=Xn,K=Bn,Q=zn,ln=U.fromCartographicArray(bn,vn),Te=Xt.getMinimumMaximumHeights(ln,d),$t=Te.minimumTerrainHeight,Jt=Te.maximumTerrainHeight;qt+=Math.abs($t),qt+=Math.abs(Jt),Fe(ht,Zt,$t,Jt,$,K),Fe(st,lt,$t,Jt,J,Q);let tt=t.multiplyByScalar(ut,p.EPSILON5,$e);t.add($,tt,$),t.add(J,tt,J),t.add(K,tt,K),t.add(Q,tt,Q),Ut($,J),Ut(K,Q),t.pack($,I,M),t.pack(J,I,M+3),t.pack(Q,I,M+6),t.pack(K,I,M+9),tt=t.multiplyByScalar(ut,-2*p.EPSILON5,$e),t.add($,tt,$),t.add(J,tt,J),t.add(K,tt,K),t.add(Q,tt,Q),Ut($,J),Ut(K,Q),t.pack($,I,M+12),t.pack(J,I,M+15),t.pack(Q,I,M+18),t.pack(K,I,M+21),V+=2,s+=3,It+=16,M+=24,Tt+=32,pe+=ge,de+=Vt}s=0;let fe=0;for(l=0;l<h;l++){for(m=0;m<Je;m++)D[s+m]=rn[m]+fe;fe+=8,s+=Je}let Wt=Kn;G.fromVertices(r,t.ZERO,3,Wt[0]),G.fromVertices(n,t.ZERO,3,Wt[1]);let me=G.fromBoundingSpheres(Wt);me.radius+=qt/(h*2);let Et={position:new zt({componentDatatype:Bt.DOUBLE,componentsPerAttribute:3,normalize:!1,values:I}),startHiAndForwardOffsetX:at(j),startLoAndForwardOffsetY:at(q),startNormalAndForwardOffsetZ:at(f),endNormalAndTextureCoordinateNormalizationX:at(X),rightNormalAndTextureCoordinateNormalizationY:at(v)};return c&&(Et.startHiLo2D=at(y),Et.offsetAndRight2D=at(H),Et.startEndNormals2D=at(C),Et.texcoordNormalization2D=new zt({componentDatatype:Bt.FLOAT,componentsPerAttribute:2,normalize:!1,values:k})),new Ce({attributes:Et,indices:D,boundingSphere:me})}function at(e){return new zt({componentDatatype:Bt.FLOAT,componentsPerAttribute:4,normalize:!1,values:e})}ct._projectNormal=Dt;var he=ct;function to(e,i){return Xt.initialize().then(function(){return g(i)&&(e=he.unpack(e,i)),he.createGeometry(e)})}var ti=to;export{ti as default};
+import {
+  WebMercatorProjection_default
+} from "./chunk-QYQIVZBU.js";
+import {
+  ArcType_default
+} from "./chunk-4VFBBNQ3.js";
+import {
+  EncodedCartesian3_default
+} from "./chunk-SAPFXU5X.js";
+import {
+  EllipsoidGeodesic_default
+} from "./chunk-6D66DPRV.js";
+import {
+  arrayRemoveDuplicates_default
+} from "./chunk-NVOABL76.js";
+import {
+  EllipsoidRhumbLine_default
+} from "./chunk-BY3E4ONI.js";
+import {
+  IntersectionTests_default
+} from "./chunk-TF776XCO.js";
+import {
+  Plane_default
+} from "./chunk-A5CODJ4M.js";
+import {
+  GeometryAttribute_default,
+  Geometry_default
+} from "./chunk-IUROUBPA.js";
+import {
+  BoundingSphere_default,
+  GeographicProjection_default
+} from "./chunk-ELI4BUOT.js";
+import {
+  Quaternion_default,
+  Rectangle_default,
+  Resource_default,
+  buildModuleUrl_default
+} from "./chunk-OXALEQPI.js";
+import {
+  ComponentDatatype_default
+} from "./chunk-FQPSOOPH.js";
+import {
+  Cartesian2_default,
+  Cartesian3_default,
+  Cartographic_default,
+  Ellipsoid_default,
+  Matrix3_default
+} from "./chunk-T6LPN7RI.js";
+import {
+  Math_default
+} from "./chunk-R4OIEIPE.js";
+import "./chunk-RHBWXX7C.js";
+import "./chunk-ZIKGV7EL.js";
+import {
+  defaultValue_default
+} from "./chunk-BAVI3ZS2.js";
+import {
+  Check_default,
+  DeveloperError_default
+} from "./chunk-TGY6H6N6.js";
+import {
+  defined_default
+} from "./chunk-N4QEHO3U.js";
+
+// packages/engine/Source/Core/GeographicTilingScheme.js
+function GeographicTilingScheme(options) {
+  options = defaultValue_default(options, defaultValue_default.EMPTY_OBJECT);
+  this._ellipsoid = defaultValue_default(options.ellipsoid, Ellipsoid_default.default);
+  this._rectangle = defaultValue_default(options.rectangle, Rectangle_default.MAX_VALUE);
+  this._projection = new GeographicProjection_default(this._ellipsoid);
+  this._numberOfLevelZeroTilesX = defaultValue_default(
+    options.numberOfLevelZeroTilesX,
+    2
+  );
+  this._numberOfLevelZeroTilesY = defaultValue_default(
+    options.numberOfLevelZeroTilesY,
+    1
+  );
+}
+Object.defineProperties(GeographicTilingScheme.prototype, {
+  /**
+   * Gets the ellipsoid that is tiled by this tiling scheme.
+   * @memberof GeographicTilingScheme.prototype
+   * @type {Ellipsoid}
+   */
+  ellipsoid: {
+    get: function() {
+      return this._ellipsoid;
+    }
+  },
+  /**
+   * Gets the rectangle, in radians, covered by this tiling scheme.
+   * @memberof GeographicTilingScheme.prototype
+   * @type {Rectangle}
+   */
+  rectangle: {
+    get: function() {
+      return this._rectangle;
+    }
+  },
+  /**
+   * Gets the map projection used by this tiling scheme.
+   * @memberof GeographicTilingScheme.prototype
+   * @type {MapProjection}
+   */
+  projection: {
+    get: function() {
+      return this._projection;
+    }
+  }
+});
+GeographicTilingScheme.prototype.getNumberOfXTilesAtLevel = function(level) {
+  return this._numberOfLevelZeroTilesX << level;
+};
+GeographicTilingScheme.prototype.getNumberOfYTilesAtLevel = function(level) {
+  return this._numberOfLevelZeroTilesY << level;
+};
+GeographicTilingScheme.prototype.rectangleToNativeRectangle = function(rectangle, result) {
+  Check_default.defined("rectangle", rectangle);
+  const west = Math_default.toDegrees(rectangle.west);
+  const south = Math_default.toDegrees(rectangle.south);
+  const east = Math_default.toDegrees(rectangle.east);
+  const north = Math_default.toDegrees(rectangle.north);
+  if (!defined_default(result)) {
+    return new Rectangle_default(west, south, east, north);
+  }
+  result.west = west;
+  result.south = south;
+  result.east = east;
+  result.north = north;
+  return result;
+};
+GeographicTilingScheme.prototype.tileXYToNativeRectangle = function(x, y, level, result) {
+  const rectangleRadians = this.tileXYToRectangle(x, y, level, result);
+  rectangleRadians.west = Math_default.toDegrees(rectangleRadians.west);
+  rectangleRadians.south = Math_default.toDegrees(rectangleRadians.south);
+  rectangleRadians.east = Math_default.toDegrees(rectangleRadians.east);
+  rectangleRadians.north = Math_default.toDegrees(rectangleRadians.north);
+  return rectangleRadians;
+};
+GeographicTilingScheme.prototype.tileXYToRectangle = function(x, y, level, result) {
+  const rectangle = this._rectangle;
+  const xTiles = this.getNumberOfXTilesAtLevel(level);
+  const yTiles = this.getNumberOfYTilesAtLevel(level);
+  const xTileWidth = rectangle.width / xTiles;
+  const west = x * xTileWidth + rectangle.west;
+  const east = (x + 1) * xTileWidth + rectangle.west;
+  const yTileHeight = rectangle.height / yTiles;
+  const north = rectangle.north - y * yTileHeight;
+  const south = rectangle.north - (y + 1) * yTileHeight;
+  if (!defined_default(result)) {
+    result = new Rectangle_default(west, south, east, north);
+  }
+  result.west = west;
+  result.south = south;
+  result.east = east;
+  result.north = north;
+  return result;
+};
+GeographicTilingScheme.prototype.positionToTileXY = function(position, level, result) {
+  const rectangle = this._rectangle;
+  if (!Rectangle_default.contains(rectangle, position)) {
+    return void 0;
+  }
+  const xTiles = this.getNumberOfXTilesAtLevel(level);
+  const yTiles = this.getNumberOfYTilesAtLevel(level);
+  const xTileWidth = rectangle.width / xTiles;
+  const yTileHeight = rectangle.height / yTiles;
+  let longitude = position.longitude;
+  if (rectangle.east < rectangle.west) {
+    longitude += Math_default.TWO_PI;
+  }
+  let xTileCoordinate = (longitude - rectangle.west) / xTileWidth | 0;
+  if (xTileCoordinate >= xTiles) {
+    xTileCoordinate = xTiles - 1;
+  }
+  let yTileCoordinate = (rectangle.north - position.latitude) / yTileHeight | 0;
+  if (yTileCoordinate >= yTiles) {
+    yTileCoordinate = yTiles - 1;
+  }
+  if (!defined_default(result)) {
+    return new Cartesian2_default(xTileCoordinate, yTileCoordinate);
+  }
+  result.x = xTileCoordinate;
+  result.y = yTileCoordinate;
+  return result;
+};
+var GeographicTilingScheme_default = GeographicTilingScheme;
+
+// packages/engine/Source/Core/ApproximateTerrainHeights.js
+var scratchDiagonalCartesianNE = new Cartesian3_default();
+var scratchDiagonalCartesianSW = new Cartesian3_default();
+var scratchDiagonalCartographic = new Cartographic_default();
+var scratchCenterCartesian = new Cartesian3_default();
+var scratchSurfaceCartesian = new Cartesian3_default();
+var scratchBoundingSphere = new BoundingSphere_default();
+var tilingScheme = new GeographicTilingScheme_default();
+var scratchCorners = [
+  new Cartographic_default(),
+  new Cartographic_default(),
+  new Cartographic_default(),
+  new Cartographic_default()
+];
+var scratchTileXY = new Cartesian2_default();
+var ApproximateTerrainHeights = {};
+ApproximateTerrainHeights.initialize = function() {
+  let initPromise = ApproximateTerrainHeights._initPromise;
+  if (defined_default(initPromise)) {
+    return initPromise;
+  }
+  initPromise = Resource_default.fetchJson(
+    buildModuleUrl_default("Assets/approximateTerrainHeights.json")
+  ).then(function(json) {
+    ApproximateTerrainHeights._terrainHeights = json;
+  });
+  ApproximateTerrainHeights._initPromise = initPromise;
+  return initPromise;
+};
+ApproximateTerrainHeights.getMinimumMaximumHeights = function(rectangle, ellipsoid) {
+  Check_default.defined("rectangle", rectangle);
+  if (!defined_default(ApproximateTerrainHeights._terrainHeights)) {
+    throw new DeveloperError_default(
+      "You must call ApproximateTerrainHeights.initialize and wait for the promise to resolve before using this function"
+    );
+  }
+  ellipsoid = defaultValue_default(ellipsoid, Ellipsoid_default.default);
+  const xyLevel = getTileXYLevel(rectangle);
+  let minTerrainHeight = ApproximateTerrainHeights._defaultMinTerrainHeight;
+  let maxTerrainHeight = ApproximateTerrainHeights._defaultMaxTerrainHeight;
+  if (defined_default(xyLevel)) {
+    const key = `${xyLevel.level}-${xyLevel.x}-${xyLevel.y}`;
+    const heights = ApproximateTerrainHeights._terrainHeights[key];
+    if (defined_default(heights)) {
+      minTerrainHeight = heights[0];
+      maxTerrainHeight = heights[1];
+    }
+    ellipsoid.cartographicToCartesian(
+      Rectangle_default.northeast(rectangle, scratchDiagonalCartographic),
+      scratchDiagonalCartesianNE
+    );
+    ellipsoid.cartographicToCartesian(
+      Rectangle_default.southwest(rectangle, scratchDiagonalCartographic),
+      scratchDiagonalCartesianSW
+    );
+    Cartesian3_default.midpoint(
+      scratchDiagonalCartesianSW,
+      scratchDiagonalCartesianNE,
+      scratchCenterCartesian
+    );
+    const surfacePosition = ellipsoid.scaleToGeodeticSurface(
+      scratchCenterCartesian,
+      scratchSurfaceCartesian
+    );
+    if (defined_default(surfacePosition)) {
+      const distance = Cartesian3_default.distance(
+        scratchCenterCartesian,
+        surfacePosition
+      );
+      minTerrainHeight = Math.min(minTerrainHeight, -distance);
+    } else {
+      minTerrainHeight = ApproximateTerrainHeights._defaultMinTerrainHeight;
+    }
+  }
+  minTerrainHeight = Math.max(
+    ApproximateTerrainHeights._defaultMinTerrainHeight,
+    minTerrainHeight
+  );
+  return {
+    minimumTerrainHeight: minTerrainHeight,
+    maximumTerrainHeight: maxTerrainHeight
+  };
+};
+ApproximateTerrainHeights.getBoundingSphere = function(rectangle, ellipsoid) {
+  Check_default.defined("rectangle", rectangle);
+  if (!defined_default(ApproximateTerrainHeights._terrainHeights)) {
+    throw new DeveloperError_default(
+      "You must call ApproximateTerrainHeights.initialize and wait for the promise to resolve before using this function"
+    );
+  }
+  ellipsoid = defaultValue_default(ellipsoid, Ellipsoid_default.default);
+  const xyLevel = getTileXYLevel(rectangle);
+  let maxTerrainHeight = ApproximateTerrainHeights._defaultMaxTerrainHeight;
+  if (defined_default(xyLevel)) {
+    const key = `${xyLevel.level}-${xyLevel.x}-${xyLevel.y}`;
+    const heights = ApproximateTerrainHeights._terrainHeights[key];
+    if (defined_default(heights)) {
+      maxTerrainHeight = heights[1];
+    }
+  }
+  const result = BoundingSphere_default.fromRectangle3D(rectangle, ellipsoid, 0);
+  BoundingSphere_default.fromRectangle3D(
+    rectangle,
+    ellipsoid,
+    maxTerrainHeight,
+    scratchBoundingSphere
+  );
+  return BoundingSphere_default.union(result, scratchBoundingSphere, result);
+};
+function getTileXYLevel(rectangle) {
+  Cartographic_default.fromRadians(
+    rectangle.east,
+    rectangle.north,
+    0,
+    scratchCorners[0]
+  );
+  Cartographic_default.fromRadians(
+    rectangle.west,
+    rectangle.north,
+    0,
+    scratchCorners[1]
+  );
+  Cartographic_default.fromRadians(
+    rectangle.east,
+    rectangle.south,
+    0,
+    scratchCorners[2]
+  );
+  Cartographic_default.fromRadians(
+    rectangle.west,
+    rectangle.south,
+    0,
+    scratchCorners[3]
+  );
+  let lastLevelX = 0, lastLevelY = 0;
+  let currentX = 0, currentY = 0;
+  const maxLevel = ApproximateTerrainHeights._terrainHeightsMaxLevel;
+  let i;
+  for (i = 0; i <= maxLevel; ++i) {
+    let failed = false;
+    for (let j = 0; j < 4; ++j) {
+      const corner = scratchCorners[j];
+      tilingScheme.positionToTileXY(corner, i, scratchTileXY);
+      if (j === 0) {
+        currentX = scratchTileXY.x;
+        currentY = scratchTileXY.y;
+      } else if (currentX !== scratchTileXY.x || currentY !== scratchTileXY.y) {
+        failed = true;
+        break;
+      }
+    }
+    if (failed) {
+      break;
+    }
+    lastLevelX = currentX;
+    lastLevelY = currentY;
+  }
+  if (i === 0) {
+    return void 0;
+  }
+  return {
+    x: lastLevelX,
+    y: lastLevelY,
+    level: i > maxLevel ? maxLevel : i - 1
+  };
+}
+ApproximateTerrainHeights._terrainHeightsMaxLevel = 6;
+ApproximateTerrainHeights._defaultMaxTerrainHeight = 9e3;
+ApproximateTerrainHeights._defaultMinTerrainHeight = -1e5;
+ApproximateTerrainHeights._terrainHeights = void 0;
+ApproximateTerrainHeights._initPromise = void 0;
+Object.defineProperties(ApproximateTerrainHeights, {
+  /**
+   * Determines if the terrain heights are initialized and ready to use. To initialize the terrain heights,
+   * call {@link ApproximateTerrainHeights#initialize} and wait for the returned promise to resolve.
+   * @type {boolean}
+   * @readonly
+   * @memberof ApproximateTerrainHeights
+   */
+  initialized: {
+    get: function() {
+      return defined_default(ApproximateTerrainHeights._terrainHeights);
+    }
+  }
+});
+var ApproximateTerrainHeights_default = ApproximateTerrainHeights;
+
+// packages/engine/Source/Core/GroundPolylineGeometry.js
+var PROJECTIONS = [GeographicProjection_default, WebMercatorProjection_default];
+var PROJECTION_COUNT = PROJECTIONS.length;
+var MITER_BREAK_SMALL = Math.cos(Math_default.toRadians(30));
+var MITER_BREAK_LARGE = Math.cos(Math_default.toRadians(150));
+var WALL_INITIAL_MIN_HEIGHT = 0;
+var WALL_INITIAL_MAX_HEIGHT = 1e3;
+function GroundPolylineGeometry(options) {
+  options = defaultValue_default(options, defaultValue_default.EMPTY_OBJECT);
+  const positions = options.positions;
+  if (!defined_default(positions) || positions.length < 2) {
+    throw new DeveloperError_default("At least two positions are required.");
+  }
+  if (defined_default(options.arcType) && options.arcType !== ArcType_default.GEODESIC && options.arcType !== ArcType_default.RHUMB) {
+    throw new DeveloperError_default(
+      "Valid options for arcType are ArcType.GEODESIC and ArcType.RHUMB."
+    );
+  }
+  this.width = defaultValue_default(options.width, 1);
+  this._positions = positions;
+  this.granularity = defaultValue_default(options.granularity, 9999);
+  this.loop = defaultValue_default(options.loop, false);
+  this.arcType = defaultValue_default(options.arcType, ArcType_default.GEODESIC);
+  this._ellipsoid = Ellipsoid_default.default;
+  this._projectionIndex = 0;
+  this._workerName = "createGroundPolylineGeometry";
+  this._scene3DOnly = false;
+}
+Object.defineProperties(GroundPolylineGeometry.prototype, {
+  /**
+   * The number of elements used to pack the object into an array.
+   * @memberof GroundPolylineGeometry.prototype
+   * @type {number}
+   * @readonly
+   * @private
+   */
+  packedLength: {
+    get: function() {
+      return 1 + this._positions.length * 3 + 1 + 1 + 1 + Ellipsoid_default.packedLength + 1 + 1;
+    }
+  }
+});
+GroundPolylineGeometry.setProjectionAndEllipsoid = function(groundPolylineGeometry, mapProjection) {
+  let projectionIndex = 0;
+  for (let i = 0; i < PROJECTION_COUNT; i++) {
+    if (mapProjection instanceof PROJECTIONS[i]) {
+      projectionIndex = i;
+      break;
+    }
+  }
+  groundPolylineGeometry._projectionIndex = projectionIndex;
+  groundPolylineGeometry._ellipsoid = mapProjection.ellipsoid;
+};
+var cart3Scratch1 = new Cartesian3_default();
+var cart3Scratch2 = new Cartesian3_default();
+var cart3Scratch3 = new Cartesian3_default();
+function computeRightNormal(start, end, maxHeight, ellipsoid, result) {
+  const startBottom = getPosition(ellipsoid, start, 0, cart3Scratch1);
+  const startTop = getPosition(ellipsoid, start, maxHeight, cart3Scratch2);
+  const endBottom = getPosition(ellipsoid, end, 0, cart3Scratch3);
+  const up = direction(startTop, startBottom, cart3Scratch2);
+  const forward = direction(endBottom, startBottom, cart3Scratch3);
+  Cartesian3_default.cross(forward, up, result);
+  return Cartesian3_default.normalize(result, result);
+}
+var interpolatedCartographicScratch = new Cartographic_default();
+var interpolatedBottomScratch = new Cartesian3_default();
+var interpolatedTopScratch = new Cartesian3_default();
+var interpolatedNormalScratch = new Cartesian3_default();
+function interpolateSegment(start, end, minHeight, maxHeight, granularity, arcType, ellipsoid, normalsArray, bottomPositionsArray, topPositionsArray, cartographicsArray) {
+  if (granularity === 0) {
+    return;
+  }
+  let ellipsoidLine;
+  if (arcType === ArcType_default.GEODESIC) {
+    ellipsoidLine = new EllipsoidGeodesic_default(start, end, ellipsoid);
+  } else if (arcType === ArcType_default.RHUMB) {
+    ellipsoidLine = new EllipsoidRhumbLine_default(start, end, ellipsoid);
+  }
+  const surfaceDistance = ellipsoidLine.surfaceDistance;
+  if (surfaceDistance < granularity) {
+    return;
+  }
+  const interpolatedNormal = computeRightNormal(
+    start,
+    end,
+    maxHeight,
+    ellipsoid,
+    interpolatedNormalScratch
+  );
+  const segments = Math.ceil(surfaceDistance / granularity);
+  const interpointDistance = surfaceDistance / segments;
+  let distanceFromStart = interpointDistance;
+  const pointsToAdd = segments - 1;
+  let packIndex = normalsArray.length;
+  for (let i = 0; i < pointsToAdd; i++) {
+    const interpolatedCartographic = ellipsoidLine.interpolateUsingSurfaceDistance(
+      distanceFromStart,
+      interpolatedCartographicScratch
+    );
+    const interpolatedBottom = getPosition(
+      ellipsoid,
+      interpolatedCartographic,
+      minHeight,
+      interpolatedBottomScratch
+    );
+    const interpolatedTop = getPosition(
+      ellipsoid,
+      interpolatedCartographic,
+      maxHeight,
+      interpolatedTopScratch
+    );
+    Cartesian3_default.pack(interpolatedNormal, normalsArray, packIndex);
+    Cartesian3_default.pack(interpolatedBottom, bottomPositionsArray, packIndex);
+    Cartesian3_default.pack(interpolatedTop, topPositionsArray, packIndex);
+    cartographicsArray.push(interpolatedCartographic.latitude);
+    cartographicsArray.push(interpolatedCartographic.longitude);
+    packIndex += 3;
+    distanceFromStart += interpointDistance;
+  }
+}
+var heightlessCartographicScratch = new Cartographic_default();
+function getPosition(ellipsoid, cartographic, height, result) {
+  Cartographic_default.clone(cartographic, heightlessCartographicScratch);
+  heightlessCartographicScratch.height = height;
+  return Cartographic_default.toCartesian(
+    heightlessCartographicScratch,
+    ellipsoid,
+    result
+  );
+}
+GroundPolylineGeometry.pack = function(value, array, startingIndex) {
+  Check_default.typeOf.object("value", value);
+  Check_default.defined("array", array);
+  let index = defaultValue_default(startingIndex, 0);
+  const positions = value._positions;
+  const positionsLength = positions.length;
+  array[index++] = positionsLength;
+  for (let i = 0; i < positionsLength; ++i) {
+    const cartesian = positions[i];
+    Cartesian3_default.pack(cartesian, array, index);
+    index += 3;
+  }
+  array[index++] = value.granularity;
+  array[index++] = value.loop ? 1 : 0;
+  array[index++] = value.arcType;
+  Ellipsoid_default.pack(value._ellipsoid, array, index);
+  index += Ellipsoid_default.packedLength;
+  array[index++] = value._projectionIndex;
+  array[index++] = value._scene3DOnly ? 1 : 0;
+  return array;
+};
+GroundPolylineGeometry.unpack = function(array, startingIndex, result) {
+  Check_default.defined("array", array);
+  let index = defaultValue_default(startingIndex, 0);
+  const positionsLength = array[index++];
+  const positions = new Array(positionsLength);
+  for (let i = 0; i < positionsLength; i++) {
+    positions[i] = Cartesian3_default.unpack(array, index);
+    index += 3;
+  }
+  const granularity = array[index++];
+  const loop = array[index++] === 1;
+  const arcType = array[index++];
+  const ellipsoid = Ellipsoid_default.unpack(array, index);
+  index += Ellipsoid_default.packedLength;
+  const projectionIndex = array[index++];
+  const scene3DOnly = array[index++] === 1;
+  if (!defined_default(result)) {
+    result = new GroundPolylineGeometry({
+      positions
+    });
+  }
+  result._positions = positions;
+  result.granularity = granularity;
+  result.loop = loop;
+  result.arcType = arcType;
+  result._ellipsoid = ellipsoid;
+  result._projectionIndex = projectionIndex;
+  result._scene3DOnly = scene3DOnly;
+  return result;
+};
+function direction(target, origin, result) {
+  Cartesian3_default.subtract(target, origin, result);
+  Cartesian3_default.normalize(result, result);
+  return result;
+}
+function tangentDirection(target, origin, up, result) {
+  result = direction(target, origin, result);
+  result = Cartesian3_default.cross(result, up, result);
+  result = Cartesian3_default.normalize(result, result);
+  result = Cartesian3_default.cross(up, result, result);
+  return result;
+}
+var toPreviousScratch = new Cartesian3_default();
+var toNextScratch = new Cartesian3_default();
+var forwardScratch = new Cartesian3_default();
+var vertexUpScratch = new Cartesian3_default();
+var cosine90 = 0;
+var cosine180 = -1;
+function computeVertexMiterNormal(previousBottom, vertexBottom, vertexTop, nextBottom, result) {
+  const up = direction(vertexTop, vertexBottom, vertexUpScratch);
+  const toPrevious = tangentDirection(
+    previousBottom,
+    vertexBottom,
+    up,
+    toPreviousScratch
+  );
+  const toNext = tangentDirection(nextBottom, vertexBottom, up, toNextScratch);
+  if (Math_default.equalsEpsilon(
+    Cartesian3_default.dot(toPrevious, toNext),
+    cosine180,
+    Math_default.EPSILON5
+  )) {
+    result = Cartesian3_default.cross(up, toPrevious, result);
+    result = Cartesian3_default.normalize(result, result);
+    return result;
+  }
+  result = Cartesian3_default.add(toNext, toPrevious, result);
+  result = Cartesian3_default.normalize(result, result);
+  const forward = Cartesian3_default.cross(up, result, forwardScratch);
+  if (Cartesian3_default.dot(toNext, forward) < cosine90) {
+    result = Cartesian3_default.negate(result, result);
+  }
+  return result;
+}
+var XZ_PLANE = Plane_default.fromPointNormal(Cartesian3_default.ZERO, Cartesian3_default.UNIT_Y);
+var previousBottomScratch = new Cartesian3_default();
+var vertexBottomScratch = new Cartesian3_default();
+var vertexTopScratch = new Cartesian3_default();
+var nextBottomScratch = new Cartesian3_default();
+var vertexNormalScratch = new Cartesian3_default();
+var intersectionScratch = new Cartesian3_default();
+var cartographicScratch0 = new Cartographic_default();
+var cartographicScratch1 = new Cartographic_default();
+var cartographicIntersectionScratch = new Cartographic_default();
+GroundPolylineGeometry.createGeometry = function(groundPolylineGeometry) {
+  const compute2dAttributes = !groundPolylineGeometry._scene3DOnly;
+  let loop = groundPolylineGeometry.loop;
+  const ellipsoid = groundPolylineGeometry._ellipsoid;
+  const granularity = groundPolylineGeometry.granularity;
+  const arcType = groundPolylineGeometry.arcType;
+  const projection = new PROJECTIONS[groundPolylineGeometry._projectionIndex](
+    ellipsoid
+  );
+  const minHeight = WALL_INITIAL_MIN_HEIGHT;
+  const maxHeight = WALL_INITIAL_MAX_HEIGHT;
+  let index;
+  let i;
+  const positions = groundPolylineGeometry._positions;
+  const positionsLength = positions.length;
+  if (positionsLength === 2) {
+    loop = false;
+  }
+  let p0;
+  let p1;
+  let c0;
+  let c1;
+  const rhumbLine = new EllipsoidRhumbLine_default(void 0, void 0, ellipsoid);
+  let intersection;
+  let intersectionCartographic;
+  let intersectionLongitude;
+  const splitPositions = [positions[0]];
+  for (i = 0; i < positionsLength - 1; i++) {
+    p0 = positions[i];
+    p1 = positions[i + 1];
+    intersection = IntersectionTests_default.lineSegmentPlane(
+      p0,
+      p1,
+      XZ_PLANE,
+      intersectionScratch
+    );
+    if (defined_default(intersection) && !Cartesian3_default.equalsEpsilon(intersection, p0, Math_default.EPSILON7) && !Cartesian3_default.equalsEpsilon(intersection, p1, Math_default.EPSILON7)) {
+      if (groundPolylineGeometry.arcType === ArcType_default.GEODESIC) {
+        splitPositions.push(Cartesian3_default.clone(intersection));
+      } else if (groundPolylineGeometry.arcType === ArcType_default.RHUMB) {
+        intersectionLongitude = ellipsoid.cartesianToCartographic(
+          intersection,
+          cartographicScratch0
+        ).longitude;
+        c0 = ellipsoid.cartesianToCartographic(p0, cartographicScratch0);
+        c1 = ellipsoid.cartesianToCartographic(p1, cartographicScratch1);
+        rhumbLine.setEndPoints(c0, c1);
+        intersectionCartographic = rhumbLine.findIntersectionWithLongitude(
+          intersectionLongitude,
+          cartographicIntersectionScratch
+        );
+        intersection = ellipsoid.cartographicToCartesian(
+          intersectionCartographic,
+          intersectionScratch
+        );
+        if (defined_default(intersection) && !Cartesian3_default.equalsEpsilon(intersection, p0, Math_default.EPSILON7) && !Cartesian3_default.equalsEpsilon(intersection, p1, Math_default.EPSILON7)) {
+          splitPositions.push(Cartesian3_default.clone(intersection));
+        }
+      }
+    }
+    splitPositions.push(p1);
+  }
+  if (loop) {
+    p0 = positions[positionsLength - 1];
+    p1 = positions[0];
+    intersection = IntersectionTests_default.lineSegmentPlane(
+      p0,
+      p1,
+      XZ_PLANE,
+      intersectionScratch
+    );
+    if (defined_default(intersection) && !Cartesian3_default.equalsEpsilon(intersection, p0, Math_default.EPSILON7) && !Cartesian3_default.equalsEpsilon(intersection, p1, Math_default.EPSILON7)) {
+      if (groundPolylineGeometry.arcType === ArcType_default.GEODESIC) {
+        splitPositions.push(Cartesian3_default.clone(intersection));
+      } else if (groundPolylineGeometry.arcType === ArcType_default.RHUMB) {
+        intersectionLongitude = ellipsoid.cartesianToCartographic(
+          intersection,
+          cartographicScratch0
+        ).longitude;
+        c0 = ellipsoid.cartesianToCartographic(p0, cartographicScratch0);
+        c1 = ellipsoid.cartesianToCartographic(p1, cartographicScratch1);
+        rhumbLine.setEndPoints(c0, c1);
+        intersectionCartographic = rhumbLine.findIntersectionWithLongitude(
+          intersectionLongitude,
+          cartographicIntersectionScratch
+        );
+        intersection = ellipsoid.cartographicToCartesian(
+          intersectionCartographic,
+          intersectionScratch
+        );
+        if (defined_default(intersection) && !Cartesian3_default.equalsEpsilon(intersection, p0, Math_default.EPSILON7) && !Cartesian3_default.equalsEpsilon(intersection, p1, Math_default.EPSILON7)) {
+          splitPositions.push(Cartesian3_default.clone(intersection));
+        }
+      }
+    }
+  }
+  let cartographicsLength = splitPositions.length;
+  let cartographics = new Array(cartographicsLength);
+  for (i = 0; i < cartographicsLength; i++) {
+    const cartographic = Cartographic_default.fromCartesian(
+      splitPositions[i],
+      ellipsoid
+    );
+    cartographic.height = 0;
+    cartographics[i] = cartographic;
+  }
+  cartographics = arrayRemoveDuplicates_default(
+    cartographics,
+    Cartographic_default.equalsEpsilon
+  );
+  cartographicsLength = cartographics.length;
+  if (cartographicsLength < 2) {
+    return void 0;
+  }
+  const cartographicsArray = [];
+  const normalsArray = [];
+  const bottomPositionsArray = [];
+  const topPositionsArray = [];
+  let previousBottom = previousBottomScratch;
+  let vertexBottom = vertexBottomScratch;
+  let vertexTop = vertexTopScratch;
+  let nextBottom = nextBottomScratch;
+  let vertexNormal = vertexNormalScratch;
+  const startCartographic = cartographics[0];
+  const nextCartographic = cartographics[1];
+  const prestartCartographic = cartographics[cartographicsLength - 1];
+  previousBottom = getPosition(
+    ellipsoid,
+    prestartCartographic,
+    minHeight,
+    previousBottom
+  );
+  nextBottom = getPosition(ellipsoid, nextCartographic, minHeight, nextBottom);
+  vertexBottom = getPosition(
+    ellipsoid,
+    startCartographic,
+    minHeight,
+    vertexBottom
+  );
+  vertexTop = getPosition(ellipsoid, startCartographic, maxHeight, vertexTop);
+  if (loop) {
+    vertexNormal = computeVertexMiterNormal(
+      previousBottom,
+      vertexBottom,
+      vertexTop,
+      nextBottom,
+      vertexNormal
+    );
+  } else {
+    vertexNormal = computeRightNormal(
+      startCartographic,
+      nextCartographic,
+      maxHeight,
+      ellipsoid,
+      vertexNormal
+    );
+  }
+  Cartesian3_default.pack(vertexNormal, normalsArray, 0);
+  Cartesian3_default.pack(vertexBottom, bottomPositionsArray, 0);
+  Cartesian3_default.pack(vertexTop, topPositionsArray, 0);
+  cartographicsArray.push(startCartographic.latitude);
+  cartographicsArray.push(startCartographic.longitude);
+  interpolateSegment(
+    startCartographic,
+    nextCartographic,
+    minHeight,
+    maxHeight,
+    granularity,
+    arcType,
+    ellipsoid,
+    normalsArray,
+    bottomPositionsArray,
+    topPositionsArray,
+    cartographicsArray
+  );
+  for (i = 1; i < cartographicsLength - 1; ++i) {
+    previousBottom = Cartesian3_default.clone(vertexBottom, previousBottom);
+    vertexBottom = Cartesian3_default.clone(nextBottom, vertexBottom);
+    const vertexCartographic = cartographics[i];
+    getPosition(ellipsoid, vertexCartographic, maxHeight, vertexTop);
+    getPosition(ellipsoid, cartographics[i + 1], minHeight, nextBottom);
+    computeVertexMiterNormal(
+      previousBottom,
+      vertexBottom,
+      vertexTop,
+      nextBottom,
+      vertexNormal
+    );
+    index = normalsArray.length;
+    Cartesian3_default.pack(vertexNormal, normalsArray, index);
+    Cartesian3_default.pack(vertexBottom, bottomPositionsArray, index);
+    Cartesian3_default.pack(vertexTop, topPositionsArray, index);
+    cartographicsArray.push(vertexCartographic.latitude);
+    cartographicsArray.push(vertexCartographic.longitude);
+    interpolateSegment(
+      cartographics[i],
+      cartographics[i + 1],
+      minHeight,
+      maxHeight,
+      granularity,
+      arcType,
+      ellipsoid,
+      normalsArray,
+      bottomPositionsArray,
+      topPositionsArray,
+      cartographicsArray
+    );
+  }
+  const endCartographic = cartographics[cartographicsLength - 1];
+  const preEndCartographic = cartographics[cartographicsLength - 2];
+  vertexBottom = getPosition(
+    ellipsoid,
+    endCartographic,
+    minHeight,
+    vertexBottom
+  );
+  vertexTop = getPosition(ellipsoid, endCartographic, maxHeight, vertexTop);
+  if (loop) {
+    const postEndCartographic = cartographics[0];
+    previousBottom = getPosition(
+      ellipsoid,
+      preEndCartographic,
+      minHeight,
+      previousBottom
+    );
+    nextBottom = getPosition(
+      ellipsoid,
+      postEndCartographic,
+      minHeight,
+      nextBottom
+    );
+    vertexNormal = computeVertexMiterNormal(
+      previousBottom,
+      vertexBottom,
+      vertexTop,
+      nextBottom,
+      vertexNormal
+    );
+  } else {
+    vertexNormal = computeRightNormal(
+      preEndCartographic,
+      endCartographic,
+      maxHeight,
+      ellipsoid,
+      vertexNormal
+    );
+  }
+  index = normalsArray.length;
+  Cartesian3_default.pack(vertexNormal, normalsArray, index);
+  Cartesian3_default.pack(vertexBottom, bottomPositionsArray, index);
+  Cartesian3_default.pack(vertexTop, topPositionsArray, index);
+  cartographicsArray.push(endCartographic.latitude);
+  cartographicsArray.push(endCartographic.longitude);
+  if (loop) {
+    interpolateSegment(
+      endCartographic,
+      startCartographic,
+      minHeight,
+      maxHeight,
+      granularity,
+      arcType,
+      ellipsoid,
+      normalsArray,
+      bottomPositionsArray,
+      topPositionsArray,
+      cartographicsArray
+    );
+    index = normalsArray.length;
+    for (i = 0; i < 3; ++i) {
+      normalsArray[index + i] = normalsArray[i];
+      bottomPositionsArray[index + i] = bottomPositionsArray[i];
+      topPositionsArray[index + i] = topPositionsArray[i];
+    }
+    cartographicsArray.push(startCartographic.latitude);
+    cartographicsArray.push(startCartographic.longitude);
+  }
+  return generateGeometryAttributes(
+    loop,
+    projection,
+    bottomPositionsArray,
+    topPositionsArray,
+    normalsArray,
+    cartographicsArray,
+    compute2dAttributes
+  );
+};
+var lineDirectionScratch = new Cartesian3_default();
+var matrix3Scratch = new Matrix3_default();
+var quaternionScratch = new Quaternion_default();
+function breakMiter(endGeometryNormal, startBottom, endBottom, endTop) {
+  const lineDirection = direction(endBottom, startBottom, lineDirectionScratch);
+  const dot = Cartesian3_default.dot(lineDirection, endGeometryNormal);
+  if (dot > MITER_BREAK_SMALL || dot < MITER_BREAK_LARGE) {
+    const vertexUp = direction(endTop, endBottom, vertexUpScratch);
+    const angle = dot < MITER_BREAK_LARGE ? Math_default.PI_OVER_TWO : -Math_default.PI_OVER_TWO;
+    const quaternion = Quaternion_default.fromAxisAngle(
+      vertexUp,
+      angle,
+      quaternionScratch
+    );
+    const rotationMatrix = Matrix3_default.fromQuaternion(quaternion, matrix3Scratch);
+    Matrix3_default.multiplyByVector(
+      rotationMatrix,
+      endGeometryNormal,
+      endGeometryNormal
+    );
+    return true;
+  }
+  return false;
+}
+var endPosCartographicScratch = new Cartographic_default();
+var normalStartpointScratch = new Cartesian3_default();
+var normalEndpointScratch = new Cartesian3_default();
+function projectNormal(projection, cartographic, normal, projectedPosition, result) {
+  const position = Cartographic_default.toCartesian(
+    cartographic,
+    projection._ellipsoid,
+    normalStartpointScratch
+  );
+  let normalEndpoint = Cartesian3_default.add(position, normal, normalEndpointScratch);
+  let flipNormal = false;
+  const ellipsoid = projection._ellipsoid;
+  let normalEndpointCartographic = ellipsoid.cartesianToCartographic(
+    normalEndpoint,
+    endPosCartographicScratch
+  );
+  if (Math.abs(cartographic.longitude - normalEndpointCartographic.longitude) > Math_default.PI_OVER_TWO) {
+    flipNormal = true;
+    normalEndpoint = Cartesian3_default.subtract(
+      position,
+      normal,
+      normalEndpointScratch
+    );
+    normalEndpointCartographic = ellipsoid.cartesianToCartographic(
+      normalEndpoint,
+      endPosCartographicScratch
+    );
+  }
+  normalEndpointCartographic.height = 0;
+  const normalEndpointProjected = projection.project(
+    normalEndpointCartographic,
+    result
+  );
+  result = Cartesian3_default.subtract(
+    normalEndpointProjected,
+    projectedPosition,
+    result
+  );
+  result.z = 0;
+  result = Cartesian3_default.normalize(result, result);
+  if (flipNormal) {
+    Cartesian3_default.negate(result, result);
+  }
+  return result;
+}
+var adjustHeightNormalScratch = new Cartesian3_default();
+var adjustHeightOffsetScratch = new Cartesian3_default();
+function adjustHeights(bottom, top, minHeight, maxHeight, adjustHeightBottom, adjustHeightTop) {
+  const adjustHeightNormal = Cartesian3_default.subtract(
+    top,
+    bottom,
+    adjustHeightNormalScratch
+  );
+  Cartesian3_default.normalize(adjustHeightNormal, adjustHeightNormal);
+  const distanceForBottom = minHeight - WALL_INITIAL_MIN_HEIGHT;
+  let adjustHeightOffset = Cartesian3_default.multiplyByScalar(
+    adjustHeightNormal,
+    distanceForBottom,
+    adjustHeightOffsetScratch
+  );
+  Cartesian3_default.add(bottom, adjustHeightOffset, adjustHeightBottom);
+  const distanceForTop = maxHeight - WALL_INITIAL_MAX_HEIGHT;
+  adjustHeightOffset = Cartesian3_default.multiplyByScalar(
+    adjustHeightNormal,
+    distanceForTop,
+    adjustHeightOffsetScratch
+  );
+  Cartesian3_default.add(top, adjustHeightOffset, adjustHeightTop);
+}
+var nudgeDirectionScratch = new Cartesian3_default();
+function nudgeXZ(start, end) {
+  const startToXZdistance = Plane_default.getPointDistance(XZ_PLANE, start);
+  const endToXZdistance = Plane_default.getPointDistance(XZ_PLANE, end);
+  let offset = nudgeDirectionScratch;
+  if (Math_default.equalsEpsilon(startToXZdistance, 0, Math_default.EPSILON2)) {
+    offset = direction(end, start, offset);
+    Cartesian3_default.multiplyByScalar(offset, Math_default.EPSILON2, offset);
+    Cartesian3_default.add(start, offset, start);
+  } else if (Math_default.equalsEpsilon(endToXZdistance, 0, Math_default.EPSILON2)) {
+    offset = direction(start, end, offset);
+    Cartesian3_default.multiplyByScalar(offset, Math_default.EPSILON2, offset);
+    Cartesian3_default.add(end, offset, end);
+  }
+}
+function nudgeCartographic(start, end) {
+  const absStartLon = Math.abs(start.longitude);
+  const absEndLon = Math.abs(end.longitude);
+  if (Math_default.equalsEpsilon(absStartLon, Math_default.PI, Math_default.EPSILON11)) {
+    const endSign = Math_default.sign(end.longitude);
+    start.longitude = endSign * (absStartLon - Math_default.EPSILON11);
+    return 1;
+  } else if (Math_default.equalsEpsilon(absEndLon, Math_default.PI, Math_default.EPSILON11)) {
+    const startSign = Math_default.sign(start.longitude);
+    end.longitude = startSign * (absEndLon - Math_default.EPSILON11);
+    return 2;
+  }
+  return 0;
+}
+var startCartographicScratch = new Cartographic_default();
+var endCartographicScratch = new Cartographic_default();
+var segmentStartTopScratch = new Cartesian3_default();
+var segmentEndTopScratch = new Cartesian3_default();
+var segmentStartBottomScratch = new Cartesian3_default();
+var segmentEndBottomScratch = new Cartesian3_default();
+var segmentStartNormalScratch = new Cartesian3_default();
+var segmentEndNormalScratch = new Cartesian3_default();
+var getHeightCartographics = [
+  startCartographicScratch,
+  endCartographicScratch
+];
+var getHeightRectangleScratch = new Rectangle_default();
+var adjustHeightStartTopScratch = new Cartesian3_default();
+var adjustHeightEndTopScratch = new Cartesian3_default();
+var adjustHeightStartBottomScratch = new Cartesian3_default();
+var adjustHeightEndBottomScratch = new Cartesian3_default();
+var segmentStart2DScratch = new Cartesian3_default();
+var segmentEnd2DScratch = new Cartesian3_default();
+var segmentStartNormal2DScratch = new Cartesian3_default();
+var segmentEndNormal2DScratch = new Cartesian3_default();
+var offsetScratch = new Cartesian3_default();
+var startUpScratch = new Cartesian3_default();
+var endUpScratch = new Cartesian3_default();
+var rightScratch = new Cartesian3_default();
+var startPlaneNormalScratch = new Cartesian3_default();
+var endPlaneNormalScratch = new Cartesian3_default();
+var encodeScratch = new EncodedCartesian3_default();
+var encodeScratch2D = new EncodedCartesian3_default();
+var forwardOffset2DScratch = new Cartesian3_default();
+var right2DScratch = new Cartesian3_default();
+var normalNudgeScratch = new Cartesian3_default();
+var scratchBoundingSpheres = [new BoundingSphere_default(), new BoundingSphere_default()];
+var REFERENCE_INDICES = [
+  0,
+  2,
+  1,
+  0,
+  3,
+  2,
+  // right
+  0,
+  7,
+  3,
+  0,
+  4,
+  7,
+  // start
+  0,
+  5,
+  4,
+  0,
+  1,
+  5,
+  // bottom
+  5,
+  7,
+  4,
+  5,
+  6,
+  7,
+  // left
+  5,
+  2,
+  6,
+  5,
+  1,
+  2,
+  // end
+  3,
+  6,
+  2,
+  3,
+  7,
+  6
+  // top
+];
+var REFERENCE_INDICES_LENGTH = REFERENCE_INDICES.length;
+function generateGeometryAttributes(loop, projection, bottomPositionsArray, topPositionsArray, normalsArray, cartographicsArray, compute2dAttributes) {
+  let i;
+  let index;
+  const ellipsoid = projection._ellipsoid;
+  const segmentCount = bottomPositionsArray.length / 3 - 1;
+  const vertexCount = segmentCount * 8;
+  const arraySizeVec4 = vertexCount * 4;
+  const indexCount = segmentCount * 36;
+  const indices = vertexCount > 65535 ? new Uint32Array(indexCount) : new Uint16Array(indexCount);
+  const positionsArray = new Float64Array(vertexCount * 3);
+  const startHiAndForwardOffsetX = new Float32Array(arraySizeVec4);
+  const startLoAndForwardOffsetY = new Float32Array(arraySizeVec4);
+  const startNormalAndForwardOffsetZ = new Float32Array(arraySizeVec4);
+  const endNormalAndTextureCoordinateNormalizationX = new Float32Array(
+    arraySizeVec4
+  );
+  const rightNormalAndTextureCoordinateNormalizationY = new Float32Array(
+    arraySizeVec4
+  );
+  let startHiLo2D;
+  let offsetAndRight2D;
+  let startEndNormals2D;
+  let texcoordNormalization2D;
+  if (compute2dAttributes) {
+    startHiLo2D = new Float32Array(arraySizeVec4);
+    offsetAndRight2D = new Float32Array(arraySizeVec4);
+    startEndNormals2D = new Float32Array(arraySizeVec4);
+    texcoordNormalization2D = new Float32Array(vertexCount * 2);
+  }
+  const cartographicsLength = cartographicsArray.length / 2;
+  let length2D = 0;
+  const startCartographic = startCartographicScratch;
+  startCartographic.height = 0;
+  const endCartographic = endCartographicScratch;
+  endCartographic.height = 0;
+  let segmentStartCartesian = segmentStartTopScratch;
+  let segmentEndCartesian = segmentEndTopScratch;
+  if (compute2dAttributes) {
+    index = 0;
+    for (i = 1; i < cartographicsLength; i++) {
+      startCartographic.latitude = cartographicsArray[index];
+      startCartographic.longitude = cartographicsArray[index + 1];
+      endCartographic.latitude = cartographicsArray[index + 2];
+      endCartographic.longitude = cartographicsArray[index + 3];
+      segmentStartCartesian = projection.project(
+        startCartographic,
+        segmentStartCartesian
+      );
+      segmentEndCartesian = projection.project(
+        endCartographic,
+        segmentEndCartesian
+      );
+      length2D += Cartesian3_default.distance(
+        segmentStartCartesian,
+        segmentEndCartesian
+      );
+      index += 2;
+    }
+  }
+  const positionsLength = topPositionsArray.length / 3;
+  segmentEndCartesian = Cartesian3_default.unpack(
+    topPositionsArray,
+    0,
+    segmentEndCartesian
+  );
+  let length3D = 0;
+  index = 3;
+  for (i = 1; i < positionsLength; i++) {
+    segmentStartCartesian = Cartesian3_default.clone(
+      segmentEndCartesian,
+      segmentStartCartesian
+    );
+    segmentEndCartesian = Cartesian3_default.unpack(
+      topPositionsArray,
+      index,
+      segmentEndCartesian
+    );
+    length3D += Cartesian3_default.distance(segmentStartCartesian, segmentEndCartesian);
+    index += 3;
+  }
+  let j;
+  index = 3;
+  let cartographicsIndex = 0;
+  let vec2sWriteIndex = 0;
+  let vec3sWriteIndex = 0;
+  let vec4sWriteIndex = 0;
+  let miterBroken = false;
+  let endBottom = Cartesian3_default.unpack(
+    bottomPositionsArray,
+    0,
+    segmentEndBottomScratch
+  );
+  let endTop = Cartesian3_default.unpack(topPositionsArray, 0, segmentEndTopScratch);
+  let endGeometryNormal = Cartesian3_default.unpack(
+    normalsArray,
+    0,
+    segmentEndNormalScratch
+  );
+  if (loop) {
+    const preEndBottom = Cartesian3_default.unpack(
+      bottomPositionsArray,
+      bottomPositionsArray.length - 6,
+      segmentStartBottomScratch
+    );
+    if (breakMiter(endGeometryNormal, preEndBottom, endBottom, endTop)) {
+      endGeometryNormal = Cartesian3_default.negate(
+        endGeometryNormal,
+        endGeometryNormal
+      );
+    }
+  }
+  let lengthSoFar3D = 0;
+  let lengthSoFar2D = 0;
+  let sumHeights = 0;
+  for (i = 0; i < segmentCount; i++) {
+    const startBottom = Cartesian3_default.clone(endBottom, segmentStartBottomScratch);
+    const startTop = Cartesian3_default.clone(endTop, segmentStartTopScratch);
+    let startGeometryNormal = Cartesian3_default.clone(
+      endGeometryNormal,
+      segmentStartNormalScratch
+    );
+    if (miterBroken) {
+      startGeometryNormal = Cartesian3_default.negate(
+        startGeometryNormal,
+        startGeometryNormal
+      );
+    }
+    endBottom = Cartesian3_default.unpack(
+      bottomPositionsArray,
+      index,
+      segmentEndBottomScratch
+    );
+    endTop = Cartesian3_default.unpack(topPositionsArray, index, segmentEndTopScratch);
+    endGeometryNormal = Cartesian3_default.unpack(
+      normalsArray,
+      index,
+      segmentEndNormalScratch
+    );
+    miterBroken = breakMiter(endGeometryNormal, startBottom, endBottom, endTop);
+    startCartographic.latitude = cartographicsArray[cartographicsIndex];
+    startCartographic.longitude = cartographicsArray[cartographicsIndex + 1];
+    endCartographic.latitude = cartographicsArray[cartographicsIndex + 2];
+    endCartographic.longitude = cartographicsArray[cartographicsIndex + 3];
+    let start2D;
+    let end2D;
+    let startGeometryNormal2D;
+    let endGeometryNormal2D;
+    if (compute2dAttributes) {
+      const nudgeResult = nudgeCartographic(startCartographic, endCartographic);
+      start2D = projection.project(startCartographic, segmentStart2DScratch);
+      end2D = projection.project(endCartographic, segmentEnd2DScratch);
+      const direction2D = direction(end2D, start2D, forwardOffset2DScratch);
+      direction2D.y = Math.abs(direction2D.y);
+      startGeometryNormal2D = segmentStartNormal2DScratch;
+      endGeometryNormal2D = segmentEndNormal2DScratch;
+      if (nudgeResult === 0 || Cartesian3_default.dot(direction2D, Cartesian3_default.UNIT_Y) > MITER_BREAK_SMALL) {
+        startGeometryNormal2D = projectNormal(
+          projection,
+          startCartographic,
+          startGeometryNormal,
+          start2D,
+          segmentStartNormal2DScratch
+        );
+        endGeometryNormal2D = projectNormal(
+          projection,
+          endCartographic,
+          endGeometryNormal,
+          end2D,
+          segmentEndNormal2DScratch
+        );
+      } else if (nudgeResult === 1) {
+        endGeometryNormal2D = projectNormal(
+          projection,
+          endCartographic,
+          endGeometryNormal,
+          end2D,
+          segmentEndNormal2DScratch
+        );
+        startGeometryNormal2D.x = 0;
+        startGeometryNormal2D.y = Math_default.sign(
+          startCartographic.longitude - Math.abs(endCartographic.longitude)
+        );
+        startGeometryNormal2D.z = 0;
+      } else {
+        startGeometryNormal2D = projectNormal(
+          projection,
+          startCartographic,
+          startGeometryNormal,
+          start2D,
+          segmentStartNormal2DScratch
+        );
+        endGeometryNormal2D.x = 0;
+        endGeometryNormal2D.y = Math_default.sign(
+          startCartographic.longitude - endCartographic.longitude
+        );
+        endGeometryNormal2D.z = 0;
+      }
+    }
+    const segmentLength3D = Cartesian3_default.distance(startTop, endTop);
+    const encodedStart = EncodedCartesian3_default.fromCartesian(
+      startBottom,
+      encodeScratch
+    );
+    const forwardOffset = Cartesian3_default.subtract(
+      endBottom,
+      startBottom,
+      offsetScratch
+    );
+    const forward = Cartesian3_default.normalize(forwardOffset, rightScratch);
+    let startUp = Cartesian3_default.subtract(startTop, startBottom, startUpScratch);
+    startUp = Cartesian3_default.normalize(startUp, startUp);
+    let rightNormal = Cartesian3_default.cross(forward, startUp, rightScratch);
+    rightNormal = Cartesian3_default.normalize(rightNormal, rightNormal);
+    let startPlaneNormal = Cartesian3_default.cross(
+      startUp,
+      startGeometryNormal,
+      startPlaneNormalScratch
+    );
+    startPlaneNormal = Cartesian3_default.normalize(startPlaneNormal, startPlaneNormal);
+    let endUp = Cartesian3_default.subtract(endTop, endBottom, endUpScratch);
+    endUp = Cartesian3_default.normalize(endUp, endUp);
+    let endPlaneNormal = Cartesian3_default.cross(
+      endGeometryNormal,
+      endUp,
+      endPlaneNormalScratch
+    );
+    endPlaneNormal = Cartesian3_default.normalize(endPlaneNormal, endPlaneNormal);
+    const texcoordNormalization3DX = segmentLength3D / length3D;
+    const texcoordNormalization3DY = lengthSoFar3D / length3D;
+    let segmentLength2D = 0;
+    let encodedStart2D;
+    let forwardOffset2D;
+    let right2D;
+    let texcoordNormalization2DX = 0;
+    let texcoordNormalization2DY = 0;
+    if (compute2dAttributes) {
+      segmentLength2D = Cartesian3_default.distance(start2D, end2D);
+      encodedStart2D = EncodedCartesian3_default.fromCartesian(
+        start2D,
+        encodeScratch2D
+      );
+      forwardOffset2D = Cartesian3_default.subtract(
+        end2D,
+        start2D,
+        forwardOffset2DScratch
+      );
+      right2D = Cartesian3_default.normalize(forwardOffset2D, right2DScratch);
+      const swap = right2D.x;
+      right2D.x = right2D.y;
+      right2D.y = -swap;
+      texcoordNormalization2DX = segmentLength2D / length2D;
+      texcoordNormalization2DY = lengthSoFar2D / length2D;
+    }
+    for (j = 0; j < 8; j++) {
+      const vec4Index = vec4sWriteIndex + j * 4;
+      const vec2Index = vec2sWriteIndex + j * 2;
+      const wIndex = vec4Index + 3;
+      const rightPlaneSide = j < 4 ? 1 : -1;
+      const topBottomSide = j === 2 || j === 3 || j === 6 || j === 7 ? 1 : -1;
+      Cartesian3_default.pack(encodedStart.high, startHiAndForwardOffsetX, vec4Index);
+      startHiAndForwardOffsetX[wIndex] = forwardOffset.x;
+      Cartesian3_default.pack(encodedStart.low, startLoAndForwardOffsetY, vec4Index);
+      startLoAndForwardOffsetY[wIndex] = forwardOffset.y;
+      Cartesian3_default.pack(
+        startPlaneNormal,
+        startNormalAndForwardOffsetZ,
+        vec4Index
+      );
+      startNormalAndForwardOffsetZ[wIndex] = forwardOffset.z;
+      Cartesian3_default.pack(
+        endPlaneNormal,
+        endNormalAndTextureCoordinateNormalizationX,
+        vec4Index
+      );
+      endNormalAndTextureCoordinateNormalizationX[wIndex] = texcoordNormalization3DX * rightPlaneSide;
+      Cartesian3_default.pack(
+        rightNormal,
+        rightNormalAndTextureCoordinateNormalizationY,
+        vec4Index
+      );
+      let texcoordNormalization = texcoordNormalization3DY * topBottomSide;
+      if (texcoordNormalization === 0 && topBottomSide < 0) {
+        texcoordNormalization = 9;
+      }
+      rightNormalAndTextureCoordinateNormalizationY[wIndex] = texcoordNormalization;
+      if (compute2dAttributes) {
+        startHiLo2D[vec4Index] = encodedStart2D.high.x;
+        startHiLo2D[vec4Index + 1] = encodedStart2D.high.y;
+        startHiLo2D[vec4Index + 2] = encodedStart2D.low.x;
+        startHiLo2D[vec4Index + 3] = encodedStart2D.low.y;
+        startEndNormals2D[vec4Index] = -startGeometryNormal2D.y;
+        startEndNormals2D[vec4Index + 1] = startGeometryNormal2D.x;
+        startEndNormals2D[vec4Index + 2] = endGeometryNormal2D.y;
+        startEndNormals2D[vec4Index + 3] = -endGeometryNormal2D.x;
+        offsetAndRight2D[vec4Index] = forwardOffset2D.x;
+        offsetAndRight2D[vec4Index + 1] = forwardOffset2D.y;
+        offsetAndRight2D[vec4Index + 2] = right2D.x;
+        offsetAndRight2D[vec4Index + 3] = right2D.y;
+        texcoordNormalization2D[vec2Index] = texcoordNormalization2DX * rightPlaneSide;
+        texcoordNormalization = texcoordNormalization2DY * topBottomSide;
+        if (texcoordNormalization === 0 && topBottomSide < 0) {
+          texcoordNormalization = 9;
+        }
+        texcoordNormalization2D[vec2Index + 1] = texcoordNormalization;
+      }
+    }
+    const adjustHeightStartBottom = adjustHeightStartBottomScratch;
+    const adjustHeightEndBottom = adjustHeightEndBottomScratch;
+    const adjustHeightStartTop = adjustHeightStartTopScratch;
+    const adjustHeightEndTop = adjustHeightEndTopScratch;
+    const getHeightsRectangle = Rectangle_default.fromCartographicArray(
+      getHeightCartographics,
+      getHeightRectangleScratch
+    );
+    const minMaxHeights = ApproximateTerrainHeights_default.getMinimumMaximumHeights(
+      getHeightsRectangle,
+      ellipsoid
+    );
+    const minHeight = minMaxHeights.minimumTerrainHeight;
+    const maxHeight = minMaxHeights.maximumTerrainHeight;
+    sumHeights += Math.abs(minHeight);
+    sumHeights += Math.abs(maxHeight);
+    adjustHeights(
+      startBottom,
+      startTop,
+      minHeight,
+      maxHeight,
+      adjustHeightStartBottom,
+      adjustHeightStartTop
+    );
+    adjustHeights(
+      endBottom,
+      endTop,
+      minHeight,
+      maxHeight,
+      adjustHeightEndBottom,
+      adjustHeightEndTop
+    );
+    let normalNudge = Cartesian3_default.multiplyByScalar(
+      rightNormal,
+      Math_default.EPSILON5,
+      normalNudgeScratch
+    );
+    Cartesian3_default.add(
+      adjustHeightStartBottom,
+      normalNudge,
+      adjustHeightStartBottom
+    );
+    Cartesian3_default.add(adjustHeightEndBottom, normalNudge, adjustHeightEndBottom);
+    Cartesian3_default.add(adjustHeightStartTop, normalNudge, adjustHeightStartTop);
+    Cartesian3_default.add(adjustHeightEndTop, normalNudge, adjustHeightEndTop);
+    nudgeXZ(adjustHeightStartBottom, adjustHeightEndBottom);
+    nudgeXZ(adjustHeightStartTop, adjustHeightEndTop);
+    Cartesian3_default.pack(adjustHeightStartBottom, positionsArray, vec3sWriteIndex);
+    Cartesian3_default.pack(adjustHeightEndBottom, positionsArray, vec3sWriteIndex + 3);
+    Cartesian3_default.pack(adjustHeightEndTop, positionsArray, vec3sWriteIndex + 6);
+    Cartesian3_default.pack(adjustHeightStartTop, positionsArray, vec3sWriteIndex + 9);
+    normalNudge = Cartesian3_default.multiplyByScalar(
+      rightNormal,
+      -2 * Math_default.EPSILON5,
+      normalNudgeScratch
+    );
+    Cartesian3_default.add(
+      adjustHeightStartBottom,
+      normalNudge,
+      adjustHeightStartBottom
+    );
+    Cartesian3_default.add(adjustHeightEndBottom, normalNudge, adjustHeightEndBottom);
+    Cartesian3_default.add(adjustHeightStartTop, normalNudge, adjustHeightStartTop);
+    Cartesian3_default.add(adjustHeightEndTop, normalNudge, adjustHeightEndTop);
+    nudgeXZ(adjustHeightStartBottom, adjustHeightEndBottom);
+    nudgeXZ(adjustHeightStartTop, adjustHeightEndTop);
+    Cartesian3_default.pack(
+      adjustHeightStartBottom,
+      positionsArray,
+      vec3sWriteIndex + 12
+    );
+    Cartesian3_default.pack(
+      adjustHeightEndBottom,
+      positionsArray,
+      vec3sWriteIndex + 15
+    );
+    Cartesian3_default.pack(adjustHeightEndTop, positionsArray, vec3sWriteIndex + 18);
+    Cartesian3_default.pack(adjustHeightStartTop, positionsArray, vec3sWriteIndex + 21);
+    cartographicsIndex += 2;
+    index += 3;
+    vec2sWriteIndex += 16;
+    vec3sWriteIndex += 24;
+    vec4sWriteIndex += 32;
+    lengthSoFar3D += segmentLength3D;
+    lengthSoFar2D += segmentLength2D;
+  }
+  index = 0;
+  let indexOffset = 0;
+  for (i = 0; i < segmentCount; i++) {
+    for (j = 0; j < REFERENCE_INDICES_LENGTH; j++) {
+      indices[index + j] = REFERENCE_INDICES[j] + indexOffset;
+    }
+    indexOffset += 8;
+    index += REFERENCE_INDICES_LENGTH;
+  }
+  const boundingSpheres = scratchBoundingSpheres;
+  BoundingSphere_default.fromVertices(
+    bottomPositionsArray,
+    Cartesian3_default.ZERO,
+    3,
+    boundingSpheres[0]
+  );
+  BoundingSphere_default.fromVertices(
+    topPositionsArray,
+    Cartesian3_default.ZERO,
+    3,
+    boundingSpheres[1]
+  );
+  const boundingSphere = BoundingSphere_default.fromBoundingSpheres(boundingSpheres);
+  boundingSphere.radius += sumHeights / (segmentCount * 2);
+  const attributes = {
+    position: new GeometryAttribute_default({
+      componentDatatype: ComponentDatatype_default.DOUBLE,
+      componentsPerAttribute: 3,
+      normalize: false,
+      values: positionsArray
+    }),
+    startHiAndForwardOffsetX: getVec4GeometryAttribute(
+      startHiAndForwardOffsetX
+    ),
+    startLoAndForwardOffsetY: getVec4GeometryAttribute(
+      startLoAndForwardOffsetY
+    ),
+    startNormalAndForwardOffsetZ: getVec4GeometryAttribute(
+      startNormalAndForwardOffsetZ
+    ),
+    endNormalAndTextureCoordinateNormalizationX: getVec4GeometryAttribute(
+      endNormalAndTextureCoordinateNormalizationX
+    ),
+    rightNormalAndTextureCoordinateNormalizationY: getVec4GeometryAttribute(
+      rightNormalAndTextureCoordinateNormalizationY
+    )
+  };
+  if (compute2dAttributes) {
+    attributes.startHiLo2D = getVec4GeometryAttribute(startHiLo2D);
+    attributes.offsetAndRight2D = getVec4GeometryAttribute(offsetAndRight2D);
+    attributes.startEndNormals2D = getVec4GeometryAttribute(startEndNormals2D);
+    attributes.texcoordNormalization2D = new GeometryAttribute_default({
+      componentDatatype: ComponentDatatype_default.FLOAT,
+      componentsPerAttribute: 2,
+      normalize: false,
+      values: texcoordNormalization2D
+    });
+  }
+  return new Geometry_default({
+    attributes,
+    indices,
+    boundingSphere
+  });
+}
+function getVec4GeometryAttribute(typedArray) {
+  return new GeometryAttribute_default({
+    componentDatatype: ComponentDatatype_default.FLOAT,
+    componentsPerAttribute: 4,
+    normalize: false,
+    values: typedArray
+  });
+}
+GroundPolylineGeometry._projectNormal = projectNormal;
+var GroundPolylineGeometry_default = GroundPolylineGeometry;
+
+// packages/engine/Source/Workers/createGroundPolylineGeometry.js
+function createGroundPolylineGeometry(groundPolylineGeometry, offset) {
+  return ApproximateTerrainHeights_default.initialize().then(function() {
+    if (defined_default(offset)) {
+      groundPolylineGeometry = GroundPolylineGeometry_default.unpack(
+        groundPolylineGeometry,
+        offset
+      );
+    }
+    return GroundPolylineGeometry_default.createGeometry(groundPolylineGeometry);
+  });
+}
+var createGroundPolylineGeometry_default = createGroundPolylineGeometry;
+export {
+  createGroundPolylineGeometry_default as default
+};

@@ -510,6 +510,8 @@ export function selectFeedItems(data: LiveDataState): FeedLogItem[] {
 }
 
 export function selectCctvRows(data: LiveDataState): CctvCamera[] {
-  return data.cctv.slice(0, 200);
+  return data.cctv
+    .filter((cam) => cam.streamFormat === "YOUTUBE")
+    .slice(0, 200);
 }
 

@@ -23,4 +23,211 @@
  * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
  */
 
-import{a as d}from"./chunk-6GG6EJBW.js";import{a as l}from"./chunk-RHEGXTJ5.js";import{b as O,c as h,d as p}from"./chunk-CWBIOT2C.js";import{d as A}from"./chunk-PPN6SLYU.js";import"./chunk-SOWUYSYI.js";import{a}from"./chunk-I36V6CKP.js";import{a as m}from"./chunk-WG62ICZK.js";import"./chunk-EEN7GMYN.js";import"./chunk-SXYTVHGU.js";import"./chunk-RAWIUDJR.js";import{a as u}from"./chunk-KGKDCW56.js";import{a as b,b as r}from"./chunk-G4IO3CPJ.js";import{e as c}from"./chunk-GBRF7ES3.js";var g=new m;function f(e){e=u(e,u.EMPTY_OBJECT);let t=e.minimum,n=e.maximum;if(r.typeOf.object("min",t),r.typeOf.object("max",n),c(e.offsetAttribute)&&e.offsetAttribute===d.TOP)throw new b("GeometryOffsetAttribute.TOP is not a supported options.offsetAttribute for this geometry.");this._min=m.clone(t),this._max=m.clone(n),this._offsetAttribute=e.offsetAttribute,this._workerName="createBoxOutlineGeometry"}f.fromDimensions=function(e){e=u(e,u.EMPTY_OBJECT);let t=e.dimensions;r.typeOf.object("dimensions",t),r.typeOf.number.greaterThanOrEquals("dimensions.x",t.x,0),r.typeOf.number.greaterThanOrEquals("dimensions.y",t.y,0),r.typeOf.number.greaterThanOrEquals("dimensions.z",t.z,0);let n=m.multiplyByScalar(t,.5,new m);return new f({minimum:m.negate(n,new m),maximum:n,offsetAttribute:e.offsetAttribute})};f.fromAxisAlignedBoundingBox=function(e){return r.typeOf.object("boundindBox",e),new f({minimum:e.minimum,maximum:e.maximum})};f.packedLength=2*m.packedLength+1;f.pack=function(e,t,n){return r.typeOf.object("value",e),r.defined("array",t),n=u(n,0),m.pack(e._min,t,n),m.pack(e._max,t,n+m.packedLength),t[n+m.packedLength*2]=u(e._offsetAttribute,-1),t};var w=new m,x=new m,_={minimum:w,maximum:x,offsetAttribute:void 0};f.unpack=function(e,t,n){r.defined("array",e),t=u(t,0);let s=m.unpack(e,t,w),o=m.unpack(e,t+m.packedLength,x),i=e[t+m.packedLength*2];return c(n)?(n._min=m.clone(s,n._min),n._max=m.clone(o,n._max),n._offsetAttribute=i===-1?void 0:i,n):(_.offsetAttribute=i===-1?void 0:i,new f(_))};f.createGeometry=function(e){let t=e._min,n=e._max;if(m.equals(t,n))return;let s=new l,o=new Uint16Array(12*2),i=new Float64Array(8*3);i[0]=t.x,i[1]=t.y,i[2]=t.z,i[3]=n.x,i[4]=t.y,i[5]=t.z,i[6]=n.x,i[7]=n.y,i[8]=t.z,i[9]=t.x,i[10]=n.y,i[11]=t.z,i[12]=t.x,i[13]=t.y,i[14]=n.z,i[15]=n.x,i[16]=t.y,i[17]=n.z,i[18]=n.x,i[19]=n.y,i[20]=n.z,i[21]=t.x,i[22]=n.y,i[23]=n.z,s.position=new p({componentDatatype:a.DOUBLE,componentsPerAttribute:3,values:i}),o[0]=4,o[1]=5,o[2]=5,o[3]=6,o[4]=6,o[5]=7,o[6]=7,o[7]=4,o[8]=0,o[9]=1,o[10]=1,o[11]=2,o[12]=2,o[13]=3,o[14]=3,o[15]=0,o[16]=0,o[17]=4,o[18]=1,o[19]=5,o[20]=2,o[21]=6,o[22]=3,o[23]=7;let k=m.subtract(n,t,g),E=m.magnitude(k)*.5;if(c(e._offsetAttribute)){let T=i.length,B=e._offsetAttribute===d.NONE?0:1,z=new Uint8Array(T/3).fill(B);s.applyOffset=new p({componentDatatype:a.UNSIGNED_BYTE,componentsPerAttribute:1,values:z})}return new h({attributes:s,indices:o,primitiveType:O.LINES,boundingSphere:new A(m.ZERO,E),offsetAttribute:e._offsetAttribute})};var y=f;function L(e,t){return c(t)&&(e=y.unpack(e,t)),y.createGeometry(e)}var R=L;export{R as default};
+import {
+  GeometryOffsetAttribute_default
+} from "./chunk-GNHZH7HP.js";
+import {
+  GeometryAttributes_default
+} from "./chunk-JYQNWIQQ.js";
+import {
+  GeometryAttribute_default,
+  Geometry_default,
+  PrimitiveType_default
+} from "./chunk-IUROUBPA.js";
+import {
+  BoundingSphere_default
+} from "./chunk-ELI4BUOT.js";
+import "./chunk-OXALEQPI.js";
+import {
+  ComponentDatatype_default
+} from "./chunk-FQPSOOPH.js";
+import {
+  Cartesian3_default
+} from "./chunk-T6LPN7RI.js";
+import "./chunk-R4OIEIPE.js";
+import "./chunk-RHBWXX7C.js";
+import "./chunk-ZIKGV7EL.js";
+import {
+  defaultValue_default
+} from "./chunk-BAVI3ZS2.js";
+import {
+  Check_default,
+  DeveloperError_default
+} from "./chunk-TGY6H6N6.js";
+import {
+  defined_default
+} from "./chunk-N4QEHO3U.js";
+
+// packages/engine/Source/Core/BoxOutlineGeometry.js
+var diffScratch = new Cartesian3_default();
+function BoxOutlineGeometry(options) {
+  options = defaultValue_default(options, defaultValue_default.EMPTY_OBJECT);
+  const min = options.minimum;
+  const max = options.maximum;
+  Check_default.typeOf.object("min", min);
+  Check_default.typeOf.object("max", max);
+  if (defined_default(options.offsetAttribute) && options.offsetAttribute === GeometryOffsetAttribute_default.TOP) {
+    throw new DeveloperError_default(
+      "GeometryOffsetAttribute.TOP is not a supported options.offsetAttribute for this geometry."
+    );
+  }
+  this._min = Cartesian3_default.clone(min);
+  this._max = Cartesian3_default.clone(max);
+  this._offsetAttribute = options.offsetAttribute;
+  this._workerName = "createBoxOutlineGeometry";
+}
+BoxOutlineGeometry.fromDimensions = function(options) {
+  options = defaultValue_default(options, defaultValue_default.EMPTY_OBJECT);
+  const dimensions = options.dimensions;
+  Check_default.typeOf.object("dimensions", dimensions);
+  Check_default.typeOf.number.greaterThanOrEquals("dimensions.x", dimensions.x, 0);
+  Check_default.typeOf.number.greaterThanOrEquals("dimensions.y", dimensions.y, 0);
+  Check_default.typeOf.number.greaterThanOrEquals("dimensions.z", dimensions.z, 0);
+  const corner = Cartesian3_default.multiplyByScalar(dimensions, 0.5, new Cartesian3_default());
+  return new BoxOutlineGeometry({
+    minimum: Cartesian3_default.negate(corner, new Cartesian3_default()),
+    maximum: corner,
+    offsetAttribute: options.offsetAttribute
+  });
+};
+BoxOutlineGeometry.fromAxisAlignedBoundingBox = function(boundingBox) {
+  Check_default.typeOf.object("boundindBox", boundingBox);
+  return new BoxOutlineGeometry({
+    minimum: boundingBox.minimum,
+    maximum: boundingBox.maximum
+  });
+};
+BoxOutlineGeometry.packedLength = 2 * Cartesian3_default.packedLength + 1;
+BoxOutlineGeometry.pack = function(value, array, startingIndex) {
+  Check_default.typeOf.object("value", value);
+  Check_default.defined("array", array);
+  startingIndex = defaultValue_default(startingIndex, 0);
+  Cartesian3_default.pack(value._min, array, startingIndex);
+  Cartesian3_default.pack(value._max, array, startingIndex + Cartesian3_default.packedLength);
+  array[startingIndex + Cartesian3_default.packedLength * 2] = defaultValue_default(
+    value._offsetAttribute,
+    -1
+  );
+  return array;
+};
+var scratchMin = new Cartesian3_default();
+var scratchMax = new Cartesian3_default();
+var scratchOptions = {
+  minimum: scratchMin,
+  maximum: scratchMax,
+  offsetAttribute: void 0
+};
+BoxOutlineGeometry.unpack = function(array, startingIndex, result) {
+  Check_default.defined("array", array);
+  startingIndex = defaultValue_default(startingIndex, 0);
+  const min = Cartesian3_default.unpack(array, startingIndex, scratchMin);
+  const max = Cartesian3_default.unpack(
+    array,
+    startingIndex + Cartesian3_default.packedLength,
+    scratchMax
+  );
+  const offsetAttribute = array[startingIndex + Cartesian3_default.packedLength * 2];
+  if (!defined_default(result)) {
+    scratchOptions.offsetAttribute = offsetAttribute === -1 ? void 0 : offsetAttribute;
+    return new BoxOutlineGeometry(scratchOptions);
+  }
+  result._min = Cartesian3_default.clone(min, result._min);
+  result._max = Cartesian3_default.clone(max, result._max);
+  result._offsetAttribute = offsetAttribute === -1 ? void 0 : offsetAttribute;
+  return result;
+};
+BoxOutlineGeometry.createGeometry = function(boxGeometry) {
+  const min = boxGeometry._min;
+  const max = boxGeometry._max;
+  if (Cartesian3_default.equals(min, max)) {
+    return;
+  }
+  const attributes = new GeometryAttributes_default();
+  const indices = new Uint16Array(12 * 2);
+  const positions = new Float64Array(8 * 3);
+  positions[0] = min.x;
+  positions[1] = min.y;
+  positions[2] = min.z;
+  positions[3] = max.x;
+  positions[4] = min.y;
+  positions[5] = min.z;
+  positions[6] = max.x;
+  positions[7] = max.y;
+  positions[8] = min.z;
+  positions[9] = min.x;
+  positions[10] = max.y;
+  positions[11] = min.z;
+  positions[12] = min.x;
+  positions[13] = min.y;
+  positions[14] = max.z;
+  positions[15] = max.x;
+  positions[16] = min.y;
+  positions[17] = max.z;
+  positions[18] = max.x;
+  positions[19] = max.y;
+  positions[20] = max.z;
+  positions[21] = min.x;
+  positions[22] = max.y;
+  positions[23] = max.z;
+  attributes.position = new GeometryAttribute_default({
+    componentDatatype: ComponentDatatype_default.DOUBLE,
+    componentsPerAttribute: 3,
+    values: positions
+  });
+  indices[0] = 4;
+  indices[1] = 5;
+  indices[2] = 5;
+  indices[3] = 6;
+  indices[4] = 6;
+  indices[5] = 7;
+  indices[6] = 7;
+  indices[7] = 4;
+  indices[8] = 0;
+  indices[9] = 1;
+  indices[10] = 1;
+  indices[11] = 2;
+  indices[12] = 2;
+  indices[13] = 3;
+  indices[14] = 3;
+  indices[15] = 0;
+  indices[16] = 0;
+  indices[17] = 4;
+  indices[18] = 1;
+  indices[19] = 5;
+  indices[20] = 2;
+  indices[21] = 6;
+  indices[22] = 3;
+  indices[23] = 7;
+  const diff = Cartesian3_default.subtract(max, min, diffScratch);
+  const radius = Cartesian3_default.magnitude(diff) * 0.5;
+  if (defined_default(boxGeometry._offsetAttribute)) {
+    const length = positions.length;
+    const offsetValue = boxGeometry._offsetAttribute === GeometryOffsetAttribute_default.NONE ? 0 : 1;
+    const applyOffset = new Uint8Array(length / 3).fill(offsetValue);
+    attributes.applyOffset = new GeometryAttribute_default({
+      componentDatatype: ComponentDatatype_default.UNSIGNED_BYTE,
+      componentsPerAttribute: 1,
+      values: applyOffset
+    });
+  }
+  return new Geometry_default({
+    attributes,
+    indices,
+    primitiveType: PrimitiveType_default.LINES,
+    boundingSphere: new BoundingSphere_default(Cartesian3_default.ZERO, radius),
+    offsetAttribute: boxGeometry._offsetAttribute
+  });
+};
+var BoxOutlineGeometry_default = BoxOutlineGeometry;
+
+// packages/engine/Source/Workers/createBoxOutlineGeometry.js
+function createBoxOutlineGeometry(boxGeometry, offset) {
+  if (defined_default(offset)) {
+    boxGeometry = BoxOutlineGeometry_default.unpack(boxGeometry, offset);
+  }
+  return BoxOutlineGeometry_default.createGeometry(boxGeometry);
+}
+var createBoxOutlineGeometry_default = createBoxOutlineGeometry;
+export {
+  createBoxOutlineGeometry_default as default
+};

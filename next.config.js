@@ -1,10 +1,40 @@
 // next.config.js
+const path = require('path');
+const fs = require('fs');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Transpile the cesium ESM package so Next.js can process it correctly
   transpilePackages: ['cesium'],
 
-  webpack: (config, { webpack }) => {
+  webpack: (config, { webpack, dev, isServer }) => {
+    // Work around Next.js 14.2 server chunk path: production emits chunks to
+    // .next/server/chunks/ but webpack-runtime.js requires "./<id>.js" (same dir).
+    // Patch the runtime to require "./chunks/<id>.js" after emit.
+    if (isServer && !dev && config.output?.path) {
+      const runtimePath = path.join(config.output.path, '..', 'webpack-runtime.js');
+      config.plugins.push({
+        apply: (compiler) => {
+          compiler.hooks.afterEmit.tap('PatchWebpackRuntimeChunkPath', () => {
+            try {
+              if (fs.existsSync(runtimePath)) {
+                let code = fs.readFileSync(runtimePath, 'utf8');
+                const patched = code.replace(
+                  /installChunk\(require\("\.\/"\s*\+\s*__webpack_require__\.u\(chunkId\)\)\)/g,
+                  'installChunk(require("./chunks/" + __webpack_require__.u(chunkId)))'
+                );
+                if (patched !== code) {
+                  fs.writeFileSync(runtimePath, patched);
+                }
+              }
+            } catch (e) {
+              console.warn('[next.config] PatchWebpackRuntimeChunkPath:', e.message);
+            }
+          });
+        },
+      });
+    }
+
     // Work around Cesium 1.120 importing a removed zip.js subpath.
     // zip-no-worker behavior matches zip.js in zip.js v2.x browser builds.
     config.resolve.alias = {

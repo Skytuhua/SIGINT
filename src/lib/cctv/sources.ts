@@ -1,4 +1,4 @@
-import type { CctvCamera, CctvStreamFormat } from "../providers/types";
+import type { CctvCamera, CctvRegion, CctvStreamFormat } from "../providers/types";
 
 const OTC_USA_URL =
   "https://raw.githubusercontent.com/AidanWelch/OpenTrafficCamMap/master/cameras/USA.json";
@@ -65,6 +65,7 @@ function flattenOtcData(data: OtcData): CctvCamera[] {
           streamFormat: fmt,
           direction: cam.direction,
           refreshSeconds: isImage ? 30 : 60,
+          region: "americas",
         });
       }
     }
@@ -79,10 +80,29 @@ async function fetchOtcCameras(): Promise<CctvCamera[]> {
   return flattenOtcData(data);
 }
 
+async function fetchYoutubeCameras(): Promise<CctvCamera[]> {
+  const resp = await fetch("/api/cctv/youtube");
+  if (!resp.ok) return [];
+  const data: CctvCamera[] = await resp.json();
+  return data;
+}
+
+function inferRegionFromCity(city: string, state?: string): CctvRegion {
+  const lower = `${city} ${state ?? ""}`.toLowerCase();
+  if (lower.includes("jerusalem") || lower.includes("tehran") || lower.includes("dubai") || lower.includes("doha") || lower.includes("riyadh")) return "mideast";
+  if (lower.includes("london") || lower.includes("uk") || lower.includes("paris") || lower.includes("berlin") || lower.includes("amsterdam") || lower.includes("madrid") || lower.includes("rome") || lower.includes("kyiv") || lower.includes("kiev") || lower.includes("france") || lower.includes("germany") || lower.includes("netherlands") || lower.includes("spain") || lower.includes("italy")) return "europe";
+  if (lower.includes("tokyo") || lower.includes("seoul") || lower.includes("singapore") || lower.includes("hong kong") || lower.includes("japan") || lower.includes("korea") || lower.includes("china") || lower.includes("india")) return "asia";
+  return "americas";
+}
+
 async function fetchStaticCameras(): Promise<CctvCamera[]> {
   const resp = await fetch("/data/cctv_sources.json");
   if (!resp.ok) return [];
-  return resp.json();
+  const raw: CctvCamera[] = await resp.json();
+  return raw.map((cam) => ({
+    ...cam,
+    region: cam.region ?? inferRegionFromCity(cam.city, cam.state),
+  }));
 }
 
 /**
@@ -90,14 +110,16 @@ async function fetchStaticCameras(): Promise<CctvCamera[]> {
  * Static entries win on ID collision.
  */
 export async function fetchAllCctvCameras(): Promise<CctvCamera[]> {
-  const [staticCams, otcCams] = await Promise.all([
+  const [staticCams, otcCams, youtubeCams] = await Promise.all([
     fetchStaticCameras().catch(() => [] as CctvCamera[]),
     fetchOtcCameras().catch(() => [] as CctvCamera[]),
+    fetchYoutubeCameras().catch(() => [] as CctvCamera[]),
   ]);
 
   const byId = new Map<string, CctvCamera>();
   for (const cam of otcCams) byId.set(cam.id, cam);
   for (const cam of staticCams) byId.set(cam.id, cam);
+  for (const cam of youtubeCams) byId.set(cam.id, cam);
 
   return Array.from(byId.values());
 }

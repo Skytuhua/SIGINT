@@ -342,6 +342,7 @@ export default function InspectorDrawer() {
 
   const cctvCamera = entity?.type === "cctv" ? (entity.data as CctvCamera) : null;
   const openCctvFloating = useWorldViewStore((s) => s.openCctvFloating);
+  const markCctvBroken = useWorldViewStore((s) => s.markCctvBroken);
 
   return (
     <aside
@@ -383,7 +384,12 @@ export default function InspectorDrawer() {
             </div>
             {cctvCamera && (
               <div style={{ padding: "8px 12px" }}>
-                <CctvFeedView camera={cctvCamera} compact />
+                <CctvFeedView
+                  camera={cctvCamera}
+                  compact
+                  onSnapshotError={markCctvBroken}
+                  onStreamError={markCctvBroken}
+                />
                 <button
                   type="button"
                   className="wv-inline-action"

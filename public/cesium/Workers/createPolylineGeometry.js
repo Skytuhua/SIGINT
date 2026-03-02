@@ -23,4 +23,472 @@
  * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
  */
 
-import{a as m}from"./chunk-LL4PRXXO.js";import{a as N}from"./chunk-3FGVTQZT.js";import{a as U}from"./chunk-T52RL3ZJ.js";import"./chunk-O7LU3SZT.js";import{a as k}from"./chunk-TXLODGLR.js";import{a as le}from"./chunk-M6TFP6VU.js";import"./chunk-Q6IZOLLM.js";import"./chunk-WZ52TQTL.js";import"./chunk-5KPQNVA2.js";import{a as se}from"./chunk-DBOVA5XH.js";import{a as ce}from"./chunk-RHEGXTJ5.js";import{a as ne,b as re,c as ie,d as O}from"./chunk-CWBIOT2C.js";import{d as oe}from"./chunk-PPN6SLYU.js";import"./chunk-SOWUYSYI.js";import{a as x}from"./chunk-I36V6CKP.js";import{a as p,d as u}from"./chunk-WG62ICZK.js";import{a as J}from"./chunk-EEN7GMYN.js";import"./chunk-SXYTVHGU.js";import"./chunk-RAWIUDJR.js";import{a as A}from"./chunk-KGKDCW56.js";import{a as V}from"./chunk-G4IO3CPJ.js";import{e as h}from"./chunk-GBRF7ES3.js";var me=[];function Ae(e,o,t,n,c){let s=me;s.length=c;let l,E=t.red,a=t.green,r=t.blue,w=t.alpha,b=n.red,i=n.green,f=n.blue,L=n.alpha;if(m.equals(t,n)){for(l=0;l<c;l++)s[l]=m.clone(t);return s}let M=(b-E)/c,z=(i-a)/c,H=(f-r)/c,B=(L-w)/c;for(l=0;l<c;l++)s[l]=new m(E+l*M,a+l*z,r+l*H,w+l*B);return s}function G(e){e=A(e,A.EMPTY_OBJECT);let o=e.positions,t=e.colors,n=A(e.width,1),c=A(e.colorsPerVertex,!1);if(!h(o)||o.length<2)throw new V("At least two positions are required.");if(typeof n!="number")throw new V("width must be a number");if(h(t)&&(c&&t.length<o.length||!c&&t.length<o.length-1))throw new V("colors has an invalid length.");this._positions=o,this._colors=t,this._width=n,this._colorsPerVertex=c,this._vertexFormat=k.clone(A(e.vertexFormat,k.DEFAULT)),this._arcType=A(e.arcType,N.GEODESIC),this._granularity=A(e.granularity,J.RADIANS_PER_DEGREE),this._ellipsoid=u.clone(A(e.ellipsoid,u.default)),this._workerName="createPolylineGeometry";let s=1+o.length*p.packedLength;s+=h(t)?1+t.length*m.packedLength:1,this.packedLength=s+u.packedLength+k.packedLength+4}G.pack=function(e,o,t){if(!h(e))throw new V("value is required");if(!h(o))throw new V("array is required");t=A(t,0);let n,c=e._positions,s=c.length;for(o[t++]=s,n=0;n<s;++n,t+=p.packedLength)p.pack(c[n],o,t);let l=e._colors;for(s=h(l)?l.length:0,o[t++]=s,n=0;n<s;++n,t+=m.packedLength)m.pack(l[n],o,t);return u.pack(e._ellipsoid,o,t),t+=u.packedLength,k.pack(e._vertexFormat,o,t),t+=k.packedLength,o[t++]=e._width,o[t++]=e._colorsPerVertex?1:0,o[t++]=e._arcType,o[t]=e._granularity,o};var de=u.clone(u.UNIT_SPHERE),ue=new k,S={positions:void 0,colors:void 0,ellipsoid:de,vertexFormat:ue,width:void 0,colorsPerVertex:void 0,arcType:void 0,granularity:void 0};G.unpack=function(e,o,t){if(!h(e))throw new V("array is required");o=A(o,0);let n,c=e[o++],s=new Array(c);for(n=0;n<c;++n,o+=p.packedLength)s[n]=p.unpack(e,o);c=e[o++];let l=c>0?new Array(c):void 0;for(n=0;n<c;++n,o+=m.packedLength)l[n]=m.unpack(e,o);let E=u.unpack(e,o,de);o+=u.packedLength;let a=k.unpack(e,o,ue);o+=k.packedLength;let r=e[o++],w=e[o++]===1,b=e[o++],i=e[o];return h(t)?(t._positions=s,t._colors=l,t._ellipsoid=u.clone(E,t._ellipsoid),t._vertexFormat=k.clone(a,t._vertexFormat),t._width=r,t._colorsPerVertex=w,t._arcType=b,t._granularity=i,t):(S.positions=s,S.colors=l,S.width=r,S.colorsPerVertex=w,S.arcType=b,S.granularity=i,new G(S))};var pe=new p,ae=new p,fe=new p,he=new p;G.createGeometry=function(e){let o=e._width,t=e._vertexFormat,n=e._colors,c=e._colorsPerVertex,s=e._arcType,l=e._granularity,E=e._ellipsoid,a,r,w,b=[],i=le(e._positions,p.equalsEpsilon,!1,b);if(h(n)&&b.length>0){let d=0,P=b[0];n=n.filter(function(q,T){let g=!1;return c?g=T===P||T===0&&P===1:g=T+1===P,g?(d++,P=b[d],!1):!0})}let f=i.length;if(f<2||o<=0)return;if(s===N.GEODESIC||s===N.RHUMB){let d,P;s===N.GEODESIC?(d=J.chordLength(l,E.maximumRadius),P=U.numberOfPoints):(d=l,P=U.numberOfPointsRhumbLine);let q=U.extractHeights(i,E);if(h(n)){let T=1;for(a=0;a<f-1;++a)T+=P(i[a],i[a+1],d);let g=new Array(T),D=0;for(a=0;a<f-1;++a){let Z=i[a],$=i[a+1],I=n[a],ee=P(Z,$,d);if(c&&a<T){let _e=n[a+1],te=Ae(Z,$,I,_e,ee),Pe=te.length;for(r=0;r<Pe;++r)g[D++]=te[r]}else for(r=0;r<ee;++r)g[D++]=m.clone(I)}g[D]=m.clone(n[n.length-1]),n=g,me.length=0}s===N.GEODESIC?i=U.generateCartesianArc({positions:i,minDistance:d,ellipsoid:E,height:q}):i=U.generateCartesianRhumbArc({positions:i,granularity:d,ellipsoid:E,height:q})}f=i.length;let L=f*4-4,M=new Float64Array(L*3),z=new Float64Array(L*3),H=new Float64Array(L*3),B=new Float32Array(L*2),K=t.st?new Float32Array(L*2):void 0,y=h(n)?new Uint8Array(L*4):void 0,W=0,j=0,X=0,Y=0,_;for(r=0;r<f;++r){r===0?(_=pe,p.subtract(i[0],i[1],_),p.add(i[0],_,_)):_=i[r-1],p.clone(_,fe),p.clone(i[r],ae),r===f-1?(_=pe,p.subtract(i[f-1],i[f-2],_),p.add(i[f-1],_,_)):_=i[r+1],p.clone(_,he);let d,P;h(y)&&(r!==0&&!c?d=n[r-1]:d=n[r],r!==f-1&&(P=n[r]));let q=r===0?2:0,T=r===f-1?2:4;for(w=q;w<T;++w){p.pack(ae,M,W),p.pack(fe,z,W),p.pack(he,H,W),W+=3;let g=w-2<0?-1:1;if(B[j++]=2*(w%2)-1,B[j++]=g*o,t.st&&(K[X++]=r/(f-1),K[X++]=Math.max(B[j-2],0)),h(y)){let D=w<2?d:P;y[Y++]=m.floatToByte(D.red),y[Y++]=m.floatToByte(D.green),y[Y++]=m.floatToByte(D.blue),y[Y++]=m.floatToByte(D.alpha)}}}let v=new ce;v.position=new O({componentDatatype:x.DOUBLE,componentsPerAttribute:3,values:M}),v.prevPosition=new O({componentDatatype:x.DOUBLE,componentsPerAttribute:3,values:z}),v.nextPosition=new O({componentDatatype:x.DOUBLE,componentsPerAttribute:3,values:H}),v.expandAndWidth=new O({componentDatatype:x.FLOAT,componentsPerAttribute:2,values:B}),t.st&&(v.st=new O({componentDatatype:x.FLOAT,componentsPerAttribute:2,values:K})),h(y)&&(v.color=new O({componentDatatype:x.UNSIGNED_BYTE,componentsPerAttribute:4,values:y,normalize:!0}));let C=se.createTypedArray(L,f*6-6),F=0,R=0,we=f-1;for(r=0;r<we;++r)C[R++]=F,C[R++]=F+2,C[R++]=F+1,C[R++]=F+1,C[R++]=F+2,C[R++]=F+3,F+=4;return new ie({attributes:v,indices:C,primitiveType:re.TRIANGLES,boundingSphere:oe.fromPoints(i),geometryType:ne.POLYLINES})};var Q=G;function ge(e,o){return h(o)&&(e=Q.unpack(e,o)),e._ellipsoid=u.clone(e._ellipsoid),Q.createGeometry(e)}var We=ge;export{We as default};
+import {
+  Color_default
+} from "./chunk-OJF4RTJG.js";
+import {
+  ArcType_default
+} from "./chunk-4VFBBNQ3.js";
+import {
+  PolylinePipeline_default
+} from "./chunk-OE4MCOC7.js";
+import "./chunk-6D66DPRV.js";
+import {
+  VertexFormat_default
+} from "./chunk-LSSWVB2X.js";
+import {
+  arrayRemoveDuplicates_default
+} from "./chunk-NVOABL76.js";
+import "./chunk-BY3E4ONI.js";
+import "./chunk-TF776XCO.js";
+import "./chunk-A5CODJ4M.js";
+import {
+  IndexDatatype_default
+} from "./chunk-EB7PNZTK.js";
+import {
+  GeometryAttributes_default
+} from "./chunk-JYQNWIQQ.js";
+import {
+  GeometryAttribute_default,
+  GeometryType_default,
+  Geometry_default,
+  PrimitiveType_default
+} from "./chunk-IUROUBPA.js";
+import {
+  BoundingSphere_default
+} from "./chunk-ELI4BUOT.js";
+import "./chunk-OXALEQPI.js";
+import {
+  ComponentDatatype_default
+} from "./chunk-FQPSOOPH.js";
+import {
+  Cartesian3_default,
+  Ellipsoid_default
+} from "./chunk-T6LPN7RI.js";
+import {
+  Math_default
+} from "./chunk-R4OIEIPE.js";
+import "./chunk-RHBWXX7C.js";
+import "./chunk-ZIKGV7EL.js";
+import {
+  defaultValue_default
+} from "./chunk-BAVI3ZS2.js";
+import {
+  DeveloperError_default
+} from "./chunk-TGY6H6N6.js";
+import {
+  defined_default
+} from "./chunk-N4QEHO3U.js";
+
+// packages/engine/Source/Core/PolylineGeometry.js
+var scratchInterpolateColorsArray = [];
+function interpolateColors(p0, p1, color0, color1, numPoints) {
+  const colors = scratchInterpolateColorsArray;
+  colors.length = numPoints;
+  let i;
+  const r0 = color0.red;
+  const g0 = color0.green;
+  const b0 = color0.blue;
+  const a0 = color0.alpha;
+  const r1 = color1.red;
+  const g1 = color1.green;
+  const b1 = color1.blue;
+  const a1 = color1.alpha;
+  if (Color_default.equals(color0, color1)) {
+    for (i = 0; i < numPoints; i++) {
+      colors[i] = Color_default.clone(color0);
+    }
+    return colors;
+  }
+  const redPerVertex = (r1 - r0) / numPoints;
+  const greenPerVertex = (g1 - g0) / numPoints;
+  const bluePerVertex = (b1 - b0) / numPoints;
+  const alphaPerVertex = (a1 - a0) / numPoints;
+  for (i = 0; i < numPoints; i++) {
+    colors[i] = new Color_default(
+      r0 + i * redPerVertex,
+      g0 + i * greenPerVertex,
+      b0 + i * bluePerVertex,
+      a0 + i * alphaPerVertex
+    );
+  }
+  return colors;
+}
+function PolylineGeometry(options) {
+  options = defaultValue_default(options, defaultValue_default.EMPTY_OBJECT);
+  const positions = options.positions;
+  const colors = options.colors;
+  const width = defaultValue_default(options.width, 1);
+  const colorsPerVertex = defaultValue_default(options.colorsPerVertex, false);
+  if (!defined_default(positions) || positions.length < 2) {
+    throw new DeveloperError_default("At least two positions are required.");
+  }
+  if (typeof width !== "number") {
+    throw new DeveloperError_default("width must be a number");
+  }
+  if (defined_default(colors) && (colorsPerVertex && colors.length < positions.length || !colorsPerVertex && colors.length < positions.length - 1)) {
+    throw new DeveloperError_default("colors has an invalid length.");
+  }
+  this._positions = positions;
+  this._colors = colors;
+  this._width = width;
+  this._colorsPerVertex = colorsPerVertex;
+  this._vertexFormat = VertexFormat_default.clone(
+    defaultValue_default(options.vertexFormat, VertexFormat_default.DEFAULT)
+  );
+  this._arcType = defaultValue_default(options.arcType, ArcType_default.GEODESIC);
+  this._granularity = defaultValue_default(
+    options.granularity,
+    Math_default.RADIANS_PER_DEGREE
+  );
+  this._ellipsoid = Ellipsoid_default.clone(
+    defaultValue_default(options.ellipsoid, Ellipsoid_default.default)
+  );
+  this._workerName = "createPolylineGeometry";
+  let numComponents = 1 + positions.length * Cartesian3_default.packedLength;
+  numComponents += defined_default(colors) ? 1 + colors.length * Color_default.packedLength : 1;
+  this.packedLength = numComponents + Ellipsoid_default.packedLength + VertexFormat_default.packedLength + 4;
+}
+PolylineGeometry.pack = function(value, array, startingIndex) {
+  if (!defined_default(value)) {
+    throw new DeveloperError_default("value is required");
+  }
+  if (!defined_default(array)) {
+    throw new DeveloperError_default("array is required");
+  }
+  startingIndex = defaultValue_default(startingIndex, 0);
+  let i;
+  const positions = value._positions;
+  let length = positions.length;
+  array[startingIndex++] = length;
+  for (i = 0; i < length; ++i, startingIndex += Cartesian3_default.packedLength) {
+    Cartesian3_default.pack(positions[i], array, startingIndex);
+  }
+  const colors = value._colors;
+  length = defined_default(colors) ? colors.length : 0;
+  array[startingIndex++] = length;
+  for (i = 0; i < length; ++i, startingIndex += Color_default.packedLength) {
+    Color_default.pack(colors[i], array, startingIndex);
+  }
+  Ellipsoid_default.pack(value._ellipsoid, array, startingIndex);
+  startingIndex += Ellipsoid_default.packedLength;
+  VertexFormat_default.pack(value._vertexFormat, array, startingIndex);
+  startingIndex += VertexFormat_default.packedLength;
+  array[startingIndex++] = value._width;
+  array[startingIndex++] = value._colorsPerVertex ? 1 : 0;
+  array[startingIndex++] = value._arcType;
+  array[startingIndex] = value._granularity;
+  return array;
+};
+var scratchEllipsoid = Ellipsoid_default.clone(Ellipsoid_default.UNIT_SPHERE);
+var scratchVertexFormat = new VertexFormat_default();
+var scratchOptions = {
+  positions: void 0,
+  colors: void 0,
+  ellipsoid: scratchEllipsoid,
+  vertexFormat: scratchVertexFormat,
+  width: void 0,
+  colorsPerVertex: void 0,
+  arcType: void 0,
+  granularity: void 0
+};
+PolylineGeometry.unpack = function(array, startingIndex, result) {
+  if (!defined_default(array)) {
+    throw new DeveloperError_default("array is required");
+  }
+  startingIndex = defaultValue_default(startingIndex, 0);
+  let i;
+  let length = array[startingIndex++];
+  const positions = new Array(length);
+  for (i = 0; i < length; ++i, startingIndex += Cartesian3_default.packedLength) {
+    positions[i] = Cartesian3_default.unpack(array, startingIndex);
+  }
+  length = array[startingIndex++];
+  const colors = length > 0 ? new Array(length) : void 0;
+  for (i = 0; i < length; ++i, startingIndex += Color_default.packedLength) {
+    colors[i] = Color_default.unpack(array, startingIndex);
+  }
+  const ellipsoid = Ellipsoid_default.unpack(array, startingIndex, scratchEllipsoid);
+  startingIndex += Ellipsoid_default.packedLength;
+  const vertexFormat = VertexFormat_default.unpack(
+    array,
+    startingIndex,
+    scratchVertexFormat
+  );
+  startingIndex += VertexFormat_default.packedLength;
+  const width = array[startingIndex++];
+  const colorsPerVertex = array[startingIndex++] === 1;
+  const arcType = array[startingIndex++];
+  const granularity = array[startingIndex];
+  if (!defined_default(result)) {
+    scratchOptions.positions = positions;
+    scratchOptions.colors = colors;
+    scratchOptions.width = width;
+    scratchOptions.colorsPerVertex = colorsPerVertex;
+    scratchOptions.arcType = arcType;
+    scratchOptions.granularity = granularity;
+    return new PolylineGeometry(scratchOptions);
+  }
+  result._positions = positions;
+  result._colors = colors;
+  result._ellipsoid = Ellipsoid_default.clone(ellipsoid, result._ellipsoid);
+  result._vertexFormat = VertexFormat_default.clone(vertexFormat, result._vertexFormat);
+  result._width = width;
+  result._colorsPerVertex = colorsPerVertex;
+  result._arcType = arcType;
+  result._granularity = granularity;
+  return result;
+};
+var scratchCartesian3 = new Cartesian3_default();
+var scratchPosition = new Cartesian3_default();
+var scratchPrevPosition = new Cartesian3_default();
+var scratchNextPosition = new Cartesian3_default();
+PolylineGeometry.createGeometry = function(polylineGeometry) {
+  const width = polylineGeometry._width;
+  const vertexFormat = polylineGeometry._vertexFormat;
+  let colors = polylineGeometry._colors;
+  const colorsPerVertex = polylineGeometry._colorsPerVertex;
+  const arcType = polylineGeometry._arcType;
+  const granularity = polylineGeometry._granularity;
+  const ellipsoid = polylineGeometry._ellipsoid;
+  let i;
+  let j;
+  let k;
+  const removedIndices = [];
+  let positions = arrayRemoveDuplicates_default(
+    polylineGeometry._positions,
+    Cartesian3_default.equalsEpsilon,
+    false,
+    removedIndices
+  );
+  if (defined_default(colors) && removedIndices.length > 0) {
+    let removedArrayIndex = 0;
+    let nextRemovedIndex = removedIndices[0];
+    colors = colors.filter(function(color, index2) {
+      let remove = false;
+      if (colorsPerVertex) {
+        remove = index2 === nextRemovedIndex || index2 === 0 && nextRemovedIndex === 1;
+      } else {
+        remove = index2 + 1 === nextRemovedIndex;
+      }
+      if (remove) {
+        removedArrayIndex++;
+        nextRemovedIndex = removedIndices[removedArrayIndex];
+        return false;
+      }
+      return true;
+    });
+  }
+  let positionsLength = positions.length;
+  if (positionsLength < 2 || width <= 0) {
+    return void 0;
+  }
+  if (arcType === ArcType_default.GEODESIC || arcType === ArcType_default.RHUMB) {
+    let subdivisionSize;
+    let numberOfPointsFunction;
+    if (arcType === ArcType_default.GEODESIC) {
+      subdivisionSize = Math_default.chordLength(
+        granularity,
+        ellipsoid.maximumRadius
+      );
+      numberOfPointsFunction = PolylinePipeline_default.numberOfPoints;
+    } else {
+      subdivisionSize = granularity;
+      numberOfPointsFunction = PolylinePipeline_default.numberOfPointsRhumbLine;
+    }
+    const heights = PolylinePipeline_default.extractHeights(positions, ellipsoid);
+    if (defined_default(colors)) {
+      let colorLength = 1;
+      for (i = 0; i < positionsLength - 1; ++i) {
+        colorLength += numberOfPointsFunction(
+          positions[i],
+          positions[i + 1],
+          subdivisionSize
+        );
+      }
+      const newColors = new Array(colorLength);
+      let newColorIndex = 0;
+      for (i = 0; i < positionsLength - 1; ++i) {
+        const p0 = positions[i];
+        const p1 = positions[i + 1];
+        const c0 = colors[i];
+        const numColors = numberOfPointsFunction(p0, p1, subdivisionSize);
+        if (colorsPerVertex && i < colorLength) {
+          const c1 = colors[i + 1];
+          const interpolatedColors = interpolateColors(
+            p0,
+            p1,
+            c0,
+            c1,
+            numColors
+          );
+          const interpolatedColorsLength = interpolatedColors.length;
+          for (j = 0; j < interpolatedColorsLength; ++j) {
+            newColors[newColorIndex++] = interpolatedColors[j];
+          }
+        } else {
+          for (j = 0; j < numColors; ++j) {
+            newColors[newColorIndex++] = Color_default.clone(c0);
+          }
+        }
+      }
+      newColors[newColorIndex] = Color_default.clone(colors[colors.length - 1]);
+      colors = newColors;
+      scratchInterpolateColorsArray.length = 0;
+    }
+    if (arcType === ArcType_default.GEODESIC) {
+      positions = PolylinePipeline_default.generateCartesianArc({
+        positions,
+        minDistance: subdivisionSize,
+        ellipsoid,
+        height: heights
+      });
+    } else {
+      positions = PolylinePipeline_default.generateCartesianRhumbArc({
+        positions,
+        granularity: subdivisionSize,
+        ellipsoid,
+        height: heights
+      });
+    }
+  }
+  positionsLength = positions.length;
+  const size = positionsLength * 4 - 4;
+  const finalPositions = new Float64Array(size * 3);
+  const prevPositions = new Float64Array(size * 3);
+  const nextPositions = new Float64Array(size * 3);
+  const expandAndWidth = new Float32Array(size * 2);
+  const st = vertexFormat.st ? new Float32Array(size * 2) : void 0;
+  const finalColors = defined_default(colors) ? new Uint8Array(size * 4) : void 0;
+  let positionIndex = 0;
+  let expandAndWidthIndex = 0;
+  let stIndex = 0;
+  let colorIndex = 0;
+  let position;
+  for (j = 0; j < positionsLength; ++j) {
+    if (j === 0) {
+      position = scratchCartesian3;
+      Cartesian3_default.subtract(positions[0], positions[1], position);
+      Cartesian3_default.add(positions[0], position, position);
+    } else {
+      position = positions[j - 1];
+    }
+    Cartesian3_default.clone(position, scratchPrevPosition);
+    Cartesian3_default.clone(positions[j], scratchPosition);
+    if (j === positionsLength - 1) {
+      position = scratchCartesian3;
+      Cartesian3_default.subtract(
+        positions[positionsLength - 1],
+        positions[positionsLength - 2],
+        position
+      );
+      Cartesian3_default.add(positions[positionsLength - 1], position, position);
+    } else {
+      position = positions[j + 1];
+    }
+    Cartesian3_default.clone(position, scratchNextPosition);
+    let color0, color1;
+    if (defined_default(finalColors)) {
+      if (j !== 0 && !colorsPerVertex) {
+        color0 = colors[j - 1];
+      } else {
+        color0 = colors[j];
+      }
+      if (j !== positionsLength - 1) {
+        color1 = colors[j];
+      }
+    }
+    const startK = j === 0 ? 2 : 0;
+    const endK = j === positionsLength - 1 ? 2 : 4;
+    for (k = startK; k < endK; ++k) {
+      Cartesian3_default.pack(scratchPosition, finalPositions, positionIndex);
+      Cartesian3_default.pack(scratchPrevPosition, prevPositions, positionIndex);
+      Cartesian3_default.pack(scratchNextPosition, nextPositions, positionIndex);
+      positionIndex += 3;
+      const direction = k - 2 < 0 ? -1 : 1;
+      expandAndWidth[expandAndWidthIndex++] = 2 * (k % 2) - 1;
+      expandAndWidth[expandAndWidthIndex++] = direction * width;
+      if (vertexFormat.st) {
+        st[stIndex++] = j / (positionsLength - 1);
+        st[stIndex++] = Math.max(expandAndWidth[expandAndWidthIndex - 2], 0);
+      }
+      if (defined_default(finalColors)) {
+        const color = k < 2 ? color0 : color1;
+        finalColors[colorIndex++] = Color_default.floatToByte(color.red);
+        finalColors[colorIndex++] = Color_default.floatToByte(color.green);
+        finalColors[colorIndex++] = Color_default.floatToByte(color.blue);
+        finalColors[colorIndex++] = Color_default.floatToByte(color.alpha);
+      }
+    }
+  }
+  const attributes = new GeometryAttributes_default();
+  attributes.position = new GeometryAttribute_default({
+    componentDatatype: ComponentDatatype_default.DOUBLE,
+    componentsPerAttribute: 3,
+    values: finalPositions
+  });
+  attributes.prevPosition = new GeometryAttribute_default({
+    componentDatatype: ComponentDatatype_default.DOUBLE,
+    componentsPerAttribute: 3,
+    values: prevPositions
+  });
+  attributes.nextPosition = new GeometryAttribute_default({
+    componentDatatype: ComponentDatatype_default.DOUBLE,
+    componentsPerAttribute: 3,
+    values: nextPositions
+  });
+  attributes.expandAndWidth = new GeometryAttribute_default({
+    componentDatatype: ComponentDatatype_default.FLOAT,
+    componentsPerAttribute: 2,
+    values: expandAndWidth
+  });
+  if (vertexFormat.st) {
+    attributes.st = new GeometryAttribute_default({
+      componentDatatype: ComponentDatatype_default.FLOAT,
+      componentsPerAttribute: 2,
+      values: st
+    });
+  }
+  if (defined_default(finalColors)) {
+    attributes.color = new GeometryAttribute_default({
+      componentDatatype: ComponentDatatype_default.UNSIGNED_BYTE,
+      componentsPerAttribute: 4,
+      values: finalColors,
+      normalize: true
+    });
+  }
+  const indices = IndexDatatype_default.createTypedArray(size, positionsLength * 6 - 6);
+  let index = 0;
+  let indicesIndex = 0;
+  const length = positionsLength - 1;
+  for (j = 0; j < length; ++j) {
+    indices[indicesIndex++] = index;
+    indices[indicesIndex++] = index + 2;
+    indices[indicesIndex++] = index + 1;
+    indices[indicesIndex++] = index + 1;
+    indices[indicesIndex++] = index + 2;
+    indices[indicesIndex++] = index + 3;
+    index += 4;
+  }
+  return new Geometry_default({
+    attributes,
+    indices,
+    primitiveType: PrimitiveType_default.TRIANGLES,
+    boundingSphere: BoundingSphere_default.fromPoints(positions),
+    geometryType: GeometryType_default.POLYLINES
+  });
+};
+var PolylineGeometry_default = PolylineGeometry;
+
+// packages/engine/Source/Workers/createPolylineGeometry.js
+function createPolylineGeometry(polylineGeometry, offset) {
+  if (defined_default(offset)) {
+    polylineGeometry = PolylineGeometry_default.unpack(polylineGeometry, offset);
+  }
+  polylineGeometry._ellipsoid = Ellipsoid_default.clone(polylineGeometry._ellipsoid);
+  return PolylineGeometry_default.createGeometry(polylineGeometry);
+}
+var createPolylineGeometry_default = createPolylineGeometry;
+export {
+  createPolylineGeometry_default as default
+};

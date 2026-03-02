@@ -1,4 +1,14 @@
-import type { EntityData, Flight, Earthquake, CctvCamera, Scene, PropagatedSat, Satellite } from "../providers/types";
+import type {
+  EntityData,
+  Flight,
+  Earthquake,
+  CctvCamera,
+  Scene,
+  PropagatedSat,
+  Satellite,
+  DisasterAlert,
+  SpaceWeatherAlert,
+} from "../providers/types";
 import type { ColumnFiltersState, ColumnSizingState, SortingState } from "@tanstack/react-table";
 
 export type DashboardView = "ops" | "news";
@@ -7,6 +17,14 @@ export type DashboardDensity = "comfortable" | "dense" | "ultra";
 export type InspectorTab = "summary" | "history" | "related" | "notes";
 export type FeedLevel = "info" | "warn" | "error";
 export type FeedHealth = "idle" | "loading" | "ok" | "stale" | "error";
+export type SourceHealthStatus = "live" | "cached" | "degraded" | "unavailable";
+
+export interface SourceHealthState {
+  status: SourceHealthStatus;
+  lastSuccessAt: number | null;
+  errorCode: string | null;
+  nextRetryAt: number | null;
+}
 
 export interface FeedLogItem {
   id: string;
@@ -60,12 +78,15 @@ export interface LiveDataState {
   flights: Flight[];
   military: Flight[];
   earthquakes: Earthquake[];
+  disasters: DisasterAlert[];
+  spaceWeather: SpaceWeatherAlert[];
   satellites: PropagatedSat[];
   satelliteCatalog: Satellite[];
   cctv: CctvCamera[];
   scenes: Scene[];
   lastUpdated: Record<string, number | null>;
   health: Record<string, FeedHealth>;
+  sourceHealth: Record<string, SourceHealthState>;
   trendHistory: TrendHistory;
   feedLog: FeedLogItem[];
   refreshTick: number;
@@ -90,29 +111,48 @@ export type DashboardLayouts = {
   xs: DashboardLayoutItem[];
 };
 
-export const DEFAULT_PANEL_IDS = ["kpi", "flight-table", "quake-table", "sat-list", "feed"] as const;
+export const DEFAULT_PANEL_IDS = [
+  "kpi",
+  "flight-table",
+  "quake-table",
+  "sat-list",
+  "feed",
+  "cctv-live",
+  "space-weather",
+] as const;
 
 export const DEFAULT_PANEL_LAYOUTS: DashboardLayouts = {
   lg: [
     { i: "kpi", x: 0, y: 0, w: 360, h: 24, minW: 180, minH: 24, maxH: 36 },
-    { i: "flight-table", x: 0, y: 24, w: 180, h: 108, minW: 90, minH: 72 },
-    { i: "quake-table", x: 180, y: 24, w: 180, h: 108, minW: 90, minH: 72 },
-    { i: "sat-list", x: 0, y: 132, w: 210, h: 96, minW: 90, minH: 60 },
-    { i: "feed", x: 210, y: 132, w: 150, h: 96, minW: 90, minH: 48 },
+    { i: "cctv-live", x: 180, y: 24, w: 180, h: 120, minW: 180, minH: 96 },
+    // Fill the left-hand side of the webcams row with the Ops feed.
+    { i: "feed", x: 0, y: 24, w: 180, h: 120, minW: 90, minH: 96 },
+    // Next row starts immediately below webcams / feed row (24 + 120 = 144).
+    { i: "flight-table", x: 0, y: 144, w: 180, h: 108, minW: 90, minH: 72 },
+    { i: "quake-table", x: 180, y: 144, w: 180, h: 108, minW: 90, minH: 72 },
+    // Subsequent rows are adjusted so panels do not overlap.
+    { i: "sat-list", x: 0, y: 252, w: 210, h: 96, minW: 90, minH: 60 },
+    { i: "space-weather", x: 0, y: 348, w: 180, h: 96, minW: 120, minH: 72 },
   ],
   md: [
     { i: "kpi", x: 0, y: 0, w: 300, h: 24, maxH: 36 },
-    { i: "flight-table", x: 0, y: 24, w: 150, h: 108, minH: 72 },
-    { i: "quake-table", x: 150, y: 24, w: 150, h: 108, minH: 72 },
-    { i: "sat-list", x: 0, y: 132, w: 180, h: 96, minH: 60 },
-    { i: "feed", x: 180, y: 132, w: 120, h: 96, minH: 48 },
+    // Medium layout: feed on the left, webcams on the right.
+    { i: "cctv-live", x: 150, y: 24, w: 150, h: 120, minW: 150, minH: 96 },
+    { i: "feed", x: 0, y: 24, w: 150, h: 120, minH: 96 },
+    { i: "flight-table", x: 0, y: 144, w: 150, h: 108, minH: 72 },
+    { i: "quake-table", x: 150, y: 144, w: 150, h: 108, minH: 72 },
+    { i: "sat-list", x: 0, y: 252, w: 180, h: 96, minH: 60 },
+    { i: "space-weather", x: 0, y: 348, w: 150, h: 96, minW: 120, minH: 72 },
   ],
   sm: [
     { i: "kpi", x: 0, y: 0, w: 180, h: 24, maxH: 36 },
-    { i: "flight-table", x: 0, y: 24, w: 180, h: 96, minH: 72 },
-    { i: "quake-table", x: 0, y: 120, w: 180, h: 96, minH: 72 },
-    { i: "sat-list", x: 0, y: 216, w: 180, h: 96, minH: 60 },
-    { i: "feed", x: 0, y: 312, w: 180, h: 72, minH: 48 },
+    // Small layout: keep webcams full-width for readability.
+    { i: "cctv-live", x: 0, y: 24, w: 180, h: 120, minW: 120, minH: 96 },
+    { i: "flight-table", x: 0, y: 144, w: 180, h: 96, minH: 72 },
+    { i: "quake-table", x: 0, y: 240, w: 180, h: 96, minH: 72 },
+    { i: "sat-list", x: 0, y: 336, w: 180, h: 96, minH: 60 },
+    { i: "feed", x: 0, y: 432, w: 180, h: 120, minH: 96 },
+    { i: "space-weather", x: 0, y: 552, w: 180, h: 96, minW: 120, minH: 72 },
   ],
   xs: [
     { i: "kpi", x: 0, y: 0, w: 60, h: 24, maxH: 36 },
@@ -120,5 +160,7 @@ export const DEFAULT_PANEL_LAYOUTS: DashboardLayouts = {
     { i: "quake-table", x: 0, y: 120, w: 60, h: 96, minH: 72 },
     { i: "sat-list", x: 0, y: 216, w: 60, h: 96, minH: 60 },
     { i: "feed", x: 0, y: 312, w: 60, h: 72, minH: 48 },
+    { i: "cctv-live", x: 0, y: 384, w: 60, h: 140, minW: 60, minH: 110 },
+    { i: "space-weather", x: 0, y: 524, w: 60, h: 96, minW: 60, minH: 72 },
   ],
 };

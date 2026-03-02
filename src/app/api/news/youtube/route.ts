@@ -8,12 +8,27 @@ export async function GET() {
     ...(result.degraded ? ["youtube"] : []),
     ...(result.data.degraded ?? []),
   ];
+  const totalItems = result.data.items.length;
+  const upstreamError = Boolean(result.error);
+  const zeroResults = !upstreamError && totalItems === 0;
+
+  const message = result.data.keyMissing
+    ? "YOUTUBE_API_KEY missing. Showing recent uploads from YouTube RSS fallback."
+    : result.data.fallbackActive
+      ? "YouTube Data API unavailable; showing recent uploads from RSS."
+      : upstreamError
+        ? "YouTube API request failed. Check quota and API key."
+        : zeroResults
+          ? "YouTube returned no live or recent videos for configured channels."
+          : undefined;
 
   return NextResponse.json(
     {
       items: result.data.items,
       keyMissing: result.data.keyMissing,
-      total: result.data.items.length,
+      discoverySource: result.data.discoverySource,
+      fallbackActive: result.data.fallbackActive,
+      total: totalItems,
       source: "youtube-live",
       degraded: backendDegraded,
       channelsChecked: result.data.channelsChecked,
@@ -21,10 +36,10 @@ export async function GET() {
       latencyMs: Math.round(result.latencyMs),
       cacheHit: result.cacheHit,
       error: result.error,
-      message: result.data.keyMissing
-        ? "Set YOUTUBE_API_KEY in .env.local to enable automatic live discovery."
-        : undefined,
+      zeroResults,
+      upstreamError,
+      message,
     },
-    { headers: { "Cache-Control": "public, max-age=120" } }
+    { headers: { "Cache-Control": "public, max-age=600" } }
   );
 }

@@ -23,4 +23,47 @@
  * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
  */
 
-import{a as o}from"./chunk-TJP3YKBO.js";import"./chunk-AWPY57MX.js";import"./chunk-GWDOQ4QX.js";import"./chunk-GI7IUZK6.js";import"./chunk-OKAWXMC7.js";import"./chunk-AXCXHIZO.js";import"./chunk-6GG6EJBW.js";import"./chunk-TXLODGLR.js";import"./chunk-WZ52TQTL.js";import"./chunk-5KPQNVA2.js";import"./chunk-DBOVA5XH.js";import"./chunk-RHEGXTJ5.js";import"./chunk-CWBIOT2C.js";import"./chunk-PPN6SLYU.js";import"./chunk-SOWUYSYI.js";import"./chunk-I36V6CKP.js";import{a as t,d as c}from"./chunk-WG62ICZK.js";import"./chunk-EEN7GMYN.js";import"./chunk-SXYTVHGU.js";import"./chunk-RAWIUDJR.js";import"./chunk-KGKDCW56.js";import"./chunk-G4IO3CPJ.js";import{e as n}from"./chunk-GBRF7ES3.js";function a(r,i){return n(i)&&(r=o.unpack(r,i)),r._center=t.clone(r._center),r._ellipsoid=c.clone(r._ellipsoid),o.createGeometry(r)}var u=a;export{u as default};
+import {
+  EllipseGeometry_default
+} from "./chunk-R3TKLC6E.js";
+import "./chunk-D4K27X2M.js";
+import "./chunk-UOEUCKKU.js";
+import "./chunk-PNFHVBSF.js";
+import "./chunk-J7MQUQJY.js";
+import "./chunk-SAPFXU5X.js";
+import "./chunk-GNHZH7HP.js";
+import "./chunk-LSSWVB2X.js";
+import "./chunk-TF776XCO.js";
+import "./chunk-A5CODJ4M.js";
+import "./chunk-EB7PNZTK.js";
+import "./chunk-JYQNWIQQ.js";
+import "./chunk-IUROUBPA.js";
+import "./chunk-ELI4BUOT.js";
+import "./chunk-OXALEQPI.js";
+import "./chunk-FQPSOOPH.js";
+import {
+  Cartesian3_default,
+  Ellipsoid_default
+} from "./chunk-T6LPN7RI.js";
+import "./chunk-R4OIEIPE.js";
+import "./chunk-RHBWXX7C.js";
+import "./chunk-ZIKGV7EL.js";
+import "./chunk-BAVI3ZS2.js";
+import "./chunk-TGY6H6N6.js";
+import {
+  defined_default
+} from "./chunk-N4QEHO3U.js";
+
+// packages/engine/Source/Workers/createEllipseGeometry.js
+function createEllipseGeometry(ellipseGeometry, offset) {
+  if (defined_default(offset)) {
+    ellipseGeometry = EllipseGeometry_default.unpack(ellipseGeometry, offset);
+  }
+  ellipseGeometry._center = Cartesian3_default.clone(ellipseGeometry._center);
+  ellipseGeometry._ellipsoid = Ellipsoid_default.clone(ellipseGeometry._ellipsoid);
+  return EllipseGeometry_default.createGeometry(ellipseGeometry);
+}
+var createEllipseGeometry_default = createEllipseGeometry;
+export {
+  createEllipseGeometry_default as default
+};

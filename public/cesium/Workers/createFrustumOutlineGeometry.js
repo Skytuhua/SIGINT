@@ -23,4 +23,212 @@
  * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
  */
 
-import{a as k,b as _,c as j}from"./chunk-CUOIAHY2.js";import"./chunk-TXLODGLR.js";import"./chunk-5KPQNVA2.js";import{a as A}from"./chunk-RHEGXTJ5.js";import{b as N,c as g,d as F}from"./chunk-CWBIOT2C.js";import{d as T}from"./chunk-PPN6SLYU.js";import{f as s}from"./chunk-SOWUYSYI.js";import{a as b}from"./chunk-I36V6CKP.js";import{a}from"./chunk-WG62ICZK.js";import"./chunk-EEN7GMYN.js";import"./chunk-SXYTVHGU.js";import"./chunk-RAWIUDJR.js";import{a as d}from"./chunk-KGKDCW56.js";import{b as h}from"./chunk-G4IO3CPJ.js";import{e as w}from"./chunk-GBRF7ES3.js";var L=0,C=1;function l(e){h.typeOf.object("options",e),h.typeOf.object("options.frustum",e.frustum),h.typeOf.object("options.origin",e.origin),h.typeOf.object("options.orientation",e.orientation);let t=e.frustum,o=e.orientation,u=e.origin,c=d(e._drawNearPlane,!0),m,p;t instanceof _?(m=L,p=_.packedLength):t instanceof k&&(m=C,p=k.packedLength),this._frustumType=m,this._frustum=t.clone(),this._origin=a.clone(u),this._orientation=s.clone(o),this._drawNearPlane=c,this._workerName="createFrustumOutlineGeometry",this.packedLength=2+p+a.packedLength+s.packedLength}l.pack=function(e,t,o){h.typeOf.object("value",e),h.defined("array",t),o=d(o,0);let u=e._frustumType,c=e._frustum;return t[o++]=u,u===L?(_.pack(c,t,o),o+=_.packedLength):(k.pack(c,t,o),o+=k.packedLength),a.pack(e._origin,t,o),o+=a.packedLength,s.pack(e._orientation,t,o),o+=s.packedLength,t[o]=e._drawNearPlane?1:0,t};var E=new _,G=new k,R=new s,S=new a;l.unpack=function(e,t,o){h.defined("array",e),t=d(t,0);let u=e[t++],c;u===L?(c=_.unpack(e,t,E),t+=_.packedLength):(c=k.unpack(e,t,G),t+=k.packedLength);let m=a.unpack(e,t,S);t+=a.packedLength;let p=s.unpack(e,t,R);t+=s.packedLength;let P=e[t]===1;if(!w(o))return new l({frustum:c,origin:m,orientation:p,_drawNearPlane:P});let n=u===o._frustumType?o._frustum:void 0;return o._frustum=c.clone(n),o._frustumType=u,o._origin=a.clone(m,o._origin),o._orientation=s.clone(p,o._orientation),o._drawNearPlane=P,o};l.createGeometry=function(e){let t=e._frustumType,o=e._frustum,u=e._origin,c=e._orientation,m=e._drawNearPlane,p=new Float64Array(3*4*2);j._computeNearFarPlanes(u,c,t,o,p);let P=new A({position:new F({componentDatatype:b.DOUBLE,componentsPerAttribute:3,values:p})}),n,r,y=m?2:1,i=new Uint16Array(8*(y+1)),f=m?0:1;for(;f<2;++f)n=m?f*8:0,r=f*4,i[n]=r,i[n+1]=r+1,i[n+2]=r+1,i[n+3]=r+2,i[n+4]=r+2,i[n+5]=r+3,i[n+6]=r+3,i[n+7]=r;for(f=0;f<2;++f)n=(y+f)*8,r=f*4,i[n]=r,i[n+1]=r+4,i[n+2]=r+1,i[n+3]=r+5,i[n+4]=r+2,i[n+5]=r+6,i[n+6]=r+3,i[n+7]=r+7;return new g({attributes:P,indices:i,primitiveType:N.LINES,boundingSphere:T.fromVertices(p)})};var O=l;function D(e,t){return w(t)&&(e=O.unpack(e,t)),O.createGeometry(e)}var I=D;export{I as default};
+import {
+  FrustumGeometry_default,
+  OrthographicFrustum_default,
+  PerspectiveFrustum_default
+} from "./chunk-2GEAGYUY.js";
+import "./chunk-LSSWVB2X.js";
+import "./chunk-A5CODJ4M.js";
+import {
+  GeometryAttributes_default
+} from "./chunk-JYQNWIQQ.js";
+import {
+  GeometryAttribute_default,
+  Geometry_default,
+  PrimitiveType_default
+} from "./chunk-IUROUBPA.js";
+import {
+  BoundingSphere_default
+} from "./chunk-ELI4BUOT.js";
+import {
+  Quaternion_default
+} from "./chunk-OXALEQPI.js";
+import {
+  ComponentDatatype_default
+} from "./chunk-FQPSOOPH.js";
+import {
+  Cartesian3_default
+} from "./chunk-T6LPN7RI.js";
+import "./chunk-R4OIEIPE.js";
+import "./chunk-RHBWXX7C.js";
+import "./chunk-ZIKGV7EL.js";
+import {
+  defaultValue_default
+} from "./chunk-BAVI3ZS2.js";
+import {
+  Check_default
+} from "./chunk-TGY6H6N6.js";
+import {
+  defined_default
+} from "./chunk-N4QEHO3U.js";
+
+// packages/engine/Source/Core/FrustumOutlineGeometry.js
+var PERSPECTIVE = 0;
+var ORTHOGRAPHIC = 1;
+function FrustumOutlineGeometry(options) {
+  Check_default.typeOf.object("options", options);
+  Check_default.typeOf.object("options.frustum", options.frustum);
+  Check_default.typeOf.object("options.origin", options.origin);
+  Check_default.typeOf.object("options.orientation", options.orientation);
+  const frustum = options.frustum;
+  const orientation = options.orientation;
+  const origin = options.origin;
+  const drawNearPlane = defaultValue_default(options._drawNearPlane, true);
+  let frustumType;
+  let frustumPackedLength;
+  if (frustum instanceof PerspectiveFrustum_default) {
+    frustumType = PERSPECTIVE;
+    frustumPackedLength = PerspectiveFrustum_default.packedLength;
+  } else if (frustum instanceof OrthographicFrustum_default) {
+    frustumType = ORTHOGRAPHIC;
+    frustumPackedLength = OrthographicFrustum_default.packedLength;
+  }
+  this._frustumType = frustumType;
+  this._frustum = frustum.clone();
+  this._origin = Cartesian3_default.clone(origin);
+  this._orientation = Quaternion_default.clone(orientation);
+  this._drawNearPlane = drawNearPlane;
+  this._workerName = "createFrustumOutlineGeometry";
+  this.packedLength = 2 + frustumPackedLength + Cartesian3_default.packedLength + Quaternion_default.packedLength;
+}
+FrustumOutlineGeometry.pack = function(value, array, startingIndex) {
+  Check_default.typeOf.object("value", value);
+  Check_default.defined("array", array);
+  startingIndex = defaultValue_default(startingIndex, 0);
+  const frustumType = value._frustumType;
+  const frustum = value._frustum;
+  array[startingIndex++] = frustumType;
+  if (frustumType === PERSPECTIVE) {
+    PerspectiveFrustum_default.pack(frustum, array, startingIndex);
+    startingIndex += PerspectiveFrustum_default.packedLength;
+  } else {
+    OrthographicFrustum_default.pack(frustum, array, startingIndex);
+    startingIndex += OrthographicFrustum_default.packedLength;
+  }
+  Cartesian3_default.pack(value._origin, array, startingIndex);
+  startingIndex += Cartesian3_default.packedLength;
+  Quaternion_default.pack(value._orientation, array, startingIndex);
+  startingIndex += Quaternion_default.packedLength;
+  array[startingIndex] = value._drawNearPlane ? 1 : 0;
+  return array;
+};
+var scratchPackPerspective = new PerspectiveFrustum_default();
+var scratchPackOrthographic = new OrthographicFrustum_default();
+var scratchPackQuaternion = new Quaternion_default();
+var scratchPackorigin = new Cartesian3_default();
+FrustumOutlineGeometry.unpack = function(array, startingIndex, result) {
+  Check_default.defined("array", array);
+  startingIndex = defaultValue_default(startingIndex, 0);
+  const frustumType = array[startingIndex++];
+  let frustum;
+  if (frustumType === PERSPECTIVE) {
+    frustum = PerspectiveFrustum_default.unpack(
+      array,
+      startingIndex,
+      scratchPackPerspective
+    );
+    startingIndex += PerspectiveFrustum_default.packedLength;
+  } else {
+    frustum = OrthographicFrustum_default.unpack(
+      array,
+      startingIndex,
+      scratchPackOrthographic
+    );
+    startingIndex += OrthographicFrustum_default.packedLength;
+  }
+  const origin = Cartesian3_default.unpack(array, startingIndex, scratchPackorigin);
+  startingIndex += Cartesian3_default.packedLength;
+  const orientation = Quaternion_default.unpack(
+    array,
+    startingIndex,
+    scratchPackQuaternion
+  );
+  startingIndex += Quaternion_default.packedLength;
+  const drawNearPlane = array[startingIndex] === 1;
+  if (!defined_default(result)) {
+    return new FrustumOutlineGeometry({
+      frustum,
+      origin,
+      orientation,
+      _drawNearPlane: drawNearPlane
+    });
+  }
+  const frustumResult = frustumType === result._frustumType ? result._frustum : void 0;
+  result._frustum = frustum.clone(frustumResult);
+  result._frustumType = frustumType;
+  result._origin = Cartesian3_default.clone(origin, result._origin);
+  result._orientation = Quaternion_default.clone(orientation, result._orientation);
+  result._drawNearPlane = drawNearPlane;
+  return result;
+};
+FrustumOutlineGeometry.createGeometry = function(frustumGeometry) {
+  const frustumType = frustumGeometry._frustumType;
+  const frustum = frustumGeometry._frustum;
+  const origin = frustumGeometry._origin;
+  const orientation = frustumGeometry._orientation;
+  const drawNearPlane = frustumGeometry._drawNearPlane;
+  const positions = new Float64Array(3 * 4 * 2);
+  FrustumGeometry_default._computeNearFarPlanes(
+    origin,
+    orientation,
+    frustumType,
+    frustum,
+    positions
+  );
+  const attributes = new GeometryAttributes_default({
+    position: new GeometryAttribute_default({
+      componentDatatype: ComponentDatatype_default.DOUBLE,
+      componentsPerAttribute: 3,
+      values: positions
+    })
+  });
+  let offset;
+  let index;
+  const numberOfPlanes = drawNearPlane ? 2 : 1;
+  const indices = new Uint16Array(8 * (numberOfPlanes + 1));
+  let i = drawNearPlane ? 0 : 1;
+  for (; i < 2; ++i) {
+    offset = drawNearPlane ? i * 8 : 0;
+    index = i * 4;
+    indices[offset] = index;
+    indices[offset + 1] = index + 1;
+    indices[offset + 2] = index + 1;
+    indices[offset + 3] = index + 2;
+    indices[offset + 4] = index + 2;
+    indices[offset + 5] = index + 3;
+    indices[offset + 6] = index + 3;
+    indices[offset + 7] = index;
+  }
+  for (i = 0; i < 2; ++i) {
+    offset = (numberOfPlanes + i) * 8;
+    index = i * 4;
+    indices[offset] = index;
+    indices[offset + 1] = index + 4;
+    indices[offset + 2] = index + 1;
+    indices[offset + 3] = index + 5;
+    indices[offset + 4] = index + 2;
+    indices[offset + 5] = index + 6;
+    indices[offset + 6] = index + 3;
+    indices[offset + 7] = index + 7;
+  }
+  return new Geometry_default({
+    attributes,
+    indices,
+    primitiveType: PrimitiveType_default.LINES,
+    boundingSphere: BoundingSphere_default.fromVertices(positions)
+  });
+};
+var FrustumOutlineGeometry_default = FrustumOutlineGeometry;
+
+// packages/engine/Source/Workers/createFrustumOutlineGeometry.js
+function createFrustumOutlineGeometry(frustumGeometry, offset) {
+  if (defined_default(offset)) {
+    frustumGeometry = FrustumOutlineGeometry_default.unpack(frustumGeometry, offset);
+  }
+  return FrustumOutlineGeometry_default.createGeometry(frustumGeometry);
+}
+var createFrustumOutlineGeometry_default = createFrustumOutlineGeometry;
+export {
+  createFrustumOutlineGeometry_default as default
+};

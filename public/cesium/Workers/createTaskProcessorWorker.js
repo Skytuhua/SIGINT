@@ -23,4 +23,10 @@
  * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
  */
 
-import{a}from"./chunk-RIW4PILL.js";import"./chunk-GBRF7ES3.js";export{a as default};
+import {
+  createTaskProcessorWorker_default
+} from "./chunk-MMV6TO3P.js";
+import "./chunk-N4QEHO3U.js";
+export {
+  createTaskProcessorWorker_default as default
+};

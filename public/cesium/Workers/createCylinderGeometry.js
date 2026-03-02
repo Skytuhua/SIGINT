@@ -23,4 +23,36 @@
  * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
  */
 
-import{a as r}from"./chunk-W5FWNHP7.js";import"./chunk-W2LU7RJ5.js";import"./chunk-6GG6EJBW.js";import"./chunk-TXLODGLR.js";import"./chunk-DBOVA5XH.js";import"./chunk-RHEGXTJ5.js";import"./chunk-CWBIOT2C.js";import"./chunk-PPN6SLYU.js";import"./chunk-SOWUYSYI.js";import"./chunk-I36V6CKP.js";import"./chunk-WG62ICZK.js";import"./chunk-EEN7GMYN.js";import"./chunk-SXYTVHGU.js";import"./chunk-RAWIUDJR.js";import"./chunk-KGKDCW56.js";import"./chunk-G4IO3CPJ.js";import{e as o}from"./chunk-GBRF7ES3.js";function i(e,t){return o(t)&&(e=r.unpack(e,t)),r.createGeometry(e)}var a=i;export{a as default};
+import {
+  CylinderGeometry_default
+} from "./chunk-5O6JWQ4E.js";
+import "./chunk-YLYBLJ3Y.js";
+import "./chunk-GNHZH7HP.js";
+import "./chunk-LSSWVB2X.js";
+import "./chunk-EB7PNZTK.js";
+import "./chunk-JYQNWIQQ.js";
+import "./chunk-IUROUBPA.js";
+import "./chunk-ELI4BUOT.js";
+import "./chunk-OXALEQPI.js";
+import "./chunk-FQPSOOPH.js";
+import "./chunk-T6LPN7RI.js";
+import "./chunk-R4OIEIPE.js";
+import "./chunk-RHBWXX7C.js";
+import "./chunk-ZIKGV7EL.js";
+import "./chunk-BAVI3ZS2.js";
+import "./chunk-TGY6H6N6.js";
+import {
+  defined_default
+} from "./chunk-N4QEHO3U.js";
+
+// packages/engine/Source/Workers/createCylinderGeometry.js
+function createCylinderGeometry(cylinderGeometry, offset) {
+  if (defined_default(offset)) {
+    cylinderGeometry = CylinderGeometry_default.unpack(cylinderGeometry, offset);
+  }
+  return CylinderGeometry_default.createGeometry(cylinderGeometry);
+}
+var createCylinderGeometry_default = createCylinderGeometry;
+export {
+  createCylinderGeometry_default as default
+};

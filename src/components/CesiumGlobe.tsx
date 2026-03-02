@@ -7,6 +7,7 @@ import {
   renderSatellites,
   renderFlights,
   renderEarthquakes,
+  renderDisasterAlerts,
   renderTraffic,
   renderCctv,
   renderNewsMarkers,
@@ -17,18 +18,22 @@ import {
   clearLayer,
   clearAllOrbitLayers,
   updateFlightPositions,
-  updateFlightHighlightPosition,
 } from "../lib/cesium/layers";
 import { applyStylePreset } from "../lib/cesium/postprocess";
 import type {
   PropagatedSat,
   Flight,
   Earthquake,
+  DisasterAlert,
   Vehicle,
   EntityData,
   Satellite,
+  Scene,
+  CctvCamera,
 } from "../lib/providers/types";
 import { fetchAllCctvCameras } from "../lib/cctv/sources";
+import { fetchJsonWithPolicy, isAbortError } from "../lib/runtime/fetchJson";
+import { buildRecordKey, dedupeByRecordKey } from "../lib/runtime/normalize";
 import type { GeoMarker } from "../lib/news/types";
 import type { Viewer } from "cesium";
 
@@ -59,6 +64,29 @@ const normalizeLon = (lonDeg: number) =>
 
 /** Max seconds to extrapolate from last snapshot (avoid runaway when fetch is late). */
 const FLIGHT_INTERPOLATION_CAP_S = 12;
+const MAX_OTC_CAMERAS_FOR_GLOBE = 1200;
+
+function sampleCctvForGlobe(
+  cameras: CctvCamera[],
+  brokenIds: Record<string, boolean>
+): CctvCamera[] {
+  const healthy = cameras.filter((cam) => cam.snapshotUrl && !brokenIds[cam.id]);
+  const otc: CctvCamera[] = [];
+  const nonOtc: CctvCamera[] = [];
+
+  for (const cam of healthy) {
+    if (cam.id.startsWith("otc_")) otc.push(cam);
+    else nonOtc.push(cam);
+  }
+
+  if (otc.length <= MAX_OTC_CAMERAS_FOR_GLOBE) {
+    return [...nonOtc, ...otc];
+  }
+
+  const step = Math.ceil(otc.length / MAX_OTC_CAMERAS_FOR_GLOBE);
+  const sampledOtc = otc.filter((_cam, idx) => idx % step === 0);
+  return [...nonOtc, ...sampledOtc];
+}
 
 /** Dead-reckoning: interpolate flight position from last snapshot using speed, heading, vRate. */
 function interpolateFlightPosition(
@@ -118,6 +146,7 @@ interface CesiumGlobeProps {
   onCameraSnapshot?: (snapshot: CameraSnapshot | null) => void;
   /** When true, disables scroll/pinch zoom (e.g. for fixed-size news globe). */
   disableZoom?: boolean;
+   onReady?: () => void;
 }
 
 // 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?CesiumGlobe 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?
@@ -126,6 +155,7 @@ export default function CesiumGlobe({
   onControlApi,
   onCameraSnapshot,
   disableZoom = false,
+  onReady,
 }: CesiumGlobeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
@@ -138,12 +168,15 @@ export default function CesiumGlobe({
   });
   const satWorkerRef = useRef<Worker | null>(null);
   const trafficWorkerRef = useRef<Worker | null>(null);
-  const flightIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const trackFetchAbortRef = useRef<AbortController | null>(null);
+  const flightRenderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingFlightsRef = useRef<Flight[] | null>(null);
   const intervalsRef = useRef<ReturnType<typeof setInterval>[]>([]);
   const fpsFrameRef = useRef({ lastTime: 0, frames: 0 });
   const currentSatsRef = useRef<PropagatedSat[]>([]);
   const currentFlightsRef = useRef<Flight[]>([]);
   const currentEarthquakesRef = useRef<Earthquake[]>([]);
+  const currentDisastersRef = useRef<DisasterAlert[]>([]);
   const currentNewsMarkersRef = useRef<GeoMarker[]>([]);
   const trackedFlightIdRef = useRef<string | null>(null);
   const followTrackedFlightRef = useRef(false);
@@ -154,7 +187,6 @@ export default function CesiumGlobe({
   const flightSnapshotsRef = useRef<
     Map<string, { flight: Flight; receivedAt: number }>
   >(new Map());
-  const highlightDebugThrottleRef = useRef<number>(0);
   const lastTleSignatureRef = useRef("");
   const cesiumRef = useRef<typeof import("cesium") | null>(null);
   const googleMapsNavRef = useRef<import("../lib/cesium/googleMapsNav").GoogleMapsNav | null>(null);
@@ -436,6 +468,19 @@ export default function CesiumGlobe({
     [store]
   );
 
+  const renderDisastersIfEnabled = useCallback(
+    async (alerts: DisasterAlert[]) => {
+      const { layers } = store.getState();
+      if (!viewerRef.current) return;
+      if (!layers.disasters) {
+        clearLayer(viewerRef.current, "disasters");
+        return;
+      }
+      await renderDisasterAlerts(viewerRef.current, alerts);
+    },
+    [store]
+  );
+
   const renderNewsIfEnabled = useCallback(
     async (markers: GeoMarker[]) => {
       const { layers, news } = store.getState();
@@ -709,123 +754,7 @@ export default function CesiumGlobe({
             store.getState().clearSelectionContext();
             return;
           }
-
-          // BillboardCollection items store their data in id
-          const id = picked?.id ?? picked?.primitive?.id;
-          if (!id) return;
-
-          let entityData: EntityData | null = null;
-
-          if (id?.type === "flight_highlight" && id?.id) {
-            const icao = String(id.id);
-            const flight = currentFlightsRef.current.find((f) => f.icao === icao);
-            if (flight) {
-              entityData = { type: "flight", id: icao, data: flight };
-            }
-          } else if (id?.type && id?.id) {
-            // Our custom billboard format: { type, id, data }
-            entityData = { type: id.type, id: String(id.id), data: id.data };
-          } else if (typeof id === "object" && id?.properties) {
-            const props = id.properties;
-            const now = Cesium.JulianDate.now();
-            const type = props.type?.getValue(now);
-            if (type === "news") {
-              const markerId = String(props.markerId?.getValue(now) ?? id.id ?? "");
-              const articleId = String(props.articleId?.getValue(now) ?? "");
-              const article =
-                store.getState().news.feedItems.find((item) => item.id === articleId) ?? null;
-              if (article) {
-                entityData = { type: "news", id: articleId, data: article };
-                store.getState().setSelectedStory(articleId);
-                store.getState().setHighlightMarker(markerId || null);
-                if (Number.isFinite(article.lat) && Number.isFinite(article.lon)) {
-                  viewer.camera.flyTo({
-                    destination: Cesium.Cartesian3.fromDegrees(
-                      article.lon as number,
-                      article.lat as number,
-                      180_000
-                    ),
-                    duration: 0.85,
-                  });
-                }
-              }
-            } else if (type === "cctv") {
-              const camId = String(props.id?.getValue(now) ?? "");
-              const camData = props.data?.getValue(now);
-              if (camId && camData) {
-                entityData = { type: "cctv", id: camId, data: camData };
-              }
-            }
-          }
-
-          if (entityData) {
-            if (entityData.type === "news") {
-              return;
-            }
-            store.getState().selectEntity(entityData);
-            if (entityData.type === "satellite") {
-              const sat = entityData.data as PropagatedSat;
-              const noradId = entityData.id;
-              if (
-                focusTargetRef.current &&
-                (focusTargetRef.current.type !== "satellite" ||
-                  focusTargetRef.current.id !== noradId)
-              ) {
-                releaseOrbitFocus();
-              }
-              trackedFlightIdRef.current = null;
-              store.getState().setTrackedFlightId(null);
-              clearLayer(viewer, "flight_highlight");
-              clearLayer(viewer, "flight_path");
-              flightPathAccumRef.current = [];
-              focusTargetRef.current = { type: "satellite", id: noradId };
-              followTrackedFlightRef.current = false;
-              lookAtInitializedRef.current = false;
-              store.getState().setTrackingId(noradId);
-              void renderSatelliteHighlight(viewer, sat);
-              void focusSatelliteSelection(viewer, sat);
-              if (satWorkerRef.current) {
-                satWorkerRef.current.postMessage({
-                  type: "COMPUTE_ORBIT",
-                  noradId,
-                });
-              }
-            } else if (entityData.type === "flight") {
-              const icao = entityData.id;
-              if (
-                focusTargetRef.current &&
-                (focusTargetRef.current.type !== "flight" ||
-                  focusTargetRef.current.id !== icao)
-              ) {
-                releaseOrbitFocus();
-              }
-              trackedFlightIdRef.current = icao;
-              followTrackedFlightRef.current = false;
-              lookAtInitializedRef.current = false;
-              lastTrackFetchRef.current = Date.now();
-              store.getState().setTrackedFlightId(icao);
-              const selectedFlight =
-                currentFlightsRef.current.find((f) => f.icao === icao) ??
-                (entityData.data as Flight);
-              void renderFlightHighlight(viewer, selectedFlight);
-              void focusFlightSelection(viewer, selectedFlight);
-
-              fetch(`/api/track?icao=${icao}`)
-                .then((response) => response.json())
-                .then((track: [number, number, number][]) => {
-                  if (trackedFlightIdRef.current !== icao || track.length < 2) return;
-                  flightPathAccumRef.current = track;
-                  void renderFlightPath(viewer, track);
-                })
-                .catch((err) => console.warn("[track] fetch failed:", err));
-            } else if (trackedFlightIdRef.current) {
-              if (focusTargetRef.current?.type === "flight") {
-                releaseOrbitFocus();
-              }
-              trackedFlightIdRef.current = null;
-              store.getState().setTrackedFlightId(null);
-            }
-          }
+          // Single click on an icon does nothing; selection is on double click
         },
         Cesium.ScreenSpaceEventType.LEFT_CLICK
       );
@@ -857,66 +786,139 @@ export default function CesiumGlobe({
         Cesium.ScreenSpaceEventType.MOUSE_MOVE
       );
 
-      // Double-click 闁?activate flight tracking + show complete flight path from API
+      // Double-click: select icon (entity) and activate tracking / flight path / etc.
       viewer.screenSpaceEventHandler.setInputAction(
         (dblclick: { position: import("cesium").Cartesian2 }) => {
           const picked = viewer.scene.pick(dblclick.position);
+          if (!picked) return;
+
           const id = picked?.id ?? picked?.primitive?.id;
-          if (!id?.type || (id.type !== "flight" && id.type !== "satellite")) return;
+          if (!id) return;
 
-          if (id.type === "flight") {
-            const flight: Flight = id.data;
+          let entityData: EntityData | null = null;
+
+          if (id?.type === "flight_highlight" && id?.id) {
             const icao = String(id.id);
-
-            focusTargetRef.current = { type: "flight", id: icao };
-            trackedFlightIdRef.current = icao;
-            followTrackedFlightRef.current = true;
-            lookAtInitializedRef.current = false;
-            flightPathAccumRef.current = [];
-            lastTrackFetchRef.current = Date.now();
-
-            store.getState().selectEntity({ type: "flight", id: icao, data: flight });
-            store.getState().setTrackedFlightId(icao);
-            void renderFlightHighlight(viewer, flight);
-
-            fetch(`/api/track?icao=${icao}`)
-              .then((r) => r.json())
-              .then((track: [number, number, number][]) => {
-                if (trackedFlightIdRef.current !== icao || track.length < 2) return;
-                flightPathAccumRef.current = track;
-                void renderFlightPath(viewer, track);
-              })
-              .catch((err) => console.warn("[track] fetch failed:", err));
-            return;
+            const flight = currentFlightsRef.current.find((f) => f.icao === icao);
+            if (flight) {
+              entityData = { type: "flight", id: icao, data: flight };
+            }
+          } else if (id?.type && id?.id) {
+            entityData = { type: id.type, id: String(id.id), data: id.data };
+          } else if (typeof id === "object" && id?.properties) {
+            const props = id.properties;
+            const now = Cesium.JulianDate.now();
+            const type = props.type?.getValue(now);
+            if (type === "news") {
+              const markerId = String(props.markerId?.getValue(now) ?? id.id ?? "");
+              const articleId = String(props.articleId?.getValue(now) ?? "");
+              const article =
+                store.getState().news.feedItems.find((item) => item.id === articleId) ?? null;
+              if (article) {
+                entityData = { type: "news", id: articleId, data: article };
+                store.getState().setSelectedStory(articleId);
+                store.getState().setStoryPopupArticle(article);
+                store.getState().setHighlightMarker(markerId || null);
+                if (Number.isFinite(article.lat) && Number.isFinite(article.lon)) {
+                  viewer.camera.flyTo({
+                    destination: Cesium.Cartesian3.fromDegrees(
+                      article.lon as number,
+                      article.lat as number,
+                      180_000
+                    ),
+                    duration: 0.85,
+                  });
+                }
+              }
+            } else if (type === "disaster") {
+              const disasterId = String(props.id?.getValue(now) ?? id.id ?? "");
+              const alert =
+                currentDisastersRef.current.find((item) => item.id === disasterId) ?? null;
+              if (alert) {
+                entityData = { type: "disaster", id: disasterId, data: alert };
+              }
+            } else if (type === "cctv") {
+              const camId = String(props.id?.getValue(now) ?? "");
+              const camData = props.data?.getValue(now);
+              if (camId && camData) {
+                entityData = { type: "cctv", id: camId, data: camData };
+              }
+            }
           }
 
-          const sat = id.data as PropagatedSat;
-          const noradId = String(id.id);
-          focusTargetRef.current = { type: "satellite", id: noradId };
-          followTrackedFlightRef.current = true;
-          lookAtInitializedRef.current = false;
+          if (!entityData) return;
 
-          trackedFlightIdRef.current = null;
-          flightPathAccumRef.current = [];
-          store.getState().setTrackedFlightId(null);
-          clearLayer(viewer, "flight_highlight");
-          clearLayer(viewer, "flight_path");
-
-          store.getState().selectEntity({ type: "satellite", id: noradId, data: sat });
-          store.getState().setTrackingId(noradId);
-          void renderSatelliteHighlight(viewer, sat);
-          void focusSatelliteSelection(viewer, sat);
-          if (satWorkerRef.current) {
-            satWorkerRef.current.postMessage({
-              type: "COMPUTE_ORBIT",
-              noradId,
-            });
+          if (entityData.type === "news") {
+            return;
+          }
+          store.getState().selectEntity(entityData);
+          if (entityData.type === "satellite") {
+            const sat = entityData.data as PropagatedSat;
+            const noradId = entityData.id;
+            if (
+              focusTargetRef.current &&
+              (focusTargetRef.current.type !== "satellite" ||
+                focusTargetRef.current.id !== noradId)
+            ) {
+              releaseOrbitFocus();
+            }
+            trackedFlightIdRef.current = null;
+            store.getState().setTrackedFlightId(null);
+            clearLayer(viewer, "flight_highlight");
+            clearLayer(viewer, "flight_path");
+            flightPathAccumRef.current = [];
+            focusTargetRef.current = { type: "satellite", id: noradId };
+            followTrackedFlightRef.current = true;
+            lookAtInitializedRef.current = false;
+            store.getState().setTrackingId(noradId);
+            void renderSatelliteHighlight(viewer, sat);
+            if (satWorkerRef.current) {
+              satWorkerRef.current.postMessage({
+                type: "COMPUTE_ORBIT",
+                noradId,
+              });
+            }
+          } else if (entityData.type === "flight") {
+            const icao = String(entityData.id ?? "").trim().toLowerCase();
+            if (!icao) return;
+            if (
+              focusTargetRef.current &&
+              (focusTargetRef.current.type !== "flight" || focusTargetRef.current.id !== icao)
+            ) {
+              releaseOrbitFocus();
+            }
+            focusTargetRef.current = { type: "flight", id: icao };
+            trackedFlightIdRef.current = icao;
+            followTrackedFlightRef.current = false; // no continuous follow so user can rotate freely
+            lookAtInitializedRef.current = false;
+            flightPathAccumRef.current = [];
+            lastTrackFetchRef.current = 0;
+            store.getState().setTrackedFlightId(icao);
+            const selectedFlight =
+              currentFlightsRef.current.find((f) => f.icao === icao) ??
+              (entityData.data as Flight);
+            void renderFlightHighlight(viewer, selectedFlight, getInterpolatedPosition);
+            void refreshTrackedPath(icao, true);
+          } else if (trackedFlightIdRef.current) {
+            if (focusTargetRef.current?.type === "flight") {
+              releaseOrbitFocus();
+            }
+            trackedFlightIdRef.current = null;
+            trackFetchAbortRef.current?.abort();
+            trackFetchAbortRef.current = null;
+            store.getState().setTrackedFlightId(null);
           }
         },
         Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK
       );
     },
-    [focusFlightSelection, focusSatelliteSelection, releaseOrbitFocus, store]
+    [
+      focusFlightSelection,
+      focusSatelliteSelection,
+      getInterpolatedPosition,
+      releaseOrbitFocus,
+      store,
+    ]
   );
 
   // 闁冲厜鍋撻柍鍏夊亾 Scene flying via store subscription 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?
@@ -958,102 +960,114 @@ export default function CesiumGlobe({
 
   // 闁冲厜鍋撻柍鍏夊亾 Data fetching 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
 
-  const fetchAndRenderFlights = useCallback(async () => {
-    const { layers } = store.getState();
-    if (!layers.flights && !layers.military) {
-      if (viewerRef.current) {
-        clearLayer(viewerRef.current, "flights");
+  const refreshTrackedPath = useCallback(async (icao: string, force = false) => {
+    if (!icao) return;
+    const now = Date.now();
+    if (!force && now - lastTrackFetchRef.current < 60_000) return;
+    lastTrackFetchRef.current = now;
+
+    trackFetchAbortRef.current?.abort();
+    const controller = new AbortController();
+    trackFetchAbortRef.current = controller;
+    try {
+      const track = await fetchJsonWithPolicy<[number, number, number][]>(
+        `/api/track?icao=${encodeURIComponent(icao)}`,
+        {
+          key: `track:${icao}`,
+          signal: controller.signal,
+          timeoutMs: 12_000,
+          retries: 1,
+          negativeTtlMs: 1_200,
+        }
+      );
+      const viewer = viewerRef.current;
+      if (!viewer || trackedFlightIdRef.current !== icao || track.length < 2) return;
+      flightPathAccumRef.current = track;
+      await renderFlightPath(viewer, track);
+    } catch (error) {
+      if (!isAbortError(error)) {
+        console.warn("[track] refresh failed:", error);
       }
-      return;
+    }
+  }, []);
+
+  const flushFlightRender = useCallback(async () => {
+    flightRenderTimeoutRef.current = null;
+    const flights = pendingFlightsRef.current ?? currentFlightsRef.current;
+    pendingFlightsRef.current = null;
+    await renderFlightsIfEnabled(flights);
+
+    const trackedId = trackedFlightIdRef.current;
+    if (trackedId && viewerRef.current) {
+      const tracked = flights.find((flight) => flight.icao === trackedId);
+      if (tracked) {
+        void renderFlightHighlight(viewerRef.current, tracked, getInterpolatedPosition);
+        void refreshTrackedPath(trackedId);
+      }
     }
 
-    try {
-      const [commercial, military] = await Promise.allSettled([
-        fetch(`/api/opensky`, { cache: "no-store" }).then((r) => r.json()),
-        fetch(`/api/military`, { cache: "no-store" }).then((r) => r.json()),
-      ]);
+    const total =
+      currentSatsRef.current.length +
+      currentFlightsRef.current.length +
+      currentEarthquakesRef.current.length +
+      currentDisastersRef.current.length;
+    store.getState().setDebug({ entityCount: total });
+  }, [getInterpolatedPosition, refreshTrackedPath, renderFlightsIfEnabled, store]);
 
-      const c: Flight[] = commercial.status === "fulfilled" ? commercial.value : [];
-      const m: Flight[] = military.status === "fulfilled" ? military.value : [];
-      const all = [...c, ...m];
-      currentFlightsRef.current = all;
+  const scheduleFlightRender = useCallback(
+    (flights: Flight[]) => {
+      pendingFlightsRef.current = flights;
+      if (flightRenderTimeoutRef.current) return;
+      flightRenderTimeoutRef.current = setTimeout(() => {
+        void flushFlightRender();
+      }, 90);
+    },
+    [flushFlightRender]
+  );
 
+  const applyLiveFlights = useCallback(
+    (commercial: Flight[], military: Flight[]) => {
+      const merged = dedupeByRecordKey(
+        [
+          ...(commercial ?? []).map((flight) => ({ ...flight, isMilitary: false })),
+          ...(military ?? []).map((flight) => ({ ...flight, isMilitary: true })),
+        ].filter((flight) => Number.isFinite(flight.lat) && Number.isFinite(flight.lon)),
+        (flight) => buildRecordKey("flight", flight.icao, flight.callsign, flight.lat, flight.lon)
+      ).map((flight) => ({ ...flight, icao: (flight.icao ?? "").trim().toLowerCase() }));
+
+      currentFlightsRef.current = merged;
       const receivedAt = Date.now();
       const snapshotMap = flightSnapshotsRef.current;
       const seen = new Set<string>();
-      for (const flight of all) {
-        if (flight.icao) {
-          seen.add(flight.icao);
-          snapshotMap.set(flight.icao, { flight, receivedAt });
-        }
+      for (const flight of merged) {
+        if (!flight.icao) continue;
+        seen.add(flight.icao);
+        snapshotMap.set(flight.icao, { flight, receivedAt });
       }
       for (const icao of Array.from(snapshotMap.keys())) {
         if (!seen.has(icao)) snapshotMap.delete(icao);
       }
-
-      await renderFlightsIfEnabled(all);
-
-      // Update tracked flight highlight; re-fetch the full path every 60 s
-      const trackedId = trackedFlightIdRef.current;
-      if (trackedId && viewerRef.current) {
-        const tracked = all.find((f) => f.icao === trackedId);
-        if (tracked) {
-          void renderFlightHighlight(viewerRef.current, tracked);
-
-          const now = Date.now();
-          if (now - lastTrackFetchRef.current > 60_000) {
-            lastTrackFetchRef.current = now;
-            const vRef = viewerRef.current;
-            fetch(`/api/track?icao=${trackedId}`)
-              .then((r) => r.json())
-              .then((track: [number, number, number][]) => {
-                if (trackedFlightIdRef.current !== trackedId || track.length < 2) return;
-                flightPathAccumRef.current = track;
-                void renderFlightPath(vRef, track);
-              })
-              .catch((err) => console.warn("[track] refresh failed:", err));
-          }
-        }
-      }
-
-      // Update entity count
-      const total =
-        currentSatsRef.current.length +
-        currentFlightsRef.current.length +
-        currentEarthquakesRef.current.length;
-      store.getState().setDebug({ entityCount: total });
-    } catch (err) {
-      console.warn("[globe] flight fetch error:", err);
-    }
-  }, [renderFlightsIfEnabled, store]);
-
-  const fetchAndRenderEarthquakes = useCallback(async () => {
-    try {
-      const data: Earthquake[] = await fetch(
-        `/api/earthquakes?t=${Date.now()}`
-      ).then((r) => r.json());
-      currentEarthquakesRef.current = data;
-      store.getState().setLiveEarthquakes(data);
-      await renderEarthquakesIfEnabled(data);
-      const total =
-        currentSatsRef.current.length +
-        currentFlightsRef.current.length +
-        data.length;
-      store.getState().setDebug({ entityCount: total });
-    } catch (err) {
-      console.warn("[globe] earthquake fetch error:", err);
-    }
-  }, [renderEarthquakesIfEnabled, store]);
+      scheduleFlightRender(merged);
+    },
+    [scheduleFlightRender]
+  );
 
   const fetchAndSendRoads = useCallback(async () => {
     if (!trafficWorkerRef.current) return;
     try {
-      const roads = await fetch("/api/overpass").then((r) => r.json());
+      const roads = await fetchJsonWithPolicy<any[]>("/api/overpass", {
+        key: "globe:roads",
+        timeoutMs: 15_000,
+        retries: 1,
+        negativeTtlMs: 5_000,
+      });
       if (roads.length > 0) {
         trafficWorkerRef.current.postMessage({ type: "SET_ROADS", roads });
       }
     } catch (err) {
-      console.warn("[globe] overpass fetch error:", err);
+      if (!isAbortError(err)) {
+        console.warn("[globe] overpass fetch error:", err);
+      }
     }
   }, []);
 
@@ -1083,6 +1097,17 @@ export default function CesiumGlobe({
         )
       );
 
+      // Live flights/military from store (dashboard feed) - avoids duplicate globe polling
+      subs.push(
+        store.subscribe(
+          (s) => ({ flights: s.liveData.flights, military: s.liveData.military }),
+          ({ flights, military }) => {
+            applyLiveFlights((flights as Flight[]) ?? [], (military as Flight[]) ?? []);
+          },
+          { equalityFn: (a, b) => a.flights === b.flights && a.military === b.military }
+        )
+      );
+
       // Earthquakes toggle
       subs.push(
         store.subscribe(
@@ -1101,6 +1126,34 @@ export default function CesiumGlobe({
           (earthquakes) => {
             currentEarthquakesRef.current = earthquakes ?? [];
             renderEarthquakesIfEnabled(currentEarthquakesRef.current);
+            const total =
+              currentSatsRef.current.length +
+              currentFlightsRef.current.length +
+              currentEarthquakesRef.current.length +
+              currentDisastersRef.current.length;
+            store.getState().setDebug({ entityCount: total });
+          }
+        )
+      );
+
+      // Disasters toggle
+      subs.push(
+        store.subscribe(
+          (s) => s.layers.disasters,
+          (enabled) => {
+            if (!enabled) clearLayer(viewer, "disasters");
+            else renderDisastersIfEnabled(currentDisastersRef.current);
+          }
+        )
+      );
+
+      // Live disasters from store
+      subs.push(
+        store.subscribe(
+          (s) => s.liveData.disasters,
+          (disasters) => {
+            currentDisastersRef.current = disasters ?? [];
+            renderDisastersIfEnabled(currentDisastersRef.current);
           }
         )
       );
@@ -1128,7 +1181,8 @@ export default function CesiumGlobe({
             if (!enabled) clearLayer(viewer, "cctv");
             else {
               const { cctv } = store.getState();
-              renderCctv(viewer, cctv.cameras, cctv.calibrations);
+              const camerasForGlobe = sampleCctvForGlobe(cctv.cameras, cctv.brokenIds);
+              renderCctv(viewer, camerasForGlobe, cctv.calibrations);
             }
           }
         )
@@ -1206,7 +1260,9 @@ export default function CesiumGlobe({
       store,
       renderSatsIfEnabled,
       renderFlightsIfEnabled,
+      applyLiveFlights,
       renderEarthquakesIfEnabled,
+      renderDisastersIfEnabled,
       renderNewsIfEnabled,
       fetchAndSendRoads,
     ]
@@ -1327,7 +1383,8 @@ export default function CesiumGlobe({
           const total =
             e.data.positions.length +
             currentFlightsRef.current.length +
-            currentEarthquakesRef.current.length;
+            currentEarthquakesRef.current.length +
+            currentDisastersRef.current.length;
           store.getState().setDebug({ entityCount: total });
         }
 
@@ -1347,13 +1404,23 @@ export default function CesiumGlobe({
       };
 
       // Initial TLE load for worker boot.
-      try {
-        const tles = (await fetch("/api/satellites").then((r) =>
-          r.json()
-        )) as Satellite[];
-        postCatalogToSatelliteWorker(tles);
-      } catch (err) {
-        console.warn("[globe] satellite TLE fetch error:", err);
+      const seededCatalog = store.getState().liveData.satelliteCatalog ?? [];
+      if (seededCatalog.length > 0) {
+        postCatalogToSatelliteWorker(seededCatalog as Satellite[]);
+      } else {
+        try {
+          const tles = await fetchJsonWithPolicy<Satellite[]>("/api/satellites", {
+            key: "globe:satellites:init",
+            timeoutMs: 20_000,
+            retries: 1,
+            negativeTtlMs: 3_000,
+          });
+          postCatalogToSatelliteWorker(tles);
+        } catch (err) {
+          if (!isAbortError(err)) {
+            console.warn("[globe] satellite TLE fetch error:", err);
+          }
+        }
       }
 
       // Keep worker TLEs synced with dashboard feed updates.
@@ -1388,16 +1455,15 @@ export default function CesiumGlobe({
       }
 
       // 闁冲厜鍋撻柍鍏夊亾 Polling intervals 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
-      await fetchAndRenderFlights();
-
-      flightIntervalRef.current = setInterval(() => {
-        void fetchAndRenderFlights();
-      }, 12_000);
-
-      await fetchAndRenderEarthquakes();
-      intervalsRef.current.push(
-        setInterval(fetchAndRenderEarthquakes, 60_000)
+      const seededLiveData = store.getState().liveData;
+      applyLiveFlights(
+        (seededLiveData.flights as Flight[]) ?? [],
+        (seededLiveData.military as Flight[]) ?? []
       );
+      currentEarthquakesRef.current = (seededLiveData.earthquakes as Earthquake[]) ?? [];
+      await renderEarthquakesIfEnabled(currentEarthquakesRef.current);
+      currentDisastersRef.current = (seededLiveData.disasters as DisasterAlert[]) ?? [];
+      await renderDisastersIfEnabled(currentDisastersRef.current);
 
       // 闁冲厜鍋撻柍鍏夊亾 Load CCTV cameras 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
       try {
@@ -1406,8 +1472,10 @@ export default function CesiumGlobe({
         store.getState().setLiveCctv(cameras);
         store.getState().markFeedUpdated("cctv");
         if (store.getState().layers.cctv) {
-          const { calibrations } = store.getState().cctv;
-          renderCctv(viewer, cameras, calibrations);
+          const { cctv } = store.getState();
+          const camerasForGlobe = sampleCctvForGlobe(cameras, cctv.brokenIds);
+          const { calibrations } = cctv;
+          renderCctv(viewer, camerasForGlobe, calibrations);
         }
       } catch {
         // CCTV data optional
@@ -1415,7 +1483,12 @@ export default function CesiumGlobe({
 
       // 闁冲厜鍋撻柍鍏夊亾 Load scenes 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
       try {
-        const scenes = await fetch("/data/scenes.json").then((r) => r.json());
+        const scenes = await fetchJsonWithPolicy<Scene[]>("/data/scenes.json", {
+          key: "globe:scenes",
+          timeoutMs: 8_000,
+          retries: 1,
+          negativeTtlMs: 4_000,
+        });
         store.getState().setScenes(scenes);
         store.getState().setLiveScenes(scenes);
         store.getState().markFeedUpdated("scenes");
@@ -1441,27 +1514,62 @@ export default function CesiumGlobe({
       // ── Google Maps–style navigation ─────────────────────────────────────
       if (!destroyed) {
         const { GoogleMapsNav } = await import("../lib/cesium/googleMapsNav");
-        const nav = new GoogleMapsNav(viewer, CesiumMod, { disableZoom });
+        const nav = new GoogleMapsNav(viewer, CesiumMod, {
+          disableZoom,
+          getOrbitTarget: () => {
+            const t = focusTargetRef.current;
+            if (!t) return null;
+            if (t.type === "flight") {
+              const interp = getInterpolatedPosition(t.id);
+              if (interp)
+                return CesiumMod.Cartesian3.fromDegrees(
+                  interp.lon,
+                  interp.lat,
+                  interp.altM + 500
+                );
+              const f = currentFlightsRef.current.find((x) => x.icao === t.id);
+              if (f)
+                return CesiumMod.Cartesian3.fromDegrees(
+                  f.lon,
+                  f.lat,
+                  (f.altM ?? 0) + 500
+                );
+              return null;
+            }
+            const sat = currentSatsRef.current.find((s) => s.noradId === t.id);
+            if (sat)
+              return CesiumMod.Cartesian3.fromDegrees(
+                sat.lon,
+                sat.lat,
+                Math.max(0, sat.altKm) * 1000
+              );
+            return null;
+          },
+        });
         nav.enable();
         googleMapsNavRef.current = nav;
       }
 
-      viewer.scene.postRender.addEventListener(() => {
+      // Update flight and highlight positions before each frame (sync in preRender so they are visible)
+      const onPreRender = () => {
+        const CesiumMod = cesiumRef.current;
+        if (!CesiumMod) return;
         const { layers } = store.getState();
         if ((layers.flights || layers.military) && flightSnapshotsRef.current.size > 0) {
-          void updateFlightPositions(viewer, getInterpolatedPosition);
+          updateFlightPositions(viewer, getInterpolatedPosition, CesiumMod);
         }
+      };
+      viewer.scene.preRender.addEventListener(onPreRender);
+      unsubscribers.push(() => {
+        try {
+          viewer.scene.preRender.removeEventListener(onPreRender);
+        } catch {
+          // ignore if viewer destroyed
+        }
+      });
 
+      viewer.scene.postRender.addEventListener(() => {
         const target = focusTargetRef.current;
-        if (target?.type === "flight" && target.id) {
-          // #region agent log
-          if (Date.now() - (highlightDebugThrottleRef.current || 0) > 1200) {
-            highlightDebugThrottleRef.current = Date.now();
-            fetch('http://127.0.0.1:7928/ingest/3da76906-48e1-4cba-af71-0b7fc1ab7982',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ebafa2'},body:JSON.stringify({sessionId:'ebafa2',location:'CesiumGlobe.tsx:postRender',message:'calling updateFlightHighlightPosition',data:{targetId:target.id},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
-          }
-          // #endregion
-          void updateFlightHighlightPosition(viewer, getInterpolatedPosition, target.id);
-        }
         if (!target) return;
         if (!followTrackedFlightRef.current) return;
         let pos: import("cesium").Cartesian3 | null = null;
@@ -1516,9 +1624,12 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => s.selection.trackedFlightId,
           (id) => {
-            trackedFlightIdRef.current = id;
-            if (!id) {
+            const normalizedId = id ? String(id).trim().toLowerCase() : null;
+            trackedFlightIdRef.current = normalizedId;
+            if (!normalizedId) {
               lastTrackFetchRef.current = 0;
+              trackFetchAbortRef.current?.abort();
+              trackFetchAbortRef.current = null;
               clearLayer(viewer, "flight_highlight");
               clearLayer(viewer, "flight_path");
               flightPathAccumRef.current = [];
@@ -1541,6 +1652,31 @@ export default function CesiumGlobe({
           }
         )
       );
+
+      // Center camera on flight/satellite whenever one is selected (globe click or panel/list).
+      unsubscribers.push(
+        store.subscribe(
+          (s) => s.selection.selectedEntity,
+          (entity) => {
+            if (!entity || !viewer || viewer.isDestroyed()) return;
+            if (entity.type === "flight") {
+              const flight = entity.data as Flight;
+              if (flight && typeof flight.lat === "number" && typeof flight.lon === "number") {
+                void focusFlightSelection(viewer, flight);
+              }
+            } else if (entity.type === "satellite") {
+              const sat = entity.data as PropagatedSat;
+              if (sat && typeof sat.lat === "number" && typeof sat.lon === "number") {
+                void focusSatelliteSelection(viewer, sat);
+              }
+            }
+          }
+        )
+      );
+
+      if (!destroyed) {
+        onReady?.();
+      }
     }
 
     init().catch(console.error);
@@ -1550,10 +1686,13 @@ export default function CesiumGlobe({
       unsubscribers.forEach((u) => u());
       intervalsRef.current.forEach(clearInterval);
       intervalsRef.current = [];
-      if (flightIntervalRef.current) {
-        clearInterval(flightIntervalRef.current);
-        flightIntervalRef.current = null;
+      if (flightRenderTimeoutRef.current) {
+        clearTimeout(flightRenderTimeoutRef.current);
+        flightRenderTimeoutRef.current = null;
       }
+      pendingFlightsRef.current = null;
+      trackFetchAbortRef.current?.abort();
+      trackFetchAbortRef.current = null;
       satWorkerRef.current?.terminate();
       trafficWorkerRef.current?.postMessage({ type: "STOP" });
       trafficWorkerRef.current?.terminate();

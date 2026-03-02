@@ -1,0 +1,80 @@
+{
+    "type":  "FeatureCollection",
+    "features":  [
+                     {
+                         "type":  "Feature",
+                         "id":  "nuclear-sites-0",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -77.04,
+                                                              38.9
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "nuclear-sites site 0",
+                                            "ts":  1772435598910
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "nuclear-sites-1",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              2.35,
+                                                              48.86
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "nuclear-sites site 1",
+                                            "ts":  1772435598910
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "nuclear-sites-2",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              139.76,
+                                                              35.68
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "nuclear-sites site 2",
+                                            "ts":  1772435598910
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "nuclear-sites-3",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              55.27,
+                                                              25.2
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "nuclear-sites site 3",
+                                            "ts":  1772435598910
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "nuclear-sites-4",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -46.63,
+                                                              -23.55
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "nuclear-sites site 4",
+                                            "ts":  1772435598910
+                                        }
+                     }
+                 ]
+}

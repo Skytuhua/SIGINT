@@ -23,4 +23,466 @@
  * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
  */
 
-import{a as nt}from"./chunk-WN2OOK5W.js";import"./chunk-T52RL3ZJ.js";import"./chunk-O7LU3SZT.js";import{a as _}from"./chunk-TXLODGLR.js";import"./chunk-M6TFP6VU.js";import"./chunk-Q6IZOLLM.js";import"./chunk-WZ52TQTL.js";import"./chunk-5KPQNVA2.js";import{a as ot}from"./chunk-DBOVA5XH.js";import{a as it}from"./chunk-RHEGXTJ5.js";import{b as tt,c as et,d as S}from"./chunk-CWBIOT2C.js";import{d as I}from"./chunk-PPN6SLYU.js";import"./chunk-SOWUYSYI.js";import{a as R}from"./chunk-I36V6CKP.js";import{a as s,d as l}from"./chunk-WG62ICZK.js";import{a as J}from"./chunk-EEN7GMYN.js";import"./chunk-SXYTVHGU.js";import"./chunk-RAWIUDJR.js";import{a as w}from"./chunk-KGKDCW56.js";import{a as P}from"./chunk-G4IO3CPJ.js";import{e as r}from"./chunk-GBRF7ES3.js";var Q=new s,Y=new s,lt=new s,st=new s,pt=new s,ut=new s,ft=new s;function k(t){t=w(t,w.EMPTY_OBJECT);let e=t.positions,o=t.maximumHeights,n=t.minimumHeights;if(!r(e))throw new P("options.positions is required.");if(r(o)&&o.length!==e.length)throw new P("options.positions and options.maximumHeights must have the same length.");if(r(n)&&n.length!==e.length)throw new P("options.positions and options.minimumHeights must have the same length.");let i=w(t.vertexFormat,_.DEFAULT),c=w(t.granularity,J.RADIANS_PER_DEGREE),a=w(t.ellipsoid,l.default);this._positions=e,this._minimumHeights=n,this._maximumHeights=o,this._vertexFormat=_.clone(i),this._granularity=c,this._ellipsoid=l.clone(a),this._workerName="createWallGeometry";let m=1+e.length*s.packedLength+2;r(n)&&(m+=n.length),r(o)&&(m+=o.length),this.packedLength=m+l.packedLength+_.packedLength+1}k.pack=function(t,e,o){if(!r(t))throw new P("value is required");if(!r(e))throw new P("array is required");o=w(o,0);let n,i=t._positions,c=i.length;for(e[o++]=c,n=0;n<c;++n,o+=s.packedLength)s.pack(i[n],e,o);let a=t._minimumHeights;if(c=r(a)?a.length:0,e[o++]=c,r(a))for(n=0;n<c;++n)e[o++]=a[n];let m=t._maximumHeights;if(c=r(m)?m.length:0,e[o++]=c,r(m))for(n=0;n<c;++n)e[o++]=m[n];return l.pack(t._ellipsoid,e,o),o+=l.packedLength,_.pack(t._vertexFormat,e,o),o+=_.packedLength,e[o]=t._granularity,e};var mt=l.clone(l.UNIT_SPHERE),rt=new _,V={positions:void 0,minimumHeights:void 0,maximumHeights:void 0,ellipsoid:mt,vertexFormat:rt,granularity:void 0};k.unpack=function(t,e,o){if(!r(t))throw new P("array is required");e=w(e,0);let n,i=t[e++],c=new Array(i);for(n=0;n<i;++n,e+=s.packedLength)c[n]=s.unpack(t,e);i=t[e++];let a;if(i>0)for(a=new Array(i),n=0;n<i;++n)a[n]=t[e++];i=t[e++];let m;if(i>0)for(m=new Array(i),n=0;n<i;++n)m[n]=t[e++];let q=l.unpack(t,e,mt);e+=l.packedLength;let H=_.unpack(t,e,rt);e+=_.packedLength;let f=t[e];return r(o)?(o._positions=c,o._minimumHeights=a,o._maximumHeights=m,o._ellipsoid=l.clone(q,o._ellipsoid),o._vertexFormat=_.clone(H,o._vertexFormat),o._granularity=f,o):(V.positions=c,V.minimumHeights=a,V.maximumHeights=m,V.granularity=f,new k(V))};k.fromConstantHeights=function(t){t=w(t,w.EMPTY_OBJECT);let e=t.positions;if(!r(e))throw new P("options.positions is required.");let o,n,i=t.minimumHeight,c=t.maximumHeight,a=r(i),m=r(c);if(a||m){let H=e.length;o=a?new Array(H):void 0,n=m?new Array(H):void 0;for(let f=0;f<H;++f)a&&(o[f]=i),m&&(n[f]=c)}let q={positions:e,maximumHeights:n,minimumHeights:o,ellipsoid:t.ellipsoid,vertexFormat:t.vertexFormat};return new k(q)};k.createGeometry=function(t){let e=t._positions,o=t._minimumHeights,n=t._maximumHeights,i=t._vertexFormat,c=t._granularity,a=t._ellipsoid,m=nt.computePositions(a,e,n,o,c,!0);if(!r(m))return;let q=m.bottomPositions,H=m.topPositions,f=m.numCorners,B=H.length,y=B*2,h=i.position?new Float64Array(y):void 0,b=i.normal?new Float32Array(y):void 0,x=i.tangent?new Float32Array(y):void 0,F=i.bitangent?new Float32Array(y):void 0,M=i.st?new Float32Array(y/3*2):void 0,v=0,T=0,C=0,z=0,W=0,g=ft,d=ut,A=pt,Z=!0;B/=3;let p,j=0,ct=1/(B-f-1);for(p=0;p<B;++p){let E=p*3,u=s.fromArray(H,E,Q),U=s.fromArray(q,E,Y);if(i.position&&(h[v++]=U.x,h[v++]=U.y,h[v++]=U.z,h[v++]=u.x,h[v++]=u.y,h[v++]=u.z),i.st&&(M[W++]=j,M[W++]=0,M[W++]=j,M[W++]=1),i.normal||i.tangent||i.bitangent){let N=s.clone(s.ZERO,st),K=s.subtract(u,a.geodeticSurfaceNormal(u,Y),Y);if(p+1<B&&(N=s.fromArray(H,E+3,st)),Z){let G=s.subtract(N,u,lt),at=s.subtract(K,u,Q);g=s.normalize(s.cross(at,G,g),g),Z=!1}s.equalsEpsilon(u,N,J.EPSILON10)?Z=!0:(j+=ct,i.tangent&&(d=s.normalize(s.subtract(N,u,d),d)),i.bitangent&&(A=s.normalize(s.cross(g,d,A),A))),i.normal&&(b[T++]=g.x,b[T++]=g.y,b[T++]=g.z,b[T++]=g.x,b[T++]=g.y,b[T++]=g.z),i.tangent&&(x[z++]=d.x,x[z++]=d.y,x[z++]=d.z,x[z++]=d.x,x[z++]=d.y,x[z++]=d.z),i.bitangent&&(F[C++]=A.x,F[C++]=A.y,F[C++]=A.z,F[C++]=A.x,F[C++]=A.y,F[C++]=A.z)}}let D=new it;i.position&&(D.position=new S({componentDatatype:R.DOUBLE,componentsPerAttribute:3,values:h})),i.normal&&(D.normal=new S({componentDatatype:R.FLOAT,componentsPerAttribute:3,values:b})),i.tangent&&(D.tangent=new S({componentDatatype:R.FLOAT,componentsPerAttribute:3,values:x})),i.bitangent&&(D.bitangent=new S({componentDatatype:R.FLOAT,componentsPerAttribute:3,values:F})),i.st&&(D.st=new S({componentDatatype:R.FLOAT,componentsPerAttribute:2,values:M}));let $=y/3;y-=6*(f+1);let L=ot.createTypedArray($,y),O=0;for(p=0;p<$-2;p+=2){let E=p,u=p+2,U=s.fromArray(h,E*3,Q),N=s.fromArray(h,u*3,Y);if(s.equalsEpsilon(U,N,J.EPSILON10))continue;let K=p+1,G=p+3;L[O++]=K,L[O++]=E,L[O++]=G,L[O++]=G,L[O++]=E,L[O++]=u}return new et({attributes:D,indices:L,primitiveType:tt.TRIANGLES,boundingSphere:new I.fromVertices(h)})};var X=k;function ht(t,e){return r(e)&&(t=X.unpack(t,e)),t._ellipsoid=l.clone(t._ellipsoid),X.createGeometry(t)}var Ot=ht;export{Ot as default};
+import {
+  WallGeometryLibrary_default
+} from "./chunk-LXQ5QAEJ.js";
+import "./chunk-OE4MCOC7.js";
+import "./chunk-6D66DPRV.js";
+import {
+  VertexFormat_default
+} from "./chunk-LSSWVB2X.js";
+import "./chunk-NVOABL76.js";
+import "./chunk-BY3E4ONI.js";
+import "./chunk-TF776XCO.js";
+import "./chunk-A5CODJ4M.js";
+import {
+  IndexDatatype_default
+} from "./chunk-EB7PNZTK.js";
+import {
+  GeometryAttributes_default
+} from "./chunk-JYQNWIQQ.js";
+import {
+  GeometryAttribute_default,
+  Geometry_default,
+  PrimitiveType_default
+} from "./chunk-IUROUBPA.js";
+import {
+  BoundingSphere_default
+} from "./chunk-ELI4BUOT.js";
+import "./chunk-OXALEQPI.js";
+import {
+  ComponentDatatype_default
+} from "./chunk-FQPSOOPH.js";
+import {
+  Cartesian3_default,
+  Ellipsoid_default
+} from "./chunk-T6LPN7RI.js";
+import {
+  Math_default
+} from "./chunk-R4OIEIPE.js";
+import "./chunk-RHBWXX7C.js";
+import "./chunk-ZIKGV7EL.js";
+import {
+  defaultValue_default
+} from "./chunk-BAVI3ZS2.js";
+import {
+  DeveloperError_default
+} from "./chunk-TGY6H6N6.js";
+import {
+  defined_default
+} from "./chunk-N4QEHO3U.js";
+
+// packages/engine/Source/Core/WallGeometry.js
+var scratchCartesian3Position1 = new Cartesian3_default();
+var scratchCartesian3Position2 = new Cartesian3_default();
+var scratchCartesian3Position4 = new Cartesian3_default();
+var scratchCartesian3Position5 = new Cartesian3_default();
+var scratchBitangent = new Cartesian3_default();
+var scratchTangent = new Cartesian3_default();
+var scratchNormal = new Cartesian3_default();
+function WallGeometry(options) {
+  options = defaultValue_default(options, defaultValue_default.EMPTY_OBJECT);
+  const wallPositions = options.positions;
+  const maximumHeights = options.maximumHeights;
+  const minimumHeights = options.minimumHeights;
+  if (!defined_default(wallPositions)) {
+    throw new DeveloperError_default("options.positions is required.");
+  }
+  if (defined_default(maximumHeights) && maximumHeights.length !== wallPositions.length) {
+    throw new DeveloperError_default(
+      "options.positions and options.maximumHeights must have the same length."
+    );
+  }
+  if (defined_default(minimumHeights) && minimumHeights.length !== wallPositions.length) {
+    throw new DeveloperError_default(
+      "options.positions and options.minimumHeights must have the same length."
+    );
+  }
+  const vertexFormat = defaultValue_default(options.vertexFormat, VertexFormat_default.DEFAULT);
+  const granularity = defaultValue_default(
+    options.granularity,
+    Math_default.RADIANS_PER_DEGREE
+  );
+  const ellipsoid = defaultValue_default(options.ellipsoid, Ellipsoid_default.default);
+  this._positions = wallPositions;
+  this._minimumHeights = minimumHeights;
+  this._maximumHeights = maximumHeights;
+  this._vertexFormat = VertexFormat_default.clone(vertexFormat);
+  this._granularity = granularity;
+  this._ellipsoid = Ellipsoid_default.clone(ellipsoid);
+  this._workerName = "createWallGeometry";
+  let numComponents = 1 + wallPositions.length * Cartesian3_default.packedLength + 2;
+  if (defined_default(minimumHeights)) {
+    numComponents += minimumHeights.length;
+  }
+  if (defined_default(maximumHeights)) {
+    numComponents += maximumHeights.length;
+  }
+  this.packedLength = numComponents + Ellipsoid_default.packedLength + VertexFormat_default.packedLength + 1;
+}
+WallGeometry.pack = function(value, array, startingIndex) {
+  if (!defined_default(value)) {
+    throw new DeveloperError_default("value is required");
+  }
+  if (!defined_default(array)) {
+    throw new DeveloperError_default("array is required");
+  }
+  startingIndex = defaultValue_default(startingIndex, 0);
+  let i;
+  const positions = value._positions;
+  let length = positions.length;
+  array[startingIndex++] = length;
+  for (i = 0; i < length; ++i, startingIndex += Cartesian3_default.packedLength) {
+    Cartesian3_default.pack(positions[i], array, startingIndex);
+  }
+  const minimumHeights = value._minimumHeights;
+  length = defined_default(minimumHeights) ? minimumHeights.length : 0;
+  array[startingIndex++] = length;
+  if (defined_default(minimumHeights)) {
+    for (i = 0; i < length; ++i) {
+      array[startingIndex++] = minimumHeights[i];
+    }
+  }
+  const maximumHeights = value._maximumHeights;
+  length = defined_default(maximumHeights) ? maximumHeights.length : 0;
+  array[startingIndex++] = length;
+  if (defined_default(maximumHeights)) {
+    for (i = 0; i < length; ++i) {
+      array[startingIndex++] = maximumHeights[i];
+    }
+  }
+  Ellipsoid_default.pack(value._ellipsoid, array, startingIndex);
+  startingIndex += Ellipsoid_default.packedLength;
+  VertexFormat_default.pack(value._vertexFormat, array, startingIndex);
+  startingIndex += VertexFormat_default.packedLength;
+  array[startingIndex] = value._granularity;
+  return array;
+};
+var scratchEllipsoid = Ellipsoid_default.clone(Ellipsoid_default.UNIT_SPHERE);
+var scratchVertexFormat = new VertexFormat_default();
+var scratchOptions = {
+  positions: void 0,
+  minimumHeights: void 0,
+  maximumHeights: void 0,
+  ellipsoid: scratchEllipsoid,
+  vertexFormat: scratchVertexFormat,
+  granularity: void 0
+};
+WallGeometry.unpack = function(array, startingIndex, result) {
+  if (!defined_default(array)) {
+    throw new DeveloperError_default("array is required");
+  }
+  startingIndex = defaultValue_default(startingIndex, 0);
+  let i;
+  let length = array[startingIndex++];
+  const positions = new Array(length);
+  for (i = 0; i < length; ++i, startingIndex += Cartesian3_default.packedLength) {
+    positions[i] = Cartesian3_default.unpack(array, startingIndex);
+  }
+  length = array[startingIndex++];
+  let minimumHeights;
+  if (length > 0) {
+    minimumHeights = new Array(length);
+    for (i = 0; i < length; ++i) {
+      minimumHeights[i] = array[startingIndex++];
+    }
+  }
+  length = array[startingIndex++];
+  let maximumHeights;
+  if (length > 0) {
+    maximumHeights = new Array(length);
+    for (i = 0; i < length; ++i) {
+      maximumHeights[i] = array[startingIndex++];
+    }
+  }
+  const ellipsoid = Ellipsoid_default.unpack(array, startingIndex, scratchEllipsoid);
+  startingIndex += Ellipsoid_default.packedLength;
+  const vertexFormat = VertexFormat_default.unpack(
+    array,
+    startingIndex,
+    scratchVertexFormat
+  );
+  startingIndex += VertexFormat_default.packedLength;
+  const granularity = array[startingIndex];
+  if (!defined_default(result)) {
+    scratchOptions.positions = positions;
+    scratchOptions.minimumHeights = minimumHeights;
+    scratchOptions.maximumHeights = maximumHeights;
+    scratchOptions.granularity = granularity;
+    return new WallGeometry(scratchOptions);
+  }
+  result._positions = positions;
+  result._minimumHeights = minimumHeights;
+  result._maximumHeights = maximumHeights;
+  result._ellipsoid = Ellipsoid_default.clone(ellipsoid, result._ellipsoid);
+  result._vertexFormat = VertexFormat_default.clone(vertexFormat, result._vertexFormat);
+  result._granularity = granularity;
+  return result;
+};
+WallGeometry.fromConstantHeights = function(options) {
+  options = defaultValue_default(options, defaultValue_default.EMPTY_OBJECT);
+  const positions = options.positions;
+  if (!defined_default(positions)) {
+    throw new DeveloperError_default("options.positions is required.");
+  }
+  let minHeights;
+  let maxHeights;
+  const min = options.minimumHeight;
+  const max = options.maximumHeight;
+  const doMin = defined_default(min);
+  const doMax = defined_default(max);
+  if (doMin || doMax) {
+    const length = positions.length;
+    minHeights = doMin ? new Array(length) : void 0;
+    maxHeights = doMax ? new Array(length) : void 0;
+    for (let i = 0; i < length; ++i) {
+      if (doMin) {
+        minHeights[i] = min;
+      }
+      if (doMax) {
+        maxHeights[i] = max;
+      }
+    }
+  }
+  const newOptions = {
+    positions,
+    maximumHeights: maxHeights,
+    minimumHeights: minHeights,
+    ellipsoid: options.ellipsoid,
+    vertexFormat: options.vertexFormat
+  };
+  return new WallGeometry(newOptions);
+};
+WallGeometry.createGeometry = function(wallGeometry) {
+  const wallPositions = wallGeometry._positions;
+  const minimumHeights = wallGeometry._minimumHeights;
+  const maximumHeights = wallGeometry._maximumHeights;
+  const vertexFormat = wallGeometry._vertexFormat;
+  const granularity = wallGeometry._granularity;
+  const ellipsoid = wallGeometry._ellipsoid;
+  const pos = WallGeometryLibrary_default.computePositions(
+    ellipsoid,
+    wallPositions,
+    maximumHeights,
+    minimumHeights,
+    granularity,
+    true
+  );
+  if (!defined_default(pos)) {
+    return;
+  }
+  const bottomPositions = pos.bottomPositions;
+  const topPositions = pos.topPositions;
+  const numCorners = pos.numCorners;
+  let length = topPositions.length;
+  let size = length * 2;
+  const positions = vertexFormat.position ? new Float64Array(size) : void 0;
+  const normals = vertexFormat.normal ? new Float32Array(size) : void 0;
+  const tangents = vertexFormat.tangent ? new Float32Array(size) : void 0;
+  const bitangents = vertexFormat.bitangent ? new Float32Array(size) : void 0;
+  const textureCoordinates = vertexFormat.st ? new Float32Array(size / 3 * 2) : void 0;
+  let positionIndex = 0;
+  let normalIndex = 0;
+  let bitangentIndex = 0;
+  let tangentIndex = 0;
+  let stIndex = 0;
+  let normal = scratchNormal;
+  let tangent = scratchTangent;
+  let bitangent = scratchBitangent;
+  let recomputeNormal = true;
+  length /= 3;
+  let i;
+  let s = 0;
+  const ds = 1 / (length - numCorners - 1);
+  for (i = 0; i < length; ++i) {
+    const i3 = i * 3;
+    const topPosition = Cartesian3_default.fromArray(
+      topPositions,
+      i3,
+      scratchCartesian3Position1
+    );
+    const bottomPosition = Cartesian3_default.fromArray(
+      bottomPositions,
+      i3,
+      scratchCartesian3Position2
+    );
+    if (vertexFormat.position) {
+      positions[positionIndex++] = bottomPosition.x;
+      positions[positionIndex++] = bottomPosition.y;
+      positions[positionIndex++] = bottomPosition.z;
+      positions[positionIndex++] = topPosition.x;
+      positions[positionIndex++] = topPosition.y;
+      positions[positionIndex++] = topPosition.z;
+    }
+    if (vertexFormat.st) {
+      textureCoordinates[stIndex++] = s;
+      textureCoordinates[stIndex++] = 0;
+      textureCoordinates[stIndex++] = s;
+      textureCoordinates[stIndex++] = 1;
+    }
+    if (vertexFormat.normal || vertexFormat.tangent || vertexFormat.bitangent) {
+      let nextTop = Cartesian3_default.clone(
+        Cartesian3_default.ZERO,
+        scratchCartesian3Position5
+      );
+      const groundPosition = Cartesian3_default.subtract(
+        topPosition,
+        ellipsoid.geodeticSurfaceNormal(
+          topPosition,
+          scratchCartesian3Position2
+        ),
+        scratchCartesian3Position2
+      );
+      if (i + 1 < length) {
+        nextTop = Cartesian3_default.fromArray(
+          topPositions,
+          i3 + 3,
+          scratchCartesian3Position5
+        );
+      }
+      if (recomputeNormal) {
+        const scalednextPosition = Cartesian3_default.subtract(
+          nextTop,
+          topPosition,
+          scratchCartesian3Position4
+        );
+        const scaledGroundPosition = Cartesian3_default.subtract(
+          groundPosition,
+          topPosition,
+          scratchCartesian3Position1
+        );
+        normal = Cartesian3_default.normalize(
+          Cartesian3_default.cross(scaledGroundPosition, scalednextPosition, normal),
+          normal
+        );
+        recomputeNormal = false;
+      }
+      if (Cartesian3_default.equalsEpsilon(topPosition, nextTop, Math_default.EPSILON10)) {
+        recomputeNormal = true;
+      } else {
+        s += ds;
+        if (vertexFormat.tangent) {
+          tangent = Cartesian3_default.normalize(
+            Cartesian3_default.subtract(nextTop, topPosition, tangent),
+            tangent
+          );
+        }
+        if (vertexFormat.bitangent) {
+          bitangent = Cartesian3_default.normalize(
+            Cartesian3_default.cross(normal, tangent, bitangent),
+            bitangent
+          );
+        }
+      }
+      if (vertexFormat.normal) {
+        normals[normalIndex++] = normal.x;
+        normals[normalIndex++] = normal.y;
+        normals[normalIndex++] = normal.z;
+        normals[normalIndex++] = normal.x;
+        normals[normalIndex++] = normal.y;
+        normals[normalIndex++] = normal.z;
+      }
+      if (vertexFormat.tangent) {
+        tangents[tangentIndex++] = tangent.x;
+        tangents[tangentIndex++] = tangent.y;
+        tangents[tangentIndex++] = tangent.z;
+        tangents[tangentIndex++] = tangent.x;
+        tangents[tangentIndex++] = tangent.y;
+        tangents[tangentIndex++] = tangent.z;
+      }
+      if (vertexFormat.bitangent) {
+        bitangents[bitangentIndex++] = bitangent.x;
+        bitangents[bitangentIndex++] = bitangent.y;
+        bitangents[bitangentIndex++] = bitangent.z;
+        bitangents[bitangentIndex++] = bitangent.x;
+        bitangents[bitangentIndex++] = bitangent.y;
+        bitangents[bitangentIndex++] = bitangent.z;
+      }
+    }
+  }
+  const attributes = new GeometryAttributes_default();
+  if (vertexFormat.position) {
+    attributes.position = new GeometryAttribute_default({
+      componentDatatype: ComponentDatatype_default.DOUBLE,
+      componentsPerAttribute: 3,
+      values: positions
+    });
+  }
+  if (vertexFormat.normal) {
+    attributes.normal = new GeometryAttribute_default({
+      componentDatatype: ComponentDatatype_default.FLOAT,
+      componentsPerAttribute: 3,
+      values: normals
+    });
+  }
+  if (vertexFormat.tangent) {
+    attributes.tangent = new GeometryAttribute_default({
+      componentDatatype: ComponentDatatype_default.FLOAT,
+      componentsPerAttribute: 3,
+      values: tangents
+    });
+  }
+  if (vertexFormat.bitangent) {
+    attributes.bitangent = new GeometryAttribute_default({
+      componentDatatype: ComponentDatatype_default.FLOAT,
+      componentsPerAttribute: 3,
+      values: bitangents
+    });
+  }
+  if (vertexFormat.st) {
+    attributes.st = new GeometryAttribute_default({
+      componentDatatype: ComponentDatatype_default.FLOAT,
+      componentsPerAttribute: 2,
+      values: textureCoordinates
+    });
+  }
+  const numVertices = size / 3;
+  size -= 6 * (numCorners + 1);
+  const indices = IndexDatatype_default.createTypedArray(numVertices, size);
+  let edgeIndex = 0;
+  for (i = 0; i < numVertices - 2; i += 2) {
+    const LL = i;
+    const LR = i + 2;
+    const pl = Cartesian3_default.fromArray(
+      positions,
+      LL * 3,
+      scratchCartesian3Position1
+    );
+    const pr = Cartesian3_default.fromArray(
+      positions,
+      LR * 3,
+      scratchCartesian3Position2
+    );
+    if (Cartesian3_default.equalsEpsilon(pl, pr, Math_default.EPSILON10)) {
+      continue;
+    }
+    const UL = i + 1;
+    const UR = i + 3;
+    indices[edgeIndex++] = UL;
+    indices[edgeIndex++] = LL;
+    indices[edgeIndex++] = UR;
+    indices[edgeIndex++] = UR;
+    indices[edgeIndex++] = LL;
+    indices[edgeIndex++] = LR;
+  }
+  return new Geometry_default({
+    attributes,
+    indices,
+    primitiveType: PrimitiveType_default.TRIANGLES,
+    boundingSphere: new BoundingSphere_default.fromVertices(positions)
+  });
+};
+var WallGeometry_default = WallGeometry;
+
+// packages/engine/Source/Workers/createWallGeometry.js
+function createWallGeometry(wallGeometry, offset) {
+  if (defined_default(offset)) {
+    wallGeometry = WallGeometry_default.unpack(wallGeometry, offset);
+  }
+  wallGeometry._ellipsoid = Ellipsoid_default.clone(wallGeometry._ellipsoid);
+  return WallGeometry_default.createGeometry(wallGeometry);
+}
+var createWallGeometry_default = createWallGeometry;
+export {
+  createWallGeometry_default as default
+};

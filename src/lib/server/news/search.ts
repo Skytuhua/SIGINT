@@ -17,7 +17,7 @@ import type {
   SuggestionItem,
   YouTubeLive,
 } from "../../news/types";
-import { getGdeltArticles, getGdeltGeo, getGdeltTimeline } from "./providers/gdelt";
+import { getGdeltArticles, getGdeltGeo } from "./providers/gdelt";
 import { geocodeNominatim } from "./providers/nominatim";
 import { getRssArticles } from "./providers/rss";
 import { fetchSecCompanyFilings, fetchSecTickerMap, searchSecFilings } from "./providers/sec";
@@ -188,6 +188,54 @@ function backendState(result: { degraded: boolean; error?: string }): "ok" | "de
   return "ok";
 }
 
+type SourceHealthState = {
+  status: "live" | "cached" | "degraded" | "unavailable";
+  lastSuccessAt: number | null;
+  errorCode: string | null;
+  nextRetryAt: number | null;
+};
+
+function resultError(result: unknown): string | undefined {
+  if (!result || typeof result !== "object") return undefined;
+  const value = (result as { error?: unknown }).error;
+  return typeof value === "string" ? value : undefined;
+}
+
+function normalizeErrorCode(error: string | undefined): string | null {
+  if (!error) return null;
+  const lower = error.toLowerCase();
+  if (lower.includes("circuit-open")) return "circuit_open";
+  if (lower.includes("timeout")) return "timeout";
+  if (lower.includes("429")) return "rate_limited";
+  if (lower.includes("500")) return "server_error";
+  if (lower.includes("network")) return "network_error";
+  return "upstream_error";
+}
+
+function buildSourceHealth(result: {
+  degraded: boolean;
+  error?: string;
+  cacheHit?: "fresh" | "stale" | "miss";
+  hasData: boolean;
+}): SourceHealthState {
+  const now = Date.now();
+  const status = !result.degraded
+    ? "live"
+    : result.cacheHit === "stale"
+      ? "cached"
+      : result.hasData
+        ? "degraded"
+        : "unavailable";
+  const errorCode = normalizeErrorCode(result.error);
+  return {
+    status,
+    lastSuccessAt: status === "live" || status === "cached" ? now : null,
+    errorCode,
+    nextRetryAt:
+      errorCode === "circuit_open" || errorCode === "rate_limited" ? now + 30_000 : null,
+  };
+}
+
 function toYoutubeNewsArticle(stream: YouTubeLive, mode: "live" | "fallback"): NewsArticle {
   const parsedPublishedAt = stream.publishedAt ? Date.parse(stream.publishedAt) : NaN;
   const item: NewsArticle = {
@@ -233,7 +281,12 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
   let ast = parseQuery(rawQ);
   ast = applyUrlParamOverrides(ast, searchParams);
   const normalizedQuery = stringifyQueryAst(ast);
-  const queryTerms = [ast.sym, ast.place, ...ast.freeText].filter(Boolean).join(" ");
+  const rawQueryTerms = [ast.sym, ast.place, ...ast.freeText].filter(Boolean);
+  const stopwordTerms = new Set(["news"]);
+  const filteredQueryTerms = rawQueryTerms
+    .map((t) => String(t).toLowerCase().trim())
+    .filter((term) => term && !stopwordTerms.has(term));
+  const queryTerms = filteredQueryTerms.join(" ");
   const domainFilter = ast.src?.find((s) => s !== "gdelt" && s !== "sec" && s !== "rss");
   const plan = routeQuery(ast, {
     requireCoords: Boolean(
@@ -322,26 +375,32 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
     ? fetchWikidataEntity({ ticker: ast.sym, company: ast.freeText[0] })
     : Promise.resolve({ data: null, degraded: false, latencyMs: 0, cacheHit: "miss" as const });
 
-  const timelinePromise = getGdeltTimeline([ast.sym, ast.place, ...ast.freeText].filter(Boolean).join(" "), ast.timespan ?? "7d");
   const youtubePromise = plan.useYoutube
     ? discoverYouTubeLiveStreams(process.env.YOUTUBE_API_KEY)
     : Promise.resolve({
-        data: { items: [], channelsChecked: 0, liveCount: 0, degraded: [], keyMissing: !process.env.YOUTUBE_API_KEY },
+        data: {
+          items: [],
+          channelsChecked: 0,
+          liveCount: 0,
+          degraded: [],
+          keyMissing: !process.env.YOUTUBE_API_KEY,
+          discoverySource: "youtube-data-api" as const,
+          fallbackActive: false,
+        },
         degraded: false,
         latencyMs: 0,
         cacheHit: "miss" as const,
       });
 
-  const [gdeltResult, rssResult, geoResult, secResult, wikidataResult, timelineResult, youtubeInitialResult] = await Promise.all([
+  const [gdeltResult, rssResult, geoResult, secResult, wikidataResult, youtubeInitialResult] = await Promise.all([
     gdeltPromise,
     rssPromise,
     geoPromise,
     secPromise,
     wikidataPromise,
-    timelinePromise,
     youtubePromise,
   ]);
-  let youtubeResult = youtubeInitialResult;
+  const youtubeResult = youtubeInitialResult;
   const rssDegraded = rssResult.degraded || rssResult.data.degradedFeeds.length > 0;
 
   backendLatency.gdelt = gdeltResult.latencyMs;
@@ -349,7 +408,6 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
   backendLatency.geo = geoResult.latencyMs;
   backendLatency.sec = secResult.latencyMs;
   backendLatency.wikidata = wikidataResult.latencyMs;
-  backendLatency.timeline = timelineResult.latencyMs;
   backendLatency.youtube = youtubeResult.latencyMs;
 
   degraded.gdelt = gdeltResult.degraded;
@@ -357,7 +415,6 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
   degraded.geo = geoResult.degraded;
   degraded.sec = secResult.degraded;
   degraded.wikidata = wikidataResult.degraded;
-  degraded.timeline = timelineResult.degraded;
   degraded.youtube = youtubeResult.degraded;
 
   const backendHealth: Record<string, "ok" | "degraded" | "open_circuit"> = {
@@ -366,8 +423,53 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
     geo: backendState(geoResult),
     sec: backendState(secResult),
     wikidata: backendState(wikidataResult),
-    timeline: backendState(timelineResult),
     youtube: backendState(youtubeResult),
+  };
+  const sourceHealth: Record<
+    string,
+    {
+      status: "live" | "cached" | "degraded" | "unavailable";
+      lastSuccessAt: number | null;
+      errorCode: string | null;
+      nextRetryAt: number | null;
+    }
+  > = {
+    gdelt: buildSourceHealth({
+      degraded: gdeltResult.degraded,
+      error: resultError(gdeltResult),
+      cacheHit: gdeltResult.cacheHit,
+      hasData: gdeltResult.data.length > 0,
+    }),
+    rss: buildSourceHealth({
+      degraded: rssDegraded,
+      error: rssResult.error,
+      cacheHit: rssResult.cacheHit,
+      hasData: rssResult.data.items.length > 0,
+    }),
+    geo: buildSourceHealth({
+      degraded: geoResult.degraded,
+      error: resultError(geoResult),
+      cacheHit: geoResult.cacheHit,
+      hasData: geoResult.data.points.length > 0 || geoResult.data.aggregates.length > 0,
+    }),
+    sec: buildSourceHealth({
+      degraded: secResult.degraded,
+      error: resultError(secResult),
+      cacheHit: secResult.cacheHit,
+      hasData: secResult.data.length > 0,
+    }),
+    wikidata: buildSourceHealth({
+      degraded: wikidataResult.degraded,
+      error: resultError(wikidataResult),
+      cacheHit: wikidataResult.cacheHit,
+      hasData: Boolean(wikidataResult.data),
+    }),
+    youtube: buildSourceHealth({
+      degraded: youtubeResult.degraded,
+      error: resultError(youtubeResult),
+      cacheHit: youtubeResult.cacheHit,
+      hasData: youtubeResult.data.items.length > 0,
+    }),
   };
 
   let items: NewsArticle[] = [
@@ -395,6 +497,28 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
       },
     })),
   ];
+
+  const searchStopwords = new Set(["news"]);
+  const searchTerms = [ast.sym, ast.place, ...ast.freeText]
+    .filter(Boolean)
+    .map((t) => String(t).toLowerCase().trim())
+    .filter((term) => term && !searchStopwords.has(term));
+  if (searchTerms.length > 0) {
+    items = items.filter((item) => {
+      const text = `${item.headline} ${item.snippet ?? ""} ${item.entity ?? ""} ${item.placeName ?? ""}`.toLowerCase();
+      return searchTerms.some((term) => term.length > 0 && text.includes(term));
+    });
+  }
+
+  const blockedDomains = ["producthunt.com"];
+  const blockedSourceLabels = ["product hunt"];
+  items = items.filter((item) => {
+    const domain = item.domain.toLowerCase();
+    const source = (item.source ?? "").toLowerCase();
+    if (blockedDomains.some((d) => domain.includes(d))) return false;
+    if (blockedSourceLabels.some((s) => source.includes(s))) return false;
+    return true;
+  });
 
   const pointByCanonical = new Map<string, { lat: number; lon: number; name: string; confidence: number }>();
   for (const point of geoResult.data.points) {
@@ -437,6 +561,12 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
     backendLatency.nominatim = nominatim.latencyMs;
     degraded.nominatim = nominatim.degraded;
     backendHealth.nominatim = backendState(nominatim);
+    sourceHealth.nominatim = buildSourceHealth({
+      degraded: nominatim.degraded,
+      error: nominatim.error,
+      cacheHit: nominatim.cacheHit,
+      hasData: Boolean(nominatim.data),
+    });
     if (nominatim.data) {
       for (const item of items.slice(0, 30)) {
         if (Number.isFinite(item.lat) && Number.isFinite(item.lon)) continue;
@@ -501,14 +631,7 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
     }
   }
 
-  if (!items.length && !plan.useYoutube) {
-    youtubeResult = await discoverYouTubeLiveStreams(process.env.YOUTUBE_API_KEY);
-    backendLatency.youtube = youtubeResult.latencyMs;
-    degraded.youtube = youtubeResult.degraded;
-    backendHealth.youtube = backendState(youtubeResult);
-  }
-
-  if (!items.length && youtubeResult.data.items.length) {
+  if (!items.length && plan.useYoutube && youtubeResult.data.items.length) {
     items = youtubeResult.data.items.slice(0, 40).map((stream) => toYoutubeNewsArticle(stream, "fallback"));
   }
 
@@ -524,12 +647,14 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
     src: ast.src,
   };
   const primaryUnavailable = backendHealth.gdelt !== "ok" && backendHealth.rss !== "ok";
-  const hasVideoFallback = youtubeResult.data.items.length > 0;
+  const hasVideoFallback = plan.useYoutube && youtubeResult.data.items.length > 0;
   const emptyReason = !items.length
     ? primaryUnavailable
-      ? hasVideoFallback
-        ? "Primary text-news upstream is degraded. Try removing restrictive filters to view video fallback items."
-        : "Primary text-news upstream is degraded and no fallback items are available. Check connectivity or configure YOUTUBE_API_KEY."
+      ? plan.useYoutube
+        ? hasVideoFallback
+          ? "Primary text-news upstream is degraded. Try removing restrictive filters to view video fallback items."
+          : "Primary text-news upstream is degraded and no video fallback items are available. Check connectivity or relax filters."
+        : "Primary text-news upstream is degraded. Check connectivity or relax filters."
       : "No stories matched current constraints. Relax filters, disable Search In View, or widen time range."
     : null;
 
@@ -547,7 +672,8 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
     degraded,
     backendLatency,
     backendHealth,
-    timeline: timelineResult.data,
+    sourceHealth,
+    timeline: [],
     emptyReason,
     fallbackApplied: [],
     activeConstraints,

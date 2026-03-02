@@ -59,6 +59,24 @@ function configureCameraControls(
   ];
 }
 
+export async function preloadCesium(): Promise<void> {
+  if (typeof window === 'undefined') return;
+
+  // Must set CESIUM_BASE_URL before any Cesium import resolves asset URLs
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (window as any).CESIUM_BASE_URL = '/cesium';
+
+  try {
+    const Cesium = await import('cesium');
+    Cesium.Ion.defaultAccessToken = process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN ?? '';
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.warn('[viewer] Cesium preload failed', error);
+    }
+  }
+}
+
 export async function initViewer(container: HTMLElement): Promise<import('cesium').Viewer> {
   // Must set CESIUM_BASE_URL before any Cesium import resolves asset URLs
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,8 +88,16 @@ export async function initViewer(container: HTMLElement): Promise<import('cesium
 
   Cesium.Ion.defaultAccessToken = process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN ?? '';
 
+  // Use a base imagery provider that works without Ion so the globe is never black.
+  // When Ion token is valid, Cesium's default would use World Imagery; when missing or
+  // when Ion fails, the default leaves the globe black. OSM always loads.
+  const baseImagery = new Cesium.OpenStreetMapImageryProvider({
+    url: 'https://tile.openstreetmap.org/',
+  });
+
   // Create viewer with all default controls disabled (we build our own UI)
   const viewer = new Cesium.Viewer(container, {
+    imageryProvider: baseImagery,
     animation: false,
     baseLayerPicker: false,
     fullscreenButton: false,
@@ -84,7 +110,7 @@ export async function initViewer(container: HTMLElement): Promise<import('cesium
     navigationHelpButton: false,
     requestRenderMode: false,
     maximumRenderTimeChange: Infinity,
-  });
+  } as Record<string, unknown>);
   configureCameraControls(viewer, Cesium);
 
   // Hide default credit display 閳?we add our own attribution

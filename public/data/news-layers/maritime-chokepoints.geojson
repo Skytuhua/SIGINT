@@ -1,0 +1,20 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature", "id": "chk-hormuz",   "geometry": { "type": "Point", "coordinates": [56.493, 26.565] }, "properties": { "name": "Strait of Hormuz",       "throughput": "21M bbl/day oil", "risk": "high",   "ts": 1772435598914 } },
+    { "type": "Feature", "id": "chk-malacca",  "geometry": { "type": "Point", "coordinates": [103.835, 1.263]  }, "properties": { "name": "Strait of Malacca",      "throughput": "100k vessels/yr", "risk": "medium", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "chk-bab",      "geometry": { "type": "Point", "coordinates": [43.425, 12.582]  }, "properties": { "name": "Bab el-Mandeb",          "throughput": "6.2M bbl/day",   "risk": "high",   "ts": 1772435598914 } },
+    { "type": "Feature", "id": "chk-suez",     "geometry": { "type": "Point", "coordinates": [32.556, 30.046]  }, "properties": { "name": "Suez Canal",             "throughput": "10% world trade", "risk": "medium", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "chk-panama",   "geometry": { "type": "Point", "coordinates": [-79.919, 9.050]  }, "properties": { "name": "Panama Canal",           "throughput": "5% world trade",  "risk": "low",    "ts": 1772435598914 } },
+    { "type": "Feature", "id": "chk-dover",    "geometry": { "type": "Point", "coordinates": [1.324, 51.117]   }, "properties": { "name": "Strait of Dover",        "throughput": "500 vessels/day", "risk": "low",    "ts": 1772435598914 } },
+    { "type": "Feature", "id": "chk-giuk",     "geometry": { "type": "Point", "coordinates": [-22.000, 65.000] }, "properties": { "name": "GIUK Gap",               "throughput": "NATO strategic",  "risk": "medium", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "chk-lombok",   "geometry": { "type": "Point", "coordinates": [115.741, -8.700] }, "properties": { "name": "Lombok Strait",          "throughput": "VLCC alternative","risk": "low",    "ts": 1772435598914 } },
+    { "type": "Feature", "id": "chk-sunda",    "geometry": { "type": "Point", "coordinates": [105.861, -6.097] }, "properties": { "name": "Sunda Strait",           "throughput": "LNG corridor",    "risk": "low",    "ts": 1772435598914 } },
+    { "type": "Feature", "id": "chk-bosphorus","geometry": { "type": "Point", "coordinates": [29.017, 41.107]  }, "properties": { "name": "Bosphorus & Dardanelles","throughput": "3M bbl/day",      "risk": "medium", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "chk-capehorn", "geometry": { "type": "Point", "coordinates": [-67.271, -55.976]}, "properties": { "name": "Cape Horn",             "throughput": "Atlantic-Pacific", "risk": "low",    "ts": 1772435598914 } },
+    { "type": "Feature", "id": "chk-goodhope", "geometry": { "type": "Point", "coordinates": [18.479, -34.357] }, "properties": { "name": "Cape of Good Hope",     "throughput": "Suez alternative","risk": "low",    "ts": 1772435598914 } },
+    { "type": "Feature", "id": "chk-luzon",    "geometry": { "type": "Point", "coordinates": [121.580, 18.502] }, "properties": { "name": "Luzon Strait",           "throughput": "SCS gateway",     "risk": "medium", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "chk-oresund",  "geometry": { "type": "Point", "coordinates": [12.689, 55.827]  }, "properties": { "name": "Øresund / Danish Straits","throughput": "Baltic access",  "risk": "low",    "ts": 1772435598914 } },
+    { "type": "Feature", "id": "chk-tsugaru",  "geometry": { "type": "Point", "coordinates": [140.690, 41.673] }, "properties": { "name": "Tsugaru Strait",         "throughput": "Japan-Russia",    "risk": "low",    "ts": 1772435598914 } }
+  ]
+}

@@ -55,33 +55,6 @@ export default function DraggableDashboardGrid({ panels }: DraggableDashboardGri
   }, [panelZOrder, panels]);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  // #region agent log
-  useEffect(() => {
-    const el = containerRef.current?.querySelector(".wv-grid-drag") ?? containerRef.current?.closest(".wv-grid-drag");
-    if (!el) return;
-    const ro = new ResizeObserver(() => {
-      const items = el.querySelectorAll(".react-grid-item:not(.react-grid-placeholder)");
-      const sample = Array.from(items).slice(0, 3).map((node) => {
-        const style = (node as HTMLElement).style;
-        return { z: style.getPropertyValue("--wv-item-z") || "unset", tag: node.className.slice(0, 40) };
-      });
-      fetch("http://127.0.0.1:7928/ingest/3da76906-48e1-4cba-af71-0b7fc1ab7982", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "3568b4" },
-        body: JSON.stringify({
-          sessionId: "3568b4",
-          location: "DraggableDashboardGrid.tsx:ResizeObserver",
-          message: "resize observed",
-          data: { itemCount: items.length, sample, panelZOrderLength: panelZOrder.length },
-          hypothesisId: "H1",
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [panelZOrder.length]);
-  // #endregion
 
   const safeLayouts = useMemo(() => {
     const next: ResponsiveLayouts<string> = { ...layouts } as ResponsiveLayouts<string>;

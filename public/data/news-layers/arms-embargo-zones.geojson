@@ -1,0 +1,55 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature", "id": "emb-kp",
+      "geometry": { "type": "Polygon", "coordinates": [[[124,37],[130,37],[130,43],[124,43],[124,37]]] },
+      "properties": { "name": "North Korea", "embargo": "UN comprehensive", "since": 2006, "resolution": "UNSCR 1718+", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "emb-ir",
+      "geometry": { "type": "Polygon", "coordinates": [[[44,25],[64,25],[64,40],[44,40],[44,25]]] },
+      "properties": { "name": "Iran", "embargo": "UN + US/EU", "since": 2007, "resolution": "UNSCR 1747", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "emb-so",
+      "geometry": { "type": "Polygon", "coordinates": [[[40,-2],[52,-2],[52,12],[40,12],[40,-2]]] },
+      "properties": { "name": "Somalia", "embargo": "UN partial", "since": 1992, "resolution": "UNSCR 733", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "emb-ly",
+      "geometry": { "type": "Polygon", "coordinates": [[[9,20],[26,20],[26,34],[9,34],[9,20]]] },
+      "properties": { "name": "Libya", "embargo": "UN", "since": 2011, "resolution": "UNSCR 1970", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "emb-sd",
+      "geometry": { "type": "Polygon", "coordinates": [[[22,8],[39,8],[39,23],[22,23],[22,8]]] },
+      "properties": { "name": "Sudan (Darfur)", "embargo": "UN (Darfur)", "since": 2004, "resolution": "UNSCR 1556", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "emb-car",
+      "geometry": { "type": "Polygon", "coordinates": [[[14,2],[28,2],[28,12],[14,12],[14,2]]] },
+      "properties": { "name": "Central African Republic", "embargo": "UN", "since": 2013, "resolution": "UNSCR 2127", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "emb-drc",
+      "geometry": { "type": "Polygon", "coordinates": [[[12,-14],[32,-14],[32,6],[12,6],[12,-14]]] },
+      "properties": { "name": "DRC (East)", "embargo": "UN partial (east)", "since": 2003, "resolution": "UNSCR 1493", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "emb-ht",
+      "geometry": { "type": "Polygon", "coordinates": [[[-75,17],[-71,17],[-71,20],[-75,20],[-75,17]]] },
+      "properties": { "name": "Haiti", "embargo": "UN", "since": 2022, "resolution": "UNSCR 2653", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "emb-ye",
+      "geometry": { "type": "Polygon", "coordinates": [[[42,11],[56,11],[56,20],[42,20],[42,11]]] },
+      "properties": { "name": "Yemen (Houthis)", "embargo": "UN targeted", "since": 2015, "resolution": "UNSCR 2216", "ts": 1772435598914 }
+    },
+    {
+      "type": "Feature", "id": "emb-ml",
+      "geometry": { "type": "Polygon", "coordinates": [[[-13,10],[6,10],[6,25],[-13,25],[-13,10]]] },
+      "properties": { "name": "Mali", "embargo": "UN", "since": 2013, "resolution": "UNSCR 2100", "ts": 1772435598914 }
+    }
+  ]
+}

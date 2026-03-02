@@ -71,6 +71,8 @@ interface SavedControllerState {
 export interface GoogleMapsNavOptions {
   /** Match the CesiumGlobe `disableZoom` prop — skips attaching the wheel handler. */
   disableZoom?: boolean;
+  /** When set, left-drag orbits around this target (e.g. selected flight/satellite) instead of panning. */
+  getOrbitTarget?: () => Cartesian3 | null;
 }
 
 // ─── Main class ───────────────────────────────────────────────────────────────
@@ -86,13 +88,15 @@ export class GoogleMapsNav {
 
   // Tracked DOM listeners for clean teardown
   private _canvasListeners: Array<[string, EventListener]> = [];
+  private _canvasCaptureListeners: Array<[string, EventListener]> = [];
 
   // Wheel / smooth-zoom state
   private _pendingZoom  = 0;
   private _zoomAnchor: import('cesium').Cartesian3 | null = null;  // screen-centre globe point
 
-  // Right-drag orbit state
+  // Right-drag orbit state (also used for left-drag orbit when getOrbitTarget is set)
   private _isTilting    = false;
+  private _isLeftOrbit  = false;  // true when orbit was started with left button around selected icon
   private _tiltLastX    = 0;
   private _tiltLastY    = 0;
   private _tiltAnchor: Cartesian3 | null = null;
@@ -173,6 +177,9 @@ export class GoogleMapsNav {
       this._on('dblclick', this._onDblClick as EventListener);
     }
     this._on('mousedown',   this._onMouseDown   as EventListener);
+    if (this.opts.getOrbitTarget) {
+      this._onCapture('mousedown', this._onLeftMouseDown as EventListener);
+    }
     this._on('contextmenu', this._onContextMenu as EventListener);
 
     // ── Start the smooth-zoom rAF loop ───────────────────────────────────
@@ -194,6 +201,10 @@ export class GoogleMapsNav {
       this.canvas.removeEventListener(type, fn);
     }
     this._canvasListeners = [];
+    for (const [type, fn] of this._canvasCaptureListeners) {
+      this.canvas.removeEventListener(type, fn, true);
+    }
+    this._canvasCaptureListeners = [];
 
     // Clean up any in-progress right-drag
     this._endTilt(/* restoreEnableTilt */ false);
@@ -295,9 +306,33 @@ export class GoogleMapsNav {
     });
   };
 
+  /** Left mousedown (capture): when getOrbitTarget is set, orbit around that target instead of pan. */
+  private _onLeftMouseDown = (e: MouseEvent): void => {
+    if (e.button !== 0) return;
+    const getTarget = this.opts.getOrbitTarget;
+    if (!getTarget) return;
+    const anchor = getTarget();
+    if (!anchor) return;
+    e.preventDefault();
+    e.stopPropagation();
+    this._tiltAnchor  = this.C.Cartesian3.clone(anchor);
+    this._tiltLastX   = e.clientX;
+    this._tiltLastY   = e.clientY;
+    this._isTilting   = true;
+    this._isLeftOrbit = true;
+    this.viewer.scene.screenSpaceCameraController.enableTilt = false;
+    const onMove: EventListener = (ev) => this._onTiltMove(ev as MouseEvent);
+    const onUp:   EventListener = ()   => this._endTilt(true);
+    this._tiltDocMove = onMove;
+    this._tiltDocUp   = onUp;
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup',   onUp);
+  };
+
   private _onMouseDown = (e: MouseEvent): void => {
     if (e.button !== 2) return; // right-button only
     e.preventDefault();
+    this._isLeftOrbit = false;
 
     const anchor = this._pickGlobe(this._toC2(e.offsetX, e.offsetY));
     this._tiltAnchor = anchor ? this.C.Cartesian3.clone(anchor) : null;
@@ -334,7 +369,15 @@ export class GoogleMapsNav {
 
     const C      = this.C;
     const camera = this.viewer.camera;
-    const anchor = this._tiltAnchor;
+    // For left-drag orbit around selected icon, refresh anchor each move (follows moving target)
+    let anchor = this._tiltAnchor;
+    if (this._isLeftOrbit && this.opts.getOrbitTarget) {
+      const next = this.opts.getOrbitTarget();
+      if (next) {
+        anchor = this.C.Cartesian3.clone(next, anchor ?? undefined);
+        this._tiltAnchor = anchor;
+      }
+    }
 
     if (anchor) {
       // ── Orbit around anchor using HeadingPitchRange ─────────────────
@@ -367,7 +410,9 @@ export class GoogleMapsNav {
   }
 
   private _endTilt(restoreEnableTilt: boolean): void {
-    this._isTilting  = false;
+    const wasLeftOrbit = this._isLeftOrbit;
+    this._isTilting   = false;
+    this._isLeftOrbit = false;
     this._tiltAnchor = null;
 
     if (this._tiltDocMove) {
@@ -380,8 +425,10 @@ export class GoogleMapsNav {
     }
 
     if (!this.viewer.isDestroyed()) {
-      // Release the lookAt constraint so pan/translate resumes normally
-      this.viewer.camera.lookAtTransform(this.C.Matrix4.IDENTITY);
+      // Release lookAt only for right-drag; when left-dragging around selected icon, globe keeps lock
+      if (!wasLeftOrbit) {
+        this.viewer.camera.lookAtTransform(this.C.Matrix4.IDENTITY);
+      }
       if (restoreEnableTilt) {
         this.viewer.scene.screenSpaceCameraController.enableTilt = true;
       }
@@ -487,5 +534,11 @@ export class GoogleMapsNav {
   private _on(type: string, handler: EventListener): void {
     this.canvas.addEventListener(type, handler);
     this._canvasListeners.push([type, handler]);
+  }
+
+  /** Attach a capture-phase listener for teardown. */
+  private _onCapture(type: string, handler: EventListener): void {
+    this.canvas.addEventListener(type, handler, true);
+    this._canvasCaptureListeners.push([type, handler]);
   }
 }

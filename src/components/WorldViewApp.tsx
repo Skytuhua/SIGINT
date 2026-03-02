@@ -69,10 +69,16 @@ export default function WorldViewApp() {
     const el = globeSectionRef.current;
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
+      // Shift + wheel: scroll the page. Plain wheel: let event reach Cesium for zoom.
+      if (!e.shiftKey) return;
+      const scrollContainer = el.parentElement?.closest?.(".wv-unified-scroll");
+      if (!scrollContainer) return;
+      scrollContainer.scrollTop += e.deltaY;
       e.preventDefault();
+      e.stopPropagation();
     };
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
+    el.addEventListener("wheel", onWheel, { passive: false, capture: true });
+    return () => el.removeEventListener("wheel", onWheel, { capture: true });
   }, [activeView]);
 
   useEffect(() => {
@@ -190,6 +196,7 @@ export default function WorldViewApp() {
           flights: false,
           military: false,
           earthquakes: false,
+          disasters: false,
           satellites: false,
           traffic: false,
           cctv: false,
@@ -217,34 +224,6 @@ export default function WorldViewApp() {
     const main = document.querySelector<HTMLElement>(".wv-main-frame");
     const scroll = document.querySelector<HTMLElement>(".wv-unified-scroll");
     if (!main || !scroll || !globeSectionRef.current) return;
-
-    const mainRect = main.getBoundingClientRect();
-    const globeRect = globeSectionRef.current.getBoundingClientRect();
-
-    // #region agent log
-    fetch("http://127.0.0.1:7928/ingest/3da76906-48e1-4cba-af71-0b7fc1ab7982", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Debug-Session-Id": "f7fc6b",
-      },
-      body: JSON.stringify({
-        sessionId: "f7fc6b",
-        runId: "pre-fix",
-        hypothesisId: "A",
-        location: "WorldViewApp.tsx:layout",
-        message: "Unified layout metrics",
-        data: {
-          globeHeightVh,
-          mainHeight: mainRect.height,
-          globeHeightPx: globeRect.height,
-          scrollClientHeight: scroll.clientHeight,
-          scrollScrollHeight: scroll.scrollHeight,
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
   }, [globeHeightVh]);
 
   return (

@@ -13,14 +13,14 @@ const GDELT_CONTEXT_BASE = "https://api.gdeltproject.org/api/v2/context/context"
 
 const DOC_POLICY: UpstreamPolicy = {
   key: "gdelt-doc",
-  ttlMs: 60_000,
-  staleTtlMs: 12 * 60_000,
+  ttlMs: 30_000,
+  staleTtlMs: 8 * 60_000,
   timeoutMs: 12_000,
   maxRetries: 2,
   backoffBaseMs: 400,
   circuitFailureThreshold: 3,
   circuitOpenMs: 2 * 60_000,
-  rateLimit: { capacity: 8, refillPerSec: 6, minIntervalMs: 80 },
+  rateLimit: { capacity: 10, refillPerSec: 8, minIntervalMs: 80 },
 };
 
 const GEO_POLICY: UpstreamPolicy = {
@@ -99,6 +99,7 @@ const CAT_QUERY_MAP: Partial<Record<NewsCategory, string>> = {
   world: "theme:UNGP_HUMAN_RIGHTS OR election OR government",
   filings: "\"SEC filing\" OR \"annual report\" OR \"quarterly report\"",
   local: "\"city council\" OR \"local government\" OR county OR regional",
+  government: "congress OR senate OR legislation OR \"executive order\" OR \"white house\" OR policy OR regulation",
 };
 
 function buildQuery(params: GdeltDocParams): string {
@@ -122,8 +123,8 @@ function parsePoint(row: Record<string, unknown>): GdeltGeoPoint | null {
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
   const count = Number(row.count ?? row.value ?? row.numarticles ?? 1);
   return {
-    name: String(row.name ?? row.fullname ?? row.country ?? row.adm1 ?? "unknown"),
-    fullname: String(row.fullname ?? row.name ?? row.country ?? row.adm1 ?? "unknown"),
+    name: String(row.name ?? row.fullname ?? row.country ?? row.adm1 ?? ""),
+    fullname: String(row.fullname ?? row.name ?? row.country ?? row.adm1 ?? ""),
     countrycode: String(row.countrycode ?? row.code ?? row.country ?? "").slice(0, 2).toUpperCase(),
     lat,
     lon,

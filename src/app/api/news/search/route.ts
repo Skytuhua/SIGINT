@@ -14,12 +14,13 @@ export async function GET(request: Request) {
       degraded: result.degraded,
       backendLatency: result.backendLatency,
       backendHealth: result.backendHealth,
+      sourceHealth: result.sourceHealth,
       emptyReason: result.emptyReason,
       fallbackApplied: result.fallbackApplied,
       activeConstraints: result.activeConstraints,
       queryEcho: result.queryEcho,
       timeline: result.timeline,
     },
-    { headers: { "Cache-Control": "no-store, max-age=0" } }
+    { headers: { "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30" } }
   );
 }

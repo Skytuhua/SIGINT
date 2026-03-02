@@ -23,4 +23,721 @@
  * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
  */
 
-import{a as Ct,b as vt}from"./chunk-QALYXFKR.js";import{a as Mt}from"./chunk-RIW4PILL.js";import{a as z}from"./chunk-NVJ64HSB.js";import"./chunk-OKAWXMC7.js";import{a as Wt}from"./chunk-CRU5R7HF.js";import{a as X}from"./chunk-DBOVA5XH.js";import"./chunk-PPN6SLYU.js";import{b as U,g as bt,h as At}from"./chunk-SOWUYSYI.js";import"./chunk-I36V6CKP.js";import{a as P,b as wt,c as lt,d as pt}from"./chunk-WG62ICZK.js";import{a as f}from"./chunk-EEN7GMYN.js";import"./chunk-SXYTVHGU.js";import"./chunk-RAWIUDJR.js";import"./chunk-KGKDCW56.js";import{a as m}from"./chunk-G4IO3CPJ.js";import{e as w}from"./chunk-GBRF7ES3.js";function T(){m.throwInstantiationError()}Object.defineProperties(T.prototype,{errorEvent:{get:m.throwInstantiationError},credit:{get:m.throwInstantiationError},tilingScheme:{get:m.throwInstantiationError},hasWaterMask:{get:m.throwInstantiationError},hasVertexNormals:{get:m.throwInstantiationError},availability:{get:m.throwInstantiationError}});var Ot=[];T.getRegularGridIndices=function(t,n){if(t*n>=f.FOUR_GIGABYTES)throw new m("The total number of vertices (width * height) must be less than 4,294,967,296.");let o=Ot[t];w(o)||(Ot[t]=o=[]);let e=o[n];return w(e)||(t*n<f.SIXTY_FOUR_KILOBYTES?e=o[n]=new Uint16Array((t-1)*(n-1)*6):e=o[n]=new Uint32Array((t-1)*(n-1)*6),Pt(t,n,e,0)),e};var Gt=[];T.getRegularGridIndicesAndEdgeIndices=function(t,n){if(t*n>=f.FOUR_GIGABYTES)throw new m("The total number of vertices (width * height) must be less than 4,294,967,296.");let o=Gt[t];w(o)||(Gt[t]=o=[]);let e=o[n];if(!w(e)){let r=T.getRegularGridIndices(t,n),s=Lt(t,n),i=s.westIndicesSouthToNorth,c=s.southIndicesEastToWest,h=s.eastIndicesNorthToSouth,E=s.northIndicesWestToEast;e=o[n]={indices:r,westIndicesSouthToNorth:i,southIndicesEastToWest:c,eastIndicesNorthToSouth:h,northIndicesWestToEast:E}}return e};var kt=[];T.getRegularGridAndSkirtIndicesAndEdgeIndices=function(t,n){if(t*n>=f.FOUR_GIGABYTES)throw new m("The total number of vertices (width * height) must be less than 4,294,967,296.");let o=kt[t];w(o)||(kt[t]=o=[]);let e=o[n];if(!w(e)){let r=t*n,s=(t-1)*(n-1)*6,i=t*2+n*2,c=Math.max(0,i-4)*6,h=r+i,E=s+c,g=Lt(t,n),d=g.westIndicesSouthToNorth,p=g.southIndicesEastToWest,b=g.eastIndicesNorthToSouth,L=g.northIndicesWestToEast,N=X.createTypedArray(h,E);Pt(t,n,N,0),T.addSkirtIndices(d,p,b,L,r,N,s),e=o[n]={indices:N,westIndicesSouthToNorth:d,southIndicesEastToWest:p,eastIndicesNorthToSouth:b,northIndicesWestToEast:L,indexCountWithoutSkirts:s}}return e};T.addSkirtIndices=function(t,n,o,e,r,s,i){let c=r;i=Z(t,c,s,i),c+=t.length,i=Z(n,c,s,i),c+=n.length,i=Z(o,c,s,i),c+=o.length,Z(e,c,s,i)};function Lt(t,n){let o=new Array(n),e=new Array(t),r=new Array(n),s=new Array(t),i;for(i=0;i<t;++i)s[i]=i,e[i]=t*n-1-i;for(i=0;i<n;++i)r[i]=(i+1)*t-1,o[i]=(n-i-1)*t;return{westIndicesSouthToNorth:o,southIndicesEastToWest:e,eastIndicesNorthToSouth:r,northIndicesWestToEast:s}}function Pt(t,n,o,e){let r=0;for(let s=0;s<n-1;++s){for(let i=0;i<t-1;++i){let c=r,h=c+t,E=h+1,g=c+1;o[e++]=c,o[e++]=h,o[e++]=g,o[e++]=g,o[e++]=h,o[e++]=E,++r}++r}}function Z(t,n,o,e){let r=t[0],s=t.length;for(let i=1;i<s;++i){let c=t[i];o[e++]=r,o[e++]=c,o[e++]=n,o[e++]=n,o[e++]=c,o[e++]=n+1,r=c,++n}return e}T.heightmapTerrainQuality=.25;T.getEstimatedLevelZeroGeometricErrorForAHeightmap=function(t,n,o){return t.maximumRadius*2*Math.PI*T.heightmapTerrainQuality/(n*o)};T.prototype.requestTileGeometry=m.throwInstantiationError;T.prototype.getLevelMaximumGeometricError=m.throwInstantiationError;T.prototype.getTileDataAvailable=m.throwInstantiationError;T.prototype.loadTileDataAvailability=m.throwInstantiationError;var Vt=T;var ht=32767,D=new P,Xt=new P,Zt=new P,u=new wt,Y=new lt;function Jt(t,n){let o=t.quantizedVertices,e=o.length/3,r=t.octEncodedNormals,s=t.westIndices.length+t.eastIndices.length+t.southIndices.length+t.northIndices.length,i=t.includeWebMercatorT,c=t.exaggeration,h=t.exaggerationRelativeHeight,g=c!==1,d=At.clone(t.rectangle),p=d.west,b=d.south,L=d.east,N=d.north,I=pt.clone(t.ellipsoid),y=t.minimumHeight,v=t.maximumHeight,S=t.relativeToCenter,_=bt.eastNorthUpToFixedFrame(S,I),O=U.inverseTransformation(_,new U),G,A;i&&(G=z.geodeticLatitudeToMercatorAngle(b),A=1/(z.geodeticLatitudeToMercatorAngle(N)-G));let j=o.subarray(0,e),q=o.subarray(e,2*e),Q=o.subarray(e*2,3*e),R=w(r),l=new Array(e),M=new Array(e),et=new Array(e),It=i?new Array(e):[],gt=g?new Array(e):[],W=Xt;W.x=Number.POSITIVE_INFINITY,W.y=Number.POSITIVE_INFINITY,W.z=Number.POSITIVE_INFINITY;let C=Zt;C.x=Number.NEGATIVE_INFINITY,C.y=Number.NEGATIVE_INFINITY,C.z=Number.NEGATIVE_INFINITY;let ot=Number.POSITIVE_INFINITY,nt=Number.NEGATIVE_INFINITY,it=Number.POSITIVE_INFINITY,rt=Number.NEGATIVE_INFINITY;for(let a=0;a<e;++a){let x=j[a],Kt=q[a],St=x/ht,xt=Kt/ht,yt=f.lerp(y,v,Q[a]/ht);u.longitude=f.lerp(p,L,St),u.latitude=f.lerp(b,N,xt),u.height=yt,ot=Math.min(u.longitude,ot),nt=Math.max(u.longitude,nt),it=Math.min(u.latitude,it),rt=Math.max(u.latitude,rt);let dt=I.cartographicToCartesian(u);l[a]=new lt(St,xt),M[a]=yt,et[a]=dt,i&&(It[a]=(z.geodeticLatitudeToMercatorAngle(u.latitude)-G)*A),g&&(gt[a]=I.geodeticSurfaceNormal(dt)),U.multiplyByPoint(O,dt,D),P.minimumByComponent(D,W,W),P.maximumByComponent(D,C,C)}let st=tt(t.westIndices,function(a,x){return l[a].y-l[x].y}),ct=tt(t.eastIndices,function(a,x){return l[x].y-l[a].y}),at=tt(t.southIndices,function(a,x){return l[x].x-l[a].x}),ut=tt(t.northIndices,function(a,x){return l[a].x-l[x].x}),mt;y<0&&(mt=new Ct(I).computeHorizonCullingPointPossiblyUnderEllipsoid(S,et,y));let k=y;k=Math.min(k,J(t.westIndices,t.westSkirtHeight,M,l,d,I,O,W,C)),k=Math.min(k,J(t.southIndices,t.southSkirtHeight,M,l,d,I,O,W,C)),k=Math.min(k,J(t.eastIndices,t.eastSkirtHeight,M,l,d,I,O,W,C)),k=Math.min(k,J(t.northIndices,t.northSkirtHeight,M,l,d,I,O,W,C));let Ft=new Wt(W,C,S),V=new vt(S,Ft,k,v,_,R,i,g,c,h),F=V.stride,Bt=e*F+s*F,B=new Float32Array(Bt),ft=0;for(let a=0;a<e;++a){if(R){let x=a*2;Y.x=r[x],Y.y=r[x+1]}ft=V.encode(B,ft,et[a],l[a],M[a],Y,It[a],gt[a])}let Ht=Math.max(0,(s-4)*2),_t=t.indices.length+Ht*3,K=X.createTypedArray(e+s,_t);K.set(t.indices,0);let Tt=1e-4,Et=(nt-ot)*Tt,Nt=(rt-it)*Tt,Yt=-Et,Rt=0,Ut=Et,zt=0,Dt=0,jt=Nt,qt=0,Qt=-Nt,H=e*F;return $(B,H,st,V,M,l,r,I,d,t.westSkirtHeight,G,A,Yt,Rt),H+=t.westIndices.length*F,$(B,H,at,V,M,l,r,I,d,t.southSkirtHeight,G,A,qt,Qt),H+=t.southIndices.length*F,$(B,H,ct,V,M,l,r,I,d,t.eastSkirtHeight,G,A,Ut,zt),H+=t.eastIndices.length*F,$(B,H,ut,V,M,l,r,I,d,t.northSkirtHeight,G,A,Dt,jt),Vt.addSkirtIndices(st,at,ct,ut,e,K,t.indices.length),n.push(B.buffer,K.buffer),{vertices:B.buffer,indices:K.buffer,westIndicesSouthToNorth:st,southIndicesEastToWest:at,eastIndicesNorthToSouth:ct,northIndicesWestToEast:ut,vertexStride:F,center:S,minimumHeight:y,maximumHeight:v,occludeePointInScaledSpace:mt,encoding:V,indexCountWithoutSkirts:t.indices.length}}function J(t,n,o,e,r,s,i,c,h){let E=Number.POSITIVE_INFINITY,g=r.north,d=r.south,p=r.east,b=r.west;p<b&&(p+=f.TWO_PI);let L=t.length;for(let N=0;N<L;++N){let I=t[N],y=o[I],v=e[I];u.longitude=f.lerp(b,p,v.x),u.latitude=f.lerp(d,g,v.y),u.height=y-n;let S=s.cartographicToCartesian(u,D);U.multiplyByPoint(i,S,S),P.minimumByComponent(S,c,c),P.maximumByComponent(S,h,h),E=Math.min(E,u.height)}return E}function $(t,n,o,e,r,s,i,c,h,E,g,d,p,b){let L=w(i),N=h.north,I=h.south,y=h.east,v=h.west;y<v&&(y+=f.TWO_PI);let S=o.length;for(let _=0;_<S;++_){let O=o[_],G=r[O],A=s[O];u.longitude=f.lerp(v,y,A.x)+p,u.latitude=f.lerp(I,N,A.y)+b,u.height=G-E;let j=c.cartographicToCartesian(u,D);if(L){let R=O*2;Y.x=i[R],Y.y=i[R+1]}let q;e.hasWebMercatorT&&(q=(z.geodeticLatitudeToMercatorAngle(u.latitude)-g)*d);let Q;e.hasGeodeticSurfaceNormals&&(Q=c.geodeticSurfaceNormal(j)),n=e.encode(t,n,j,A,u.height,Y,q,Q)}}function tt(t,n){let o;return typeof t.slice=="function"&&(o=t.slice(),typeof o.sort!="function"&&(o=void 0)),w(o)||(o=Array.prototype.slice.call(t)),o.sort(n),o}var Se=Mt(Jt);export{Se as default};
+import {
+  EllipsoidalOccluder_default,
+  TerrainEncoding_default
+} from "./chunk-OXSI7N4C.js";
+import {
+  createTaskProcessorWorker_default
+} from "./chunk-MMV6TO3P.js";
+import {
+  WebMercatorProjection_default
+} from "./chunk-QYQIVZBU.js";
+import "./chunk-J7MQUQJY.js";
+import {
+  AxisAlignedBoundingBox_default
+} from "./chunk-XZZNKIEV.js";
+import {
+  IndexDatatype_default
+} from "./chunk-EB7PNZTK.js";
+import "./chunk-ELI4BUOT.js";
+import {
+  Matrix4_default,
+  Rectangle_default,
+  Transforms_default
+} from "./chunk-OXALEQPI.js";
+import "./chunk-FQPSOOPH.js";
+import {
+  Cartesian2_default,
+  Cartesian3_default,
+  Cartographic_default,
+  Ellipsoid_default
+} from "./chunk-T6LPN7RI.js";
+import {
+  Math_default
+} from "./chunk-R4OIEIPE.js";
+import "./chunk-RHBWXX7C.js";
+import "./chunk-ZIKGV7EL.js";
+import "./chunk-BAVI3ZS2.js";
+import {
+  DeveloperError_default
+} from "./chunk-TGY6H6N6.js";
+import {
+  defined_default
+} from "./chunk-N4QEHO3U.js";
+
+// packages/engine/Source/Core/TerrainProvider.js
+function TerrainProvider() {
+  DeveloperError_default.throwInstantiationError();
+}
+Object.defineProperties(TerrainProvider.prototype, {
+  /**
+   * Gets an event that is raised when the terrain provider encounters an asynchronous error.  By subscribing
+   * to the event, you will be notified of the error and can potentially recover from it.  Event listeners
+   * are passed an instance of {@link TileProviderError}.
+   * @memberof TerrainProvider.prototype
+   * @type {Event<TerrainProvider.ErrorEvent>}
+   * @readonly
+   */
+  errorEvent: {
+    get: DeveloperError_default.throwInstantiationError
+  },
+  /**
+   * Gets the credit to display when this terrain provider is active.  Typically this is used to credit
+   * the source of the terrain.
+   * @memberof TerrainProvider.prototype
+   * @type {Credit}
+   * @readonly
+   */
+  credit: {
+    get: DeveloperError_default.throwInstantiationError
+  },
+  /**
+   * Gets the tiling scheme used by the provider.
+   * @memberof TerrainProvider.prototype
+   * @type {TilingScheme}
+   * @readonly
+   */
+  tilingScheme: {
+    get: DeveloperError_default.throwInstantiationError
+  },
+  /**
+   * Gets a value indicating whether or not the provider includes a water mask.  The water mask
+   * indicates which areas of the globe are water rather than land, so they can be rendered
+   * as a reflective surface with animated waves.
+   * @memberof TerrainProvider.prototype
+   * @type {boolean}
+   * @readonly
+   */
+  hasWaterMask: {
+    get: DeveloperError_default.throwInstantiationError
+  },
+  /**
+   * Gets a value indicating whether or not the requested tiles include vertex normals.
+   * @memberof TerrainProvider.prototype
+   * @type {boolean}
+   * @readonly
+   */
+  hasVertexNormals: {
+    get: DeveloperError_default.throwInstantiationError
+  },
+  /**
+   * Gets an object that can be used to determine availability of terrain from this provider, such as
+   * at points and in rectangles. This property may be undefined if availability
+   * information is not available.
+   * @memberof TerrainProvider.prototype
+   * @type {TileAvailability}
+   * @readonly
+   */
+  availability: {
+    get: DeveloperError_default.throwInstantiationError
+  }
+});
+var regularGridIndicesCache = [];
+TerrainProvider.getRegularGridIndices = function(width, height) {
+  if (width * height >= Math_default.FOUR_GIGABYTES) {
+    throw new DeveloperError_default(
+      "The total number of vertices (width * height) must be less than 4,294,967,296."
+    );
+  }
+  let byWidth = regularGridIndicesCache[width];
+  if (!defined_default(byWidth)) {
+    regularGridIndicesCache[width] = byWidth = [];
+  }
+  let indices = byWidth[height];
+  if (!defined_default(indices)) {
+    if (width * height < Math_default.SIXTY_FOUR_KILOBYTES) {
+      indices = byWidth[height] = new Uint16Array(
+        (width - 1) * (height - 1) * 6
+      );
+    } else {
+      indices = byWidth[height] = new Uint32Array(
+        (width - 1) * (height - 1) * 6
+      );
+    }
+    addRegularGridIndices(width, height, indices, 0);
+  }
+  return indices;
+};
+var regularGridAndEdgeIndicesCache = [];
+TerrainProvider.getRegularGridIndicesAndEdgeIndices = function(width, height) {
+  if (width * height >= Math_default.FOUR_GIGABYTES) {
+    throw new DeveloperError_default(
+      "The total number of vertices (width * height) must be less than 4,294,967,296."
+    );
+  }
+  let byWidth = regularGridAndEdgeIndicesCache[width];
+  if (!defined_default(byWidth)) {
+    regularGridAndEdgeIndicesCache[width] = byWidth = [];
+  }
+  let indicesAndEdges = byWidth[height];
+  if (!defined_default(indicesAndEdges)) {
+    const indices = TerrainProvider.getRegularGridIndices(width, height);
+    const edgeIndices = getEdgeIndices(width, height);
+    const westIndicesSouthToNorth = edgeIndices.westIndicesSouthToNorth;
+    const southIndicesEastToWest = edgeIndices.southIndicesEastToWest;
+    const eastIndicesNorthToSouth = edgeIndices.eastIndicesNorthToSouth;
+    const northIndicesWestToEast = edgeIndices.northIndicesWestToEast;
+    indicesAndEdges = byWidth[height] = {
+      indices,
+      westIndicesSouthToNorth,
+      southIndicesEastToWest,
+      eastIndicesNorthToSouth,
+      northIndicesWestToEast
+    };
+  }
+  return indicesAndEdges;
+};
+var regularGridAndSkirtAndEdgeIndicesCache = [];
+TerrainProvider.getRegularGridAndSkirtIndicesAndEdgeIndices = function(width, height) {
+  if (width * height >= Math_default.FOUR_GIGABYTES) {
+    throw new DeveloperError_default(
+      "The total number of vertices (width * height) must be less than 4,294,967,296."
+    );
+  }
+  let byWidth = regularGridAndSkirtAndEdgeIndicesCache[width];
+  if (!defined_default(byWidth)) {
+    regularGridAndSkirtAndEdgeIndicesCache[width] = byWidth = [];
+  }
+  let indicesAndEdges = byWidth[height];
+  if (!defined_default(indicesAndEdges)) {
+    const gridVertexCount = width * height;
+    const gridIndexCount = (width - 1) * (height - 1) * 6;
+    const edgeVertexCount = width * 2 + height * 2;
+    const edgeIndexCount = Math.max(0, edgeVertexCount - 4) * 6;
+    const vertexCount = gridVertexCount + edgeVertexCount;
+    const indexCount = gridIndexCount + edgeIndexCount;
+    const edgeIndices = getEdgeIndices(width, height);
+    const westIndicesSouthToNorth = edgeIndices.westIndicesSouthToNorth;
+    const southIndicesEastToWest = edgeIndices.southIndicesEastToWest;
+    const eastIndicesNorthToSouth = edgeIndices.eastIndicesNorthToSouth;
+    const northIndicesWestToEast = edgeIndices.northIndicesWestToEast;
+    const indices = IndexDatatype_default.createTypedArray(vertexCount, indexCount);
+    addRegularGridIndices(width, height, indices, 0);
+    TerrainProvider.addSkirtIndices(
+      westIndicesSouthToNorth,
+      southIndicesEastToWest,
+      eastIndicesNorthToSouth,
+      northIndicesWestToEast,
+      gridVertexCount,
+      indices,
+      gridIndexCount
+    );
+    indicesAndEdges = byWidth[height] = {
+      indices,
+      westIndicesSouthToNorth,
+      southIndicesEastToWest,
+      eastIndicesNorthToSouth,
+      northIndicesWestToEast,
+      indexCountWithoutSkirts: gridIndexCount
+    };
+  }
+  return indicesAndEdges;
+};
+TerrainProvider.addSkirtIndices = function(westIndicesSouthToNorth, southIndicesEastToWest, eastIndicesNorthToSouth, northIndicesWestToEast, vertexCount, indices, offset) {
+  let vertexIndex = vertexCount;
+  offset = addSkirtIndices(
+    westIndicesSouthToNorth,
+    vertexIndex,
+    indices,
+    offset
+  );
+  vertexIndex += westIndicesSouthToNorth.length;
+  offset = addSkirtIndices(
+    southIndicesEastToWest,
+    vertexIndex,
+    indices,
+    offset
+  );
+  vertexIndex += southIndicesEastToWest.length;
+  offset = addSkirtIndices(
+    eastIndicesNorthToSouth,
+    vertexIndex,
+    indices,
+    offset
+  );
+  vertexIndex += eastIndicesNorthToSouth.length;
+  addSkirtIndices(northIndicesWestToEast, vertexIndex, indices, offset);
+};
+function getEdgeIndices(width, height) {
+  const westIndicesSouthToNorth = new Array(height);
+  const southIndicesEastToWest = new Array(width);
+  const eastIndicesNorthToSouth = new Array(height);
+  const northIndicesWestToEast = new Array(width);
+  let i;
+  for (i = 0; i < width; ++i) {
+    northIndicesWestToEast[i] = i;
+    southIndicesEastToWest[i] = width * height - 1 - i;
+  }
+  for (i = 0; i < height; ++i) {
+    eastIndicesNorthToSouth[i] = (i + 1) * width - 1;
+    westIndicesSouthToNorth[i] = (height - i - 1) * width;
+  }
+  return {
+    westIndicesSouthToNorth,
+    southIndicesEastToWest,
+    eastIndicesNorthToSouth,
+    northIndicesWestToEast
+  };
+}
+function addRegularGridIndices(width, height, indices, offset) {
+  let index = 0;
+  for (let j = 0; j < height - 1; ++j) {
+    for (let i = 0; i < width - 1; ++i) {
+      const upperLeft = index;
+      const lowerLeft = upperLeft + width;
+      const lowerRight = lowerLeft + 1;
+      const upperRight = upperLeft + 1;
+      indices[offset++] = upperLeft;
+      indices[offset++] = lowerLeft;
+      indices[offset++] = upperRight;
+      indices[offset++] = upperRight;
+      indices[offset++] = lowerLeft;
+      indices[offset++] = lowerRight;
+      ++index;
+    }
+    ++index;
+  }
+}
+function addSkirtIndices(edgeIndices, vertexIndex, indices, offset) {
+  let previousIndex = edgeIndices[0];
+  const length = edgeIndices.length;
+  for (let i = 1; i < length; ++i) {
+    const index = edgeIndices[i];
+    indices[offset++] = previousIndex;
+    indices[offset++] = index;
+    indices[offset++] = vertexIndex;
+    indices[offset++] = vertexIndex;
+    indices[offset++] = index;
+    indices[offset++] = vertexIndex + 1;
+    previousIndex = index;
+    ++vertexIndex;
+  }
+  return offset;
+}
+TerrainProvider.heightmapTerrainQuality = 0.25;
+TerrainProvider.getEstimatedLevelZeroGeometricErrorForAHeightmap = function(ellipsoid, tileImageWidth, numberOfTilesAtLevelZero) {
+  return ellipsoid.maximumRadius * 2 * Math.PI * TerrainProvider.heightmapTerrainQuality / (tileImageWidth * numberOfTilesAtLevelZero);
+};
+TerrainProvider.prototype.requestTileGeometry = DeveloperError_default.throwInstantiationError;
+TerrainProvider.prototype.getLevelMaximumGeometricError = DeveloperError_default.throwInstantiationError;
+TerrainProvider.prototype.getTileDataAvailable = DeveloperError_default.throwInstantiationError;
+TerrainProvider.prototype.loadTileDataAvailability = DeveloperError_default.throwInstantiationError;
+var TerrainProvider_default = TerrainProvider;
+
+// packages/engine/Source/Workers/createVerticesFromQuantizedTerrainMesh.js
+var maxShort = 32767;
+var cartesian3Scratch = new Cartesian3_default();
+var scratchMinimum = new Cartesian3_default();
+var scratchMaximum = new Cartesian3_default();
+var cartographicScratch = new Cartographic_default();
+var toPack = new Cartesian2_default();
+function createVerticesFromQuantizedTerrainMesh(parameters, transferableObjects) {
+  const quantizedVertices = parameters.quantizedVertices;
+  const quantizedVertexCount = quantizedVertices.length / 3;
+  const octEncodedNormals = parameters.octEncodedNormals;
+  const edgeVertexCount = parameters.westIndices.length + parameters.eastIndices.length + parameters.southIndices.length + parameters.northIndices.length;
+  const includeWebMercatorT = parameters.includeWebMercatorT;
+  const exaggeration = parameters.exaggeration;
+  const exaggerationRelativeHeight = parameters.exaggerationRelativeHeight;
+  const hasExaggeration = exaggeration !== 1;
+  const includeGeodeticSurfaceNormals = hasExaggeration;
+  const rectangle = Rectangle_default.clone(parameters.rectangle);
+  const west = rectangle.west;
+  const south = rectangle.south;
+  const east = rectangle.east;
+  const north = rectangle.north;
+  const ellipsoid = Ellipsoid_default.clone(parameters.ellipsoid);
+  const minimumHeight = parameters.minimumHeight;
+  const maximumHeight = parameters.maximumHeight;
+  const center = parameters.relativeToCenter;
+  const fromENU = Transforms_default.eastNorthUpToFixedFrame(center, ellipsoid);
+  const toENU = Matrix4_default.inverseTransformation(fromENU, new Matrix4_default());
+  let southMercatorY;
+  let oneOverMercatorHeight;
+  if (includeWebMercatorT) {
+    southMercatorY = WebMercatorProjection_default.geodeticLatitudeToMercatorAngle(
+      south
+    );
+    oneOverMercatorHeight = 1 / (WebMercatorProjection_default.geodeticLatitudeToMercatorAngle(north) - southMercatorY);
+  }
+  const uBuffer = quantizedVertices.subarray(0, quantizedVertexCount);
+  const vBuffer = quantizedVertices.subarray(
+    quantizedVertexCount,
+    2 * quantizedVertexCount
+  );
+  const heightBuffer = quantizedVertices.subarray(
+    quantizedVertexCount * 2,
+    3 * quantizedVertexCount
+  );
+  const hasVertexNormals = defined_default(octEncodedNormals);
+  const uvs = new Array(quantizedVertexCount);
+  const heights = new Array(quantizedVertexCount);
+  const positions = new Array(quantizedVertexCount);
+  const webMercatorTs = includeWebMercatorT ? new Array(quantizedVertexCount) : [];
+  const geodeticSurfaceNormals = includeGeodeticSurfaceNormals ? new Array(quantizedVertexCount) : [];
+  const minimum = scratchMinimum;
+  minimum.x = Number.POSITIVE_INFINITY;
+  minimum.y = Number.POSITIVE_INFINITY;
+  minimum.z = Number.POSITIVE_INFINITY;
+  const maximum = scratchMaximum;
+  maximum.x = Number.NEGATIVE_INFINITY;
+  maximum.y = Number.NEGATIVE_INFINITY;
+  maximum.z = Number.NEGATIVE_INFINITY;
+  let minLongitude = Number.POSITIVE_INFINITY;
+  let maxLongitude = Number.NEGATIVE_INFINITY;
+  let minLatitude = Number.POSITIVE_INFINITY;
+  let maxLatitude = Number.NEGATIVE_INFINITY;
+  for (let i = 0; i < quantizedVertexCount; ++i) {
+    const rawU = uBuffer[i];
+    const rawV = vBuffer[i];
+    const u = rawU / maxShort;
+    const v = rawV / maxShort;
+    const height = Math_default.lerp(
+      minimumHeight,
+      maximumHeight,
+      heightBuffer[i] / maxShort
+    );
+    cartographicScratch.longitude = Math_default.lerp(west, east, u);
+    cartographicScratch.latitude = Math_default.lerp(south, north, v);
+    cartographicScratch.height = height;
+    minLongitude = Math.min(cartographicScratch.longitude, minLongitude);
+    maxLongitude = Math.max(cartographicScratch.longitude, maxLongitude);
+    minLatitude = Math.min(cartographicScratch.latitude, minLatitude);
+    maxLatitude = Math.max(cartographicScratch.latitude, maxLatitude);
+    const position = ellipsoid.cartographicToCartesian(cartographicScratch);
+    uvs[i] = new Cartesian2_default(u, v);
+    heights[i] = height;
+    positions[i] = position;
+    if (includeWebMercatorT) {
+      webMercatorTs[i] = (WebMercatorProjection_default.geodeticLatitudeToMercatorAngle(
+        cartographicScratch.latitude
+      ) - southMercatorY) * oneOverMercatorHeight;
+    }
+    if (includeGeodeticSurfaceNormals) {
+      geodeticSurfaceNormals[i] = ellipsoid.geodeticSurfaceNormal(position);
+    }
+    Matrix4_default.multiplyByPoint(toENU, position, cartesian3Scratch);
+    Cartesian3_default.minimumByComponent(cartesian3Scratch, minimum, minimum);
+    Cartesian3_default.maximumByComponent(cartesian3Scratch, maximum, maximum);
+  }
+  const westIndicesSouthToNorth = copyAndSort(parameters.westIndices, function(a, b) {
+    return uvs[a].y - uvs[b].y;
+  });
+  const eastIndicesNorthToSouth = copyAndSort(parameters.eastIndices, function(a, b) {
+    return uvs[b].y - uvs[a].y;
+  });
+  const southIndicesEastToWest = copyAndSort(parameters.southIndices, function(a, b) {
+    return uvs[b].x - uvs[a].x;
+  });
+  const northIndicesWestToEast = copyAndSort(parameters.northIndices, function(a, b) {
+    return uvs[a].x - uvs[b].x;
+  });
+  let occludeePointInScaledSpace;
+  if (minimumHeight < 0) {
+    const occluder = new EllipsoidalOccluder_default(ellipsoid);
+    occludeePointInScaledSpace = occluder.computeHorizonCullingPointPossiblyUnderEllipsoid(
+      center,
+      positions,
+      minimumHeight
+    );
+  }
+  let hMin = minimumHeight;
+  hMin = Math.min(
+    hMin,
+    findMinMaxSkirts(
+      parameters.westIndices,
+      parameters.westSkirtHeight,
+      heights,
+      uvs,
+      rectangle,
+      ellipsoid,
+      toENU,
+      minimum,
+      maximum
+    )
+  );
+  hMin = Math.min(
+    hMin,
+    findMinMaxSkirts(
+      parameters.southIndices,
+      parameters.southSkirtHeight,
+      heights,
+      uvs,
+      rectangle,
+      ellipsoid,
+      toENU,
+      minimum,
+      maximum
+    )
+  );
+  hMin = Math.min(
+    hMin,
+    findMinMaxSkirts(
+      parameters.eastIndices,
+      parameters.eastSkirtHeight,
+      heights,
+      uvs,
+      rectangle,
+      ellipsoid,
+      toENU,
+      minimum,
+      maximum
+    )
+  );
+  hMin = Math.min(
+    hMin,
+    findMinMaxSkirts(
+      parameters.northIndices,
+      parameters.northSkirtHeight,
+      heights,
+      uvs,
+      rectangle,
+      ellipsoid,
+      toENU,
+      minimum,
+      maximum
+    )
+  );
+  const aaBox = new AxisAlignedBoundingBox_default(minimum, maximum, center);
+  const encoding = new TerrainEncoding_default(
+    center,
+    aaBox,
+    hMin,
+    maximumHeight,
+    fromENU,
+    hasVertexNormals,
+    includeWebMercatorT,
+    includeGeodeticSurfaceNormals,
+    exaggeration,
+    exaggerationRelativeHeight
+  );
+  const vertexStride = encoding.stride;
+  const size = quantizedVertexCount * vertexStride + edgeVertexCount * vertexStride;
+  const vertexBuffer = new Float32Array(size);
+  let bufferIndex = 0;
+  for (let j = 0; j < quantizedVertexCount; ++j) {
+    if (hasVertexNormals) {
+      const n = j * 2;
+      toPack.x = octEncodedNormals[n];
+      toPack.y = octEncodedNormals[n + 1];
+    }
+    bufferIndex = encoding.encode(
+      vertexBuffer,
+      bufferIndex,
+      positions[j],
+      uvs[j],
+      heights[j],
+      toPack,
+      webMercatorTs[j],
+      geodeticSurfaceNormals[j]
+    );
+  }
+  const edgeTriangleCount = Math.max(0, (edgeVertexCount - 4) * 2);
+  const indexBufferLength = parameters.indices.length + edgeTriangleCount * 3;
+  const indexBuffer = IndexDatatype_default.createTypedArray(
+    quantizedVertexCount + edgeVertexCount,
+    indexBufferLength
+  );
+  indexBuffer.set(parameters.indices, 0);
+  const percentage = 1e-4;
+  const lonOffset = (maxLongitude - minLongitude) * percentage;
+  const latOffset = (maxLatitude - minLatitude) * percentage;
+  const westLongitudeOffset = -lonOffset;
+  const westLatitudeOffset = 0;
+  const eastLongitudeOffset = lonOffset;
+  const eastLatitudeOffset = 0;
+  const northLongitudeOffset = 0;
+  const northLatitudeOffset = latOffset;
+  const southLongitudeOffset = 0;
+  const southLatitudeOffset = -latOffset;
+  let vertexBufferIndex = quantizedVertexCount * vertexStride;
+  addSkirt(
+    vertexBuffer,
+    vertexBufferIndex,
+    westIndicesSouthToNorth,
+    encoding,
+    heights,
+    uvs,
+    octEncodedNormals,
+    ellipsoid,
+    rectangle,
+    parameters.westSkirtHeight,
+    southMercatorY,
+    oneOverMercatorHeight,
+    westLongitudeOffset,
+    westLatitudeOffset
+  );
+  vertexBufferIndex += parameters.westIndices.length * vertexStride;
+  addSkirt(
+    vertexBuffer,
+    vertexBufferIndex,
+    southIndicesEastToWest,
+    encoding,
+    heights,
+    uvs,
+    octEncodedNormals,
+    ellipsoid,
+    rectangle,
+    parameters.southSkirtHeight,
+    southMercatorY,
+    oneOverMercatorHeight,
+    southLongitudeOffset,
+    southLatitudeOffset
+  );
+  vertexBufferIndex += parameters.southIndices.length * vertexStride;
+  addSkirt(
+    vertexBuffer,
+    vertexBufferIndex,
+    eastIndicesNorthToSouth,
+    encoding,
+    heights,
+    uvs,
+    octEncodedNormals,
+    ellipsoid,
+    rectangle,
+    parameters.eastSkirtHeight,
+    southMercatorY,
+    oneOverMercatorHeight,
+    eastLongitudeOffset,
+    eastLatitudeOffset
+  );
+  vertexBufferIndex += parameters.eastIndices.length * vertexStride;
+  addSkirt(
+    vertexBuffer,
+    vertexBufferIndex,
+    northIndicesWestToEast,
+    encoding,
+    heights,
+    uvs,
+    octEncodedNormals,
+    ellipsoid,
+    rectangle,
+    parameters.northSkirtHeight,
+    southMercatorY,
+    oneOverMercatorHeight,
+    northLongitudeOffset,
+    northLatitudeOffset
+  );
+  TerrainProvider_default.addSkirtIndices(
+    westIndicesSouthToNorth,
+    southIndicesEastToWest,
+    eastIndicesNorthToSouth,
+    northIndicesWestToEast,
+    quantizedVertexCount,
+    indexBuffer,
+    parameters.indices.length
+  );
+  transferableObjects.push(vertexBuffer.buffer, indexBuffer.buffer);
+  return {
+    vertices: vertexBuffer.buffer,
+    indices: indexBuffer.buffer,
+    westIndicesSouthToNorth,
+    southIndicesEastToWest,
+    eastIndicesNorthToSouth,
+    northIndicesWestToEast,
+    vertexStride,
+    center,
+    minimumHeight,
+    maximumHeight,
+    occludeePointInScaledSpace,
+    encoding,
+    indexCountWithoutSkirts: parameters.indices.length
+  };
+}
+function findMinMaxSkirts(edgeIndices, edgeHeight, heights, uvs, rectangle, ellipsoid, toENU, minimum, maximum) {
+  let hMin = Number.POSITIVE_INFINITY;
+  const north = rectangle.north;
+  const south = rectangle.south;
+  let east = rectangle.east;
+  const west = rectangle.west;
+  if (east < west) {
+    east += Math_default.TWO_PI;
+  }
+  const length = edgeIndices.length;
+  for (let i = 0; i < length; ++i) {
+    const index = edgeIndices[i];
+    const h = heights[index];
+    const uv = uvs[index];
+    cartographicScratch.longitude = Math_default.lerp(west, east, uv.x);
+    cartographicScratch.latitude = Math_default.lerp(south, north, uv.y);
+    cartographicScratch.height = h - edgeHeight;
+    const position = ellipsoid.cartographicToCartesian(
+      cartographicScratch,
+      cartesian3Scratch
+    );
+    Matrix4_default.multiplyByPoint(toENU, position, position);
+    Cartesian3_default.minimumByComponent(position, minimum, minimum);
+    Cartesian3_default.maximumByComponent(position, maximum, maximum);
+    hMin = Math.min(hMin, cartographicScratch.height);
+  }
+  return hMin;
+}
+function addSkirt(vertexBuffer, vertexBufferIndex, edgeVertices, encoding, heights, uvs, octEncodedNormals, ellipsoid, rectangle, skirtLength, southMercatorY, oneOverMercatorHeight, longitudeOffset, latitudeOffset) {
+  const hasVertexNormals = defined_default(octEncodedNormals);
+  const north = rectangle.north;
+  const south = rectangle.south;
+  let east = rectangle.east;
+  const west = rectangle.west;
+  if (east < west) {
+    east += Math_default.TWO_PI;
+  }
+  const length = edgeVertices.length;
+  for (let i = 0; i < length; ++i) {
+    const index = edgeVertices[i];
+    const h = heights[index];
+    const uv = uvs[index];
+    cartographicScratch.longitude = Math_default.lerp(west, east, uv.x) + longitudeOffset;
+    cartographicScratch.latitude = Math_default.lerp(south, north, uv.y) + latitudeOffset;
+    cartographicScratch.height = h - skirtLength;
+    const position = ellipsoid.cartographicToCartesian(
+      cartographicScratch,
+      cartesian3Scratch
+    );
+    if (hasVertexNormals) {
+      const n = index * 2;
+      toPack.x = octEncodedNormals[n];
+      toPack.y = octEncodedNormals[n + 1];
+    }
+    let webMercatorT;
+    if (encoding.hasWebMercatorT) {
+      webMercatorT = (WebMercatorProjection_default.geodeticLatitudeToMercatorAngle(
+        cartographicScratch.latitude
+      ) - southMercatorY) * oneOverMercatorHeight;
+    }
+    let geodeticSurfaceNormal;
+    if (encoding.hasGeodeticSurfaceNormals) {
+      geodeticSurfaceNormal = ellipsoid.geodeticSurfaceNormal(position);
+    }
+    vertexBufferIndex = encoding.encode(
+      vertexBuffer,
+      vertexBufferIndex,
+      position,
+      uv,
+      cartographicScratch.height,
+      toPack,
+      webMercatorT,
+      geodeticSurfaceNormal
+    );
+  }
+}
+function copyAndSort(typedArray, comparator) {
+  let copy;
+  if (typeof typedArray.slice === "function") {
+    copy = typedArray.slice();
+    if (typeof copy.sort !== "function") {
+      copy = void 0;
+    }
+  }
+  if (!defined_default(copy)) {
+    copy = Array.prototype.slice.call(typedArray);
+  }
+  copy.sort(comparator);
+  return copy;
+}
+var createVerticesFromQuantizedTerrainMesh_default = createTaskProcessorWorker_default(
+  createVerticesFromQuantizedTerrainMesh
+);
+export {
+  createVerticesFromQuantizedTerrainMesh_default as default
+};

@@ -1,0 +1,30 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature", "id": "rad-us-ca", "geometry": { "type": "Point", "coordinates": [-121.494, 38.577] }, "properties": { "name": "Sacramento RadNet", "country": "US", "network": "EPA RadNet", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-us-ny", "geometry": { "type": "Point", "coordinates": [-73.950, 40.665] }, "properties": { "name": "New York RadNet", "country": "US", "network": "EPA RadNet", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-us-il", "geometry": { "type": "Point", "coordinates": [-87.631, 41.851] }, "properties": { "name": "Chicago RadNet", "country": "US", "network": "EPA RadNet", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-jp-tk", "geometry": { "type": "Point", "coordinates": [139.692, 35.689] }, "properties": { "name": "Tokyo MEXT Station", "country": "JP", "network": "MEXT/NRA", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-jp-fk", "geometry": { "type": "Point", "coordinates": [140.869, 37.459] }, "properties": { "name": "Fukushima MEXT Station", "country": "JP", "network": "MEXT/NRA", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-de-be", "geometry": { "type": "Point", "coordinates": [13.405, 52.520] }, "properties": { "name": "Berlin ODL Station", "country": "DE", "network": "BfS ODL", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-fr-pa", "geometry": { "type": "Point", "coordinates": [2.347, 48.859] }, "properties": { "name": "Paris IRSN Station", "country": "FR", "network": "IRSN TELERAY", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-gb-lo", "geometry": { "type": "Point", "coordinates": [-0.128, 51.507] }, "properties": { "name": "London PHE Station", "country": "GB", "network": "PHE RIMNET", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-ua-ky", "geometry": { "type": "Point", "coordinates": [30.523, 50.450] }, "properties": { "name": "Kyiv RadStat", "country": "UA", "network": "SNRIU", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-ua-ch", "geometry": { "type": "Point", "coordinates": [30.092, 51.277] }, "properties": { "name": "Chornobyl Zone Monitor", "country": "UA", "network": "SNRIU", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-cn-bj", "geometry": { "type": "Point", "coordinates": [116.407, 39.904] }, "properties": { "name": "Beijing NRM Station", "country": "CN", "network": "NNSA China", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-ru-mo", "geometry": { "type": "Point", "coordinates": [37.618, 55.756] }, "properties": { "name": "Moscow Roshydromet", "country": "RU", "network": "Roshydromet", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-au-sy", "geometry": { "type": "Point", "coordinates": [151.207, -33.867] }, "properties": { "name": "Sydney ARPANSA Station", "country": "AU", "network": "ARPANSA", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-in-mu", "geometry": { "type": "Point", "coordinates": [72.877, 19.076] }, "properties": { "name": "Mumbai AERB Station", "country": "IN", "network": "AERB India", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-kr-se", "geometry": { "type": "Point", "coordinates": [126.978, 37.566] }, "properties": { "name": "Seoul NRC Station", "country": "KR", "network": "NSSC Korea", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-se-st", "geometry": { "type": "Point", "coordinates": [18.068, 59.330] }, "properties": { "name": "Stockholm SSM Station", "country": "SE", "network": "SSM Sweden", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-fi-he", "geometry": { "type": "Point", "coordinates": [24.938, 60.170] }, "properties": { "name": "Helsinki STUK Station", "country": "FI", "network": "STUK Finland", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-ch-ge", "geometry": { "type": "Point", "coordinates": [6.143, 46.204] }, "properties": { "name": "Geneva ENSI Station", "country": "CH", "network": "ENSI Switzerland", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-ca-ot", "geometry": { "type": "Point", "coordinates": [-75.695, 45.424] }, "properties": { "name": "Ottawa HC Station", "country": "CA", "network": "HC Canada", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-br-ri", "geometry": { "type": "Point", "coordinates": [-43.172, -22.907] }, "properties": { "name": "Rio de Janeiro CNEN", "country": "BR", "network": "CNEN Brazil", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-za-ct", "geometry": { "type": "Point", "coordinates": [18.424, -33.924] }, "properties": { "name": "Cape Town NNR Station", "country": "ZA", "network": "NNR South Africa", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-ar-ba", "geometry": { "type": "Point", "coordinates": [-58.382, -34.613] }, "properties": { "name": "Buenos Aires ARN Station", "country": "AR", "network": "ARN Argentina", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-mx-mx", "geometry": { "type": "Point", "coordinates": [-99.133, 19.432] }, "properties": { "name": "Mexico City CNSNS", "country": "MX", "network": "CNSNS Mexico", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-pk-is", "geometry": { "type": "Point", "coordinates": [73.048, 33.720] }, "properties": { "name": "Islamabad PNRA Station", "country": "PK", "network": "PNRA Pakistan", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "rad-nz-we", "geometry": { "type": "Point", "coordinates": [174.763, -41.286] }, "properties": { "name": "Wellington GNS Station", "country": "NZ", "network": "GNS NZ", "ts": 1772435598914 } }
+  ]
+}

@@ -1,7 +1,7 @@
 // News system configuration — curated data sources, channel lists, keyword weights.
 // This file is safe to import client-side (no secrets).
 
-import type { YouTubeChannel, NewsCategory } from "../lib/news/types";
+import type { YouTubeChannel, NewsCategory, VideoPanelCategory } from "../lib/news/types";
 
 export interface RssFeedSource {
   id: string;
@@ -12,21 +12,46 @@ export interface RssFeedSource {
   language?: string;
 }
 
+export interface CategoryPanelConfig {
+  id: string;
+  title: string;
+  category: NewsCategory;
+  dedicatedFeeds?: string[];
+  apiEndpoint?: string;
+  refreshMs?: number;
+  icon?: string;
+}
+
 // ---- YouTube live news channels ----
 
 export const NEWS_VIDEO_CHANNELS: YouTubeChannel[] = [
-  { channelId: "UCVTomc35agH1SM6kCKzwW_g", label: "Bloomberg TV", priority: 100, region: "global" },
-  { channelId: "UCtn-u5YH-y5R2Cob8vvpKLg", label: "Reuters", priority: 96, region: "global" },
-  { channelId: "UCIALMKvObZNtJ6AmdCLP7Lg", label: "AP News", priority: 95, region: "global" },
-  { channelId: "UCBi2mrWuNuyYy4gbM6fU18Q", label: "ABC News", priority: 90, region: "us" },
-  { channelId: "UCeY0bbntWzzVIaj2z3QigXg", label: "NBC News", priority: 90, region: "us" },
-  { channelId: "UCupvZG-5ko_eiXAupbDfxWw", label: "CNN", priority: 88, region: "us" },
-  { channelId: "UCvJJ_dzjViJCoLf5uKUTwoA", label: "CNBC TV18", priority: 87, region: "asia" },
-  { channelId: "UC16niRr50-MSBwiO3YDb3RA", label: "Sky News", priority: 86, region: "uk" },
-  { channelId: "UCNye-wNBqNL5ZzHSJj3l8Bg", label: "DW News", priority: 84, region: "eu" },
-  { channelId: "UCHKkHPkL0IePiQMNcFwIpzQ", label: "France 24 EN", priority: 82, region: "eu" },
-  { channelId: "UCWX3yGbODI3HLiRPFcYIBGg", label: "Al Jazeera EN", priority: 80, region: "mena" },
-  { channelId: "UCaXkIU1QidjPwiAYu6GcHjg", label: "WION", priority: 74, region: "asia" },
+  // Business & Financial (Bloomberg, CNBC)
+  { channelId: "UCVTomc35agH1SM6kCKzwW_g", label: "Bloomberg TV", priority: 100, region: "global", categories: ["tech", "business", "financial"] },
+  { channelId: "UCtn-u5YH-y5R2Cob8vvpKLg", label: "Reuters", priority: 96, region: "global", categories: ["tech", "business", "general"] },
+  { channelId: "UCvJJ_dzjViJCoLf5uKUTwoA", label: "CNBC TV18", priority: 87, region: "asia", categories: ["business", "financial"] },
+  // General news
+  { channelId: "UCIALMKvObZNtJ6AmdCLP7Lg", label: "AP News", priority: 95, region: "global", categories: ["general"] },
+  { channelId: "UCBi2mrWuNuyYy4gbM6fU18Q", label: "ABC News", priority: 90, region: "us", categories: ["general"] },
+  { channelId: "UCeY0bbntWzzVIaj2z3QigXg", label: "NBC News", priority: 90, region: "us", categories: ["general"] },
+  { channelId: "UCupvZG-5ko_eiXAupbDfxWw", label: "CNN", priority: 88, region: "us", categories: ["general"] },
+  { channelId: "UC16niRr50-MSBwiO3YDb3RA", label: "Sky News", priority: 86, region: "uk", categories: ["general"] },
+  { channelId: "UCNye-wNBqNL5ZzHSJj3l8Bg", label: "DW News", priority: 84, region: "eu", categories: ["general"] },
+  { channelId: "UCHKkHPkL0IePiQMNcFwIpzQ", label: "France 24 EN", priority: 82, region: "eu", categories: ["general"] },
+  { channelId: "UCWX3yGbODI3HLiRPFcYIBGg", label: "Al Jazeera EN", priority: 80, region: "mena", categories: ["general"] },
+  { channelId: "UCaXkIU1QidjPwiAYu6GcHjg", label: "WION", priority: 74, region: "asia", categories: ["general", "tech"] },
+];
+
+/** Live video panel definitions: main category + subcategory (source) choices */
+export const LIVE_VIDEO_PANELS: Array<{
+  id: string;
+  category: VideoPanelCategory;
+  title: string;
+  subtitle: string;
+}> = [
+  { id: "news-video-tech", category: "tech", title: "LIVE TECH", subtitle: "Tech & startup news streams" },
+  { id: "news-video-business", category: "business", title: "LIVE BUSINESS", subtitle: "Business & markets streams" },
+  { id: "news-video-general", category: "general", title: "LIVE NEWS", subtitle: "General news from global sources" },
+  { id: "news-video-financial", category: "financial", title: "LIVE MARKETS", subtitle: "Financial & markets streams" },
 ];
 
 // Backward-compatible export name for existing imports.
@@ -57,6 +82,28 @@ export const NEWS_RSS_FEEDS: RssFeedSource[] = [
   { id: "spacenews", label: "SpaceNews", url: "https://spacenews.com/feed/", category: "space", region: "global", language: "en" },
   { id: "fierce-biotech", label: "Fierce Biotech", url: "https://www.fiercebiotech.com/rss/xml", category: "biotech", region: "us", language: "en" },
   { id: "ft-banking", label: "FT Banking", url: "https://www.ft.com/banking-finance?format=rss", category: "financial", region: "global", language: "en" },
+  // Government & Policy
+  { id: "hill-policy", label: "The Hill", url: "https://thehill.com/feed/", category: "government", region: "us", language: "en" },
+  { id: "politico-top", label: "Politico", url: "https://rss.politico.com/politics-news.xml", category: "government", region: "us", language: "en" },
+  { id: "lawfare", label: "Lawfare", url: "https://www.lawfaremedia.org/rss.xml", category: "government", region: "us", language: "en" },
+  // Energy
+  { id: "oilprice", label: "OilPrice.com", url: "https://oilprice.com/rss/main", category: "energy", region: "global", language: "en" },
+  { id: "utility-dive", label: "Utility Dive", url: "https://www.utilitydive.com/feeds/news/", category: "energy", region: "us", language: "en" },
+  // Military & Defense
+  { id: "defense-one", label: "Defense One", url: "https://www.defenseone.com/rss/", category: "defense", region: "us", language: "en" },
+  { id: "breaking-defense", label: "Breaking Defense", url: "https://breakingdefense.com/feed/", category: "defense", region: "us", language: "en" },
+  { id: "war-on-rocks", label: "War on the Rocks", url: "https://warontherocks.com/feed/", category: "defense", region: "global", language: "en" },
+  // Semiconductors
+  { id: "semi-engineering", label: "Semiconductor Engineering", url: "https://semiengineering.com/feed/", category: "semiconductors", region: "global", language: "en" },
+  { id: "eetimes", label: "EE Times", url: "https://www.eetimes.com/feed/", category: "semiconductors", region: "global", language: "en" },
+  // Finance & Markets
+  { id: "seeking-alpha", label: "Seeking Alpha", url: "https://seekingalpha.com/market_currents.xml", category: "financial", region: "us", language: "en" },
+  { id: "marketwatch", label: "MarketWatch", url: "https://feeds.marketwatch.com/marketwatch/topstories/", category: "markets", region: "us", language: "en" },
+  // AI
+  { id: "mit-ai", label: "MIT Tech Review AI", url: "https://www.technologyreview.com/topic/artificial-intelligence/feed", category: "ai", region: "global", language: "en" },
+  { id: "the-decoder", label: "The Decoder", url: "https://the-decoder.com/feed/", category: "ai", region: "global", language: "en" },
+  // Hacker News (RSS mirror)
+  { id: "hn-front", label: "Hacker News", url: "https://hnrss.org/frontpage", category: "tech", region: "global", language: "en" },
 ];
 
 // ---- Market-moving keyword weights for scoring ----
@@ -211,6 +258,12 @@ export const CATEGORY_KEYWORDS: Record<NewsCategory, string[]> = {
     "10-K", "10-Q", "8-K", "S-1", "filing", "sec", "edgar",
     "annual report", "quarterly report",
   ],
+  government: [
+    "congress", "senate", "house of representatives", "legislation", "executive order",
+    "white house", "state department", "pentagon", "regulation", "policy",
+    "bipartisan", "filibuster", "committee", "hearing", "subpoena",
+    "cabinet", "attorney general", "federal", "appropriations",
+  ],
   watchlist: [],
 };
 
@@ -235,6 +288,10 @@ export const GDELT_THEME_CATEGORY: Record<string, NewsCategory> = {
   SCIENCE_SPACE: "space",
   SCIENCE: "tech",
   UNGP_HUMAN_RIGHTS: "world",
+  GOV: "government",
+  GOV_ELECTION: "government",
+  GOV_LEGISLATION: "government",
+  LEADER: "government",
 };
 
 // ---- GDELT country code → ISO2 mapping (FIPS to ISO2 for common ones) ----
@@ -292,7 +349,8 @@ export const CATEGORY_COLORS: Record<NewsCategory, string> = {
   crypto: "#76ff03",         // lime
   local: "#4fc3f7",          // blue
   filings: "#7f9fbe",        // accent blue
-  watchlist: "#f4d03f",      // yellow
+  government: "#b388ff",      // light purple
+  watchlist: "#f4d03f",       // yellow
 };
 
 // ---- News TV auto-rotate interval options (minutes) ----
@@ -320,5 +378,27 @@ export const CATEGORY_LABELS: Record<NewsCategory, string> = {
   crypto: "Crypto",
   local: "Local",
   filings: "Filings",
+  government: "Government",
   watchlist: "Watchlist",
 };
+
+// ---- Category panel definitions for dedicated feed windows ----
+
+export const CATEGORY_PANEL_CONFIGS: CategoryPanelConfig[] = [
+  { id: "news-cat-tech", title: "TECHNOLOGY", category: "tech", dedicatedFeeds: ["verge", "ars", "wired", "hn-front"], icon: "", refreshMs: 10_000 },
+  { id: "news-cat-ai", title: "AI / ML", category: "ai", dedicatedFeeds: ["venturebeat-ai", "mit-ai", "the-decoder"], icon: "", refreshMs: 10_000 },
+  { id: "news-cat-crypto", title: "CRYPTO", category: "crypto", dedicatedFeeds: ["coindesk"], apiEndpoint: "/api/news/coingecko?mode=markets&limit=10", icon: "", refreshMs: 12_000 },
+  { id: "news-cat-markets", title: "MARKETS", category: "markets", dedicatedFeeds: ["cnbc-top", "reuters-business", "bbc-business", "marketwatch"], icon: "", refreshMs: 8_000 },
+  { id: "news-cat-cyber", title: "CYBERSECURITY", category: "cyber", dedicatedFeeds: ["krebs", "therecord"], icon: "", refreshMs: 12_000 },
+  { id: "news-cat-semis", title: "SEMICONDUCTORS", category: "semiconductors", dedicatedFeeds: ["semi-engineering", "eetimes"], icon: "", refreshMs: 15_000 },
+  { id: "news-cat-cloud", title: "CLOUD & INFRA", category: "cloud", icon: "", refreshMs: 15_000 },
+  { id: "news-cat-startups", title: "STARTUPS & VC", category: "startups", dedicatedFeeds: ["techcrunch"], icon: "", refreshMs: 12_000 },
+  { id: "news-cat-ipo", title: "IPO & SPAC", category: "ipo", icon: "", refreshMs: 15_000 },
+  { id: "news-cat-funding", title: "FUNDING & VC", category: "startups", dedicatedFeeds: ["techcrunch"], icon: "", refreshMs: 15_000 },
+  { id: "news-cat-energy", title: "ENERGY", category: "energy", dedicatedFeeds: ["oilprice", "utility-dive"], icon: "", refreshMs: 15_000 },
+  { id: "news-cat-defense", title: "DEFENSE & MILITARY", category: "defense", dedicatedFeeds: ["defense-one", "breaking-defense", "war-on-rocks"], icon: "", refreshMs: 15_000 },
+  { id: "news-cat-govt", title: "GOVERNMENT & POLICY", category: "government", dedicatedFeeds: ["hill-policy", "politico-top", "lawfare"], icon: "", refreshMs: 12_000 },
+  { id: "news-cat-finance", title: "FINANCE", category: "financial", dedicatedFeeds: ["ft-banking", "seeking-alpha"], icon: "", refreshMs: 10_000 },
+  { id: "news-cat-space", title: "SPACE", category: "space", dedicatedFeeds: ["spacenews"], icon: "", refreshMs: 20_000 },
+  { id: "news-cat-biotech", title: "BIOTECH & PHARMA", category: "biotech", dedicatedFeeds: ["fierce-biotech"], icon: "", refreshMs: 20_000 },
+];

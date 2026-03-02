@@ -1,0 +1,25 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature", "id": "ref-cxb",    "geometry": { "type": "Point", "coordinates": [92.163, 21.427]  }, "properties": { "name": "Cox's Bazar / Kutupalong", "country": "BD", "population": 900000, "origin": "Myanmar",       "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-kakuma", "geometry": { "type": "Point", "coordinates": [34.813, 3.714]   }, "properties": { "name": "Kakuma Camp",              "country": "KE", "population": 200000, "origin": "Multi",         "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-dadaab", "geometry": { "type": "Point", "coordinates": [40.318, 1.755]   }, "properties": { "name": "Dadaab Complex",           "country": "KE", "population": 220000, "origin": "Somalia",       "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-zaatari","geometry": { "type": "Point", "coordinates": [36.997, 32.296]  }, "properties": { "name": "Za'atari Camp",            "country": "JO", "population": 79000,  "origin": "Syria",         "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-dollo",  "geometry": { "type": "Point", "coordinates": [42.071, 4.188]   }, "properties": { "name": "Dollo Ado Complex",       "country": "ET", "population": 210000, "origin": "Somalia",       "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-tongog", "geometry": { "type": "Point", "coordinates": [34.590, 4.680]   }, "properties": { "name": "Kalobeyei Settlement",    "country": "KE", "population": 60000,  "origin": "S. Sudan",      "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-bidibid","geometry": { "type": "Point", "coordinates": [31.836, 3.631]   }, "properties": { "name": "Bidi Bidi Camp",          "country": "UG", "population": 270000, "origin": "S. Sudan",      "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-nakivale","geometry": { "type": "Point", "coordinates": [30.898, -1.020] }, "properties": { "name": "Nakivale Settlement",     "country": "UG", "population": 130000, "origin": "Multi",         "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-minawao","geometry": { "type": "Point", "coordinates": [14.003, 10.810]  }, "properties": { "name": "Minawao Camp",            "country": "CM", "population": 65000,  "origin": "Nigeria",       "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-azraq",  "geometry": { "type": "Point", "coordinates": [36.835, 31.846]  }, "properties": { "name": "Azraq Camp",              "country": "JO", "population": 41000,  "origin": "Syria",         "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-mahama", "geometry": { "type": "Point", "coordinates": [30.610, -1.793]  }, "properties": { "name": "Mahama Camp",             "country": "RW", "population": 54000,  "origin": "Burundi",       "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-nyarugusu","geometry": { "type": "Point", "coordinates": [30.391, -4.263]}, "properties": { "name": "Nyarugusu Camp",          "country": "TZ", "population": 140000, "origin": "DRC/Burundi",   "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-nduta",  "geometry": { "type": "Point", "coordinates": [30.565, -4.080]  }, "properties": { "name": "Nduta Camp",              "country": "TZ", "population": 60000,  "origin": "Burundi",       "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-dzaleka","geometry": { "type": "Point", "coordinates": [33.654, -13.788] }, "properties": { "name": "Dzaleka Camp",            "country": "MW", "population": 52000,  "origin": "Multi",         "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-mandera","geometry": { "type": "Point", "coordinates": [41.859, 3.933]   }, "properties": { "name": "Ifo / Hagadera / Dagahaley","country": "KE","population": 180000,"origin": "Somalia",       "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-maban",  "geometry": { "type": "Point", "coordinates": [33.649, 9.833]   }, "properties": { "name": "Maban Refugee Camps",    "country": "SD", "population": 140000, "origin": "S. Sudan",      "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-gorom",  "geometry": { "type": "Point", "coordinates": [31.561, 4.297]   }, "properties": { "name": "Gorom Settlement",        "country": "UG", "population": 45000,  "origin": "S. Sudan",      "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-rhino",  "geometry": { "type": "Point", "coordinates": [31.347, 3.062]   }, "properties": { "name": "Rhino Camp",             "country": "UG", "population": 120000, "origin": "S. Sudan",      "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-mahd",   "geometry": { "type": "Point", "coordinates": [49.041, 37.450]  }, "properties": { "name": "Mahd Camp (Urmia)",      "country": "IR", "population": 30000,  "origin": "Afghanistan",   "ts": 1772435598914 } },
+    { "type": "Feature", "id": "ref-cox2",   "geometry": { "type": "Point", "coordinates": [92.209, 21.253]  }, "properties": { "name": "Teknaf Settlement",       "country": "BD", "population": 75000,  "origin": "Myanmar",       "ts": 1772435598914 } }
+  ]
+}

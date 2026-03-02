@@ -12,6 +12,7 @@ const DEFAULT_H = 300;
 export default function CctvFloatingPanel() {
   const floating = useWorldViewStore((s) => s.cctv.floating);
   const close = useWorldViewStore((s) => s.closeCctvFloating);
+  const markCctvBroken = useWorldViewStore((s) => s.markCctvBroken);
 
   const [pos, setPos] = useState({ x: 60, y: 60 });
   const [size, setSize] = useState({ w: DEFAULT_W, h: DEFAULT_H });
@@ -148,7 +149,11 @@ export default function CctvFloatingPanel() {
       {/* Body */}
       {!minimized && (
         <div style={{ flex: 1, overflow: "hidden", padding: 8 }}>
-          <CctvFeedView camera={cam} />
+          <CctvFeedView
+            camera={cam}
+            onSnapshotError={markCctvBroken}
+            onStreamError={markCctvBroken}
+          />
           <div style={{ marginTop: 6, fontSize: 10, color: "#7aa", display: "flex", gap: 12 }}>
             <span>{cam.city}{cam.state ? `, ${cam.state}` : ""}</span>
             <span>{cam.streamFormat ?? "JPEG"}</span>

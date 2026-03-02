@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CATEGORY_LABELS, PRESET_QUERIES, ROTATE_INTERVAL_OPTIONS } from "../../config/newsConfig";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { CATEGORY_LABELS, CATEGORY_PANEL_CONFIGS, LIVE_VIDEO_PANELS, NEWS_VIDEO_CHANNELS, PRESET_QUERIES } from "../../config/newsConfig";
+import CategoryFeedPanel from "./CategoryFeedPanel";
 import { makeFingerprint } from "../../lib/news/engine/dedupe";
 import { InMemoryNewsIndex } from "../../lib/news/index/inMemoryIndex";
 import { parseQuery } from "../../lib/news/query/parse";
@@ -15,23 +16,33 @@ import type {
   NormalizedNewsItem,
   SearchRouteResult,
   SuggestionItem,
+  VideoPanelCategory,
   YouTubeLive,
 } from "../../lib/news/types";
 import { formatUtc } from "../../lib/dashboard/format";
+import type { DashboardLayouts } from "../../lib/dashboard/types";
+import { fetchJsonWithPolicy, isAbortError } from "../../lib/runtime/fetchJson";
+import { globalRefreshRuntime } from "../../lib/runtime/globalRefreshRuntime";
+import {
+  readPersistentFeedCache,
+  writePersistentFeedCache,
+} from "../../lib/runtime/persistentFeedCache";
 import { useWorldViewStore } from "../../store";
 import Panel from "../dashboard/panel/Panel";
 import PanelBody from "../dashboard/panel/PanelBody";
 import PanelControls from "../dashboard/panel/PanelControls";
 import PanelFooter from "../dashboard/panel/PanelFooter";
 import PanelHeader from "../dashboard/panel/PanelHeader";
-import Toggle from "../dashboard/controls/Toggle";
 import NewsDraggableGrid from "./NewsDraggableGrid";
-import NewsWorldMap from "./NewsWorldMap";
+import NewsPopupModal from "./NewsPopupModal";
+import MapLibreNewsMap from "./MapLibreNewsMap";
+import LiveVideoPanel from "./LiveVideoPanel";
+import PredictionMarketsPanel from "./PredictionMarketsPanel";
 
-const NEWS_REFRESH_MS = 12_000;
+const NEWS_REFRESH_MS = 6_000;
+const VIDEO_REFRESH_MS = 75_000;
 const NEWS_TERMINAL_TICK_MS = 1_000;
 const NEWS_TAPE_TICK_MS = 2_000;
-const VIDEO_REFRESH_MS = 120_000;
 const NEWS_RETENTION_MS = 24 * 60 * 60_000;
 const NEWS_RETENTION_MAX_ITEMS = 1200;
 
@@ -66,17 +77,19 @@ const CATEGORY_TABS = [
   "space",
   "biotech",
   "crypto",
+  "government",
   "local",
   "filings",
-  "watchlist",
 ] as const;
 
 const SEARCH_INDEX = new InMemoryNewsIndex(5000);
-const NEWS_CACHE_KEY = "worldview-news-feed-cache-v1";
+const NEWS_CACHE_META_KEY = "worldview-news-feed-cache-meta-v1";
+const NEWS_CACHE_STORE_KEY = "news:workspace:feed";
 const NEWS_CACHE_MAX_ITEMS = 240;
 const NEWS_CACHE_MAX_MARKERS = 600;
 const NEWS_CACHE_MAX_AGE_MS = 24 * 60 * 60_000;
 
+const BLOCKED_NEWS_SOURCES = new Set(["product hunt", "producthunt.com"]);
 const EMPTY_FACETS: NewsFacetState = {
   sources: [],
   categories: [],
@@ -84,6 +97,37 @@ const EMPTY_FACETS: NewsFacetState = {
   regions: [],
   coordAvailability: [],
 };
+
+const VIDEO_CATEGORY_CHANNEL_IDS = new Map<VideoPanelCategory, Set<string>>();
+for (const channel of NEWS_VIDEO_CHANNELS) {
+  const categories = channel.categories ?? ["general"];
+  for (const category of categories) {
+    if (!VIDEO_CATEGORY_CHANNEL_IDS.has(category)) VIDEO_CATEGORY_CHANNEL_IDS.set(category, new Set());
+    VIDEO_CATEGORY_CHANNEL_IDS.get(category)!.add(channel.channelId);
+  }
+}
+
+function sortYouTubeStreamsLiveFirst(items: YouTubeLive[]): YouTubeLive[] {
+  return [...items].sort((a, b) => {
+    if (a.status !== b.status) return a.status === "live" ? -1 : 1;
+    const aTs = Date.parse(a.publishedAt ?? "");
+    const bTs = Date.parse(b.publishedAt ?? "");
+    if (Number.isFinite(aTs) && Number.isFinite(bTs)) return bTs - aTs;
+    return 0;
+  });
+}
+
+function uniqueStreamsByVideoId(items: YouTubeLive[]): YouTubeLive[] {
+  const seen = new Set<string>();
+  const out: YouTubeLive[] = [];
+  for (const item of items) {
+    const key = item.videoId.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+  }
+  return out;
+}
 
 interface PersistedNewsCache {
   savedAt: number;
@@ -93,50 +137,113 @@ interface PersistedNewsCache {
   facets: NewsFacetState;
 }
 
-function readNewsCache(): PersistedNewsCache | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(NEWS_CACHE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<PersistedNewsCache> | null;
-    if (!parsed || !Array.isArray(parsed.items) || !Array.isArray(parsed.markers)) return null;
-    const savedAt = Number(parsed.savedAt);
-    if (!Number.isFinite(savedAt)) return null;
-    if (Date.now() - savedAt > NEWS_CACHE_MAX_AGE_MS) return null;
-    return {
-      savedAt,
-      query: typeof parsed.query === "string" ? parsed.query : "",
-      items: parsed.items.slice(0, NEWS_CACHE_MAX_ITEMS),
-      markers: parsed.markers.slice(0, NEWS_CACHE_MAX_MARKERS),
-      facets: parsed.facets ?? EMPTY_FACETS,
-    };
-  } catch {
-    return null;
-  }
+interface PersistedNewsCacheMeta {
+  savedAt: number;
+  query: string;
+  itemCount: number;
 }
 
-function writeNewsCache(data: PersistedNewsCache): void {
+async function readNewsCache(): Promise<PersistedNewsCache | null> {
+  const now = Date.now();
+  if (typeof window !== "undefined") {
+    try {
+      const rawMeta = window.localStorage.getItem(NEWS_CACHE_META_KEY);
+      if (rawMeta) {
+        const meta = JSON.parse(rawMeta) as Partial<PersistedNewsCacheMeta>;
+        const metaSavedAt = Number(meta.savedAt);
+        if (Number.isFinite(metaSavedAt) && now - metaSavedAt > NEWS_CACHE_MAX_AGE_MS) {
+          return null;
+        }
+      }
+    } catch {
+      // Ignore metadata parse errors; fallback to persistent payload read.
+    }
+  }
+
+  const cached = await readPersistentFeedCache<PersistedNewsCache>(NEWS_CACHE_STORE_KEY);
+  const entry = cached.entry;
+  if (!entry) return null;
+  if (now - entry.savedAt > NEWS_CACHE_MAX_AGE_MS) return null;
+  const payload = entry.payload;
+  if (!payload || !Array.isArray(payload.items) || !Array.isArray(payload.markers)) return null;
+  return {
+    savedAt: entry.savedAt,
+    query: typeof payload.query === "string" ? payload.query : "",
+    items: payload.items.slice(0, NEWS_CACHE_MAX_ITEMS),
+    markers: payload.markers.slice(0, NEWS_CACHE_MAX_MARKERS),
+    facets: payload.facets ?? EMPTY_FACETS,
+  };
+}
+
+async function writeNewsCache(data: PersistedNewsCache): Promise<void> {
+  const payload: PersistedNewsCache = {
+    savedAt: data.savedAt,
+    query: data.query,
+    items: data.items.slice(0, NEWS_CACHE_MAX_ITEMS),
+    markers: data.markers.slice(0, NEWS_CACHE_MAX_MARKERS),
+    facets: data.facets ?? EMPTY_FACETS,
+  };
+
+  await writePersistentFeedCache({
+    cacheKey: NEWS_CACHE_STORE_KEY,
+    savedAt: payload.savedAt,
+    expiresAt: payload.savedAt + 10 * 60_000,
+    staleUntil: payload.savedAt + NEWS_CACHE_MAX_AGE_MS,
+    payload,
+    itemCount: payload.items.length,
+  });
+
   if (typeof window === "undefined") return;
   try {
-    const payload: PersistedNewsCache = {
-      savedAt: data.savedAt,
-      query: data.query,
-      items: data.items.slice(0, NEWS_CACHE_MAX_ITEMS),
-      markers: data.markers.slice(0, NEWS_CACHE_MAX_MARKERS),
-      facets: data.facets ?? EMPTY_FACETS,
+    const meta: PersistedNewsCacheMeta = {
+      savedAt: payload.savedAt,
+      query: payload.query,
+      itemCount: payload.items.length,
     };
-    window.localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify(payload));
+    window.localStorage.setItem(NEWS_CACHE_META_KEY, JSON.stringify(meta));
   } catch {
-    // ignore cache write errors
+    // ignore metadata write errors
   }
 }
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url, { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error(`${url} returned ${response.status}`);
+interface FetchJsonOptions {
+  key?: string;
+  signal?: AbortSignal;
+  timeoutMs?: number;
+  retries?: number;
+  negativeTtlMs?: number;
+}
+
+async function fetchJson<T>(url: string, options: FetchJsonOptions = {}): Promise<T> {
+  return fetchJsonWithPolicy<T>(url, {
+    key: options.key ?? url,
+    signal: options.signal,
+    timeoutMs: options.timeoutMs ?? 15_000,
+    retries: options.retries ?? 1,
+    backoffBaseMs: 400,
+    negativeTtlMs: options.negativeTtlMs ?? 1_200,
+  });
+}
+
+function extractEntity(item: NormalizedNewsItem): string {
+  if (item.entity && item.entity !== "none" && item.entity !== "unknown") return item.entity;
+  const words = item.headline.split(/\s+/);
+  for (const w of words) {
+    if (w.length >= 2 && w.length <= 5 && w === w.toUpperCase() && /^[A-Z]+$/.test(w)) return w;
   }
-  return (await response.json()) as T;
+  return "";
+}
+
+function extractRegion(item: NormalizedNewsItem): string {
+  if (item.region && item.region !== "none" && item.region !== "unknown") return item.region;
+  if (item.country && item.country !== "none" && item.country !== "unknown") return item.country;
+  if (item.placeName && item.placeName !== "none" && item.placeName !== "unknown") return item.placeName;
+  try {
+    const host = new URL(item.url).hostname;
+    const tld = host.split(".").pop()?.toUpperCase();
+    if (tld && tld.length === 2 && tld !== "IO" && tld !== "CO") return tld;
+  } catch { /* ignore */ }
+  return "";
 }
 
 function isTypingTarget(target: EventTarget | null): boolean {
@@ -192,12 +299,6 @@ function formatShortTime(ts: number): string {
   return new Date(ts).toISOString().slice(11, 19);
 }
 
-function splitCsv(raw: string): string[] {
-  return raw
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
 
 function toQueryBbox(bounds: { west: number; south: number; east: number; north: number } | null): string | null {
   if (!bounds) return null;
@@ -248,6 +349,34 @@ function compareNewsItems(a: Pick<NewsArticle, "publishedAt" | "score" | "id">, 
   return a.id.localeCompare(b.id);
 }
 
+function minLayoutY(layouts: DashboardLayouts): number {
+  const breakpoints: Array<keyof DashboardLayouts> = ["lg", "md", "sm", "xs"];
+  let min = Number.POSITIVE_INFINITY;
+  for (const bp of breakpoints) {
+    const items = layouts[bp] ?? [];
+    for (const item of items) {
+      if (Number.isFinite(item.y)) {
+        min = Math.min(min, item.y);
+      }
+    }
+  }
+  return Number.isFinite(min) ? min : 0;
+}
+
+function normalizeLayoutsTop(layouts: DashboardLayouts): DashboardLayouts {
+  const minY = minLayoutY(layouts);
+  if (minY <= 0) return layouts;
+  const breakpoints: Array<keyof DashboardLayouts> = ["lg", "md", "sm", "xs"];
+  const next = { ...layouts } as DashboardLayouts;
+  for (const bp of breakpoints) {
+    next[bp] = (next[bp] ?? []).map((item) => ({
+      ...item,
+      y: Math.max(0, item.y - minY),
+    }));
+  }
+  return next;
+}
+
 function buildFacetRows(
   items: NewsArticle[],
   key: "source" | "category" | "language" | "country"
@@ -261,7 +390,7 @@ function buildFacetRows(
           ? item.category
           : key === "language"
             ? item.language
-            : item.country ?? "unknown";
+            : item.country ?? "Global";
     counts.set(value, (counts.get(value) ?? 0) + 1);
   }
   return Array.from(counts.entries())
@@ -310,64 +439,6 @@ function widenTimespan(query: string): string {
   return stringifyQueryAst(ast);
 }
 
-function WatchlistChipSection({
-  label,
-  items,
-  placeholder,
-  onAdd,
-  onRemove,
-  transform,
-}: {
-  label: string;
-  items: string[];
-  placeholder: string;
-  onAdd: (value: string) => void;
-  onRemove: (value: string) => void;
-  transform?: (v: string) => string;
-}) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const handleAdd = () => {
-    const raw = inputRef.current?.value.trim();
-    if (!raw || !inputRef.current) return;
-    const values = splitCsv(raw);
-    for (const v of values) {
-      onAdd(transform ? transform(v) : v);
-    }
-    inputRef.current.value = "";
-    inputRef.current.focus();
-  };
-
-  return (
-    <div className="wv-wl-section">
-      <div className="wv-wl-section-label">{label}</div>
-      <div className="wv-wl-chips">
-        {items.map((item) => (
-          <span key={item} className="wv-wl-chip">
-            <span>{item}</span>
-            <button type="button" aria-label={`Remove ${item}`} onClick={() => onRemove(item)}>
-              &times;
-            </button>
-          </span>
-        ))}
-        {!items.length && <span className="wv-wl-empty">{placeholder}</span>}
-      </div>
-      <div className="wv-wl-add-row">
-        <input
-          ref={inputRef}
-          placeholder={`Add ${label.toLowerCase()}…`}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleAdd();
-            }
-          }}
-        />
-        <button type="button" onClick={handleAdd}>+</button>
-      </div>
-    </div>
-  );
-}
-
 export default function NewsWorkspace({ embedded = false }: { embedded?: boolean }) {
   const dashboardView = useWorldViewStore((s) => s.dashboard.activeView);
   const news = useWorldViewStore((s) => s.news);
@@ -381,18 +452,20 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   const setNewsFacets = useWorldViewStore((s) => s.setNewsFacets);
   const setNewsThreads = useWorldViewStore((s) => s.setNewsThreads);
   const setSelectedStory = useWorldViewStore((s) => s.setSelectedStory);
+  const setStoryPopupArticle = useWorldViewStore((s) => s.setStoryPopupArticle);
   const setHighlightMarker = useWorldViewStore((s) => s.setHighlightMarker);
   const setSearchInView = useWorldViewStore((s) => s.setSearchInView);
   const setNewsLayoutPreset = useWorldViewStore((s) => s.setNewsLayoutPreset);
   const resetNewsLayout = useWorldViewStore((s) => s.resetNewsLayout);
+  const setNewsPanelLayouts = useWorldViewStore((s) => s.setNewsPanelLayouts);
   const setNewsPanelVisibility = useWorldViewStore((s) => s.setNewsPanelVisibility);
   const setNewsPanelLock = useWorldViewStore((s) => s.setNewsPanelLock);
-  const setNewsWatchlist = useWorldViewStore((s) => s.setNewsWatchlist);
   const saveNewsSearch = useWorldViewStore((s) => s.saveNewsSearch);
   const deleteNewsSearch = useWorldViewStore((s) => s.deleteNewsSearch);
   const upsertNewsAlert = useWorldViewStore((s) => s.upsertNewsAlert);
   const ackNewsAlert = useWorldViewStore((s) => s.ackNewsAlert);
   const setNewsVideoState = useWorldViewStore((s) => s.setNewsVideoState);
+  const setNewsVideoPanelState = useWorldViewStore((s) => s.setNewsVideoPanelState);
   const setHeadlineTape = useWorldViewStore((s) => s.setHeadlineTape);
   const advanceHeadlineTape = useWorldViewStore((s) => s.advanceHeadlineTape);
   const setNewsBackendHealth = useWorldViewStore((s) => s.setNewsBackendHealth);
@@ -409,16 +482,26 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   const [liveStreams, setLiveStreams] = useState<YouTubeLive[]>([]);
   const [videoLoading, setVideoLoading] = useState(false);
   const [videoKeyMissing, setVideoKeyMissing] = useState(false);
+  const [videoDiscoverySource, setVideoDiscoverySource] = useState<"youtube-data-api" | "youtube-rss">("youtube-data-api");
+  const [videoFallbackActive, setVideoFallbackActive] = useState(false);
   const [contextItem, setContextItem] = useState<NewsArticle | null>(null);
-  const [searchInputDraft, setSearchInputDraft] = useState(news.query || "news time:24h");
+  const [newsMapReady, setNewsMapReady] = useState(false);
+  const [searchInputDraft, setSearchInputDraft] = useState(news.query || "time:24h");
   const [panelMenuOpen, setPanelMenuOpen] = useState(false);
   const [searchResultsOpen, setSearchResultsOpen] = useState(false);
   const [topbarExpanded, setTopbarExpanded] = useState(false);
   const initialLayoutAppliedRef = useRef(false);
+  const layoutTopOffsetCheckedRef = useRef(false);
   const cacheHydratedRef = useRef(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const searchInFlightRef = useRef(false);
   const searchRequestIdRef = useRef(0);
+  const searchAbortRef = useRef<AbortController | null>(null);
+  const videoAbortRef = useRef<AbortController | null>(null);
+  const suggestAbortRef = useRef<AbortController | null>(null);
+  const contextAbortRef = useRef<AbortController | null>(null);
+  const alertsAbortRef = useRef<AbortController | null>(null);
+  const alertsRef = useRef<AlertRuleState[]>(news.alerts);
   const rollingFeedContextRef = useRef("");
   const rollingFeedRef = useRef<NormalizedNewsItem[]>([]);
   const markerByArticleIdRef = useRef<Map<string, GeoMarker>>(new Map());
@@ -426,6 +509,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   const pendingTerminalQueueRef = useRef<string[]>([]);
   const terminalOrderRef = useRef<string[]>([]);
   const terminalItemsRef = useRef<NormalizedNewsItem[]>([]);
+  const terminalBodyRef = useRef<HTMLDivElement | null>(null);
   const [terminalVersion, setTerminalVersion] = useState(0);
   const searchContextRef = useRef({
     query: news.query,
@@ -446,6 +530,10 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     }
   }, [feedItems.length]);
 
+  useEffect(() => {
+    alertsRef.current = news.alerts;
+  }, [news.alerts]);
+
   const enqueueTerminalIds = useCallback((ids: string[]) => {
     if (!ids.length) return;
     const queued = new Set(pendingTerminalQueueRef.current);
@@ -463,7 +551,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     const existing = terminalOrderRef.current.filter((id) => nextSet.has(id));
     const existingSet = new Set(existing);
     const appended = nextIds.filter((id) => !existingSet.has(id));
-    const merged = [...existing, ...appended];
+    const merged = [...appended, ...existing];
     const changed =
       merged.length !== terminalOrderRef.current.length ||
       merged.some((id, idx) => id !== terminalOrderRef.current[idx]);
@@ -517,28 +605,35 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     if (cacheHydratedRef.current) return;
     cacheHydratedRef.current = true;
     if (news.feedItems.length > 0) return;
-    const cached = readNewsCache();
-    if (!cached || !cached.items.length) return;
-    const cachedItems = [...(cached.items as NormalizedNewsItem[])].sort(compareNewsItems);
-    setNewsFeedItems(cachedItems);
-    setNewsMarkers(cached.markers);
-    setNewsFacets(cached.facets);
-    setNewsThreads(buildThreadList(cachedItems));
-    rollingFeedContextRef.current = `cache:${cached.query}`;
-    rollingFeedRef.current = cachedItems.slice(0, NEWS_RETENTION_MAX_ITEMS);
-    markerByArticleIdRef.current = new Map(cached.markers.map((marker) => [marker.articleId, marker]));
-    syncTerminalOrder(cachedItems);
-    setNewsLastUpdated(cached.savedAt);
-    setNewsUiState({
-      statusLine: `Loaded ${cachedItems.length} cached stories. Refreshing live feed...`,
-    });
-    SEARCH_INDEX.upsert(cachedItems);
-    const top = cachedItems[0];
-    if (top) {
-      setSelectedStory(top.id);
-      const marker = cached.markers.find((entry) => entry.articleId === top.id);
-      setHighlightMarker(marker?.id ?? null);
-    }
+    let cancelled = false;
+    void (async () => {
+      const cached = await readNewsCache();
+      if (cancelled) return;
+      if (!cached || !cached.items.length) return;
+      const cachedItems = [...(cached.items as NormalizedNewsItem[])].sort(compareNewsItems);
+      setNewsFeedItems(cachedItems);
+      setNewsMarkers(cached.markers);
+      setNewsFacets(cached.facets);
+      setNewsThreads(buildThreadList(cachedItems));
+      rollingFeedContextRef.current = `cache:${cached.query}`;
+      rollingFeedRef.current = cachedItems.slice(0, NEWS_RETENTION_MAX_ITEMS);
+      markerByArticleIdRef.current = new Map(cached.markers.map((marker) => [marker.articleId, marker]));
+      syncTerminalOrder(cachedItems);
+      setNewsLastUpdated(cached.savedAt);
+      setNewsUiState({
+        statusLine: `Loaded ${cachedItems.length} cached stories. Refreshing live feed...`,
+      });
+      SEARCH_INDEX.upsert(cachedItems);
+      const top = cachedItems[0];
+      if (top) {
+        setSelectedStory(top.id);
+        const marker = cached.markers.find((entry) => entry.articleId === top.id);
+        setHighlightMarker(marker?.id ?? null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [
     dashboardView,
     news.feedItems.length,
@@ -555,20 +650,21 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
 
   const filteredItems = useMemo(() => {
     const sourceMuted = new Set(news.mutedSources.map((source) => source.toLowerCase()));
-    const bySource = feedItems.filter((item) => !sourceMuted.has(item.source.toLowerCase()));
+    const bySource = feedItems.filter((item) => {
+      const src = item.source.toLowerCase();
+      const domain = (item.domain ?? "").toLowerCase();
+      if (
+        BLOCKED_NEWS_SOURCES.has(src) ||
+        Array.from(BLOCKED_NEWS_SOURCES).some((blocked) => domain.includes(blocked))
+      ) {
+        return false;
+      }
+      if (sourceMuted.has(src)) return false;
+      return true;
+    });
     if (activeCategory === "all") return bySource;
-    if (activeCategory === "watchlist") {
-      return bySource.filter((item) => {
-        const text = `${item.headline} ${item.snippet} ${item.entity ?? ""}`.toLowerCase();
-        const tickerHit = news.watchlist.tickers.some((token) => text.includes(token.toLowerCase()));
-        const topicHit = news.watchlist.topics.some((token) => text.includes(token.toLowerCase()));
-        const regionText = `${item.region ?? item.country ?? item.placeName ?? ""}`.toLowerCase();
-        const regionHit = news.watchlist.regions.some((token) => regionText.includes(token.toLowerCase()));
-        return tickerHit || topicHit || regionHit;
-      });
-    }
     return bySource.filter((item) => item.category === activeCategory);
-  }, [feedItems, activeCategory, news.mutedSources, news.watchlist]);
+  }, [feedItems, activeCategory, news.mutedSources]);
 
   const terminalItems = useMemo(() => {
     const order = new Map<string, number>();
@@ -624,62 +720,16 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   }, [news.query, news.searchInView, news.selectedStoryId, bbox, geoMode]);
 
   const newsGlobeFooterMessage = useMemo(() => {
-    if (newsBackendHealth.search === "loading") return "Searching…";
+    if (newsBackendHealth.search === "loading") return "Searching...";
     const anyDegraded = Object.values(newsBackendHealth).some((v) => v === "degraded");
     if (anyDegraded) return "Some sources delayed";
     return undefined;
   }, [newsBackendHealth]);
 
-  const videoChannels = useMemo(() => {
-    const byChannel = new Map<string, { channelId: string; channelName: string; liveCount: number; recentCount: number }>();
-    for (const item of liveStreams) {
-      const prev = byChannel.get(item.channelId) ?? {
-        channelId: item.channelId,
-        channelName: item.channelName,
-        liveCount: 0,
-        recentCount: 0,
-      };
-      if (item.status === "live") prev.liveCount += 1;
-      else prev.recentCount += 1;
-      byChannel.set(item.channelId, prev);
-    }
-    return Array.from(byChannel.values()).sort((a, b) => {
-      const aWeight = a.liveCount * 100 + a.recentCount;
-      const bWeight = b.liveCount * 100 + b.recentCount;
-      return bWeight - aWeight || a.channelName.localeCompare(b.channelName);
-    });
-  }, [liveStreams]);
-
-  const filteredLiveStreams = useMemo(() => {
-    if (!news.video.selectedChannelFilter) return liveStreams;
-    return liveStreams.filter((item) => item.channelId === news.video.selectedChannelFilter);
-  }, [liveStreams, news.video.selectedChannelFilter]);
-
-  const videoTabItems = useMemo(() => {
-    const ordered = [...filteredLiveStreams].sort((a, b) => {
-      if (a.status !== b.status) return a.status === "live" ? -1 : 1;
-      const aTs = Date.parse(a.publishedAt ?? "");
-      const bTs = Date.parse(b.publishedAt ?? "");
-      if (Number.isFinite(aTs) && Number.isFinite(bTs)) return bTs - aTs;
-      return 0;
-    });
-    const byChannel = new Map<string, YouTubeLive>();
-    for (const stream of ordered) {
-      if (!byChannel.has(stream.channelId)) {
-        byChannel.set(stream.channelId, stream);
-      }
-    }
-    return Array.from(byChannel.values()).slice(0, 14);
-  }, [filteredLiveStreams]);
-
-  useEffect(() => {
-    if (dashboardView !== "news") return;
-    if (!videoTabItems.length) return;
-    const hasActive = videoTabItems.some((item) => item.videoId === news.video.selectedVideoId);
-    if (hasActive) return;
-    const next = videoTabItems[0];
-    setNewsVideoState({ selectedVideoId: next.videoId, selectedChannelId: next.channelId });
-  }, [dashboardView, videoTabItems, news.video.selectedVideoId, setNewsVideoState]);
+  const hasAnyVideoPanelVisible = useMemo(
+    () => LIVE_VIDEO_PANELS.some((p) => news.panelVisibility[p.id] !== false),
+    [news.panelVisibility]
+  );
 
   const runSearch = useCallback(
     async (
@@ -688,6 +738,9 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     ) => {
       if (dashboardView !== "news") return;
       if (reason === "poll" && searchInFlightRef.current) return;
+      searchAbortRef.current?.abort();
+      const controller = new AbortController();
+      searchAbortRef.current = controller;
 
       const stateNews = useWorldViewStore.getState().news;
       const context = {
@@ -755,7 +808,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           enqueueTerminalIds(newIds);
 
           if (merged.length) {
-            writeNewsCache({
+            void writeNewsCache({
               savedAt: Date.now(),
               query: queryForAst,
               items: merged,
@@ -881,27 +934,138 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           bbox: primaryBbox,
           mode: context.geoMode,
         };
+        let primaryPayload: SearchRouteResult | null = null;
+        let primaryEmptyReason: string | null = null;
+        let primaryAttemptContext: { inView: boolean; bbox: string | null; mode: "pointdata" | "country" | "adm1" } | null = null;
+        let usePrimaryEmptyReason = false;
 
-        for (const attempt of attempts) {
-          if (requestId !== searchRequestIdRef.current) return;
+        const parallelAttempts = attempts.filter(
+          (a) =>
+            a.id === "primary" ||
+            (allowFallbackChain && a.id === "disable-search-in-view") ||
+            (allowFallbackChain && a.id === "fallback-news-time-24h")
+        );
+        const sequentialAttempts = attempts.filter((a) => !parallelAttempts.includes(a));
+
+        const runAttempt = async (attempt: (typeof attempts)[0]) => {
           const payload = await fetchJson<SearchRouteResult>(
             buildSearchUrl(attempt.query, {
               inView: attempt.inView,
               bbox: attempt.bbox,
               mode: attempt.mode,
-            })
+            }),
+            {
+              key: `news:search:${attempt.id}:${attempt.mode}:${attempt.inView ? "inview" : "all"}:${attempt.query}`,
+              signal: controller.signal,
+              timeoutMs: 18_000,
+              retries: 1,
+              negativeTtlMs: 1_000,
+            }
           );
+          return { attempt, payload };
+        };
+
+        if (parallelAttempts.length > 1) {
+          const results = await Promise.allSettled(
+            parallelAttempts.map((a) => runAttempt(a))
+          );
+          const byId = new Map<string, { attempt: (typeof attempts)[0]; payload: SearchRouteResult }>();
+          for (const result of results) {
+            if (result.status === "fulfilled" && requestId === searchRequestIdRef.current) {
+              const { attempt, payload } = result.value;
+              byId.set(attempt.id, { attempt, payload });
+              if (attempt.id === "primary" && (payload.items?.length ?? 0) === 0) {
+                primaryPayload = payload;
+                primaryEmptyReason = payload.emptyReason ?? null;
+                primaryAttemptContext = { inView: attempt.inView, bbox: attempt.bbox, mode: attempt.mode };
+              }
+            }
+          }
+          const preferenceOrder = ["primary", "disable-search-in-view", "fallback-news-time-24h"];
+          for (const id of preferenceOrder) {
+            const entry = byId.get(id);
+            if (!entry) continue;
+            const count = entry.payload.items?.length ?? 0;
+            if (count > 0) {
+              if (
+                id === "fallback-news-time-24h" &&
+                primaryEmptyReason != null &&
+                primaryEmptyReason.includes("No stories matched")
+              ) {
+                lastCount = applyPayload(primaryPayload!, activeQuery, primaryAttemptContext!);
+                usePrimaryEmptyReason = true;
+              } else {
+                lastCount = applyPayload(
+                  entry.payload,
+                  entry.attempt.query,
+                  { inView: entry.attempt.inView, bbox: entry.attempt.bbox, mode: entry.attempt.mode }
+                );
+                finalQuery = entry.attempt.query;
+                if (id !== "primary") fallbackApplied.push(id);
+              }
+              appliedFromAttempt = true;
+              lastPayload = entry.payload;
+              lastAttemptContext = { inView: entry.attempt.inView, bbox: entry.attempt.bbox, mode: entry.attempt.mode };
+              break;
+            }
+          }
+          if (!appliedFromAttempt) {
+            lastPayload = primaryPayload ?? Array.from(byId.values())[0]?.payload ?? null;
+            if (lastPayload) {
+              lastAttemptContext = primaryAttemptContext ?? lastAttemptContext;
+              for (const id of preferenceOrder) {
+                if (id !== "primary" && byId.has(id)) fallbackApplied.push(id);
+              }
+            }
+          }
+        }
+
+        if (!appliedFromAttempt && sequentialAttempts.length > 0) {
+          for (const attempt of sequentialAttempts) {
+            if (requestId !== searchRequestIdRef.current) return;
+            const { attempt: a, payload } = await runAttempt(attempt).then((r) => ({ attempt: r.attempt, payload: r.payload }));
+            lastPayload = payload;
+            lastAttemptContext = { inView: a.inView, bbox: a.bbox, mode: a.mode };
+            finalQuery = a.query;
+            const count = payload.items?.length ?? 0;
+            if (a.id === "primary" && count === 0) {
+              primaryPayload = payload;
+              primaryEmptyReason = payload.emptyReason ?? null;
+              primaryAttemptContext = lastAttemptContext;
+            }
+            if (a.id !== "primary") fallbackApplied.push(a.id);
+            if (count > 0) {
+              if (
+                a.id === "fallback-news-time-24h" &&
+                primaryEmptyReason != null &&
+                primaryEmptyReason.includes("No stories matched")
+              ) {
+                lastCount = applyPayload(primaryPayload!, activeQuery, primaryAttemptContext!);
+                usePrimaryEmptyReason = true;
+              } else {
+                lastCount = applyPayload(payload, a.query, lastAttemptContext);
+              }
+              appliedFromAttempt = true;
+              break;
+            }
+          }
+        }
+
+        if (!appliedFromAttempt && parallelAttempts.length === 1) {
+          const { attempt, payload } = await runAttempt(parallelAttempts[0]);
+          if (requestId !== searchRequestIdRef.current) return;
           lastPayload = payload;
           lastAttemptContext = { inView: attempt.inView, bbox: attempt.bbox, mode: attempt.mode };
           finalQuery = attempt.query;
           const count = payload.items?.length ?? 0;
-          if (attempt.id !== "primary") {
-            fallbackApplied.push(attempt.id);
+          if (attempt.id === "primary" && count === 0) {
+            primaryPayload = payload;
+            primaryEmptyReason = payload.emptyReason ?? null;
+            primaryAttemptContext = lastAttemptContext;
           }
           if (count > 0) {
             lastCount = applyPayload(payload, attempt.query, lastAttemptContext);
             appliedFromAttempt = true;
-            break;
           }
         }
 
@@ -933,7 +1097,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
         if (lastPayload) {
           setNewsQueryState({
             lastFallbackApplied: fallbackApplied,
-            lastEmptyReason: lastPayload.emptyReason ?? null,
+            lastEmptyReason: usePrimaryEmptyReason ? primaryEmptyReason : (lastPayload.emptyReason ?? null),
           });
           if (reason !== "poll") {
             if (preservedExisting) {
@@ -962,11 +1126,15 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           }
         }
       } catch (error) {
+        if (isAbortError(error) || controller.signal.aborted) return;
         if (requestId !== searchRequestIdRef.current) return;
         console.error("[news/search] failed", error);
         setNewsBackendHealth("search", "error");
         setNewsUiState({ statusLine: "Search failed. Upstream sources may be throttled." });
       } finally {
+        if (searchAbortRef.current === controller) {
+          searchAbortRef.current = null;
+        }
         if (requestId === searchRequestIdRef.current) {
           searchInFlightRef.current = false;
           if (showLoading) {
@@ -996,42 +1164,69 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   );
 
   const refreshVideo = useCallback(async () => {
-    if (dashboardView !== "news" || !news.panelVisibility["news-video"]) return;
+    if (dashboardView !== "news" || !hasAnyVideoPanelVisible) return;
+    videoAbortRef.current?.abort();
+    const controller = new AbortController();
+    videoAbortRef.current = controller;
     setVideoLoading(true);
     setNewsBackendHealth("youtube", "loading");
     try {
       const payload = await fetchJson<{
         items: YouTubeLive[];
         keyMissing: boolean;
+        discoverySource?: "youtube-data-api" | "youtube-rss";
+        fallbackActive?: boolean;
         degraded?: string[];
         liveCount?: number;
         channelsChecked?: number;
-      }>("/api/news/youtube");
+        zeroResults?: boolean;
+        upstreamError?: boolean;
+        message?: string;
+      }>("/api/news/youtube", {
+        key: "news:youtube",
+        signal: controller.signal,
+        timeoutMs: 18_000,
+        retries: 1,
+        negativeTtlMs: 1_200,
+      });
       const nextItems = payload.items ?? [];
       setLiveStreams(nextItems);
       setVideoKeyMissing(Boolean(payload.keyMissing));
+      setVideoDiscoverySource(payload.discoverySource ?? "youtube-data-api");
+      setVideoFallbackActive(Boolean(payload.fallbackActive));
       setNewsBackendHealth("youtube", payload.degraded?.length ? "degraded" : "ok");
-      if (!news.video.selectedVideoId && nextItems.length) {
-        const firstLive = nextItems.find((item) => item.status === "live") ?? nextItems[0];
-        setNewsVideoState({ selectedVideoId: firstLive.videoId, selectedChannelId: firstLive.channelId });
-      }
-      if (nextItems.length) {
-        setNewsUiState({
-          statusLine: `Video list updated: ${payload.liveCount ?? 0} live across ${payload.channelsChecked ?? 0} channels.`,
-        });
-      }
+      const baseSummary = `Video: ${payload.liveCount ?? 0} live across ${payload.channelsChecked ?? 0} channels.`;
+      const statusMessage =
+        payload.message ||
+        (payload.keyMissing
+          ? "YOUTUBE_API_KEY missing. Showing recent uploads from RSS fallback."
+          : payload.fallbackActive
+            ? "YouTube Data API unavailable; showing recent uploads from RSS."
+            : payload.upstreamError
+            ? "YouTube API request failed; auto-discovery may be limited."
+            : payload.zeroResults || !nextItems.length
+              ? "No YouTube streams discovered for configured channels right now."
+              : baseSummary);
+      setNewsUiState({
+        statusLine: statusMessage,
+      });
     } catch (error) {
+      if (isAbortError(error) || controller.signal.aborted) return;
       console.error("[news/youtube] failed", error);
       setNewsBackendHealth("youtube", "error");
+      setNewsUiState({
+        statusLine: "YouTube auto-discovery failed; check API key and network.",
+      });
     } finally {
+      if (videoAbortRef.current === controller) {
+        videoAbortRef.current = null;
+      }
       setVideoLoading(false);
     }
   }, [
     dashboardView,
-    news.panelVisibility,
-    news.video.selectedVideoId,
+    hasAnyVideoPanelVisible,
     setNewsBackendHealth,
-    setNewsVideoState,
     setNewsUiState,
   ]);
 
@@ -1041,65 +1236,115 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       setNewsQuery("news time:24h");
       return;
     }
-    const timer = setTimeout(() => void runSearch("query"), 120);
+    const timer = setTimeout(() => void runSearch("query"), 0);
     return () => clearTimeout(timer);
   }, [dashboardView, news.query, runSearch, setNewsQuery]);
 
   useEffect(() => {
     if (dashboardView !== "news") return;
-    const id = setInterval(() => void runSearch("poll"), NEWS_REFRESH_MS);
-    return () => clearInterval(id);
+    const disposePoll = globalRefreshRuntime.register({
+      pool: "news",
+      task: {
+      key: "news:search-poll",
+      intervalMs: NEWS_REFRESH_MS,
+      runOnStart: false,
+      jitterPct: 0.14,
+      hiddenIntervalMultiplier: 3,
+      timeoutMs: 20_000,
+      run: async () => {
+        await runSearch("poll");
+      },
+      },
+    });
+    return () => {
+      disposePoll();
+    };
   }, [dashboardView, runSearch]);
 
   useEffect(() => {
-    if (dashboardView !== "news") return;
-    if (!news.panelVisibility["news-video"]) return;
-    void refreshVideo();
-    const id = setInterval(() => void refreshVideo(), VIDEO_REFRESH_MS);
-    return () => clearInterval(id);
-  }, [dashboardView, news.panelVisibility, refreshVideo]);
+    if (dashboardView !== "news" || !hasAnyVideoPanelVisible) {
+      videoAbortRef.current?.abort();
+      return;
+    }
+    const disposeVideoPoll = globalRefreshRuntime.register({
+      pool: "news",
+      task: {
+      key: "news:video-poll",
+      intervalMs: VIDEO_REFRESH_MS,
+      runOnStart: true,
+      jitterPct: 0.12,
+      hiddenIntervalMultiplier: 3,
+      timeoutMs: 25_000,
+      run: async () => {
+        await refreshVideo();
+      },
+      },
+    });
+    return () => {
+      disposeVideoPoll();
+      videoAbortRef.current?.abort();
+    };
+  }, [dashboardView, hasAnyVideoPanelVisible, refreshVideo]);
+
+  useEffect(() => {
+    if (dashboardView !== "news" || !hasAnyVideoPanelVisible) return;
+    if (!liveStreams.length) return;
+
+    const byPanel = news.video.byPanel ?? {};
+    const visibleVideoPanels = LIVE_VIDEO_PANELS.filter((cfg) => news.panelVisibility[cfg.id] !== false);
+    const usedVideoIds = new Set<string>();
+
+    for (const cfg of visibleVideoPanels) {
+      const panelState = byPanel[cfg.id] ?? {
+        selectedVideoId: null,
+        selectedChannelFilter: null,
+        manualUrl: "",
+      };
+      const channelIds = VIDEO_CATEGORY_CHANNEL_IDS.get(cfg.category) ?? new Set<string>();
+      const baseCandidates = liveStreams.filter((stream) => channelIds.has(stream.channelId));
+      const selectedFilterStillValid =
+        !!panelState.selectedChannelFilter &&
+        baseCandidates.some((stream) => stream.channelId === panelState.selectedChannelFilter);
+      let candidates = baseCandidates;
+      if (selectedFilterStillValid) {
+        candidates = baseCandidates.filter((stream) => stream.channelId === panelState.selectedChannelFilter);
+      }
+      const orderedCandidates = uniqueStreamsByVideoId(sortYouTubeStreamsLiveFirst(candidates));
+      const current = panelState.selectedVideoId;
+      const currentIsUsable = Boolean(
+        current &&
+          orderedCandidates.some((stream) => stream.videoId === current) &&
+          !usedVideoIds.has(current)
+      );
+      const nextVideoId =
+        currentIsUsable
+          ? current
+          : (orderedCandidates.find((stream) => !usedVideoIds.has(stream.videoId))?.videoId ?? null);
+
+      if (nextVideoId) usedVideoIds.add(nextVideoId);
+      const shouldResetFilter = !!panelState.selectedChannelFilter && !selectedFilterStillValid;
+      if ((current ?? null) !== nextVideoId || shouldResetFilter) {
+        setNewsVideoPanelState(cfg.id, {
+          selectedVideoId: nextVideoId,
+          ...(shouldResetFilter ? { selectedChannelFilter: null } : {}),
+        });
+      }
+    }
+  }, [
+    dashboardView,
+    hasAnyVideoPanelVisible,
+    liveStreams,
+    news.panelVisibility,
+    news.video.byPanel,
+    setNewsVideoPanelState,
+  ]);
 
   useEffect(() => {
     if (dashboardView !== "news") return;
     if (!news.headlineTape.enabled || news.headlineTape.paused) return;
     if (!terminalItems.length) return;
     const id = setInterval(() => {
-      // #region agent log
-      const workspace = document.querySelector<HTMLElement>(".wv-news-workspace");
-      const gridArea = document.querySelector<HTMLElement>(".wv-news-grid-area");
-      const terminalBody = document.querySelector<HTMLElement>(".wv-news-terminal-body");
-      const tapeStream = document.querySelector<HTMLElement>(".wv-news-tape-stream");
-      const before = {
-        workspace: workspace ? { scrollTop: workspace.scrollTop, scrollHeight: workspace.scrollHeight, clientHeight: workspace.clientHeight } : null,
-        gridArea: gridArea ? { scrollTop: gridArea.scrollTop, scrollHeight: gridArea.scrollHeight, clientHeight: gridArea.clientHeight } : null,
-        terminalBody: terminalBody ? { scrollTop: terminalBody.scrollTop, scrollHeight: terminalBody.scrollHeight, clientHeight: terminalBody.clientHeight } : null,
-        docEl: typeof document !== "undefined" ? { scrollTop: document.documentElement.scrollTop, scrollHeight: document.documentElement.scrollHeight } : null,
-        body: typeof document !== "undefined" ? { scrollTop: document.body.scrollTop, scrollHeight: document.body.scrollHeight } : null,
-        tapeTextLen: tapeStream ? tapeStream.textContent?.length ?? 0 : 0,
-      };
-      fetch("http://127.0.0.1:7928/ingest/3da76906-48e1-4cba-af71-0b7fc1ab7982", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "62a2fc" }, body: JSON.stringify({ sessionId: "62a2fc", location: "NewsWorkspace.tsx:tape-interval-before", message: "scroll before tape tick", data: before, timestamp: Date.now(), hypothesisId: "A" }) }).catch(() => {});
-      // #endregion
       advanceHeadlineTape(1);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          // #region agent log
-          const ws = document.querySelector<HTMLElement>(".wv-news-workspace");
-          const ga = document.querySelector<HTMLElement>(".wv-news-grid-area");
-          const tb = document.querySelector<HTMLElement>(".wv-news-terminal-body");
-          const tapeStreamAfter = document.querySelector<HTMLElement>(".wv-news-tape-stream");
-          const after = {
-            workspace: ws ? { scrollTop: ws.scrollTop, scrollHeight: ws.scrollHeight, clientHeight: ws.clientHeight } : null,
-            gridArea: ga ? { scrollTop: ga.scrollTop, scrollHeight: ga.scrollHeight, clientHeight: ga.clientHeight } : null,
-            terminalBody: tb ? { scrollTop: tb.scrollTop, scrollHeight: tb.scrollHeight, clientHeight: tb.clientHeight } : null,
-            docEl: typeof document !== "undefined" ? { scrollTop: document.documentElement.scrollTop, scrollHeight: document.documentElement.scrollHeight } : null,
-            body: typeof document !== "undefined" ? { scrollTop: document.body.scrollTop, scrollHeight: document.body.scrollHeight } : null,
-            tapeTextLen: tapeStreamAfter ? tapeStreamAfter.textContent?.length ?? 0 : 0,
-            cursor: useWorldViewStore.getState().news.headlineTape.cursor,
-          };
-          fetch("http://127.0.0.1:7928/ingest/3da76906-48e1-4cba-af71-0b7fc1ab7982", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "62a2fc" }, body: JSON.stringify({ sessionId: "62a2fc", location: "NewsWorkspace.tsx:tape-interval-after", message: "scroll after tape tick", data: after, timestamp: Date.now(), hypothesisId: "B" }) }).catch(() => {});
-          // #endregion
-        });
-      });
     }, NEWS_TAPE_TICK_MS);
     return () => clearInterval(id);
   }, [
@@ -1111,32 +1356,21 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   ]);
 
   useEffect(() => {
-    // #region agent log
-    const workspace = document.querySelector<HTMLElement>(".wv-news-workspace");
-    const gridArea = document.querySelector<HTMLElement>(".wv-news-grid-area");
-    const terminalBody = document.querySelector<HTMLElement>(".wv-news-terminal-body");
-    const scrollState = {
-      workspace: workspace ? { scrollTop: workspace.scrollTop, scrollHeight: workspace.scrollHeight } : null,
-      gridArea: gridArea ? { scrollTop: gridArea.scrollTop, scrollHeight: gridArea.scrollHeight } : null,
-      terminalBody: terminalBody ? { scrollTop: terminalBody.scrollTop, scrollHeight: terminalBody.scrollHeight } : null,
-      docEl: typeof document !== "undefined" ? document.documentElement.scrollTop : null,
-      body: typeof document !== "undefined" ? document.body.scrollTop : null,
-    };
-    fetch("http://127.0.0.1:7928/ingest/3da76906-48e1-4cba-af71-0b7fc1ab7982", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "62a2fc" }, body: JSON.stringify({ sessionId: "62a2fc", location: "NewsWorkspace.tsx:on-cursor-change", message: "scroll when headlineTape.cursor effect ran", data: { cursor: news.headlineTape.cursor, scrollState }, timestamp: Date.now(), hypothesisId: "D" }) }).catch(() => {});
-    // #endregion
-  }, [news.headlineTape.cursor]);
-
-  useEffect(() => {
     syncTerminalOrder(terminalItems);
   }, [terminalItems, syncTerminalOrder]);
+
+  const prevTerminalVersionRef = useRef(terminalVersion);
+  useEffect(() => {
+    if (prevTerminalVersionRef.current === terminalVersion) return;
+    prevTerminalVersionRef.current = terminalVersion;
+  }, [terminalVersion]);
 
   useEffect(() => {
     if (dashboardView !== "news") return;
     const id = setInterval(() => {
-      const visibleIds = new Set(terminalItemsRef.current.map((item) => item.id));
-      if (!visibleIds.size) return;
-      let changed = false;
+      if (!pendingTerminalQueueRef.current.length) return;
 
+      let changed = false;
       while (pendingTerminalQueueRef.current.length > 0) {
         const nextId = pendingTerminalQueueRef.current.shift();
         if (!nextId) continue;
@@ -1147,18 +1381,6 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
         ];
         changed = true;
         break;
-      }
-
-      if (!changed) {
-        const visibleInOrder = terminalOrderRef.current.filter((id) => visibleIds.has(id));
-        if (visibleInOrder.length > 1) {
-          const first = visibleInOrder[0];
-          terminalOrderRef.current = [
-            ...terminalOrderRef.current.filter((id) => id !== first),
-            first,
-          ];
-          changed = true;
-        }
       }
 
       if (changed) {
@@ -1187,28 +1409,13 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   }, [panelMenuOpen]);
 
   useEffect(() => {
-    if (dashboardView !== "news") return;
-    if (!news.video.autoRotateEnabled || news.video.autoRotatePaused) return;
-    if (!liveStreams.length) return;
-    const id = setInterval(() => {
-      const currentIdx = liveStreams.findIndex((item) => item.videoId === news.video.selectedVideoId);
-      const next = liveStreams[(currentIdx + 1) % liveStreams.length] ?? liveStreams[0];
-      setNewsVideoState({
-        selectedVideoId: next.videoId,
-        selectedChannelId: next.channelId,
-        lastRotateAt: Date.now(),
-      });
-    }, Math.max(1, news.video.autoRotateMinutes) * 60_000);
-    return () => clearInterval(id);
-  }, [
-    dashboardView,
-    news.video.autoRotateEnabled,
-    news.video.autoRotatePaused,
-    news.video.autoRotateMinutes,
-    news.video.selectedVideoId,
-    liveStreams,
-    setNewsVideoState,
-  ]);
+    if (dashboardView !== "news" || layoutTopOffsetCheckedRef.current) return;
+    const minY = minLayoutY(news.panelLayouts);
+    if (minY > 0) {
+      setNewsPanelLayouts(normalizeLayoutsTop(news.panelLayouts));
+    }
+    layoutTopOffsetCheckedRef.current = true;
+  }, [dashboardView, news.panelLayouts, setNewsPanelLayouts]);
 
   useEffect(() => {
     if (dashboardView !== "news" || initialLayoutAppliedRef.current) return;
@@ -1222,6 +1429,9 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   useEffect(() => {
     if (dashboardView !== "news") return;
     const q = searchInputDraft.trim();
+    suggestAbortRef.current?.abort();
+    const controller = new AbortController();
+    suggestAbortRef.current = controller;
     const fromIndex = SEARCH_INDEX.suggest(q, 6);
     const fromSaved = news.savedSearches
       .filter((item) => item.name.toLowerCase().includes(q.toLowerCase()) || item.query.toLowerCase().includes(q.toLowerCase()))
@@ -1235,7 +1445,14 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     const timer = setTimeout(async () => {
       try {
         const payload = await fetchJson<{ suggestions: SuggestionItem[] }>(
-          `/api/news/suggest?q=${encodeURIComponent(q)}&limit=8`
+          `/api/news/suggest?q=${encodeURIComponent(q)}&limit=8`,
+          {
+            key: `news:suggest:${q}`,
+            signal: controller.signal,
+            timeoutMs: 8_000,
+            retries: 1,
+            negativeTtlMs: 600,
+          }
         );
         const combined = [...payload.suggestions, ...fromSaved, ...fromIndex];
         const seen = new Set<string>();
@@ -1247,10 +1464,17 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
         });
         setSuggestions(deduped.slice(0, 12));
       } catch {
+        if (controller.signal.aborted) return;
         setSuggestions([...fromSaved, ...fromIndex].slice(0, 8));
       }
     }, 200);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+      if (suggestAbortRef.current === controller) {
+        suggestAbortRef.current = null;
+      }
+    };
   }, [dashboardView, searchInputDraft, news.savedSearches]);
 
   useEffect(() => {
@@ -1259,62 +1483,124 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
 
   useEffect(() => {
     if (dashboardView !== "news") return;
-    if (!news.alerts.length) return;
-    const id = setInterval(async () => {
-      const alerts = news.alerts.filter((item) => item.enabled).slice(0, 8);
-      for (const alert of alerts) {
-        try {
-          const payload = await fetchJson<SearchRouteResult>(
-            `/api/news/search?q=${encodeURIComponent(alert.query)}&limit=60`
-          );
-          const fingerprints = payload.items.map((item) => makeFingerprint(item));
-          const seen = new Set(alert.seenFingerprints);
-          const newHits = fingerprints.filter((fp) => !seen.has(fp));
-          const nextSeen = Array.from(new Set([...alert.seenFingerprints, ...newHits])).slice(-500);
-          if (newHits.length >= alert.threshold) {
-            if (alert.soundEnabled) playAlertTone();
-            upsertNewsAlert({
-              ...alert,
-              lastChecked: Date.now(),
-              hitCount: alert.hitCount + newHits.length,
-              unreadCount: alert.unreadCount + newHits.length,
-              seenFingerprints: nextSeen,
-            });
-          } else {
-            upsertNewsAlert({ ...alert, lastChecked: Date.now(), seenFingerprints: nextSeen });
+    const disposeAlerts = globalRefreshRuntime.register({
+      pool: "news",
+      task: {
+      key: "news:alerts-poll",
+      intervalMs: NEWS_REFRESH_MS,
+      runOnStart: false,
+      jitterPct: 0.2,
+      hiddenIntervalMultiplier: 3.5,
+      timeoutMs: 25_000,
+      run: async ({ signal }) => {
+        const alerts = alertsRef.current.filter((item) => item.enabled).slice(0, 8);
+        if (!alerts.length) return;
+
+        alertsAbortRef.current?.abort();
+        const controller = new AbortController();
+        alertsAbortRef.current = controller;
+        signal.addEventListener("abort", () => controller.abort(), { once: true });
+
+        for (const alert of alerts) {
+          if (controller.signal.aborted) return;
+          try {
+            const payload = await fetchJson<SearchRouteResult>(
+              `/api/news/search?q=${encodeURIComponent(alert.query)}&limit=60`,
+              {
+                key: `news:alert:${alert.id}:${alert.query}`,
+                signal: controller.signal,
+                timeoutMs: 15_000,
+                retries: 1,
+                negativeTtlMs: 900,
+              }
+            );
+            const fingerprints = payload.items.map((item) => makeFingerprint(item));
+            const seen = new Set(alert.seenFingerprints);
+            const newHits = fingerprints.filter((fp) => !seen.has(fp));
+            const nextSeen = Array.from(new Set([...alert.seenFingerprints, ...newHits])).slice(-500);
+            if (newHits.length >= alert.threshold) {
+              if (alert.soundEnabled) playAlertTone();
+              upsertNewsAlert({
+                ...alert,
+                lastChecked: Date.now(),
+                hitCount: alert.hitCount + newHits.length,
+                unreadCount: alert.unreadCount + newHits.length,
+                seenFingerprints: nextSeen,
+              });
+            } else {
+              upsertNewsAlert({ ...alert, lastChecked: Date.now(), seenFingerprints: nextSeen });
+            }
+          } catch (error) {
+            if (isAbortError(error) || controller.signal.aborted) return;
           }
-        } catch {
-          // suppress noisy alert errors
         }
-      }
-    }, NEWS_REFRESH_MS);
-    return () => clearInterval(id);
-  }, [dashboardView, news.alerts, upsertNewsAlert]);
+
+        if (alertsAbortRef.current === controller) {
+          alertsAbortRef.current = null;
+        }
+      },
+      },
+    });
+    return () => {
+      disposeAlerts();
+      alertsAbortRef.current?.abort();
+      alertsAbortRef.current = null;
+    };
+  }, [dashboardView, upsertNewsAlert]);
 
   useEffect(() => {
     if (dashboardView !== "news") return;
     if (!selectedItem) {
+      contextAbortRef.current?.abort();
+      contextAbortRef.current = null;
       setRelatedItems([]);
       setTimeline([]);
       return;
     }
+    contextAbortRef.current?.abort();
+    const controller = new AbortController();
+    contextAbortRef.current = controller;
     const query = [selectedItem.entity, selectedItem.placeName, selectedItem.headline.split(/\s+/g).slice(0, 4).join(" ")]
       .filter(Boolean)
       .join(" ");
-    Promise.all([
-      fetchJson<{ articles?: GdeltArticle[] }>(`/api/news/gdelt-context?q=${encodeURIComponent(query)}`),
+    void Promise.all([
+      fetchJson<{ articles?: GdeltArticle[] }>(
+        `/api/news/gdelt-context?q=${encodeURIComponent(query)}`,
+        {
+          key: `news:ctx:${query}`,
+          signal: controller.signal,
+          timeoutMs: 12_000,
+          retries: 1,
+          negativeTtlMs: 900,
+        }
+      ),
       fetchJson<{ timeline?: Array<{ date: string; value: number }> }>(
-        `/api/news/gdelt-timeline?q=${encodeURIComponent(query)}&timespan=7d`
+        `/api/news/gdelt-timeline?q=${encodeURIComponent(query)}&timespan=7d`,
+        {
+          key: `news:timeline:${query}`,
+          signal: controller.signal,
+          timeoutMs: 12_000,
+          retries: 1,
+          negativeTtlMs: 900,
+        }
       ),
     ])
       .then(([ctx, tl]) => {
+        if (controller.signal.aborted) return;
         setRelatedItems((ctx.articles ?? []).slice(0, 8));
         setTimeline(tl.timeline ?? []);
       })
-      .catch(() => {
+      .catch((error) => {
+        if (isAbortError(error) || controller.signal.aborted) return;
         setRelatedItems([]);
         setTimeline([]);
       });
+    return () => {
+      controller.abort();
+      if (contextAbortRef.current === controller) {
+        contextAbortRef.current = null;
+      }
+    };
   }, [dashboardView, selectedItem?.id]);
 
   useEffect(() => {
@@ -1347,6 +1633,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
         const item = terminalItems[selectedRow];
         if (!item) return;
         setSelectedStory(item.id);
+        setStoryPopupArticle(item);
         const marker = news.markers.find((entry) => entry.articleId === item.id);
         setHighlightMarker(marker?.id ?? null);
         return;
@@ -1358,8 +1645,8 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       }
       if (event.key.toLowerCase() === "v") {
         event.preventDefault();
-        setNewsPanelVisibility("news-video", true);
-        useWorldViewStore.getState().setNewsPanelFocus("news-video");
+        setNewsPanelVisibility("news-video-general", true);
+        useWorldViewStore.getState().setNewsPanelFocus("news-video-general");
         return;
       }
       if (event.key.toLowerCase() === "a") {
@@ -1403,6 +1690,21 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     setHighlightMarker(marker?.id ?? null);
   }, [selectedRow, terminalItems.length, news.markers, news.selectedStoryId, setSelectedStory, setHighlightMarker]);
 
+  useEffect(() => {
+    return () => {
+      searchAbortRef.current?.abort();
+      searchAbortRef.current = null;
+      videoAbortRef.current?.abort();
+      videoAbortRef.current = null;
+      suggestAbortRef.current?.abort();
+      suggestAbortRef.current = null;
+      contextAbortRef.current?.abort();
+      contextAbortRef.current = null;
+      alertsAbortRef.current?.abort();
+      alertsAbortRef.current = null;
+    };
+  }, []);
+
   const tapeItem = terminalItems.length
     ? terminalItems[((news.headlineTape.cursor % terminalItems.length) + terminalItems.length) % terminalItems.length]
     : null;
@@ -1429,7 +1731,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
               />
             }
           />
-          <PanelBody className="wv-news-terminal-body">
+          <PanelBody ref={terminalBodyRef} className="wv-news-terminal-body">
             <div className="wv-news-category-tabs">
               <button type="button" className={activeCategory === "all" ? "is-active" : ""} onClick={() => setActiveCategory("all")}>
                 All
@@ -1453,6 +1755,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
                 </div>
               </div>
             ) : null}
+            <div className="wv-news-terminal-table-scroll">
             <table className="wv-news-terminal-table">
               <thead>
                 <tr>
@@ -1469,7 +1772,13 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
                   <tr
                     key={item.id}
                     className={item.id === selectedItem?.id ? "is-selected" : ""}
-                    onClick={() => setSelectedRow(idx)}
+                    onClick={() => {
+                      setSelectedRow(idx);
+                      setSelectedStory(item.id);
+                      setStoryPopupArticle(item);
+                      const marker = news.markers.find((m) => m.articleId === item.id);
+                      setHighlightMarker(marker?.id ?? null);
+                    }}
                     onContextMenu={(event) => {
                       event.preventDefault();
                       setContextItem(item);
@@ -1477,8 +1786,8 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
                   >
                     <td>{formatShortTime(item.publishedAt)}</td>
                     <td>{item.source}</td>
-                    <td>{item.entity ?? "--"}</td>
-                    <td>{item.region ?? item.country ?? item.placeName ?? "--"}</td>
+                    <td>{extractEntity(item)}</td>
+                    <td>{extractRegion(item)}</td>
                     <td>{item.headline}</td>
                     <td>{Math.round(item.score)}</td>
                   </tr>
@@ -1486,12 +1795,13 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
                 {!terminalItems.length ? (
                   <tr>
                     <td colSpan={6} className="wv-news-empty">
-                      {news.queryState.lastEmptyReason ?? "No results for current filters. Try `news time:24h`."}
+                      {news.queryState.lastEmptyReason ?? "No results. Try `news time:24h`."}
                     </td>
                   </tr>
                 ) : null}
               </tbody>
             </table>
+            </div>
           </PanelBody>
           <PanelFooter
             source="NEWS SEARCH"
@@ -1509,84 +1819,6 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       ),
     },
     {
-      id: "news-story",
-      node: (
-        <Panel panelId="news-story" workspace="news">
-          <PanelHeader
-            title="STORY VIEWER"
-            subtitle="Snippet, related coverage, where + timeline"
-            {...lockHeaderProps("news-story")}
-            controls={<PanelControls />}
-          />
-          <PanelBody className="wv-news-story-body">
-            {selectedItem ? (
-              <>
-                <h4>{selectedItem.headline}</h4>
-                <div className="wv-news-story-meta">
-                  <span>{selectedItem.source}</span>
-                  <span>{formatUtc(selectedItem.publishedAt)}</span>
-                  <span>{selectedItem.domain}</span>
-                </div>
-                <p>{selectedItem.snippet || "No snippet available from source feed."}</p>
-                <div className="wv-news-provenance">
-                  <span>headline:{selectedItem.provenance.headlineSource}</span>
-                  <span>coords:{selectedItem.provenance.coordsSource}</span>
-                  <span>entity:{selectedItem.provenance.entitySource}</span>
-                  <span>conf:{Math.round(selectedItem.provenance.confidence * 100)}%</span>
-                </div>
-                <div className="wv-news-story-actions">
-                  <a href={selectedItem.url} target="_blank" rel="noreferrer">OPEN SOURCE</a>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const marker = news.markers.find((entry) => entry.articleId === selectedItem.id);
-                      setHighlightMarker(marker?.id ?? null);
-                    }}
-                  >
-                    HIGHLIGHT MARKER
-                  </button>
-                </div>
-                <div className="wv-news-where">
-                  <div className="wv-news-section-title">Where</div>
-                  <div>
-                    {Number.isFinite(selectedItem.lat) && Number.isFinite(selectedItem.lon)
-                      ? `${selectedItem.placeName ?? "Unknown"} (${(selectedItem.lat as number).toFixed(4)}, ${(selectedItem.lon as number).toFixed(4)})`
-                      : "No coordinates available"}
-                  </div>
-                  <div>Source: {selectedItem.coordSource ?? "none"}</div>
-                </div>
-                <div className="wv-news-related">
-                  <div className="wv-news-section-title">Related</div>
-                  {relatedItems.length ? (
-                    <ul>
-                      {relatedItems.map((entry) => (
-                        <li key={`${entry.url}-${entry.seendate ?? ""}`}>
-                          <a href={entry.url} target="_blank" rel="noreferrer">{entry.title || entry.url}</a>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div>No related context.</div>
-                  )}
-                </div>
-                <div className="wv-news-timeline">
-                  <div className="wv-news-section-title">Timeline (7d)</div>
-                  <div className="wv-news-timeline-bars">
-                    {timeline.slice(-24).map((point) => (
-                      <span key={point.date} title={`${point.date}: ${point.value}`} style={{ height: `${Math.max(8, Math.min(48, point.value * 4))}px` }} />
-                    ))}
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="wv-news-empty">Select a story from the feed.</div>
-            )}
-          </PanelBody>
-          <PanelFooter source="GDELT CONTEXT" updatedAt={Date.now()} health="ok" />
-        </Panel>
-      ),
-    },
-    {
       id: "news-globe",
       node: (
         <Panel panelId="news-globe" workspace="news">
@@ -1598,240 +1830,89 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           />
           <PanelBody noPadding className="wv-news-globe-body">
             <div className="wv-news-globe-cube">
-              <NewsWorldMap />
+              <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                <MapLibreNewsMap onReady={() => setNewsMapReady(true)} />
+                {!newsMapReady && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "rgba(3, 8, 14, 0.72)",
+                      color: "#d7e2ee",
+                      fontSize: 11,
+                      letterSpacing: 1,
+                      textTransform: "uppercase",
+                      pointerEvents: "none",
+                      zIndex: 2,
+                    }}
+                  >
+                    INITIALIZING NEWS MAP...
+                  </div>
+                )}
+              </div>
             </div>
           </PanelBody>
           <PanelFooter source="NEWS MAP" updatedAt={Date.now()} health={newsBackendHealth.search === "loading" ? "loading" : Object.values(newsBackendHealth).some((v) => v === "degraded") ? "stale" : "ok"} message={newsGlobeFooterMessage} />
         </Panel>
       ),
     },
+    ...LIVE_VIDEO_PANELS.map((cfg) => {
+      const panelState = (news.video.byPanel ?? {})[cfg.id] ?? {
+        selectedVideoId: null,
+        selectedChannelFilter: null,
+        manualUrl: "",
+      };
+      return {
+        id: cfg.id,
+        node: (
+          <LiveVideoPanel
+            key={cfg.id}
+            panelId={cfg.id}
+            title={cfg.title}
+            subtitle={cfg.subtitle}
+            category={cfg.category}
+            liveStreams={liveStreams}
+            panelState={panelState}
+            setPanelState={(partial) => setNewsVideoPanelState(cfg.id, partial)}
+            lockHeaderProps={lockHeaderProps(cfg.id)}
+            onRefresh={() => void refreshVideo()}
+            loading={videoLoading}
+            videoKeyMissing={videoKeyMissing}
+            discoverySource={videoDiscoverySource}
+            fallbackActive={videoFallbackActive}
+            backendHealth={newsBackendHealth.youtube ?? "ok"}
+            liveCount={liveStreams.filter((s) => s.status === "live").length}
+            totalCount={liveStreams.length}
+          />
+        ),
+      };
+    }),
     {
-      id: "news-video",
+      id: "news-predictions",
       node: (
-        <Panel panelId="news-video" workspace="news">
-          <PanelHeader
-            title="LIVE VIDEO"
-            subtitle="YouTube live list + embedded player"
-            {...lockHeaderProps("news-video")}
-            controls={<PanelControls onRefresh={() => void refreshVideo()} loading={videoLoading} refreshText="LIVE NOW" />}
-          />
-          <PanelBody className="wv-news-video-body">
-            {news.video.selectedVideoId ? (
-              <iframe
-                className="wv-news-video-frame"
-                src={`https://www.youtube.com/embed/${news.video.selectedVideoId}?autoplay=0&rel=0`}
-                title="Live News Video"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            ) : (
-              <div className="wv-news-empty">Select a live stream or paste URL.</div>
-            )}
-            <div className="wv-news-video-channel-filter">
-              <label htmlFor="video-channel-filter">Source</label>
-              <select
-                id="video-channel-filter"
-                value={news.video.selectedChannelFilter ?? ""}
-                onChange={(event) =>
-                  setNewsVideoState({
-                    selectedChannelFilter: event.target.value || null,
-                  })
-                }
-              >
-                <option value="">All sources</option>
-                {videoChannels.map((channel) => (
-                  <option key={channel.channelId} value={channel.channelId}>
-                    {channel.channelName} ({channel.liveCount ? `LIVE ${channel.liveCount}` : `RECENT ${channel.recentCount}`})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="wv-news-video-tabs" role="tablist" aria-label="Live video sources">
-              {videoTabItems.map((stream) => (
-                <button
-                  key={`tab-${stream.channelId}-${stream.videoId}`}
-                  type="button"
-                  role="tab"
-                  aria-selected={news.video.selectedVideoId === stream.videoId}
-                  className={news.video.selectedVideoId === stream.videoId ? "is-active" : ""}
-                  onClick={() => setNewsVideoState({ selectedVideoId: stream.videoId, selectedChannelId: stream.channelId, manualUrl: "" })}
-                >
-                  <span>{stream.channelName}</span>
-                  <span className={`wv-tab-state ${stream.status === "live" ? "is-live" : "is-recent"}`}>
-                    {stream.status === "live" ? "LIVE" : "RECENT"}
-                  </span>
-                </button>
-              ))}
-              {!videoTabItems.length ? <div className="wv-news-empty">No streams discovered for current source filter.</div> : null}
-            </div>
-            {news.video.selectedVideoId ? (
-              <div className="wv-news-video-selected-title">
-                {(filteredLiveStreams.find((stream) => stream.videoId === news.video.selectedVideoId) ?? liveStreams.find((stream) => stream.videoId === news.video.selectedVideoId))?.title ?? "Selected stream"}
-              </div>
-            ) : null}
-            <div className="wv-news-video-manual">
-              <input
-                value={news.video.manualUrl}
-                placeholder="Paste YouTube URL or video ID"
-                onChange={(event) => setNewsVideoState({ manualUrl: event.target.value })}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  const videoId = parseVideoId(news.video.manualUrl);
-                  if (!videoId) {
-                    setNewsUiState({ statusLine: "Invalid YouTube URL/video ID." });
-                    return;
-                  }
-                  setNewsVideoState({ selectedVideoId: videoId });
-                  setNewsUiState({ statusLine: `Opened manual video ${videoId}.` });
-                }}
-              >
-                OPEN
-              </button>
-            </div>
-            <div className="wv-news-video-tv">
-              <Toggle label="News TV" checked={news.video.autoRotateEnabled} onChange={(checked) => setNewsVideoState({ autoRotateEnabled: checked })} />
-              <Toggle label="Pause Rotate" checked={news.video.autoRotatePaused} onChange={(checked) => setNewsVideoState({ autoRotatePaused: checked })} />
-              <select value={news.video.autoRotateMinutes} onChange={(event) => setNewsVideoState({ autoRotateMinutes: Number(event.target.value) || 10 })}>
-                {ROTATE_INTERVAL_OPTIONS.map((minutes) => (
-                  <option key={minutes} value={minutes}>{minutes}m</option>
-                ))}
-              </select>
-            </div>
-          </PanelBody>
-          <PanelFooter
-            source="YOUTUBE"
-            updatedAt={Date.now()}
-            health={videoKeyMissing ? "stale" : newsBackendHealth.youtube === "degraded" ? "stale" : "ok"}
-            message={
-              videoKeyMissing
-                ? "YOUTUBE_API_KEY missing; manual mode enabled."
-                : `${liveStreams.filter((item) => item.status === "live").length} live / ${liveStreams.length} total`
-            }
-          />
-        </Panel>
+        <PredictionMarketsPanel
+          key="news-predictions"
+          panelId="news-predictions"
+          lockHeaderProps={lockHeaderProps("news-predictions")}
+        />
       ),
     },
-    {
-      id: "news-watchlist",
+    ...CATEGORY_PANEL_CONFIGS.map((cfg) => ({
+      id: cfg.id,
       node: (
-        <Panel panelId="news-watchlist" workspace="news">
-          <PanelHeader
-            title="WATCHLIST"
-            subtitle="Tracked items and alert rules"
-            {...lockHeaderProps("news-watchlist")}
-            controls={<PanelControls />}
-          />
-          <PanelBody className="wv-news-watchlist-body">
-            <div className="wv-wl-group">
-              <WatchlistChipSection
-                label="Tickers"
-                items={news.watchlist.tickers}
-                placeholder="No tickers tracked"
-                transform={(v) => v.toUpperCase()}
-                onAdd={(v) =>
-                  setNewsWatchlist({
-                    tickers: Array.from(new Set([...news.watchlist.tickers, v])),
-                  })
-                }
-                onRemove={(v) =>
-                  setNewsWatchlist({
-                    tickers: news.watchlist.tickers.filter((t) => t !== v),
-                  })
-                }
-              />
-              <WatchlistChipSection
-                label="Topics"
-                items={news.watchlist.topics}
-                placeholder="No topics tracked"
-                onAdd={(v) =>
-                  setNewsWatchlist({
-                    topics: Array.from(new Set([...news.watchlist.topics, v])),
-                  })
-                }
-                onRemove={(v) =>
-                  setNewsWatchlist({
-                    topics: news.watchlist.topics.filter((t) => t !== v),
-                  })
-                }
-              />
-              <WatchlistChipSection
-                label="Regions"
-                items={news.watchlist.regions}
-                placeholder="No regions tracked"
-                onAdd={(v) =>
-                  setNewsWatchlist({
-                    regions: Array.from(new Set([...news.watchlist.regions, v])),
-                  })
-                }
-                onRemove={(v) =>
-                  setNewsWatchlist({
-                    regions: news.watchlist.regions.filter((t) => t !== v),
-                  })
-                }
-              />
-            </div>
-
-            <div className="wv-wl-divider">
-              <span>ALERTS</span>
-            </div>
-
-            <div className="wv-wl-alerts">
-              <div className="wv-wl-alert-create">
-                <button
-                  type="button"
-                  onClick={() =>
-                    upsertNewsAlert({
-                      id: `alert-${Date.now().toString(36)}`,
-                      name: news.query.slice(0, 48) || "Alert",
-                      query: news.query,
-                      threshold: 1,
-                      soundEnabled: false,
-                      enabled: true,
-                      lastChecked: 0,
-                      hitCount: 0,
-                      unreadCount: 0,
-                      seenFingerprints: [],
-                    })
-                  }
-                >
-                  + NEW ALERT
-                </button>
-                <span className="wv-wl-alert-hint">from current query</span>
-              </div>
-
-              {news.alerts.length === 0 && (
-                <div className="wv-wl-empty">No alerts configured. Press A or click + NEW ALERT.</div>
-              )}
-
-              {news.alerts.map((alert) => (
-                <div key={alert.id} className="wv-wl-alert-row">
-                  <div className="wv-wl-alert-header">
-                    <span className="wv-wl-alert-name">{alert.name}</span>
-                    {alert.unreadCount > 0 && (
-                      <span className="wv-wl-alert-badge">{alert.unreadCount}</span>
-                    )}
-                  </div>
-                  <div className="wv-wl-alert-query">{alert.query}</div>
-                  <div className="wv-wl-alert-controls">
-                    <Toggle label="Enabled" checked={alert.enabled} onChange={(checked) => upsertNewsAlert({ ...alert, enabled: checked })} />
-                    <Toggle label="Sound" checked={alert.soundEnabled} onChange={(checked) => upsertNewsAlert({ ...alert, soundEnabled: checked })} />
-                    <button type="button" onClick={() => ackNewsAlert(alert.id)}>ACK</button>
-                  </div>
-                </div>
-              ))}
-            </div>
+        <Panel key={cfg.id} panelId={cfg.id} workspace="news">
+          <PanelHeader title={cfg.title} {...lockHeaderProps(cfg.id)} />
+          <PanelBody noPadding className="wv-catfeed-panel-body">
+            <CategoryFeedPanel config={cfg} />
           </PanelBody>
-          <PanelFooter
-            source="WATCHLIST"
-            updatedAt={Date.now()}
-            health="ok"
-            message={`${news.watchlist.tickers.length + news.watchlist.topics.length + news.watchlist.regions.length} items · ${news.alerts.length} alerts`}
-          />
         </Panel>
       ),
-    },
+      minW: 60,
+      minH: 50,
+    })),
   ];
 
   const executeSearch = useCallback(
@@ -1875,7 +1956,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           </div>
           {news.ui.showHelpHints ? (
             <span className="wv-news-hotkeys" title="Keyboard shortcuts (when not typing)">
-              <kbd>/</kbd> focus search · <kbd>j</kbd>/<kbd>k</kbd> move · <kbd>Enter</kbd> open story · <kbd>g</kbd> globe · <kbd>v</kbd> video · <kbd>a</kbd> new alert
+              <kbd>/</kbd> focus search | <kbd>j</kbd>/<kbd>k</kbd> move | <kbd>Enter</kbd> open story | <kbd>g</kbd> globe | <kbd>v</kbd> video | <kbd>a</kbd> new alert
             </span>
           ) : null}
         </div>
@@ -1905,15 +1986,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
               }}
               placeholder="sym:NVDA merger time:7d near:37.77,-122.4,500"
             />
-            <button
-              type="button"
-              onClick={() => {
-                const nextQuery = searchInputDraft.trim();
-                executeSearch(nextQuery);
-              }}
-            >
-              RUN QUERY
-            </button>
+
             <button
               type="button"
               onClick={() =>
@@ -2019,7 +2092,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           <div className="wv-news-search-overlay">
             <div className="wv-news-search-overlay-header">
               <span className="wv-news-search-overlay-title">
-                SEARCH RESULTS — {news.query || "all"} — {terminalItems.length} stories
+                SEARCH RESULTS  | {news.query || "all"}  | {terminalItems.length} stories
               </span>
               <button type="button" onClick={() => setSearchResultsOpen(false)}>CLOSE</button>
             </div>
@@ -2034,6 +2107,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
               ))}
             </div>
             <div className="wv-news-search-overlay-body">
+              <div className="wv-news-terminal-table-scroll">
               <table className="wv-news-terminal-table">
                 <thead>
                   <tr>
@@ -2052,6 +2126,10 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
                       className={item.id === selectedItem?.id ? "is-selected" : ""}
                       onClick={() => {
                         setSelectedRow(idx);
+                        setSelectedStory(item.id);
+                        setStoryPopupArticle(item);
+                        const marker = news.markers.find((m) => m.articleId === item.id);
+                        setHighlightMarker(marker?.id ?? null);
                         setSearchResultsOpen(false);
                       }}
                       onContextMenu={(event) => {
@@ -2061,8 +2139,8 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
                     >
                       <td>{formatShortTime(item.publishedAt)}</td>
                       <td>{item.source}</td>
-                      <td>{item.entity ?? "--"}</td>
-                      <td>{item.region ?? item.country ?? item.placeName ?? "--"}</td>
+                      <td>{extractEntity(item)}</td>
+                      <td>{extractRegion(item)}</td>
                       <td>{item.headline}</td>
                       <td>{Math.round(item.score)}</td>
                     </tr>
@@ -2076,14 +2154,27 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
                   ) : null}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         ) : null}
       </div>
 
       <div className="wv-news-grid-area">
-        <NewsDraggableGrid panels={panelNodes.filter((panel) => news.panelVisibility[panel.id] !== false)} />
+        <NewsDraggableGrid
+          panels={panelNodes.filter((panel) => news.panelVisibility[panel.id] !== false)}
+          emptyCategoryPanelIds={CATEGORY_PANEL_CONFIGS.filter((c) => news.categoryPanelHasArticles[c.id] === false).map((c) => c.id)}
+        />
       </div>
+
+      {news.storyPopupArticle ? (
+        <NewsPopupModal
+          article={news.storyPopupArticle}
+          relatedItems={news.storyPopupArticle.id === selectedItem?.id ? relatedItems : undefined}
+          timeline={news.storyPopupArticle.id === selectedItem?.id ? timeline : undefined}
+          onClose={() => setStoryPopupArticle(null)}
+        />
+      ) : null}
 
       {contextItem ? (
         <div className="wv-news-context-menu" role="menu" aria-label="row actions">
@@ -2096,47 +2187,15 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           <button type="button" onClick={() => { useWorldViewStore.getState().muteNewsSource(contextItem.source, true); setContextItem(null); }}>
             Mute Source
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (contextItem.entity) {
-                setNewsWatchlist({
-                  tickers: Array.from(new Set([...news.watchlist.tickers, contextItem.entity.toUpperCase()])),
-                });
-              } else {
-                const token = contextItem.headline.split(/\s+/g).slice(0, 2).join(" ");
-                setNewsWatchlist({
-                  topics: Array.from(new Set([...news.watchlist.topics, token])),
-                });
-              }
-              setContextItem(null);
-            }}
-          >
-            Add To Watchlist
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              upsertNewsAlert({
-                id: `alert-${Date.now().toString(36)}`,
-                name: contextItem.headline.slice(0, 42),
-                query: contextItem.entity ? `sym:${contextItem.entity}` : contextItem.headline.slice(0, 80),
-                threshold: 1,
-                soundEnabled: false,
-                enabled: true,
-                lastChecked: 0,
-                hitCount: 0,
-                unreadCount: 0,
-                seenFingerprints: [],
-              });
-              setContextItem(null);
-            }}
-          >
-            Create Alert
-          </button>
+
+
           <button type="button" onClick={() => setContextItem(null)}>Close</button>
         </div>
       ) : null}
     </div>
   );
 }
+
+
+
+

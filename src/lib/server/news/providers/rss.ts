@@ -7,14 +7,14 @@ import { cachedFetch, type CachedFetchResult, type UpstreamPolicy } from "../ups
 
 const POLICY: UpstreamPolicy = {
   key: "rss",
-  ttlMs: 55_000,
-  staleTtlMs: 5 * 60_000,
+  ttlMs: 30_000,
+  staleTtlMs: 4 * 60_000,
   timeoutMs: 9_000,
   maxRetries: 1,
   backoffBaseMs: 450,
   circuitFailureThreshold: 3,
   circuitOpenMs: 90_000,
-  rateLimit: { capacity: 4, refillPerSec: 4, minIntervalMs: 120 },
+  rateLimit: { capacity: 6, refillPerSec: 5, minIntervalMs: 100 },
 };
 
 const XML = new XMLParser({
@@ -140,7 +140,7 @@ function toNewsArticle(feed: RssFeedSource, row: Record<string, unknown>): NewsA
     try {
       return new URL(canonicalUrl).hostname.replace(/^www\./, "");
     } catch {
-      return "unknown";
+      return feed.label.toLowerCase().replace(/\s+/g, "");
     }
   })();
   const detected = categorizeArticle({
@@ -161,7 +161,7 @@ function toNewsArticle(feed: RssFeedSource, row: Record<string, unknown>): NewsA
     publishedAt,
     snippet,
     imageUrl: imageUrl || undefined,
-    language: feed.language ?? "unknown",
+    language: feed.language ?? "en",
     category,
     score: 0,
     backendSource: "rss",
@@ -215,12 +215,16 @@ async function fetchFeed(feed: RssFeedSource): Promise<NewsArticle[]> {
 }
 
 export async function getRssArticles(params: RssParams): Promise<CachedFetchResult<RssNewsResult>> {
-  const qTerms = (params.q ?? "")
+  const rawQ = (params.q ?? "").trim();
+  let qTerms = rawQ
     .toLowerCase()
     .split(/[^\w.-]+/g)
     .map((token) => token.trim())
-    .filter((token) => token.length >= 3)
+    .filter((token) => token.length >= 2)
     .slice(0, 8);
+  if (rawQ.length > 0 && qTerms.length === 0) {
+    qTerms = [rawQ.toLowerCase()];
+  }
   const maxItems = Math.max(30, Math.min(360, params.maxItems ?? 220));
   const selectedFeeds = params.cat
     ? NEWS_RSS_FEEDS.filter((feed) => feed.category === params.cat)

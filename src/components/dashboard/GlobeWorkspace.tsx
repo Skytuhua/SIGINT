@@ -29,6 +29,7 @@ const layers = [
   { key: "flights", label: "Flights" },
   { key: "military", label: "Military" },
   { key: "earthquakes", label: "Earthquakes" },
+  { key: "disasters", label: "Disasters" },
   { key: "satellites", label: "Satellites" },
   { key: "news", label: "News" },
   { key: "traffic", label: "Traffic" },
@@ -43,6 +44,7 @@ interface GlobeWorkspaceProps {
 export default function GlobeWorkspace({ embedded = false, compact = false }: GlobeWorkspaceProps) {
   const [camera, setCamera] = useState<CameraSnapshot | null>(null);
   const [api, setApi] = useState<GlobeControlApi | null>(null);
+  const [globeReady, setGlobeReady] = useState(false);
 
   const layerState = useWorldViewStore((s) => s.layers);
   const toggleLayer = useWorldViewStore((s) => s.toggleLayer);
@@ -68,7 +70,33 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
           controls={<PanelControls onRefresh={api?.gotoHome} refreshText="HOME" />}
         />
         <PanelBody noPadding className="wv-globe-canvas-wrap">
-          <CesiumGlobe onControlApi={setApi} onCameraSnapshot={setCamera} />
+          <div style={{ position: "relative", width: "100%", height: "100%" }}>
+            <CesiumGlobe
+              onControlApi={setApi}
+              onCameraSnapshot={setCamera}
+              onReady={() => setGlobeReady(true)}
+            />
+            {!globeReady && (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "rgba(3, 8, 14, 0.72)",
+                  color: "#d7e2ee",
+                  fontSize: 11,
+                  letterSpacing: 1,
+                  textTransform: "uppercase",
+                  pointerEvents: "none",
+                  zIndex: 2,
+                }}
+              >
+                INITIALIZING GLOBE...
+              </div>
+            )}
+          </div>
         </PanelBody>
         <PanelFooter
           source="CESIUM"
@@ -248,4 +276,3 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
     </div>
   );
 }
-

@@ -19,7 +19,8 @@ export type NewsCategory =
   | "crypto"
   | "local"
   | "filings"
-  | "watchlist";
+  | "watchlist"
+  | "government";
 
 export type CoordSource = "gdelt" | "gdelt-geo" | "wikidata" | "nominatim" | "none";
 
@@ -131,6 +132,15 @@ export interface SearchRouteResult {
   degraded: Record<string, boolean>;
   backendLatency: Record<string, number>;
   backendHealth: Record<string, "ok" | "degraded" | "open_circuit">;
+  sourceHealth?: Record<
+    string,
+    {
+      status: "live" | "cached" | "degraded" | "unavailable";
+      lastSuccessAt: number | null;
+      errorCode: string | null;
+      nextRetryAt: number | null;
+    }
+  >;
   timeline: GdeltTimelinePoint[];
   emptyReason: string | null;
   fallbackApplied: string[];
@@ -242,11 +252,16 @@ export interface YouTubeLive {
   sourceUrl: string;
 }
 
+/** Main category for live video panels: tech, business, general, financial */
+export type VideoPanelCategory = "tech" | "business" | "general" | "financial";
+
 export interface YouTubeChannel {
   channelId: string;
   label: string;
   priority: number;
   region: string;
+  /** Categories this channel belongs to; used to filter live video panels */
+  categories?: VideoPanelCategory[];
 }
 
 // ---- SEC EDGAR ----
@@ -347,6 +362,60 @@ export interface CountryProfile {
   }[];
 }
 
+// ---- Prediction Markets ----
+
+export interface PredictionMarketItem {
+  id: string;
+  question: string;
+  yesPrice: number;
+  noPrice: number;
+  volume: number;
+  liquidity: number;
+  endDate: string;
+  slug: string;
+  eventTitle: string;
+  lastUpdated?: number;
+}
+
+// ---- Infrastructure Exposure ----
+
+export interface InfrastructureItem {
+  name: string;
+  type: "pipeline" | "data_center" | "nuclear";
+  subtype?: string;
+  lat: number;
+  lon: number;
+  country: string;
+  capacity?: string;
+  lengthKm?: number;
+  distanceKm?: number;
+}
+
+export interface CountryInfrastructure {
+  pipelines: InfrastructureItem[];
+  dataCenters: InfrastructureItem[];
+  nuclearFacilities: InfrastructureItem[];
+}
+
+// ---- Enhanced Country Profile ----
+
+export interface EnhancedCountryProfile extends CountryProfile {
+  acledScore?: number;
+  governanceDeficit?: number;
+  compositeIndex?: number;
+  governance?: {
+    politicalStability: number | null;
+    ruleOfLaw: number | null;
+    controlOfCorruption: number | null;
+    governmentEffectiveness: number | null;
+    regulatoryQuality: number | null;
+    voiceAccountability: number | null;
+    year: number;
+  };
+  predictionMarkets?: PredictionMarketItem[];
+  infrastructure?: CountryInfrastructure;
+}
+
 // ---- Panel layout presets ----
 
 export type NewsLayoutPreset = "news-centric" | "globe-centric" | "split";
@@ -372,4 +441,6 @@ export interface NewsVideoState {
   autoRotateMinutes: number;
   autoRotatePaused: boolean;
   lastRotateAt: number;
+  /** Per-panel state for category-specific video windows */
+  byPanel: Record<string, { selectedVideoId: string | null; selectedChannelFilter: string | null; manualUrl: string }>;
 }

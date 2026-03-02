@@ -1,0 +1,80 @@
+{
+    "type":  "FeatureCollection",
+    "features":  [
+                     {
+                         "type":  "Feature",
+                         "id":  "internet-exchanges-0",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -77.04,
+                                                              38.9
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "internet-exchanges site 0",
+                                            "ts":  1772435598920
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "internet-exchanges-1",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              2.35,
+                                                              48.86
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "internet-exchanges site 1",
+                                            "ts":  1772435598920
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "internet-exchanges-2",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              139.76,
+                                                              35.68
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "internet-exchanges site 2",
+                                            "ts":  1772435598920
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "internet-exchanges-3",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              55.27,
+                                                              25.2
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "internet-exchanges site 3",
+                                            "ts":  1772435598920
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "internet-exchanges-4",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -46.63,
+                                                              -23.55
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "internet-exchanges site 4",
+                                            "ts":  1772435598920
+                                        }
+                     }
+                 ]
+}

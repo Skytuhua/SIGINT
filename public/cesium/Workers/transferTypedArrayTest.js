@@ -21,4 +21,21 @@
  *
  * Portions licensed separately.
  * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
- */self.onmessage=function(e){let s=e.data.array,a=self.webkitPostMessage||self.postMessage;try{a({array:s},[s.buffer])}catch{a({})}};
+ */
+
+
+// packages/engine/Source/Workers/transferTypedArrayTest.js
+self.onmessage = function(event) {
+  const array = event.data.array;
+  const postMessage = self.webkitPostMessage || self.postMessage;
+  try {
+    postMessage(
+      {
+        array
+      },
+      [array.buffer]
+    );
+  } catch (e) {
+    postMessage({});
+  }
+};

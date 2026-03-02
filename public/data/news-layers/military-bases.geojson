@@ -1,0 +1,80 @@
+{
+    "type":  "FeatureCollection",
+    "features":  [
+                     {
+                         "type":  "Feature",
+                         "id":  "military-bases-0",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -77.04,
+                                                              38.9
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "military-bases site 0",
+                                            "ts":  1772435598806
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "military-bases-1",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              2.35,
+                                                              48.86
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "military-bases site 1",
+                                            "ts":  1772435598814
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "military-bases-2",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              139.76,
+                                                              35.68
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "military-bases site 2",
+                                            "ts":  1772435598814
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "military-bases-3",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              55.27,
+                                                              25.2
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "military-bases site 3",
+                                            "ts":  1772435598814
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "military-bases-4",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -46.63,
+                                                              -23.55
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "military-bases site 4",
+                                            "ts":  1772435598814
+                                        }
+                     }
+                 ]
+}

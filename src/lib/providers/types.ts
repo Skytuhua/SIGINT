@@ -96,6 +96,49 @@ export const EarthquakeSchema = z.object({
 });
 export type Earthquake = z.infer<typeof EarthquakeSchema>;
 
+export const DisasterAlertSchema = z.object({
+  id: z.string(),
+  source: z.literal("gdacs").default("gdacs"),
+  upstreamId: z.string(),
+  title: z.string(),
+  eventType: z.string(),
+  eventId: z.string().optional(),
+  episodeId: z.string().optional(),
+  alertLevel: z.string().optional(),
+  severity: z.string().optional(),
+  severityValue: z.number().nullable().optional(),
+  country: z.string().optional(),
+  description: z.string().optional(),
+  lat: z.number(),
+  lon: z.number(),
+  startedAt: z.number().nullable().optional(),
+  updatedAt: z.number(),
+  link: z.string().optional(),
+  raw: z.record(z.unknown()).optional(),
+});
+export type DisasterAlert = z.infer<typeof DisasterAlertSchema>;
+
+export const SpaceWeatherAlertLevelSchema = z.enum([
+  "ALERT",
+  "WARNING",
+  "WATCH",
+  "INFO",
+]);
+
+export const SpaceWeatherAlertSchema = z.object({
+  id: z.string(),
+  source: z.literal("swpc").default("swpc"),
+  upstreamId: z.string(),
+  productId: z.string(),
+  issueDatetime: z.number(),
+  title: z.string(),
+  level: SpaceWeatherAlertLevelSchema,
+  summary: z.string(),
+  rawMessage: z.string(),
+});
+export type SpaceWeatherAlert = z.infer<typeof SpaceWeatherAlertSchema>;
+export type SpaceWeatherAlertLevel = z.infer<typeof SpaceWeatherAlertLevelSchema>;
+
 // 閳光偓閳光偓閳光偓 Traffic 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
 export const RoadSegmentSchema = z.object({
@@ -117,8 +160,17 @@ export type Vehicle = z.infer<typeof VehicleSchema>;
 
 // 閳光偓閳光偓閳光偓 CCTV 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
-export const CctvStreamFormat = z.enum(["M3U8", "IMAGE_STREAM", "JPEG", "UNKNOWN"]);
+export const CctvStreamFormat = z.enum([
+  "M3U8",
+  "IMAGE_STREAM",
+  "JPEG",
+  "YOUTUBE",
+  "UNKNOWN",
+]);
 export type CctvStreamFormat = z.infer<typeof CctvStreamFormat>;
+
+export const CctvRegion = z.enum(["mideast", "europe", "americas", "asia"]);
+export type CctvRegion = z.infer<typeof CctvRegion>;
 
 export const CctvCameraSchema = z.object({
   id: z.string(),
@@ -132,6 +184,7 @@ export const CctvCameraSchema = z.object({
   streamFormat: CctvStreamFormat.optional(),
   state: z.string().optional(),
   direction: z.string().optional(),
+  region: CctvRegion.optional(),
 });
 export type CctvCamera = z.infer<typeof CctvCameraSchema>;
 
@@ -160,9 +213,16 @@ export interface DataProvider<T> {
 // 閳光偓閳光偓閳光偓 Selection entity 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
 export interface EntityData {
-  type: 'satellite' | 'flight' | 'earthquake' | 'cctv' | 'traffic' | 'news';
+  type: 'satellite' | 'flight' | 'earthquake' | 'disaster' | 'cctv' | 'traffic' | 'news';
   id: string;
-  data: PropagatedSat | Flight | Earthquake | CctvCamera | NewsArticle | Record<string, unknown>;
+  data:
+    | PropagatedSat
+    | Flight
+    | Earthquake
+    | DisasterAlert
+    | CctvCamera
+    | NewsArticle
+    | Record<string, unknown>;
 }
 
 // 閳光偓閳光偓閳光偓 Camera calibration 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓

@@ -1,0 +1,20 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature", "id": "sanc-ir", "geometry": { "type": "Point", "coordinates": [53.688, 32.427] }, "properties": { "name": "Iran", "regime": "US/EU/UN", "sector": "nuclear, finance, oil", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "sanc-kp", "geometry": { "type": "Point", "coordinates": [127.510, 40.339] }, "properties": { "name": "North Korea", "regime": "US/UN", "sector": "arms, finance, proliferation", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "sanc-ru", "geometry": { "type": "Point", "coordinates": [37.615, 55.752] }, "properties": { "name": "Russia (Moscow entities)", "regime": "US/EU/UK", "sector": "energy, finance, defense", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "sanc-by", "geometry": { "type": "Point", "coordinates": [27.561, 53.902] }, "properties": { "name": "Belarus", "regime": "US/EU", "sector": "political, finance", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "sanc-mm", "geometry": { "type": "Point", "coordinates": [96.129, 19.763] }, "properties": { "name": "Myanmar", "regime": "US/EU/UK", "sector": "military, gems, finance", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "sanc-ve", "geometry": { "type": "Point", "coordinates": [-66.880, 10.480] }, "properties": { "name": "Venezuela", "regime": "US/EU", "sector": "oil, finance, political", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "sanc-cu", "geometry": { "type": "Point", "coordinates": [-82.366, 23.136] }, "properties": { "name": "Cuba", "regime": "US", "sector": "finance, trade", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "sanc-sy", "geometry": { "type": "Point", "coordinates": [36.292, 33.510] }, "properties": { "name": "Syria", "regime": "US/EU", "sector": "oil, finance, arms", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "sanc-zw", "geometry": { "type": "Point", "coordinates": [31.053, -17.829] }, "properties": { "name": "Zimbabwe", "regime": "US/EU", "sector": "political, finance", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "sanc-sd", "geometry": { "type": "Point", "coordinates": [32.534, 15.558] }, "properties": { "name": "Sudan", "regime": "US", "sector": "political, arms", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "sanc-so", "geometry": { "type": "Point", "coordinates": [45.341, 2.047] }, "properties": { "name": "Somalia (Al-Shabaab entities)", "regime": "UN/US", "sector": "arms, finance", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "sanc-ye", "geometry": { "type": "Point", "coordinates": [44.207, 15.369] }, "properties": { "name": "Yemen (Houthi entities)", "regime": "US/UN", "sector": "arms, finance", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "sanc-ly", "geometry": { "type": "Point", "coordinates": [13.180, 32.903] }, "properties": { "name": "Libya", "regime": "UN/EU", "sector": "arms, oil", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "sanc-ht", "geometry": { "type": "Point", "coordinates": [-72.338, 18.542] }, "properties": { "name": "Haiti (Gang entities)", "regime": "US/UN", "sector": "arms, political", "ts": 1772435598914 } },
+    { "type": "Feature", "id": "sanc-ml", "geometry": { "type": "Point", "coordinates": [-8.000, 17.571] }, "properties": { "name": "Mali", "regime": "US/EU/UN", "sector": "arms, political", "ts": 1772435598914 } }
+  ]
+}

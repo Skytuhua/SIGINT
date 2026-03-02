@@ -1,0 +1,80 @@
+{
+    "type":  "FeatureCollection",
+    "features":  [
+                     {
+                         "type":  "Feature",
+                         "id":  "volcanoes-0",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -77.04,
+                                                              38.9
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "volcanoes site 0",
+                                            "ts":  1772435598918
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "volcanoes-1",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              2.35,
+                                                              48.86
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "volcanoes site 1",
+                                            "ts":  1772435598918
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "volcanoes-2",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              139.76,
+                                                              35.68
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "volcanoes site 2",
+                                            "ts":  1772435598918
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "volcanoes-3",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              55.27,
+                                                              25.2
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "volcanoes site 3",
+                                            "ts":  1772435598918
+                                        }
+                     },
+                     {
+                         "type":  "Feature",
+                         "id":  "volcanoes-4",
+                         "geometry":  {
+                                          "type":  "Point",
+                                          "coordinates":  [
+                                                              -46.63,
+                                                              -23.55
+                                                          ]
+                                      },
+                         "properties":  {
+                                            "name":  "volcanoes site 4",
+                                            "ts":  1772435598918
+                                        }
+                     }
+                 ]
+}

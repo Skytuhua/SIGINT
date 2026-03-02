@@ -1,1 +1,8019 @@
-window.cesiumGoogleEarthDbRootParser=function(e){"use strict";var r,t,o=e.Reader,n=e.util,a=e.roots.default||(e.roots.default={});return a.keyhole=((r={}).dbroot=((t={}).StringEntryProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.stringId=0,r.prototype.stringValue="",r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.StringEntryProto;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.stringId=e.fixed32();break;case 2:l.stringValue=e.string();break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("stringId"))throw n.ProtocolError("missing required 'stringId'",{instance:l});if(!l.hasOwnProperty("stringValue"))throw n.ProtocolError("missing required 'stringValue'",{instance:l});return l},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":n.isInteger(e.stringId)?n.isString(e.stringValue)?null:"stringValue: string expected":"stringId: integer expected"},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.StringEntryProto)return e;var r=new a.keyhole.dbroot.StringEntryProto;return null!=e.stringId&&(r.stringId=e.stringId>>>0),null!=e.stringValue&&(r.stringValue=String(e.stringValue)),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.stringId=0,t.stringValue=""),null!=e.stringId&&e.hasOwnProperty("stringId")&&(t.stringId=e.stringId),null!=e.stringValue&&e.hasOwnProperty("stringValue")&&(t.stringValue=e.stringValue),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.StringEntryProto"},r}(),t.StringIdOrValueProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.stringId=0,r.prototype.value="",r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.StringIdOrValueProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.stringId=e.fixed32();break;case 2:n.value=e.string();break;default:e.skipType(7&l)}}return n},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":null!=e.stringId&&e.hasOwnProperty("stringId")&&!n.isInteger(e.stringId)?"stringId: integer expected":null!=e.value&&e.hasOwnProperty("value")&&!n.isString(e.value)?"value: string expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.StringIdOrValueProto)return e;var r=new a.keyhole.dbroot.StringIdOrValueProto;return null!=e.stringId&&(r.stringId=e.stringId>>>0),null!=e.value&&(r.value=String(e.value)),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.stringId=0,t.value=""),null!=e.stringId&&e.hasOwnProperty("stringId")&&(t.stringId=e.stringId),null!=e.value&&e.hasOwnProperty("value")&&(t.value=e.value),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.StringIdOrValueProto"},r}(),t.PlanetModelProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.radius=6378.137,r.prototype.flattening=.00335281066474748,r.prototype.elevationBias=0,r.prototype.negativeAltitudeExponentBias=0,r.prototype.compressedNegativeAltitudeThreshold=0,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.PlanetModelProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.radius=e.double();break;case 2:n.flattening=e.double();break;case 4:n.elevationBias=e.double();break;case 5:n.negativeAltitudeExponentBias=e.int32();break;case 6:n.compressedNegativeAltitudeThreshold=e.double();break;default:e.skipType(7&l)}}return n},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":null!=e.radius&&e.hasOwnProperty("radius")&&"number"!=typeof e.radius?"radius: number expected":null!=e.flattening&&e.hasOwnProperty("flattening")&&"number"!=typeof e.flattening?"flattening: number expected":null!=e.elevationBias&&e.hasOwnProperty("elevationBias")&&"number"!=typeof e.elevationBias?"elevationBias: number expected":null!=e.negativeAltitudeExponentBias&&e.hasOwnProperty("negativeAltitudeExponentBias")&&!n.isInteger(e.negativeAltitudeExponentBias)?"negativeAltitudeExponentBias: integer expected":null!=e.compressedNegativeAltitudeThreshold&&e.hasOwnProperty("compressedNegativeAltitudeThreshold")&&"number"!=typeof e.compressedNegativeAltitudeThreshold?"compressedNegativeAltitudeThreshold: number expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.PlanetModelProto)return e;var r=new a.keyhole.dbroot.PlanetModelProto;return null!=e.radius&&(r.radius=Number(e.radius)),null!=e.flattening&&(r.flattening=Number(e.flattening)),null!=e.elevationBias&&(r.elevationBias=Number(e.elevationBias)),null!=e.negativeAltitudeExponentBias&&(r.negativeAltitudeExponentBias=0|e.negativeAltitudeExponentBias),null!=e.compressedNegativeAltitudeThreshold&&(r.compressedNegativeAltitudeThreshold=Number(e.compressedNegativeAltitudeThreshold)),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.radius=6378.137,t.flattening=.00335281066474748,t.elevationBias=0,t.negativeAltitudeExponentBias=0,t.compressedNegativeAltitudeThreshold=0),null!=e.radius&&e.hasOwnProperty("radius")&&(t.radius=r.json&&!isFinite(e.radius)?String(e.radius):e.radius),null!=e.flattening&&e.hasOwnProperty("flattening")&&(t.flattening=r.json&&!isFinite(e.flattening)?String(e.flattening):e.flattening),null!=e.elevationBias&&e.hasOwnProperty("elevationBias")&&(t.elevationBias=r.json&&!isFinite(e.elevationBias)?String(e.elevationBias):e.elevationBias),null!=e.negativeAltitudeExponentBias&&e.hasOwnProperty("negativeAltitudeExponentBias")&&(t.negativeAltitudeExponentBias=e.negativeAltitudeExponentBias),null!=e.compressedNegativeAltitudeThreshold&&e.hasOwnProperty("compressedNegativeAltitudeThreshold")&&(t.compressedNegativeAltitudeThreshold=r.json&&!isFinite(e.compressedNegativeAltitudeThreshold)?String(e.compressedNegativeAltitudeThreshold):e.compressedNegativeAltitudeThreshold),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.PlanetModelProto"},r}(),t.ProviderInfoProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.providerId=0,r.prototype.copyrightString=null,r.prototype.verticalPixelOffset=-1,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.ProviderInfoProto;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.providerId=e.int32();break;case 2:l.copyrightString=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 3:l.verticalPixelOffset=e.int32();break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("providerId"))throw n.ProtocolError("missing required 'providerId'",{instance:l});return l},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(!n.isInteger(e.providerId))return"providerId: integer expected";if(null!=e.copyrightString&&e.hasOwnProperty("copyrightString")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.copyrightString);if(r)return"copyrightString."+r}return null!=e.verticalPixelOffset&&e.hasOwnProperty("verticalPixelOffset")&&!n.isInteger(e.verticalPixelOffset)?"verticalPixelOffset: integer expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.ProviderInfoProto)return e;var r=new a.keyhole.dbroot.ProviderInfoProto;if(null!=e.providerId&&(r.providerId=0|e.providerId),null!=e.copyrightString){if("object"!=typeof e.copyrightString)throw TypeError(".keyhole.dbroot.ProviderInfoProto.copyrightString: object expected");r.copyrightString=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.copyrightString)}return null!=e.verticalPixelOffset&&(r.verticalPixelOffset=0|e.verticalPixelOffset),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.providerId=0,t.copyrightString=null,t.verticalPixelOffset=-1),null!=e.providerId&&e.hasOwnProperty("providerId")&&(t.providerId=e.providerId),null!=e.copyrightString&&e.hasOwnProperty("copyrightString")&&(t.copyrightString=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.copyrightString,r)),null!=e.verticalPixelOffset&&e.hasOwnProperty("verticalPixelOffset")&&(t.verticalPixelOffset=e.verticalPixelOffset),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.ProviderInfoProto"},r}(),t.PopUpProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.isBalloonStyle=!1,r.prototype.text=null,r.prototype.backgroundColorAbgr=4294967295,r.prototype.textColorAbgr=4278190080,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.PopUpProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.isBalloonStyle=e.bool();break;case 2:n.text=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 3:n.backgroundColorAbgr=e.fixed32();break;case 4:n.textColorAbgr=e.fixed32();break;default:e.skipType(7&l)}}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.isBalloonStyle&&e.hasOwnProperty("isBalloonStyle")&&"boolean"!=typeof e.isBalloonStyle)return"isBalloonStyle: boolean expected";if(null!=e.text&&e.hasOwnProperty("text")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.text);if(r)return"text."+r}return null!=e.backgroundColorAbgr&&e.hasOwnProperty("backgroundColorAbgr")&&!n.isInteger(e.backgroundColorAbgr)?"backgroundColorAbgr: integer expected":null!=e.textColorAbgr&&e.hasOwnProperty("textColorAbgr")&&!n.isInteger(e.textColorAbgr)?"textColorAbgr: integer expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.PopUpProto)return e;var r=new a.keyhole.dbroot.PopUpProto;if(null!=e.isBalloonStyle&&(r.isBalloonStyle=!!e.isBalloonStyle),null!=e.text){if("object"!=typeof e.text)throw TypeError(".keyhole.dbroot.PopUpProto.text: object expected");r.text=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.text)}return null!=e.backgroundColorAbgr&&(r.backgroundColorAbgr=e.backgroundColorAbgr>>>0),null!=e.textColorAbgr&&(r.textColorAbgr=e.textColorAbgr>>>0),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.isBalloonStyle=!1,t.text=null,t.backgroundColorAbgr=4294967295,t.textColorAbgr=4278190080),null!=e.isBalloonStyle&&e.hasOwnProperty("isBalloonStyle")&&(t.isBalloonStyle=e.isBalloonStyle),null!=e.text&&e.hasOwnProperty("text")&&(t.text=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.text,r)),null!=e.backgroundColorAbgr&&e.hasOwnProperty("backgroundColorAbgr")&&(t.backgroundColorAbgr=e.backgroundColorAbgr),null!=e.textColorAbgr&&e.hasOwnProperty("textColorAbgr")&&(t.textColorAbgr=e.textColorAbgr),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.PopUpProto"},r}(),t.StyleAttributeProto=function(){function r(e){if(this.drawFlag=[],e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.styleId="",r.prototype.providerId=0,r.prototype.polyColorAbgr=4294967295,r.prototype.lineColorAbgr=4294967295,r.prototype.lineWidth=1,r.prototype.labelColorAbgr=4294967295,r.prototype.labelScale=1,r.prototype.placemarkIconColorAbgr=4294967295,r.prototype.placemarkIconScale=1,r.prototype.placemarkIconPath=null,r.prototype.placemarkIconX=0,r.prototype.placemarkIconY=0,r.prototype.placemarkIconWidth=32,r.prototype.placemarkIconHeight=32,r.prototype.popUp=null,r.prototype.drawFlag=n.emptyArray,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.StyleAttributeProto;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.styleId=e.string();break;case 3:l.providerId=e.int32();break;case 4:l.polyColorAbgr=e.fixed32();break;case 5:l.lineColorAbgr=e.fixed32();break;case 6:l.lineWidth=e.float();break;case 7:l.labelColorAbgr=e.fixed32();break;case 8:l.labelScale=e.float();break;case 9:l.placemarkIconColorAbgr=e.fixed32();break;case 10:l.placemarkIconScale=e.float();break;case 11:l.placemarkIconPath=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 12:l.placemarkIconX=e.int32();break;case 13:l.placemarkIconY=e.int32();break;case 14:l.placemarkIconWidth=e.int32();break;case 15:l.placemarkIconHeight=e.int32();break;case 16:l.popUp=a.keyhole.dbroot.PopUpProto.decode(e,e.uint32());break;case 17:l.drawFlag&&l.drawFlag.length||(l.drawFlag=[]),l.drawFlag.push(a.keyhole.dbroot.DrawFlagProto.decode(e,e.uint32()));break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("styleId"))throw n.ProtocolError("missing required 'styleId'",{instance:l});return l},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(!n.isString(e.styleId))return"styleId: string expected";if(null!=e.providerId&&e.hasOwnProperty("providerId")&&!n.isInteger(e.providerId))return"providerId: integer expected";if(null!=e.polyColorAbgr&&e.hasOwnProperty("polyColorAbgr")&&!n.isInteger(e.polyColorAbgr))return"polyColorAbgr: integer expected";if(null!=e.lineColorAbgr&&e.hasOwnProperty("lineColorAbgr")&&!n.isInteger(e.lineColorAbgr))return"lineColorAbgr: integer expected";if(null!=e.lineWidth&&e.hasOwnProperty("lineWidth")&&"number"!=typeof e.lineWidth)return"lineWidth: number expected";if(null!=e.labelColorAbgr&&e.hasOwnProperty("labelColorAbgr")&&!n.isInteger(e.labelColorAbgr))return"labelColorAbgr: integer expected";if(null!=e.labelScale&&e.hasOwnProperty("labelScale")&&"number"!=typeof e.labelScale)return"labelScale: number expected";if(null!=e.placemarkIconColorAbgr&&e.hasOwnProperty("placemarkIconColorAbgr")&&!n.isInteger(e.placemarkIconColorAbgr))return"placemarkIconColorAbgr: integer expected";if(null!=e.placemarkIconScale&&e.hasOwnProperty("placemarkIconScale")&&"number"!=typeof e.placemarkIconScale)return"placemarkIconScale: number expected";if(null!=e.placemarkIconPath&&e.hasOwnProperty("placemarkIconPath")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.placemarkIconPath);if(r)return"placemarkIconPath."+r}if(null!=e.placemarkIconX&&e.hasOwnProperty("placemarkIconX")&&!n.isInteger(e.placemarkIconX))return"placemarkIconX: integer expected";if(null!=e.placemarkIconY&&e.hasOwnProperty("placemarkIconY")&&!n.isInteger(e.placemarkIconY))return"placemarkIconY: integer expected";if(null!=e.placemarkIconWidth&&e.hasOwnProperty("placemarkIconWidth")&&!n.isInteger(e.placemarkIconWidth))return"placemarkIconWidth: integer expected";if(null!=e.placemarkIconHeight&&e.hasOwnProperty("placemarkIconHeight")&&!n.isInteger(e.placemarkIconHeight))return"placemarkIconHeight: integer expected";if(null!=e.popUp&&e.hasOwnProperty("popUp")){var r=a.keyhole.dbroot.PopUpProto.verify(e.popUp);if(r)return"popUp."+r}if(null!=e.drawFlag&&e.hasOwnProperty("drawFlag")){if(!Array.isArray(e.drawFlag))return"drawFlag: array expected";for(var t=0;t<e.drawFlag.length;++t){var r=a.keyhole.dbroot.DrawFlagProto.verify(e.drawFlag[t]);if(r)return"drawFlag."+r}}return null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.StyleAttributeProto)return e;var r=new a.keyhole.dbroot.StyleAttributeProto;if(null!=e.styleId&&(r.styleId=String(e.styleId)),null!=e.providerId&&(r.providerId=0|e.providerId),null!=e.polyColorAbgr&&(r.polyColorAbgr=e.polyColorAbgr>>>0),null!=e.lineColorAbgr&&(r.lineColorAbgr=e.lineColorAbgr>>>0),null!=e.lineWidth&&(r.lineWidth=Number(e.lineWidth)),null!=e.labelColorAbgr&&(r.labelColorAbgr=e.labelColorAbgr>>>0),null!=e.labelScale&&(r.labelScale=Number(e.labelScale)),null!=e.placemarkIconColorAbgr&&(r.placemarkIconColorAbgr=e.placemarkIconColorAbgr>>>0),null!=e.placemarkIconScale&&(r.placemarkIconScale=Number(e.placemarkIconScale)),null!=e.placemarkIconPath){if("object"!=typeof e.placemarkIconPath)throw TypeError(".keyhole.dbroot.StyleAttributeProto.placemarkIconPath: object expected");r.placemarkIconPath=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.placemarkIconPath)}if(null!=e.placemarkIconX&&(r.placemarkIconX=0|e.placemarkIconX),null!=e.placemarkIconY&&(r.placemarkIconY=0|e.placemarkIconY),null!=e.placemarkIconWidth&&(r.placemarkIconWidth=0|e.placemarkIconWidth),null!=e.placemarkIconHeight&&(r.placemarkIconHeight=0|e.placemarkIconHeight),null!=e.popUp){if("object"!=typeof e.popUp)throw TypeError(".keyhole.dbroot.StyleAttributeProto.popUp: object expected");r.popUp=a.keyhole.dbroot.PopUpProto.fromObject(e.popUp)}if(e.drawFlag){if(!Array.isArray(e.drawFlag))throw TypeError(".keyhole.dbroot.StyleAttributeProto.drawFlag: array expected");r.drawFlag=[];for(var t=0;t<e.drawFlag.length;++t){if("object"!=typeof e.drawFlag[t])throw TypeError(".keyhole.dbroot.StyleAttributeProto.drawFlag: object expected");r.drawFlag[t]=a.keyhole.dbroot.DrawFlagProto.fromObject(e.drawFlag[t])}}return r},r.toObject=function(e,r){r||(r={});var t={};if((r.arrays||r.defaults)&&(t.drawFlag=[]),r.defaults&&(t.styleId="",t.providerId=0,t.polyColorAbgr=4294967295,t.lineColorAbgr=4294967295,t.lineWidth=1,t.labelColorAbgr=4294967295,t.labelScale=1,t.placemarkIconColorAbgr=4294967295,t.placemarkIconScale=1,t.placemarkIconPath=null,t.placemarkIconX=0,t.placemarkIconY=0,t.placemarkIconWidth=32,t.placemarkIconHeight=32,t.popUp=null),null!=e.styleId&&e.hasOwnProperty("styleId")&&(t.styleId=e.styleId),null!=e.providerId&&e.hasOwnProperty("providerId")&&(t.providerId=e.providerId),null!=e.polyColorAbgr&&e.hasOwnProperty("polyColorAbgr")&&(t.polyColorAbgr=e.polyColorAbgr),null!=e.lineColorAbgr&&e.hasOwnProperty("lineColorAbgr")&&(t.lineColorAbgr=e.lineColorAbgr),null!=e.lineWidth&&e.hasOwnProperty("lineWidth")&&(t.lineWidth=r.json&&!isFinite(e.lineWidth)?String(e.lineWidth):e.lineWidth),null!=e.labelColorAbgr&&e.hasOwnProperty("labelColorAbgr")&&(t.labelColorAbgr=e.labelColorAbgr),null!=e.labelScale&&e.hasOwnProperty("labelScale")&&(t.labelScale=r.json&&!isFinite(e.labelScale)?String(e.labelScale):e.labelScale),null!=e.placemarkIconColorAbgr&&e.hasOwnProperty("placemarkIconColorAbgr")&&(t.placemarkIconColorAbgr=e.placemarkIconColorAbgr),null!=e.placemarkIconScale&&e.hasOwnProperty("placemarkIconScale")&&(t.placemarkIconScale=r.json&&!isFinite(e.placemarkIconScale)?String(e.placemarkIconScale):e.placemarkIconScale),null!=e.placemarkIconPath&&e.hasOwnProperty("placemarkIconPath")&&(t.placemarkIconPath=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.placemarkIconPath,r)),null!=e.placemarkIconX&&e.hasOwnProperty("placemarkIconX")&&(t.placemarkIconX=e.placemarkIconX),null!=e.placemarkIconY&&e.hasOwnProperty("placemarkIconY")&&(t.placemarkIconY=e.placemarkIconY),null!=e.placemarkIconWidth&&e.hasOwnProperty("placemarkIconWidth")&&(t.placemarkIconWidth=e.placemarkIconWidth),null!=e.placemarkIconHeight&&e.hasOwnProperty("placemarkIconHeight")&&(t.placemarkIconHeight=e.placemarkIconHeight),null!=e.popUp&&e.hasOwnProperty("popUp")&&(t.popUp=a.keyhole.dbroot.PopUpProto.toObject(e.popUp,r)),e.drawFlag&&e.drawFlag.length){t.drawFlag=[];for(var o=0;o<e.drawFlag.length;++o)t.drawFlag[o]=a.keyhole.dbroot.DrawFlagProto.toObject(e.drawFlag[o],r)}return t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.StyleAttributeProto"},r}(),t.StyleMapProto=function(){function r(e){if(this.channelId=[],e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.styleMapId=0,r.prototype.channelId=n.emptyArray,r.prototype.normalStyleAttribute=0,r.prototype.highlightStyleAttribute=0,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.StyleMapProto;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.styleMapId=e.int32();break;case 2:if(l.channelId&&l.channelId.length||(l.channelId=[]),(7&i)==2)for(var s=e.uint32()+e.pos;e.pos<s;)l.channelId.push(e.int32());else l.channelId.push(e.int32());break;case 3:l.normalStyleAttribute=e.int32();break;case 4:l.highlightStyleAttribute=e.int32();break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("styleMapId"))throw n.ProtocolError("missing required 'styleMapId'",{instance:l});return l},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(!n.isInteger(e.styleMapId))return"styleMapId: integer expected";if(null!=e.channelId&&e.hasOwnProperty("channelId")){if(!Array.isArray(e.channelId))return"channelId: array expected";for(var r=0;r<e.channelId.length;++r)if(!n.isInteger(e.channelId[r]))return"channelId: integer[] expected"}return null!=e.normalStyleAttribute&&e.hasOwnProperty("normalStyleAttribute")&&!n.isInteger(e.normalStyleAttribute)?"normalStyleAttribute: integer expected":null!=e.highlightStyleAttribute&&e.hasOwnProperty("highlightStyleAttribute")&&!n.isInteger(e.highlightStyleAttribute)?"highlightStyleAttribute: integer expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.StyleMapProto)return e;var r=new a.keyhole.dbroot.StyleMapProto;if(null!=e.styleMapId&&(r.styleMapId=0|e.styleMapId),e.channelId){if(!Array.isArray(e.channelId))throw TypeError(".keyhole.dbroot.StyleMapProto.channelId: array expected");r.channelId=[];for(var t=0;t<e.channelId.length;++t)r.channelId[t]=0|e.channelId[t]}return null!=e.normalStyleAttribute&&(r.normalStyleAttribute=0|e.normalStyleAttribute),null!=e.highlightStyleAttribute&&(r.highlightStyleAttribute=0|e.highlightStyleAttribute),r},r.toObject=function(e,r){r||(r={});var t={};if((r.arrays||r.defaults)&&(t.channelId=[]),r.defaults&&(t.styleMapId=0,t.normalStyleAttribute=0,t.highlightStyleAttribute=0),null!=e.styleMapId&&e.hasOwnProperty("styleMapId")&&(t.styleMapId=e.styleMapId),e.channelId&&e.channelId.length){t.channelId=[];for(var o=0;o<e.channelId.length;++o)t.channelId[o]=e.channelId[o]}return null!=e.normalStyleAttribute&&e.hasOwnProperty("normalStyleAttribute")&&(t.normalStyleAttribute=e.normalStyleAttribute),null!=e.highlightStyleAttribute&&e.hasOwnProperty("highlightStyleAttribute")&&(t.highlightStyleAttribute=e.highlightStyleAttribute),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.StyleMapProto"},r}(),t.ZoomRangeProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.minZoom=0,r.prototype.maxZoom=0,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.ZoomRangeProto;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.minZoom=e.int32();break;case 2:l.maxZoom=e.int32();break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("minZoom"))throw n.ProtocolError("missing required 'minZoom'",{instance:l});if(!l.hasOwnProperty("maxZoom"))throw n.ProtocolError("missing required 'maxZoom'",{instance:l});return l},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":n.isInteger(e.minZoom)?n.isInteger(e.maxZoom)?null:"maxZoom: integer expected":"minZoom: integer expected"},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.ZoomRangeProto)return e;var r=new a.keyhole.dbroot.ZoomRangeProto;return null!=e.minZoom&&(r.minZoom=0|e.minZoom),null!=e.maxZoom&&(r.maxZoom=0|e.maxZoom),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.minZoom=0,t.maxZoom=0),null!=e.minZoom&&e.hasOwnProperty("minZoom")&&(t.minZoom=e.minZoom),null!=e.maxZoom&&e.hasOwnProperty("maxZoom")&&(t.maxZoom=e.maxZoom),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.ZoomRangeProto"},r}(),t.DrawFlagProto=function(){var r,t;function l(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return l.prototype.drawFlagType=1,l.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.DrawFlagProto;e.pos<t;){var i=e.uint32();i>>>3==1?l.drawFlagType=e.int32():e.skipType(7&i)}if(!l.hasOwnProperty("drawFlagType"))throw n.ProtocolError("missing required 'drawFlagType'",{instance:l});return l},l.verify=function(e){if("object"!=typeof e||null===e)return"object expected";switch(e.drawFlagType){default:return"drawFlagType: enum value expected";case 1:case 2:case 3:case 4:case 5:}return null},l.fromObject=function(e){if(e instanceof a.keyhole.dbroot.DrawFlagProto)return e;var r=new a.keyhole.dbroot.DrawFlagProto;switch(e.drawFlagType){case"TYPE_FILL_ONLY":case 1:r.drawFlagType=1;break;case"TYPE_OUTLINE_ONLY":case 2:r.drawFlagType=2;break;case"TYPE_FILL_AND_OUTLINE":case 3:r.drawFlagType=3;break;case"TYPE_ANTIALIASING":case 4:r.drawFlagType=4;break;case"TYPE_CENTER_LABEL":case 5:r.drawFlagType=5}return r},l.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.drawFlagType=r.enums===String?"TYPE_FILL_ONLY":1),null!=e.drawFlagType&&e.hasOwnProperty("drawFlagType")&&(t.drawFlagType=r.enums===String?a.keyhole.dbroot.DrawFlagProto.DrawFlagType[e.drawFlagType]:e.drawFlagType),t},l.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},l.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.DrawFlagProto"},l.DrawFlagType=((t=Object.create(r={}))[r[1]="TYPE_FILL_ONLY"]=1,t[r[2]="TYPE_OUTLINE_ONLY"]=2,t[r[3]="TYPE_FILL_AND_OUTLINE"]=3,t[r[4]="TYPE_ANTIALIASING"]=4,t[r[5]="TYPE_CENTER_LABEL"]=5,t),l}(),t.LayerProto=function(){function r(e){if(this.zoomRange=[],e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.zoomRange=n.emptyArray,r.prototype.preserveTextLevel=30,r.prototype.lodBeginTransition=!1,r.prototype.lodEndTransition=!1,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.LayerProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.zoomRange&&n.zoomRange.length||(n.zoomRange=[]),n.zoomRange.push(a.keyhole.dbroot.ZoomRangeProto.decode(e,e.uint32()));break;case 2:n.preserveTextLevel=e.int32();break;case 4:n.lodBeginTransition=e.bool();break;case 5:n.lodEndTransition=e.bool();break;default:e.skipType(7&l)}}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.zoomRange&&e.hasOwnProperty("zoomRange")){if(!Array.isArray(e.zoomRange))return"zoomRange: array expected";for(var r=0;r<e.zoomRange.length;++r){var t=a.keyhole.dbroot.ZoomRangeProto.verify(e.zoomRange[r]);if(t)return"zoomRange."+t}}return null!=e.preserveTextLevel&&e.hasOwnProperty("preserveTextLevel")&&!n.isInteger(e.preserveTextLevel)?"preserveTextLevel: integer expected":null!=e.lodBeginTransition&&e.hasOwnProperty("lodBeginTransition")&&"boolean"!=typeof e.lodBeginTransition?"lodBeginTransition: boolean expected":null!=e.lodEndTransition&&e.hasOwnProperty("lodEndTransition")&&"boolean"!=typeof e.lodEndTransition?"lodEndTransition: boolean expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.LayerProto)return e;var r=new a.keyhole.dbroot.LayerProto;if(e.zoomRange){if(!Array.isArray(e.zoomRange))throw TypeError(".keyhole.dbroot.LayerProto.zoomRange: array expected");r.zoomRange=[];for(var t=0;t<e.zoomRange.length;++t){if("object"!=typeof e.zoomRange[t])throw TypeError(".keyhole.dbroot.LayerProto.zoomRange: object expected");r.zoomRange[t]=a.keyhole.dbroot.ZoomRangeProto.fromObject(e.zoomRange[t])}}return null!=e.preserveTextLevel&&(r.preserveTextLevel=0|e.preserveTextLevel),null!=e.lodBeginTransition&&(r.lodBeginTransition=!!e.lodBeginTransition),null!=e.lodEndTransition&&(r.lodEndTransition=!!e.lodEndTransition),r},r.toObject=function(e,r){r||(r={});var t={};if((r.arrays||r.defaults)&&(t.zoomRange=[]),r.defaults&&(t.preserveTextLevel=30,t.lodBeginTransition=!1,t.lodEndTransition=!1),e.zoomRange&&e.zoomRange.length){t.zoomRange=[];for(var o=0;o<e.zoomRange.length;++o)t.zoomRange[o]=a.keyhole.dbroot.ZoomRangeProto.toObject(e.zoomRange[o],r)}return null!=e.preserveTextLevel&&e.hasOwnProperty("preserveTextLevel")&&(t.preserveTextLevel=e.preserveTextLevel),null!=e.lodBeginTransition&&e.hasOwnProperty("lodBeginTransition")&&(t.lodBeginTransition=e.lodBeginTransition),null!=e.lodEndTransition&&e.hasOwnProperty("lodEndTransition")&&(t.lodEndTransition=e.lodEndTransition),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.LayerProto"},r}(),t.FolderProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.isExpandable=!0,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.FolderProto;e.pos<t;){var l=e.uint32();l>>>3==1?n.isExpandable=e.bool():e.skipType(7&l)}return n},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":null!=e.isExpandable&&e.hasOwnProperty("isExpandable")&&"boolean"!=typeof e.isExpandable?"isExpandable: boolean expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.FolderProto)return e;var r=new a.keyhole.dbroot.FolderProto;return null!=e.isExpandable&&(r.isExpandable=!!e.isExpandable),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.isExpandable=!0),null!=e.isExpandable&&e.hasOwnProperty("isExpandable")&&(t.isExpandable=e.isExpandable),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.FolderProto"},r}(),t.RequirementProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.requiredVram="",r.prototype.requiredClientVer="",r.prototype.probability="",r.prototype.requiredUserAgent="",r.prototype.requiredClientCapabilities="",r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.RequirementProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 3:n.requiredVram=e.string();break;case 4:n.requiredClientVer=e.string();break;case 5:n.probability=e.string();break;case 6:n.requiredUserAgent=e.string();break;case 7:n.requiredClientCapabilities=e.string();break;default:e.skipType(7&l)}}return n},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":null!=e.requiredVram&&e.hasOwnProperty("requiredVram")&&!n.isString(e.requiredVram)?"requiredVram: string expected":null!=e.requiredClientVer&&e.hasOwnProperty("requiredClientVer")&&!n.isString(e.requiredClientVer)?"requiredClientVer: string expected":null!=e.probability&&e.hasOwnProperty("probability")&&!n.isString(e.probability)?"probability: string expected":null!=e.requiredUserAgent&&e.hasOwnProperty("requiredUserAgent")&&!n.isString(e.requiredUserAgent)?"requiredUserAgent: string expected":null!=e.requiredClientCapabilities&&e.hasOwnProperty("requiredClientCapabilities")&&!n.isString(e.requiredClientCapabilities)?"requiredClientCapabilities: string expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.RequirementProto)return e;var r=new a.keyhole.dbroot.RequirementProto;return null!=e.requiredVram&&(r.requiredVram=String(e.requiredVram)),null!=e.requiredClientVer&&(r.requiredClientVer=String(e.requiredClientVer)),null!=e.probability&&(r.probability=String(e.probability)),null!=e.requiredUserAgent&&(r.requiredUserAgent=String(e.requiredUserAgent)),null!=e.requiredClientCapabilities&&(r.requiredClientCapabilities=String(e.requiredClientCapabilities)),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.requiredVram="",t.requiredClientVer="",t.probability="",t.requiredUserAgent="",t.requiredClientCapabilities=""),null!=e.requiredVram&&e.hasOwnProperty("requiredVram")&&(t.requiredVram=e.requiredVram),null!=e.requiredClientVer&&e.hasOwnProperty("requiredClientVer")&&(t.requiredClientVer=e.requiredClientVer),null!=e.probability&&e.hasOwnProperty("probability")&&(t.probability=e.probability),null!=e.requiredUserAgent&&e.hasOwnProperty("requiredUserAgent")&&(t.requiredUserAgent=e.requiredUserAgent),null!=e.requiredClientCapabilities&&e.hasOwnProperty("requiredClientCapabilities")&&(t.requiredClientCapabilities=e.requiredClientCapabilities),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.RequirementProto"},r}(),t.LookAtProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.longitude=0,r.prototype.latitude=0,r.prototype.range=0,r.prototype.tilt=0,r.prototype.heading=0,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.LookAtProto;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.longitude=e.float();break;case 2:l.latitude=e.float();break;case 3:l.range=e.float();break;case 4:l.tilt=e.float();break;case 5:l.heading=e.float();break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("longitude"))throw n.ProtocolError("missing required 'longitude'",{instance:l});if(!l.hasOwnProperty("latitude"))throw n.ProtocolError("missing required 'latitude'",{instance:l});return l},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":"number"!=typeof e.longitude?"longitude: number expected":"number"!=typeof e.latitude?"latitude: number expected":null!=e.range&&e.hasOwnProperty("range")&&"number"!=typeof e.range?"range: number expected":null!=e.tilt&&e.hasOwnProperty("tilt")&&"number"!=typeof e.tilt?"tilt: number expected":null!=e.heading&&e.hasOwnProperty("heading")&&"number"!=typeof e.heading?"heading: number expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.LookAtProto)return e;var r=new a.keyhole.dbroot.LookAtProto;return null!=e.longitude&&(r.longitude=Number(e.longitude)),null!=e.latitude&&(r.latitude=Number(e.latitude)),null!=e.range&&(r.range=Number(e.range)),null!=e.tilt&&(r.tilt=Number(e.tilt)),null!=e.heading&&(r.heading=Number(e.heading)),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.longitude=0,t.latitude=0,t.range=0,t.tilt=0,t.heading=0),null!=e.longitude&&e.hasOwnProperty("longitude")&&(t.longitude=r.json&&!isFinite(e.longitude)?String(e.longitude):e.longitude),null!=e.latitude&&e.hasOwnProperty("latitude")&&(t.latitude=r.json&&!isFinite(e.latitude)?String(e.latitude):e.latitude),null!=e.range&&e.hasOwnProperty("range")&&(t.range=r.json&&!isFinite(e.range)?String(e.range):e.range),null!=e.tilt&&e.hasOwnProperty("tilt")&&(t.tilt=r.json&&!isFinite(e.tilt)?String(e.tilt):e.tilt),null!=e.heading&&e.hasOwnProperty("heading")&&(t.heading=r.json&&!isFinite(e.heading)?String(e.heading):e.heading),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.LookAtProto"},r}(),t.NestedFeatureProto=function(){var r,t;function l(e){if(this.children=[],e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return l.prototype.featureType=1,l.prototype.kmlUrl=null,l.prototype.databaseUrl="",l.prototype.layer=null,l.prototype.folder=null,l.prototype.requirement=null,l.prototype.channelId=0,l.prototype.displayName=null,l.prototype.isVisible=!0,l.prototype.isEnabled=!0,l.prototype.isChecked=!1,l.prototype.layerMenuIconPath="icons/773_l.png",l.prototype.description=null,l.prototype.lookAt=null,l.prototype.assetUuid="",l.prototype.isSaveLocked=!0,l.prototype.children=n.emptyArray,l.prototype.clientConfigScriptName="",l.prototype.dioramaDataChannelBase=-1,l.prototype.replicaDataChannelBase=-1,l.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.NestedFeatureProto;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.featureType=e.int32();break;case 2:l.kmlUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 21:l.databaseUrl=e.string();break;case 3:l.layer=a.keyhole.dbroot.LayerProto.decode(e,e.uint32());break;case 4:l.folder=a.keyhole.dbroot.FolderProto.decode(e,e.uint32());break;case 5:l.requirement=a.keyhole.dbroot.RequirementProto.decode(e,e.uint32());break;case 6:l.channelId=e.int32();break;case 7:l.displayName=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 8:l.isVisible=e.bool();break;case 9:l.isEnabled=e.bool();break;case 10:l.isChecked=e.bool();break;case 11:l.layerMenuIconPath=e.string();break;case 12:l.description=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 13:l.lookAt=a.keyhole.dbroot.LookAtProto.decode(e,e.uint32());break;case 15:l.assetUuid=e.string();break;case 16:l.isSaveLocked=e.bool();break;case 17:l.children&&l.children.length||(l.children=[]),l.children.push(a.keyhole.dbroot.NestedFeatureProto.decode(e,e.uint32()));break;case 18:l.clientConfigScriptName=e.string();break;case 19:l.dioramaDataChannelBase=e.int32();break;case 20:l.replicaDataChannelBase=e.int32();break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("channelId"))throw n.ProtocolError("missing required 'channelId'",{instance:l});return l},l.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.featureType&&e.hasOwnProperty("featureType"))switch(e.featureType){default:return"featureType: enum value expected";case 1:case 2:case 3:case 4:}if(null!=e.kmlUrl&&e.hasOwnProperty("kmlUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.kmlUrl);if(r)return"kmlUrl."+r}if(null!=e.databaseUrl&&e.hasOwnProperty("databaseUrl")&&!n.isString(e.databaseUrl))return"databaseUrl: string expected";if(null!=e.layer&&e.hasOwnProperty("layer")){var r=a.keyhole.dbroot.LayerProto.verify(e.layer);if(r)return"layer."+r}if(null!=e.folder&&e.hasOwnProperty("folder")){var r=a.keyhole.dbroot.FolderProto.verify(e.folder);if(r)return"folder."+r}if(null!=e.requirement&&e.hasOwnProperty("requirement")){var r=a.keyhole.dbroot.RequirementProto.verify(e.requirement);if(r)return"requirement."+r}if(!n.isInteger(e.channelId))return"channelId: integer expected";if(null!=e.displayName&&e.hasOwnProperty("displayName")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.displayName);if(r)return"displayName."+r}if(null!=e.isVisible&&e.hasOwnProperty("isVisible")&&"boolean"!=typeof e.isVisible)return"isVisible: boolean expected";if(null!=e.isEnabled&&e.hasOwnProperty("isEnabled")&&"boolean"!=typeof e.isEnabled)return"isEnabled: boolean expected";if(null!=e.isChecked&&e.hasOwnProperty("isChecked")&&"boolean"!=typeof e.isChecked)return"isChecked: boolean expected";if(null!=e.layerMenuIconPath&&e.hasOwnProperty("layerMenuIconPath")&&!n.isString(e.layerMenuIconPath))return"layerMenuIconPath: string expected";if(null!=e.description&&e.hasOwnProperty("description")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.description);if(r)return"description."+r}if(null!=e.lookAt&&e.hasOwnProperty("lookAt")){var r=a.keyhole.dbroot.LookAtProto.verify(e.lookAt);if(r)return"lookAt."+r}if(null!=e.assetUuid&&e.hasOwnProperty("assetUuid")&&!n.isString(e.assetUuid))return"assetUuid: string expected";if(null!=e.isSaveLocked&&e.hasOwnProperty("isSaveLocked")&&"boolean"!=typeof e.isSaveLocked)return"isSaveLocked: boolean expected";if(null!=e.children&&e.hasOwnProperty("children")){if(!Array.isArray(e.children))return"children: array expected";for(var t=0;t<e.children.length;++t){var r=a.keyhole.dbroot.NestedFeatureProto.verify(e.children[t]);if(r)return"children."+r}}return null!=e.clientConfigScriptName&&e.hasOwnProperty("clientConfigScriptName")&&!n.isString(e.clientConfigScriptName)?"clientConfigScriptName: string expected":null!=e.dioramaDataChannelBase&&e.hasOwnProperty("dioramaDataChannelBase")&&!n.isInteger(e.dioramaDataChannelBase)?"dioramaDataChannelBase: integer expected":null!=e.replicaDataChannelBase&&e.hasOwnProperty("replicaDataChannelBase")&&!n.isInteger(e.replicaDataChannelBase)?"replicaDataChannelBase: integer expected":null},l.fromObject=function(e){if(e instanceof a.keyhole.dbroot.NestedFeatureProto)return e;var r=new a.keyhole.dbroot.NestedFeatureProto;switch(e.featureType){case"TYPE_POINT_Z":case 1:r.featureType=1;break;case"TYPE_POLYGON_Z":case 2:r.featureType=2;break;case"TYPE_LINE_Z":case 3:r.featureType=3;break;case"TYPE_TERRAIN":case 4:r.featureType=4}if(null!=e.kmlUrl){if("object"!=typeof e.kmlUrl)throw TypeError(".keyhole.dbroot.NestedFeatureProto.kmlUrl: object expected");r.kmlUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.kmlUrl)}if(null!=e.databaseUrl&&(r.databaseUrl=String(e.databaseUrl)),null!=e.layer){if("object"!=typeof e.layer)throw TypeError(".keyhole.dbroot.NestedFeatureProto.layer: object expected");r.layer=a.keyhole.dbroot.LayerProto.fromObject(e.layer)}if(null!=e.folder){if("object"!=typeof e.folder)throw TypeError(".keyhole.dbroot.NestedFeatureProto.folder: object expected");r.folder=a.keyhole.dbroot.FolderProto.fromObject(e.folder)}if(null!=e.requirement){if("object"!=typeof e.requirement)throw TypeError(".keyhole.dbroot.NestedFeatureProto.requirement: object expected");r.requirement=a.keyhole.dbroot.RequirementProto.fromObject(e.requirement)}if(null!=e.channelId&&(r.channelId=0|e.channelId),null!=e.displayName){if("object"!=typeof e.displayName)throw TypeError(".keyhole.dbroot.NestedFeatureProto.displayName: object expected");r.displayName=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.displayName)}if(null!=e.isVisible&&(r.isVisible=!!e.isVisible),null!=e.isEnabled&&(r.isEnabled=!!e.isEnabled),null!=e.isChecked&&(r.isChecked=!!e.isChecked),null!=e.layerMenuIconPath&&(r.layerMenuIconPath=String(e.layerMenuIconPath)),null!=e.description){if("object"!=typeof e.description)throw TypeError(".keyhole.dbroot.NestedFeatureProto.description: object expected");r.description=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.description)}if(null!=e.lookAt){if("object"!=typeof e.lookAt)throw TypeError(".keyhole.dbroot.NestedFeatureProto.lookAt: object expected");r.lookAt=a.keyhole.dbroot.LookAtProto.fromObject(e.lookAt)}if(null!=e.assetUuid&&(r.assetUuid=String(e.assetUuid)),null!=e.isSaveLocked&&(r.isSaveLocked=!!e.isSaveLocked),e.children){if(!Array.isArray(e.children))throw TypeError(".keyhole.dbroot.NestedFeatureProto.children: array expected");r.children=[];for(var t=0;t<e.children.length;++t){if("object"!=typeof e.children[t])throw TypeError(".keyhole.dbroot.NestedFeatureProto.children: object expected");r.children[t]=a.keyhole.dbroot.NestedFeatureProto.fromObject(e.children[t])}}return null!=e.clientConfigScriptName&&(r.clientConfigScriptName=String(e.clientConfigScriptName)),null!=e.dioramaDataChannelBase&&(r.dioramaDataChannelBase=0|e.dioramaDataChannelBase),null!=e.replicaDataChannelBase&&(r.replicaDataChannelBase=0|e.replicaDataChannelBase),r},l.toObject=function(e,r){r||(r={});var t={};if((r.arrays||r.defaults)&&(t.children=[]),r.defaults&&(t.featureType=r.enums===String?"TYPE_POINT_Z":1,t.kmlUrl=null,t.layer=null,t.folder=null,t.requirement=null,t.channelId=0,t.displayName=null,t.isVisible=!0,t.isEnabled=!0,t.isChecked=!1,t.layerMenuIconPath="icons/773_l.png",t.description=null,t.lookAt=null,t.assetUuid="",t.isSaveLocked=!0,t.clientConfigScriptName="",t.dioramaDataChannelBase=-1,t.replicaDataChannelBase=-1,t.databaseUrl=""),null!=e.featureType&&e.hasOwnProperty("featureType")&&(t.featureType=r.enums===String?a.keyhole.dbroot.NestedFeatureProto.FeatureType[e.featureType]:e.featureType),null!=e.kmlUrl&&e.hasOwnProperty("kmlUrl")&&(t.kmlUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.kmlUrl,r)),null!=e.layer&&e.hasOwnProperty("layer")&&(t.layer=a.keyhole.dbroot.LayerProto.toObject(e.layer,r)),null!=e.folder&&e.hasOwnProperty("folder")&&(t.folder=a.keyhole.dbroot.FolderProto.toObject(e.folder,r)),null!=e.requirement&&e.hasOwnProperty("requirement")&&(t.requirement=a.keyhole.dbroot.RequirementProto.toObject(e.requirement,r)),null!=e.channelId&&e.hasOwnProperty("channelId")&&(t.channelId=e.channelId),null!=e.displayName&&e.hasOwnProperty("displayName")&&(t.displayName=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.displayName,r)),null!=e.isVisible&&e.hasOwnProperty("isVisible")&&(t.isVisible=e.isVisible),null!=e.isEnabled&&e.hasOwnProperty("isEnabled")&&(t.isEnabled=e.isEnabled),null!=e.isChecked&&e.hasOwnProperty("isChecked")&&(t.isChecked=e.isChecked),null!=e.layerMenuIconPath&&e.hasOwnProperty("layerMenuIconPath")&&(t.layerMenuIconPath=e.layerMenuIconPath),null!=e.description&&e.hasOwnProperty("description")&&(t.description=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.description,r)),null!=e.lookAt&&e.hasOwnProperty("lookAt")&&(t.lookAt=a.keyhole.dbroot.LookAtProto.toObject(e.lookAt,r)),null!=e.assetUuid&&e.hasOwnProperty("assetUuid")&&(t.assetUuid=e.assetUuid),null!=e.isSaveLocked&&e.hasOwnProperty("isSaveLocked")&&(t.isSaveLocked=e.isSaveLocked),e.children&&e.children.length){t.children=[];for(var o=0;o<e.children.length;++o)t.children[o]=a.keyhole.dbroot.NestedFeatureProto.toObject(e.children[o],r)}return null!=e.clientConfigScriptName&&e.hasOwnProperty("clientConfigScriptName")&&(t.clientConfigScriptName=e.clientConfigScriptName),null!=e.dioramaDataChannelBase&&e.hasOwnProperty("dioramaDataChannelBase")&&(t.dioramaDataChannelBase=e.dioramaDataChannelBase),null!=e.replicaDataChannelBase&&e.hasOwnProperty("replicaDataChannelBase")&&(t.replicaDataChannelBase=e.replicaDataChannelBase),null!=e.databaseUrl&&e.hasOwnProperty("databaseUrl")&&(t.databaseUrl=e.databaseUrl),t},l.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},l.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.NestedFeatureProto"},l.FeatureType=((t=Object.create(r={}))[r[1]="TYPE_POINT_Z"]=1,t[r[2]="TYPE_POLYGON_Z"]=2,t[r[3]="TYPE_LINE_Z"]=3,t[r[4]="TYPE_TERRAIN"]=4,t),l}(),t.MfeDomainFeaturesProto=function(){var r,t;function l(e){if(this.supportedFeatures=[],e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return l.prototype.countryCode="",l.prototype.domainName="",l.prototype.supportedFeatures=n.emptyArray,l.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.MfeDomainFeaturesProto;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.countryCode=e.string();break;case 2:l.domainName=e.string();break;case 3:if(l.supportedFeatures&&l.supportedFeatures.length||(l.supportedFeatures=[]),(7&i)==2)for(var s=e.uint32()+e.pos;e.pos<s;)l.supportedFeatures.push(e.int32());else l.supportedFeatures.push(e.int32());break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("countryCode"))throw n.ProtocolError("missing required 'countryCode'",{instance:l});if(!l.hasOwnProperty("domainName"))throw n.ProtocolError("missing required 'domainName'",{instance:l});return l},l.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(!n.isString(e.countryCode))return"countryCode: string expected";if(!n.isString(e.domainName))return"domainName: string expected";if(null!=e.supportedFeatures&&e.hasOwnProperty("supportedFeatures")){if(!Array.isArray(e.supportedFeatures))return"supportedFeatures: array expected";for(var r=0;r<e.supportedFeatures.length;++r)switch(e.supportedFeatures[r]){default:return"supportedFeatures: enum value[] expected";case 0:case 1:case 2:}}return null},l.fromObject=function(e){if(e instanceof a.keyhole.dbroot.MfeDomainFeaturesProto)return e;var r=new a.keyhole.dbroot.MfeDomainFeaturesProto;if(null!=e.countryCode&&(r.countryCode=String(e.countryCode)),null!=e.domainName&&(r.domainName=String(e.domainName)),e.supportedFeatures){if(!Array.isArray(e.supportedFeatures))throw TypeError(".keyhole.dbroot.MfeDomainFeaturesProto.supportedFeatures: array expected");r.supportedFeatures=[];for(var t=0;t<e.supportedFeatures.length;++t)switch(e.supportedFeatures[t]){default:case"GEOCODING":case 0:r.supportedFeatures[t]=0;break;case"LOCAL_SEARCH":case 1:r.supportedFeatures[t]=1;break;case"DRIVING_DIRECTIONS":case 2:r.supportedFeatures[t]=2}}return r},l.toObject=function(e,r){r||(r={});var t={};if((r.arrays||r.defaults)&&(t.supportedFeatures=[]),r.defaults&&(t.countryCode="",t.domainName=""),null!=e.countryCode&&e.hasOwnProperty("countryCode")&&(t.countryCode=e.countryCode),null!=e.domainName&&e.hasOwnProperty("domainName")&&(t.domainName=e.domainName),e.supportedFeatures&&e.supportedFeatures.length){t.supportedFeatures=[];for(var o=0;o<e.supportedFeatures.length;++o)t.supportedFeatures[o]=r.enums===String?a.keyhole.dbroot.MfeDomainFeaturesProto.SupportedFeature[e.supportedFeatures[o]]:e.supportedFeatures[o]}return t},l.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},l.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.MfeDomainFeaturesProto"},l.SupportedFeature=((t=Object.create(r={}))[r[0]="GEOCODING"]=0,t[r[1]="LOCAL_SEARCH"]=1,t[r[2]="DRIVING_DIRECTIONS"]=2,t),l}(),t.ClientOptionsProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.disableDiskCache=!1,r.prototype.disableEmbeddedBrowserVista=!1,r.prototype.drawAtmosphere=!0,r.prototype.drawStars=!0,r.prototype.shaderFilePrefix="",r.prototype.useProtobufQuadtreePackets=!1,r.prototype.useExtendedCopyrightIds=!0,r.prototype.precipitationsOptions=null,r.prototype.captureOptions=null,r.prototype.show_2dMapsIcon=!0,r.prototype.disableInternalBrowser=!1,r.prototype.internalBrowserBlacklist="",r.prototype.internalBrowserOriginWhitelist="*",r.prototype.polarTileMergingLevel=0,r.prototype.jsBridgeRequestWhitelist="http://*.google.com/*",r.prototype.mapsOptions=null,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.ClientOptionsProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.disableDiskCache=e.bool();break;case 2:n.disableEmbeddedBrowserVista=e.bool();break;case 3:n.drawAtmosphere=e.bool();break;case 4:n.drawStars=e.bool();break;case 5:n.shaderFilePrefix=e.string();break;case 6:n.useProtobufQuadtreePackets=e.bool();break;case 7:n.useExtendedCopyrightIds=e.bool();break;case 8:n.precipitationsOptions=a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.decode(e,e.uint32());break;case 9:n.captureOptions=a.keyhole.dbroot.ClientOptionsProto.CaptureOptions.decode(e,e.uint32());break;case 10:n.show_2dMapsIcon=e.bool();break;case 11:n.disableInternalBrowser=e.bool();break;case 12:n.internalBrowserBlacklist=e.string();break;case 13:n.internalBrowserOriginWhitelist=e.string();break;case 14:n.polarTileMergingLevel=e.int32();break;case 15:n.jsBridgeRequestWhitelist=e.string();break;case 16:n.mapsOptions=a.keyhole.dbroot.ClientOptionsProto.MapsOptions.decode(e,e.uint32());break;default:e.skipType(7&l)}}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.disableDiskCache&&e.hasOwnProperty("disableDiskCache")&&"boolean"!=typeof e.disableDiskCache)return"disableDiskCache: boolean expected";if(null!=e.disableEmbeddedBrowserVista&&e.hasOwnProperty("disableEmbeddedBrowserVista")&&"boolean"!=typeof e.disableEmbeddedBrowserVista)return"disableEmbeddedBrowserVista: boolean expected";if(null!=e.drawAtmosphere&&e.hasOwnProperty("drawAtmosphere")&&"boolean"!=typeof e.drawAtmosphere)return"drawAtmosphere: boolean expected";if(null!=e.drawStars&&e.hasOwnProperty("drawStars")&&"boolean"!=typeof e.drawStars)return"drawStars: boolean expected";if(null!=e.shaderFilePrefix&&e.hasOwnProperty("shaderFilePrefix")&&!n.isString(e.shaderFilePrefix))return"shaderFilePrefix: string expected";if(null!=e.useProtobufQuadtreePackets&&e.hasOwnProperty("useProtobufQuadtreePackets")&&"boolean"!=typeof e.useProtobufQuadtreePackets)return"useProtobufQuadtreePackets: boolean expected";if(null!=e.useExtendedCopyrightIds&&e.hasOwnProperty("useExtendedCopyrightIds")&&"boolean"!=typeof e.useExtendedCopyrightIds)return"useExtendedCopyrightIds: boolean expected";if(null!=e.precipitationsOptions&&e.hasOwnProperty("precipitationsOptions")){var r=a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.verify(e.precipitationsOptions);if(r)return"precipitationsOptions."+r}if(null!=e.captureOptions&&e.hasOwnProperty("captureOptions")){var r=a.keyhole.dbroot.ClientOptionsProto.CaptureOptions.verify(e.captureOptions);if(r)return"captureOptions."+r}if(null!=e.show_2dMapsIcon&&e.hasOwnProperty("show_2dMapsIcon")&&"boolean"!=typeof e.show_2dMapsIcon)return"show_2dMapsIcon: boolean expected";if(null!=e.disableInternalBrowser&&e.hasOwnProperty("disableInternalBrowser")&&"boolean"!=typeof e.disableInternalBrowser)return"disableInternalBrowser: boolean expected";if(null!=e.internalBrowserBlacklist&&e.hasOwnProperty("internalBrowserBlacklist")&&!n.isString(e.internalBrowserBlacklist))return"internalBrowserBlacklist: string expected";if(null!=e.internalBrowserOriginWhitelist&&e.hasOwnProperty("internalBrowserOriginWhitelist")&&!n.isString(e.internalBrowserOriginWhitelist))return"internalBrowserOriginWhitelist: string expected";if(null!=e.polarTileMergingLevel&&e.hasOwnProperty("polarTileMergingLevel")&&!n.isInteger(e.polarTileMergingLevel))return"polarTileMergingLevel: integer expected";if(null!=e.jsBridgeRequestWhitelist&&e.hasOwnProperty("jsBridgeRequestWhitelist")&&!n.isString(e.jsBridgeRequestWhitelist))return"jsBridgeRequestWhitelist: string expected";if(null!=e.mapsOptions&&e.hasOwnProperty("mapsOptions")){var r=a.keyhole.dbroot.ClientOptionsProto.MapsOptions.verify(e.mapsOptions);if(r)return"mapsOptions."+r}return null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.ClientOptionsProto)return e;var r=new a.keyhole.dbroot.ClientOptionsProto;if(null!=e.disableDiskCache&&(r.disableDiskCache=!!e.disableDiskCache),null!=e.disableEmbeddedBrowserVista&&(r.disableEmbeddedBrowserVista=!!e.disableEmbeddedBrowserVista),null!=e.drawAtmosphere&&(r.drawAtmosphere=!!e.drawAtmosphere),null!=e.drawStars&&(r.drawStars=!!e.drawStars),null!=e.shaderFilePrefix&&(r.shaderFilePrefix=String(e.shaderFilePrefix)),null!=e.useProtobufQuadtreePackets&&(r.useProtobufQuadtreePackets=!!e.useProtobufQuadtreePackets),null!=e.useExtendedCopyrightIds&&(r.useExtendedCopyrightIds=!!e.useExtendedCopyrightIds),null!=e.precipitationsOptions){if("object"!=typeof e.precipitationsOptions)throw TypeError(".keyhole.dbroot.ClientOptionsProto.precipitationsOptions: object expected");r.precipitationsOptions=a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.fromObject(e.precipitationsOptions)}if(null!=e.captureOptions){if("object"!=typeof e.captureOptions)throw TypeError(".keyhole.dbroot.ClientOptionsProto.captureOptions: object expected");r.captureOptions=a.keyhole.dbroot.ClientOptionsProto.CaptureOptions.fromObject(e.captureOptions)}if(null!=e.show_2dMapsIcon&&(r.show_2dMapsIcon=!!e.show_2dMapsIcon),null!=e.disableInternalBrowser&&(r.disableInternalBrowser=!!e.disableInternalBrowser),null!=e.internalBrowserBlacklist&&(r.internalBrowserBlacklist=String(e.internalBrowserBlacklist)),null!=e.internalBrowserOriginWhitelist&&(r.internalBrowserOriginWhitelist=String(e.internalBrowserOriginWhitelist)),null!=e.polarTileMergingLevel&&(r.polarTileMergingLevel=0|e.polarTileMergingLevel),null!=e.jsBridgeRequestWhitelist&&(r.jsBridgeRequestWhitelist=String(e.jsBridgeRequestWhitelist)),null!=e.mapsOptions){if("object"!=typeof e.mapsOptions)throw TypeError(".keyhole.dbroot.ClientOptionsProto.mapsOptions: object expected");r.mapsOptions=a.keyhole.dbroot.ClientOptionsProto.MapsOptions.fromObject(e.mapsOptions)}return r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.disableDiskCache=!1,t.disableEmbeddedBrowserVista=!1,t.drawAtmosphere=!0,t.drawStars=!0,t.shaderFilePrefix="",t.useProtobufQuadtreePackets=!1,t.useExtendedCopyrightIds=!0,t.precipitationsOptions=null,t.captureOptions=null,t.show_2dMapsIcon=!0,t.disableInternalBrowser=!1,t.internalBrowserBlacklist="",t.internalBrowserOriginWhitelist="*",t.polarTileMergingLevel=0,t.jsBridgeRequestWhitelist="http://*.google.com/*",t.mapsOptions=null),null!=e.disableDiskCache&&e.hasOwnProperty("disableDiskCache")&&(t.disableDiskCache=e.disableDiskCache),null!=e.disableEmbeddedBrowserVista&&e.hasOwnProperty("disableEmbeddedBrowserVista")&&(t.disableEmbeddedBrowserVista=e.disableEmbeddedBrowserVista),null!=e.drawAtmosphere&&e.hasOwnProperty("drawAtmosphere")&&(t.drawAtmosphere=e.drawAtmosphere),null!=e.drawStars&&e.hasOwnProperty("drawStars")&&(t.drawStars=e.drawStars),null!=e.shaderFilePrefix&&e.hasOwnProperty("shaderFilePrefix")&&(t.shaderFilePrefix=e.shaderFilePrefix),null!=e.useProtobufQuadtreePackets&&e.hasOwnProperty("useProtobufQuadtreePackets")&&(t.useProtobufQuadtreePackets=e.useProtobufQuadtreePackets),null!=e.useExtendedCopyrightIds&&e.hasOwnProperty("useExtendedCopyrightIds")&&(t.useExtendedCopyrightIds=e.useExtendedCopyrightIds),null!=e.precipitationsOptions&&e.hasOwnProperty("precipitationsOptions")&&(t.precipitationsOptions=a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.toObject(e.precipitationsOptions,r)),null!=e.captureOptions&&e.hasOwnProperty("captureOptions")&&(t.captureOptions=a.keyhole.dbroot.ClientOptionsProto.CaptureOptions.toObject(e.captureOptions,r)),null!=e.show_2dMapsIcon&&e.hasOwnProperty("show_2dMapsIcon")&&(t.show_2dMapsIcon=e.show_2dMapsIcon),null!=e.disableInternalBrowser&&e.hasOwnProperty("disableInternalBrowser")&&(t.disableInternalBrowser=e.disableInternalBrowser),null!=e.internalBrowserBlacklist&&e.hasOwnProperty("internalBrowserBlacklist")&&(t.internalBrowserBlacklist=e.internalBrowserBlacklist),null!=e.internalBrowserOriginWhitelist&&e.hasOwnProperty("internalBrowserOriginWhitelist")&&(t.internalBrowserOriginWhitelist=e.internalBrowserOriginWhitelist),null!=e.polarTileMergingLevel&&e.hasOwnProperty("polarTileMergingLevel")&&(t.polarTileMergingLevel=e.polarTileMergingLevel),null!=e.jsBridgeRequestWhitelist&&e.hasOwnProperty("jsBridgeRequestWhitelist")&&(t.jsBridgeRequestWhitelist=e.jsBridgeRequestWhitelist),null!=e.mapsOptions&&e.hasOwnProperty("mapsOptions")&&(t.mapsOptions=a.keyhole.dbroot.ClientOptionsProto.MapsOptions.toObject(e.mapsOptions,r)),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.ClientOptionsProto"},r.PrecipitationsOptions=function(){function r(e){if(this.weatherMapping=[],e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.imageUrl="",r.prototype.imageExpireTime=900,r.prototype.maxColorDistance=20,r.prototype.imageLevel=5,r.prototype.weatherMapping=n.emptyArray,r.prototype.cloudsLayerUrl="",r.prototype.animationDecelerationDelay=20,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.imageUrl=e.string();break;case 2:n.imageExpireTime=e.int32();break;case 3:n.maxColorDistance=e.int32();break;case 4:n.imageLevel=e.int32();break;case 5:n.weatherMapping&&n.weatherMapping.length||(n.weatherMapping=[]),n.weatherMapping.push(a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping.decode(e,e.uint32()));break;case 6:n.cloudsLayerUrl=e.string();break;case 7:n.animationDecelerationDelay=e.float();break;default:e.skipType(7&l)}}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.imageUrl&&e.hasOwnProperty("imageUrl")&&!n.isString(e.imageUrl))return"imageUrl: string expected";if(null!=e.imageExpireTime&&e.hasOwnProperty("imageExpireTime")&&!n.isInteger(e.imageExpireTime))return"imageExpireTime: integer expected";if(null!=e.maxColorDistance&&e.hasOwnProperty("maxColorDistance")&&!n.isInteger(e.maxColorDistance))return"maxColorDistance: integer expected";if(null!=e.imageLevel&&e.hasOwnProperty("imageLevel")&&!n.isInteger(e.imageLevel))return"imageLevel: integer expected";if(null!=e.weatherMapping&&e.hasOwnProperty("weatherMapping")){if(!Array.isArray(e.weatherMapping))return"weatherMapping: array expected";for(var r=0;r<e.weatherMapping.length;++r){var t=a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping.verify(e.weatherMapping[r]);if(t)return"weatherMapping."+t}}return null!=e.cloudsLayerUrl&&e.hasOwnProperty("cloudsLayerUrl")&&!n.isString(e.cloudsLayerUrl)?"cloudsLayerUrl: string expected":null!=e.animationDecelerationDelay&&e.hasOwnProperty("animationDecelerationDelay")&&"number"!=typeof e.animationDecelerationDelay?"animationDecelerationDelay: number expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions)return e;var r=new a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions;if(null!=e.imageUrl&&(r.imageUrl=String(e.imageUrl)),null!=e.imageExpireTime&&(r.imageExpireTime=0|e.imageExpireTime),null!=e.maxColorDistance&&(r.maxColorDistance=0|e.maxColorDistance),null!=e.imageLevel&&(r.imageLevel=0|e.imageLevel),e.weatherMapping){if(!Array.isArray(e.weatherMapping))throw TypeError(".keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.weatherMapping: array expected");r.weatherMapping=[];for(var t=0;t<e.weatherMapping.length;++t){if("object"!=typeof e.weatherMapping[t])throw TypeError(".keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.weatherMapping: object expected");r.weatherMapping[t]=a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping.fromObject(e.weatherMapping[t])}}return null!=e.cloudsLayerUrl&&(r.cloudsLayerUrl=String(e.cloudsLayerUrl)),null!=e.animationDecelerationDelay&&(r.animationDecelerationDelay=Number(e.animationDecelerationDelay)),r},r.toObject=function(e,r){r||(r={});var t={};if((r.arrays||r.defaults)&&(t.weatherMapping=[]),r.defaults&&(t.imageUrl="",t.imageExpireTime=900,t.maxColorDistance=20,t.imageLevel=5,t.cloudsLayerUrl="",t.animationDecelerationDelay=20),null!=e.imageUrl&&e.hasOwnProperty("imageUrl")&&(t.imageUrl=e.imageUrl),null!=e.imageExpireTime&&e.hasOwnProperty("imageExpireTime")&&(t.imageExpireTime=e.imageExpireTime),null!=e.maxColorDistance&&e.hasOwnProperty("maxColorDistance")&&(t.maxColorDistance=e.maxColorDistance),null!=e.imageLevel&&e.hasOwnProperty("imageLevel")&&(t.imageLevel=e.imageLevel),e.weatherMapping&&e.weatherMapping.length){t.weatherMapping=[];for(var o=0;o<e.weatherMapping.length;++o)t.weatherMapping[o]=a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping.toObject(e.weatherMapping[o],r)}return null!=e.cloudsLayerUrl&&e.hasOwnProperty("cloudsLayerUrl")&&(t.cloudsLayerUrl=e.cloudsLayerUrl),null!=e.animationDecelerationDelay&&e.hasOwnProperty("animationDecelerationDelay")&&(t.animationDecelerationDelay=r.json&&!isFinite(e.animationDecelerationDelay)?String(e.animationDecelerationDelay):e.animationDecelerationDelay),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions"},r.WeatherMapping=function(){var r,t;function l(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return l.prototype.colorAbgr=0,l.prototype.weatherType=0,l.prototype.elongation=1,l.prototype.opacity=0,l.prototype.fogDensity=0,l.prototype.speed0=0,l.prototype.speed1=0,l.prototype.speed2=0,l.prototype.speed3=0,l.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.colorAbgr=e.uint32();break;case 2:l.weatherType=e.int32();break;case 3:l.elongation=e.float();break;case 4:l.opacity=e.float();break;case 5:l.fogDensity=e.float();break;case 6:l.speed0=e.float();break;case 7:l.speed1=e.float();break;case 8:l.speed2=e.float();break;case 9:l.speed3=e.float();break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("colorAbgr"))throw n.ProtocolError("missing required 'colorAbgr'",{instance:l});if(!l.hasOwnProperty("weatherType"))throw n.ProtocolError("missing required 'weatherType'",{instance:l});return l},l.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(!n.isInteger(e.colorAbgr))return"colorAbgr: integer expected";switch(e.weatherType){default:return"weatherType: enum value expected";case 0:case 1:case 2:}return null!=e.elongation&&e.hasOwnProperty("elongation")&&"number"!=typeof e.elongation?"elongation: number expected":null!=e.opacity&&e.hasOwnProperty("opacity")&&"number"!=typeof e.opacity?"opacity: number expected":null!=e.fogDensity&&e.hasOwnProperty("fogDensity")&&"number"!=typeof e.fogDensity?"fogDensity: number expected":null!=e.speed0&&e.hasOwnProperty("speed0")&&"number"!=typeof e.speed0?"speed0: number expected":null!=e.speed1&&e.hasOwnProperty("speed1")&&"number"!=typeof e.speed1?"speed1: number expected":null!=e.speed2&&e.hasOwnProperty("speed2")&&"number"!=typeof e.speed2?"speed2: number expected":null!=e.speed3&&e.hasOwnProperty("speed3")&&"number"!=typeof e.speed3?"speed3: number expected":null},l.fromObject=function(e){if(e instanceof a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping)return e;var r=new a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping;switch(null!=e.colorAbgr&&(r.colorAbgr=e.colorAbgr>>>0),e.weatherType){case"NO_PRECIPITATION":case 0:r.weatherType=0;break;case"RAIN":case 1:r.weatherType=1;break;case"SNOW":case 2:r.weatherType=2}return null!=e.elongation&&(r.elongation=Number(e.elongation)),null!=e.opacity&&(r.opacity=Number(e.opacity)),null!=e.fogDensity&&(r.fogDensity=Number(e.fogDensity)),null!=e.speed0&&(r.speed0=Number(e.speed0)),null!=e.speed1&&(r.speed1=Number(e.speed1)),null!=e.speed2&&(r.speed2=Number(e.speed2)),null!=e.speed3&&(r.speed3=Number(e.speed3)),r},l.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.colorAbgr=0,t.weatherType=r.enums===String?"NO_PRECIPITATION":0,t.elongation=1,t.opacity=0,t.fogDensity=0,t.speed0=0,t.speed1=0,t.speed2=0,t.speed3=0),null!=e.colorAbgr&&e.hasOwnProperty("colorAbgr")&&(t.colorAbgr=e.colorAbgr),null!=e.weatherType&&e.hasOwnProperty("weatherType")&&(t.weatherType=r.enums===String?a.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping.WeatherType[e.weatherType]:e.weatherType),null!=e.elongation&&e.hasOwnProperty("elongation")&&(t.elongation=r.json&&!isFinite(e.elongation)?String(e.elongation):e.elongation),null!=e.opacity&&e.hasOwnProperty("opacity")&&(t.opacity=r.json&&!isFinite(e.opacity)?String(e.opacity):e.opacity),null!=e.fogDensity&&e.hasOwnProperty("fogDensity")&&(t.fogDensity=r.json&&!isFinite(e.fogDensity)?String(e.fogDensity):e.fogDensity),null!=e.speed0&&e.hasOwnProperty("speed0")&&(t.speed0=r.json&&!isFinite(e.speed0)?String(e.speed0):e.speed0),null!=e.speed1&&e.hasOwnProperty("speed1")&&(t.speed1=r.json&&!isFinite(e.speed1)?String(e.speed1):e.speed1),null!=e.speed2&&e.hasOwnProperty("speed2")&&(t.speed2=r.json&&!isFinite(e.speed2)?String(e.speed2):e.speed2),null!=e.speed3&&e.hasOwnProperty("speed3")&&(t.speed3=r.json&&!isFinite(e.speed3)?String(e.speed3):e.speed3),t},l.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},l.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping"},l.WeatherType=((t=Object.create(r={}))[r[0]="NO_PRECIPITATION"]=0,t[r[1]="RAIN"]=1,t[r[2]="SNOW"]=2,t),l}(),r}(),r.CaptureOptions=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.allowSaveAsImage=!0,r.prototype.maxFreeCaptureRes=2400,r.prototype.maxPremiumCaptureRes=4800,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.ClientOptionsProto.CaptureOptions;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.allowSaveAsImage=e.bool();break;case 2:n.maxFreeCaptureRes=e.int32();break;case 3:n.maxPremiumCaptureRes=e.int32();break;default:e.skipType(7&l)}}return n},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":null!=e.allowSaveAsImage&&e.hasOwnProperty("allowSaveAsImage")&&"boolean"!=typeof e.allowSaveAsImage?"allowSaveAsImage: boolean expected":null!=e.maxFreeCaptureRes&&e.hasOwnProperty("maxFreeCaptureRes")&&!n.isInteger(e.maxFreeCaptureRes)?"maxFreeCaptureRes: integer expected":null!=e.maxPremiumCaptureRes&&e.hasOwnProperty("maxPremiumCaptureRes")&&!n.isInteger(e.maxPremiumCaptureRes)?"maxPremiumCaptureRes: integer expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.ClientOptionsProto.CaptureOptions)return e;var r=new a.keyhole.dbroot.ClientOptionsProto.CaptureOptions;return null!=e.allowSaveAsImage&&(r.allowSaveAsImage=!!e.allowSaveAsImage),null!=e.maxFreeCaptureRes&&(r.maxFreeCaptureRes=0|e.maxFreeCaptureRes),null!=e.maxPremiumCaptureRes&&(r.maxPremiumCaptureRes=0|e.maxPremiumCaptureRes),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.allowSaveAsImage=!0,t.maxFreeCaptureRes=2400,t.maxPremiumCaptureRes=4800),null!=e.allowSaveAsImage&&e.hasOwnProperty("allowSaveAsImage")&&(t.allowSaveAsImage=e.allowSaveAsImage),null!=e.maxFreeCaptureRes&&e.hasOwnProperty("maxFreeCaptureRes")&&(t.maxFreeCaptureRes=e.maxFreeCaptureRes),null!=e.maxPremiumCaptureRes&&e.hasOwnProperty("maxPremiumCaptureRes")&&(t.maxPremiumCaptureRes=e.maxPremiumCaptureRes),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.ClientOptionsProto.CaptureOptions"},r}(),r.MapsOptions=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.enableMaps=!1,r.prototype.docsAutoDownloadEnabled=!1,r.prototype.docsAutoDownloadInterval=0,r.prototype.docsAutoUploadEnabled=!1,r.prototype.docsAutoUploadDelay=0,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.ClientOptionsProto.MapsOptions;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.enableMaps=e.bool();break;case 2:n.docsAutoDownloadEnabled=e.bool();break;case 3:n.docsAutoDownloadInterval=e.int32();break;case 4:n.docsAutoUploadEnabled=e.bool();break;case 5:n.docsAutoUploadDelay=e.int32();break;default:e.skipType(7&l)}}return n},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":null!=e.enableMaps&&e.hasOwnProperty("enableMaps")&&"boolean"!=typeof e.enableMaps?"enableMaps: boolean expected":null!=e.docsAutoDownloadEnabled&&e.hasOwnProperty("docsAutoDownloadEnabled")&&"boolean"!=typeof e.docsAutoDownloadEnabled?"docsAutoDownloadEnabled: boolean expected":null!=e.docsAutoDownloadInterval&&e.hasOwnProperty("docsAutoDownloadInterval")&&!n.isInteger(e.docsAutoDownloadInterval)?"docsAutoDownloadInterval: integer expected":null!=e.docsAutoUploadEnabled&&e.hasOwnProperty("docsAutoUploadEnabled")&&"boolean"!=typeof e.docsAutoUploadEnabled?"docsAutoUploadEnabled: boolean expected":null!=e.docsAutoUploadDelay&&e.hasOwnProperty("docsAutoUploadDelay")&&!n.isInteger(e.docsAutoUploadDelay)?"docsAutoUploadDelay: integer expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.ClientOptionsProto.MapsOptions)return e;var r=new a.keyhole.dbroot.ClientOptionsProto.MapsOptions;return null!=e.enableMaps&&(r.enableMaps=!!e.enableMaps),null!=e.docsAutoDownloadEnabled&&(r.docsAutoDownloadEnabled=!!e.docsAutoDownloadEnabled),null!=e.docsAutoDownloadInterval&&(r.docsAutoDownloadInterval=0|e.docsAutoDownloadInterval),null!=e.docsAutoUploadEnabled&&(r.docsAutoUploadEnabled=!!e.docsAutoUploadEnabled),null!=e.docsAutoUploadDelay&&(r.docsAutoUploadDelay=0|e.docsAutoUploadDelay),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.enableMaps=!1,t.docsAutoDownloadEnabled=!1,t.docsAutoDownloadInterval=0,t.docsAutoUploadEnabled=!1,t.docsAutoUploadDelay=0),null!=e.enableMaps&&e.hasOwnProperty("enableMaps")&&(t.enableMaps=e.enableMaps),null!=e.docsAutoDownloadEnabled&&e.hasOwnProperty("docsAutoDownloadEnabled")&&(t.docsAutoDownloadEnabled=e.docsAutoDownloadEnabled),null!=e.docsAutoDownloadInterval&&e.hasOwnProperty("docsAutoDownloadInterval")&&(t.docsAutoDownloadInterval=e.docsAutoDownloadInterval),null!=e.docsAutoUploadEnabled&&e.hasOwnProperty("docsAutoUploadEnabled")&&(t.docsAutoUploadEnabled=e.docsAutoUploadEnabled),null!=e.docsAutoUploadDelay&&e.hasOwnProperty("docsAutoUploadDelay")&&(t.docsAutoUploadDelay=e.docsAutoUploadDelay),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.ClientOptionsProto.MapsOptions"},r}(),r}(),t.FetchingOptionsProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.maxRequestsPerQuery=1,r.prototype.forceMaxRequestsPerQuery=!1,r.prototype.sortBatches=!1,r.prototype.maxDrawable=2,r.prototype.maxImagery=2,r.prototype.maxTerrain=5,r.prototype.maxQuadtree=5,r.prototype.maxDioramaMetadata=1,r.prototype.maxDioramaData=0,r.prototype.maxConsumerFetchRatio=1,r.prototype.maxProEcFetchRatio=0,r.prototype.safeOverallQps=0,r.prototype.safeImageryQps=0,r.prototype.domainsForHttps="google.com gstatic.com",r.prototype.hostsForHttp="",r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.FetchingOptionsProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.maxRequestsPerQuery=e.int32();break;case 12:n.forceMaxRequestsPerQuery=e.bool();break;case 13:n.sortBatches=e.bool();break;case 2:n.maxDrawable=e.int32();break;case 3:n.maxImagery=e.int32();break;case 4:n.maxTerrain=e.int32();break;case 5:n.maxQuadtree=e.int32();break;case 6:n.maxDioramaMetadata=e.int32();break;case 7:n.maxDioramaData=e.int32();break;case 8:n.maxConsumerFetchRatio=e.float();break;case 9:n.maxProEcFetchRatio=e.float();break;case 10:n.safeOverallQps=e.float();break;case 11:n.safeImageryQps=e.float();break;case 14:n.domainsForHttps=e.string();break;case 15:n.hostsForHttp=e.string();break;default:e.skipType(7&l)}}return n},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":null!=e.maxRequestsPerQuery&&e.hasOwnProperty("maxRequestsPerQuery")&&!n.isInteger(e.maxRequestsPerQuery)?"maxRequestsPerQuery: integer expected":null!=e.forceMaxRequestsPerQuery&&e.hasOwnProperty("forceMaxRequestsPerQuery")&&"boolean"!=typeof e.forceMaxRequestsPerQuery?"forceMaxRequestsPerQuery: boolean expected":null!=e.sortBatches&&e.hasOwnProperty("sortBatches")&&"boolean"!=typeof e.sortBatches?"sortBatches: boolean expected":null!=e.maxDrawable&&e.hasOwnProperty("maxDrawable")&&!n.isInteger(e.maxDrawable)?"maxDrawable: integer expected":null!=e.maxImagery&&e.hasOwnProperty("maxImagery")&&!n.isInteger(e.maxImagery)?"maxImagery: integer expected":null!=e.maxTerrain&&e.hasOwnProperty("maxTerrain")&&!n.isInteger(e.maxTerrain)?"maxTerrain: integer expected":null!=e.maxQuadtree&&e.hasOwnProperty("maxQuadtree")&&!n.isInteger(e.maxQuadtree)?"maxQuadtree: integer expected":null!=e.maxDioramaMetadata&&e.hasOwnProperty("maxDioramaMetadata")&&!n.isInteger(e.maxDioramaMetadata)?"maxDioramaMetadata: integer expected":null!=e.maxDioramaData&&e.hasOwnProperty("maxDioramaData")&&!n.isInteger(e.maxDioramaData)?"maxDioramaData: integer expected":null!=e.maxConsumerFetchRatio&&e.hasOwnProperty("maxConsumerFetchRatio")&&"number"!=typeof e.maxConsumerFetchRatio?"maxConsumerFetchRatio: number expected":null!=e.maxProEcFetchRatio&&e.hasOwnProperty("maxProEcFetchRatio")&&"number"!=typeof e.maxProEcFetchRatio?"maxProEcFetchRatio: number expected":null!=e.safeOverallQps&&e.hasOwnProperty("safeOverallQps")&&"number"!=typeof e.safeOverallQps?"safeOverallQps: number expected":null!=e.safeImageryQps&&e.hasOwnProperty("safeImageryQps")&&"number"!=typeof e.safeImageryQps?"safeImageryQps: number expected":null!=e.domainsForHttps&&e.hasOwnProperty("domainsForHttps")&&!n.isString(e.domainsForHttps)?"domainsForHttps: string expected":null!=e.hostsForHttp&&e.hasOwnProperty("hostsForHttp")&&!n.isString(e.hostsForHttp)?"hostsForHttp: string expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.FetchingOptionsProto)return e;var r=new a.keyhole.dbroot.FetchingOptionsProto;return null!=e.maxRequestsPerQuery&&(r.maxRequestsPerQuery=0|e.maxRequestsPerQuery),null!=e.forceMaxRequestsPerQuery&&(r.forceMaxRequestsPerQuery=!!e.forceMaxRequestsPerQuery),null!=e.sortBatches&&(r.sortBatches=!!e.sortBatches),null!=e.maxDrawable&&(r.maxDrawable=0|e.maxDrawable),null!=e.maxImagery&&(r.maxImagery=0|e.maxImagery),null!=e.maxTerrain&&(r.maxTerrain=0|e.maxTerrain),null!=e.maxQuadtree&&(r.maxQuadtree=0|e.maxQuadtree),null!=e.maxDioramaMetadata&&(r.maxDioramaMetadata=0|e.maxDioramaMetadata),null!=e.maxDioramaData&&(r.maxDioramaData=0|e.maxDioramaData),null!=e.maxConsumerFetchRatio&&(r.maxConsumerFetchRatio=Number(e.maxConsumerFetchRatio)),null!=e.maxProEcFetchRatio&&(r.maxProEcFetchRatio=Number(e.maxProEcFetchRatio)),null!=e.safeOverallQps&&(r.safeOverallQps=Number(e.safeOverallQps)),null!=e.safeImageryQps&&(r.safeImageryQps=Number(e.safeImageryQps)),null!=e.domainsForHttps&&(r.domainsForHttps=String(e.domainsForHttps)),null!=e.hostsForHttp&&(r.hostsForHttp=String(e.hostsForHttp)),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.maxRequestsPerQuery=1,t.maxDrawable=2,t.maxImagery=2,t.maxTerrain=5,t.maxQuadtree=5,t.maxDioramaMetadata=1,t.maxDioramaData=0,t.maxConsumerFetchRatio=1,t.maxProEcFetchRatio=0,t.safeOverallQps=0,t.safeImageryQps=0,t.forceMaxRequestsPerQuery=!1,t.sortBatches=!1,t.domainsForHttps="google.com gstatic.com",t.hostsForHttp=""),null!=e.maxRequestsPerQuery&&e.hasOwnProperty("maxRequestsPerQuery")&&(t.maxRequestsPerQuery=e.maxRequestsPerQuery),null!=e.maxDrawable&&e.hasOwnProperty("maxDrawable")&&(t.maxDrawable=e.maxDrawable),null!=e.maxImagery&&e.hasOwnProperty("maxImagery")&&(t.maxImagery=e.maxImagery),null!=e.maxTerrain&&e.hasOwnProperty("maxTerrain")&&(t.maxTerrain=e.maxTerrain),null!=e.maxQuadtree&&e.hasOwnProperty("maxQuadtree")&&(t.maxQuadtree=e.maxQuadtree),null!=e.maxDioramaMetadata&&e.hasOwnProperty("maxDioramaMetadata")&&(t.maxDioramaMetadata=e.maxDioramaMetadata),null!=e.maxDioramaData&&e.hasOwnProperty("maxDioramaData")&&(t.maxDioramaData=e.maxDioramaData),null!=e.maxConsumerFetchRatio&&e.hasOwnProperty("maxConsumerFetchRatio")&&(t.maxConsumerFetchRatio=r.json&&!isFinite(e.maxConsumerFetchRatio)?String(e.maxConsumerFetchRatio):e.maxConsumerFetchRatio),null!=e.maxProEcFetchRatio&&e.hasOwnProperty("maxProEcFetchRatio")&&(t.maxProEcFetchRatio=r.json&&!isFinite(e.maxProEcFetchRatio)?String(e.maxProEcFetchRatio):e.maxProEcFetchRatio),null!=e.safeOverallQps&&e.hasOwnProperty("safeOverallQps")&&(t.safeOverallQps=r.json&&!isFinite(e.safeOverallQps)?String(e.safeOverallQps):e.safeOverallQps),null!=e.safeImageryQps&&e.hasOwnProperty("safeImageryQps")&&(t.safeImageryQps=r.json&&!isFinite(e.safeImageryQps)?String(e.safeImageryQps):e.safeImageryQps),null!=e.forceMaxRequestsPerQuery&&e.hasOwnProperty("forceMaxRequestsPerQuery")&&(t.forceMaxRequestsPerQuery=e.forceMaxRequestsPerQuery),null!=e.sortBatches&&e.hasOwnProperty("sortBatches")&&(t.sortBatches=e.sortBatches),null!=e.domainsForHttps&&e.hasOwnProperty("domainsForHttps")&&(t.domainsForHttps=e.domainsForHttps),null!=e.hostsForHttp&&e.hasOwnProperty("hostsForHttp")&&(t.hostsForHttp=e.hostsForHttp),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.FetchingOptionsProto"},r}(),t.TimeMachineOptionsProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.serverUrl="",r.prototype.isTimemachine=!1,r.prototype.dwellTimeMs=500,r.prototype.discoverabilityAltitudeMeters=15e3,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.TimeMachineOptionsProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.serverUrl=e.string();break;case 2:n.isTimemachine=e.bool();break;case 3:n.dwellTimeMs=e.int32();break;case 4:n.discoverabilityAltitudeMeters=e.int32();break;default:e.skipType(7&l)}}return n},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":null!=e.serverUrl&&e.hasOwnProperty("serverUrl")&&!n.isString(e.serverUrl)?"serverUrl: string expected":null!=e.isTimemachine&&e.hasOwnProperty("isTimemachine")&&"boolean"!=typeof e.isTimemachine?"isTimemachine: boolean expected":null!=e.dwellTimeMs&&e.hasOwnProperty("dwellTimeMs")&&!n.isInteger(e.dwellTimeMs)?"dwellTimeMs: integer expected":null!=e.discoverabilityAltitudeMeters&&e.hasOwnProperty("discoverabilityAltitudeMeters")&&!n.isInteger(e.discoverabilityAltitudeMeters)?"discoverabilityAltitudeMeters: integer expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.TimeMachineOptionsProto)return e;var r=new a.keyhole.dbroot.TimeMachineOptionsProto;return null!=e.serverUrl&&(r.serverUrl=String(e.serverUrl)),null!=e.isTimemachine&&(r.isTimemachine=!!e.isTimemachine),null!=e.dwellTimeMs&&(r.dwellTimeMs=0|e.dwellTimeMs),null!=e.discoverabilityAltitudeMeters&&(r.discoverabilityAltitudeMeters=0|e.discoverabilityAltitudeMeters),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.serverUrl="",t.isTimemachine=!1,t.dwellTimeMs=500,t.discoverabilityAltitudeMeters=15e3),null!=e.serverUrl&&e.hasOwnProperty("serverUrl")&&(t.serverUrl=e.serverUrl),null!=e.isTimemachine&&e.hasOwnProperty("isTimemachine")&&(t.isTimemachine=e.isTimemachine),null!=e.dwellTimeMs&&e.hasOwnProperty("dwellTimeMs")&&(t.dwellTimeMs=e.dwellTimeMs),null!=e.discoverabilityAltitudeMeters&&e.hasOwnProperty("discoverabilityAltitudeMeters")&&(t.discoverabilityAltitudeMeters=e.discoverabilityAltitudeMeters),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.TimeMachineOptionsProto"},r}(),t.AutopiaOptionsProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.metadataServerUrl="http://cbk0.google.com/cbk",r.prototype.depthmapServerUrl="http://cbk0.google.com/cbk",r.prototype.coverageOverlayUrl="",r.prototype.maxImageryQps=0,r.prototype.maxMetadataDepthmapQps=0,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.AutopiaOptionsProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.metadataServerUrl=e.string();break;case 2:n.depthmapServerUrl=e.string();break;case 3:n.coverageOverlayUrl=e.string();break;case 4:n.maxImageryQps=e.float();break;case 5:n.maxMetadataDepthmapQps=e.float();break;default:e.skipType(7&l)}}return n},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":null!=e.metadataServerUrl&&e.hasOwnProperty("metadataServerUrl")&&!n.isString(e.metadataServerUrl)?"metadataServerUrl: string expected":null!=e.depthmapServerUrl&&e.hasOwnProperty("depthmapServerUrl")&&!n.isString(e.depthmapServerUrl)?"depthmapServerUrl: string expected":null!=e.coverageOverlayUrl&&e.hasOwnProperty("coverageOverlayUrl")&&!n.isString(e.coverageOverlayUrl)?"coverageOverlayUrl: string expected":null!=e.maxImageryQps&&e.hasOwnProperty("maxImageryQps")&&"number"!=typeof e.maxImageryQps?"maxImageryQps: number expected":null!=e.maxMetadataDepthmapQps&&e.hasOwnProperty("maxMetadataDepthmapQps")&&"number"!=typeof e.maxMetadataDepthmapQps?"maxMetadataDepthmapQps: number expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.AutopiaOptionsProto)return e;var r=new a.keyhole.dbroot.AutopiaOptionsProto;return null!=e.metadataServerUrl&&(r.metadataServerUrl=String(e.metadataServerUrl)),null!=e.depthmapServerUrl&&(r.depthmapServerUrl=String(e.depthmapServerUrl)),null!=e.coverageOverlayUrl&&(r.coverageOverlayUrl=String(e.coverageOverlayUrl)),null!=e.maxImageryQps&&(r.maxImageryQps=Number(e.maxImageryQps)),null!=e.maxMetadataDepthmapQps&&(r.maxMetadataDepthmapQps=Number(e.maxMetadataDepthmapQps)),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.metadataServerUrl="http://cbk0.google.com/cbk",t.depthmapServerUrl="http://cbk0.google.com/cbk",t.coverageOverlayUrl="",t.maxImageryQps=0,t.maxMetadataDepthmapQps=0),null!=e.metadataServerUrl&&e.hasOwnProperty("metadataServerUrl")&&(t.metadataServerUrl=e.metadataServerUrl),null!=e.depthmapServerUrl&&e.hasOwnProperty("depthmapServerUrl")&&(t.depthmapServerUrl=e.depthmapServerUrl),null!=e.coverageOverlayUrl&&e.hasOwnProperty("coverageOverlayUrl")&&(t.coverageOverlayUrl=e.coverageOverlayUrl),null!=e.maxImageryQps&&e.hasOwnProperty("maxImageryQps")&&(t.maxImageryQps=r.json&&!isFinite(e.maxImageryQps)?String(e.maxImageryQps):e.maxImageryQps),null!=e.maxMetadataDepthmapQps&&e.hasOwnProperty("maxMetadataDepthmapQps")&&(t.maxMetadataDepthmapQps=r.json&&!isFinite(e.maxMetadataDepthmapQps)?String(e.maxMetadataDepthmapQps):e.maxMetadataDepthmapQps),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.AutopiaOptionsProto"},r}(),t.CSIOptionsProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.samplingPercentage=0,r.prototype.experimentId="",r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.CSIOptionsProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.samplingPercentage=e.int32();break;case 2:n.experimentId=e.string();break;default:e.skipType(7&l)}}return n},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":null!=e.samplingPercentage&&e.hasOwnProperty("samplingPercentage")&&!n.isInteger(e.samplingPercentage)?"samplingPercentage: integer expected":null!=e.experimentId&&e.hasOwnProperty("experimentId")&&!n.isString(e.experimentId)?"experimentId: string expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.CSIOptionsProto)return e;var r=new a.keyhole.dbroot.CSIOptionsProto;return null!=e.samplingPercentage&&(r.samplingPercentage=0|e.samplingPercentage),null!=e.experimentId&&(r.experimentId=String(e.experimentId)),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.samplingPercentage=0,t.experimentId=""),null!=e.samplingPercentage&&e.hasOwnProperty("samplingPercentage")&&(t.samplingPercentage=e.samplingPercentage),null!=e.experimentId&&e.hasOwnProperty("experimentId")&&(t.experimentId=e.experimentId),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.CSIOptionsProto"},r}(),t.SearchTabProto=function(){function r(e){if(this.inputBox=[],e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.isVisible=!1,r.prototype.tabLabel=null,r.prototype.baseUrl="",r.prototype.viewportPrefix="",r.prototype.inputBox=n.emptyArray,r.prototype.requirement=null,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.SearchTabProto;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.isVisible=e.bool();break;case 2:l.tabLabel=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 3:l.baseUrl=e.string();break;case 4:l.viewportPrefix=e.string();break;case 5:l.inputBox&&l.inputBox.length||(l.inputBox=[]),l.inputBox.push(a.keyhole.dbroot.SearchTabProto.InputBoxInfo.decode(e,e.uint32()));break;case 6:l.requirement=a.keyhole.dbroot.RequirementProto.decode(e,e.uint32());break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("isVisible"))throw n.ProtocolError("missing required 'isVisible'",{instance:l});return l},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if("boolean"!=typeof e.isVisible)return"isVisible: boolean expected";if(null!=e.tabLabel&&e.hasOwnProperty("tabLabel")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.tabLabel);if(r)return"tabLabel."+r}if(null!=e.baseUrl&&e.hasOwnProperty("baseUrl")&&!n.isString(e.baseUrl))return"baseUrl: string expected";if(null!=e.viewportPrefix&&e.hasOwnProperty("viewportPrefix")&&!n.isString(e.viewportPrefix))return"viewportPrefix: string expected";if(null!=e.inputBox&&e.hasOwnProperty("inputBox")){if(!Array.isArray(e.inputBox))return"inputBox: array expected";for(var t=0;t<e.inputBox.length;++t){var r=a.keyhole.dbroot.SearchTabProto.InputBoxInfo.verify(e.inputBox[t]);if(r)return"inputBox."+r}}if(null!=e.requirement&&e.hasOwnProperty("requirement")){var r=a.keyhole.dbroot.RequirementProto.verify(e.requirement);if(r)return"requirement."+r}return null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.SearchTabProto)return e;var r=new a.keyhole.dbroot.SearchTabProto;if(null!=e.isVisible&&(r.isVisible=!!e.isVisible),null!=e.tabLabel){if("object"!=typeof e.tabLabel)throw TypeError(".keyhole.dbroot.SearchTabProto.tabLabel: object expected");r.tabLabel=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.tabLabel)}if(null!=e.baseUrl&&(r.baseUrl=String(e.baseUrl)),null!=e.viewportPrefix&&(r.viewportPrefix=String(e.viewportPrefix)),e.inputBox){if(!Array.isArray(e.inputBox))throw TypeError(".keyhole.dbroot.SearchTabProto.inputBox: array expected");r.inputBox=[];for(var t=0;t<e.inputBox.length;++t){if("object"!=typeof e.inputBox[t])throw TypeError(".keyhole.dbroot.SearchTabProto.inputBox: object expected");r.inputBox[t]=a.keyhole.dbroot.SearchTabProto.InputBoxInfo.fromObject(e.inputBox[t])}}if(null!=e.requirement){if("object"!=typeof e.requirement)throw TypeError(".keyhole.dbroot.SearchTabProto.requirement: object expected");r.requirement=a.keyhole.dbroot.RequirementProto.fromObject(e.requirement)}return r},r.toObject=function(e,r){r||(r={});var t={};if((r.arrays||r.defaults)&&(t.inputBox=[]),r.defaults&&(t.isVisible=!1,t.tabLabel=null,t.baseUrl="",t.viewportPrefix="",t.requirement=null),null!=e.isVisible&&e.hasOwnProperty("isVisible")&&(t.isVisible=e.isVisible),null!=e.tabLabel&&e.hasOwnProperty("tabLabel")&&(t.tabLabel=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.tabLabel,r)),null!=e.baseUrl&&e.hasOwnProperty("baseUrl")&&(t.baseUrl=e.baseUrl),null!=e.viewportPrefix&&e.hasOwnProperty("viewportPrefix")&&(t.viewportPrefix=e.viewportPrefix),e.inputBox&&e.inputBox.length){t.inputBox=[];for(var o=0;o<e.inputBox.length;++o)t.inputBox[o]=a.keyhole.dbroot.SearchTabProto.InputBoxInfo.toObject(e.inputBox[o],r)}return null!=e.requirement&&e.hasOwnProperty("requirement")&&(t.requirement=a.keyhole.dbroot.RequirementProto.toObject(e.requirement,r)),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.SearchTabProto"},r.InputBoxInfo=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.label=null,r.prototype.queryVerb="",r.prototype.queryPrepend="",r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.SearchTabProto.InputBoxInfo;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.label=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 2:l.queryVerb=e.string();break;case 3:l.queryPrepend=e.string();break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("label"))throw n.ProtocolError("missing required 'label'",{instance:l});if(!l.hasOwnProperty("queryVerb"))throw n.ProtocolError("missing required 'queryVerb'",{instance:l});return l},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.label);return r?"label."+r:n.isString(e.queryVerb)?null!=e.queryPrepend&&e.hasOwnProperty("queryPrepend")&&!n.isString(e.queryPrepend)?"queryPrepend: string expected":null:"queryVerb: string expected"},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.SearchTabProto.InputBoxInfo)return e;var r=new a.keyhole.dbroot.SearchTabProto.InputBoxInfo;if(null!=e.label){if("object"!=typeof e.label)throw TypeError(".keyhole.dbroot.SearchTabProto.InputBoxInfo.label: object expected");r.label=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.label)}return null!=e.queryVerb&&(r.queryVerb=String(e.queryVerb)),null!=e.queryPrepend&&(r.queryPrepend=String(e.queryPrepend)),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.label=null,t.queryVerb="",t.queryPrepend=""),null!=e.label&&e.hasOwnProperty("label")&&(t.label=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.label,r)),null!=e.queryVerb&&e.hasOwnProperty("queryVerb")&&(t.queryVerb=e.queryVerb),null!=e.queryPrepend&&e.hasOwnProperty("queryPrepend")&&(t.queryPrepend=e.queryPrepend),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.SearchTabProto.InputBoxInfo"},r}(),r}(),t.CobrandProto=function(){var r,t;function l(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return l.prototype.logoUrl="",l.prototype.xCoord=null,l.prototype.yCoord=null,l.prototype.tiePoint=6,l.prototype.screenSize=0,l.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.CobrandProto;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.logoUrl=e.string();break;case 2:l.xCoord=a.keyhole.dbroot.CobrandProto.Coord.decode(e,e.uint32());break;case 3:l.yCoord=a.keyhole.dbroot.CobrandProto.Coord.decode(e,e.uint32());break;case 4:l.tiePoint=e.int32();break;case 5:l.screenSize=e.double();break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("logoUrl"))throw n.ProtocolError("missing required 'logoUrl'",{instance:l});return l},l.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(!n.isString(e.logoUrl))return"logoUrl: string expected";if(null!=e.xCoord&&e.hasOwnProperty("xCoord")){var r=a.keyhole.dbroot.CobrandProto.Coord.verify(e.xCoord);if(r)return"xCoord."+r}if(null!=e.yCoord&&e.hasOwnProperty("yCoord")){var r=a.keyhole.dbroot.CobrandProto.Coord.verify(e.yCoord);if(r)return"yCoord."+r}if(null!=e.tiePoint&&e.hasOwnProperty("tiePoint"))switch(e.tiePoint){default:return"tiePoint: enum value expected";case 0:case 1:case 2:case 3:case 4:case 5:case 6:case 7:case 8:}return null!=e.screenSize&&e.hasOwnProperty("screenSize")&&"number"!=typeof e.screenSize?"screenSize: number expected":null},l.fromObject=function(e){if(e instanceof a.keyhole.dbroot.CobrandProto)return e;var r=new a.keyhole.dbroot.CobrandProto;if(null!=e.logoUrl&&(r.logoUrl=String(e.logoUrl)),null!=e.xCoord){if("object"!=typeof e.xCoord)throw TypeError(".keyhole.dbroot.CobrandProto.xCoord: object expected");r.xCoord=a.keyhole.dbroot.CobrandProto.Coord.fromObject(e.xCoord)}if(null!=e.yCoord){if("object"!=typeof e.yCoord)throw TypeError(".keyhole.dbroot.CobrandProto.yCoord: object expected");r.yCoord=a.keyhole.dbroot.CobrandProto.Coord.fromObject(e.yCoord)}switch(e.tiePoint){case"TOP_LEFT":case 0:r.tiePoint=0;break;case"TOP_CENTER":case 1:r.tiePoint=1;break;case"TOP_RIGHT":case 2:r.tiePoint=2;break;case"MID_LEFT":case 3:r.tiePoint=3;break;case"MID_CENTER":case 4:r.tiePoint=4;break;case"MID_RIGHT":case 5:r.tiePoint=5;break;case"BOTTOM_LEFT":case 6:r.tiePoint=6;break;case"BOTTOM_CENTER":case 7:r.tiePoint=7;break;case"BOTTOM_RIGHT":case 8:r.tiePoint=8}return null!=e.screenSize&&(r.screenSize=Number(e.screenSize)),r},l.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.logoUrl="",t.xCoord=null,t.yCoord=null,t.tiePoint=r.enums===String?"BOTTOM_LEFT":6,t.screenSize=0),null!=e.logoUrl&&e.hasOwnProperty("logoUrl")&&(t.logoUrl=e.logoUrl),null!=e.xCoord&&e.hasOwnProperty("xCoord")&&(t.xCoord=a.keyhole.dbroot.CobrandProto.Coord.toObject(e.xCoord,r)),null!=e.yCoord&&e.hasOwnProperty("yCoord")&&(t.yCoord=a.keyhole.dbroot.CobrandProto.Coord.toObject(e.yCoord,r)),null!=e.tiePoint&&e.hasOwnProperty("tiePoint")&&(t.tiePoint=r.enums===String?a.keyhole.dbroot.CobrandProto.TiePoint[e.tiePoint]:e.tiePoint),null!=e.screenSize&&e.hasOwnProperty("screenSize")&&(t.screenSize=r.json&&!isFinite(e.screenSize)?String(e.screenSize):e.screenSize),t},l.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},l.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.CobrandProto"},l.Coord=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.value=0,r.prototype.isRelative=!1,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.CobrandProto.Coord;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.value=e.double();break;case 2:l.isRelative=e.bool();break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("value"))throw n.ProtocolError("missing required 'value'",{instance:l});return l},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":"number"!=typeof e.value?"value: number expected":null!=e.isRelative&&e.hasOwnProperty("isRelative")&&"boolean"!=typeof e.isRelative?"isRelative: boolean expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.CobrandProto.Coord)return e;var r=new a.keyhole.dbroot.CobrandProto.Coord;return null!=e.value&&(r.value=Number(e.value)),null!=e.isRelative&&(r.isRelative=!!e.isRelative),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.value=0,t.isRelative=!1),null!=e.value&&e.hasOwnProperty("value")&&(t.value=r.json&&!isFinite(e.value)?String(e.value):e.value),null!=e.isRelative&&e.hasOwnProperty("isRelative")&&(t.isRelative=e.isRelative),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.CobrandProto.Coord"},r}(),l.TiePoint=((t=Object.create(r={}))[r[0]="TOP_LEFT"]=0,t[r[1]="TOP_CENTER"]=1,t[r[2]="TOP_RIGHT"]=2,t[r[3]="MID_LEFT"]=3,t[r[4]="MID_CENTER"]=4,t[r[5]="MID_RIGHT"]=5,t[r[6]="BOTTOM_LEFT"]=6,t[r[7]="BOTTOM_CENTER"]=7,t[r[8]="BOTTOM_RIGHT"]=8,t),l}(),t.DatabaseDescriptionProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.databaseName=null,r.prototype.databaseUrl="",r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.DatabaseDescriptionProto;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.databaseName=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 2:l.databaseUrl=e.string();break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("databaseUrl"))throw n.ProtocolError("missing required 'databaseUrl'",{instance:l});return l},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.databaseName&&e.hasOwnProperty("databaseName")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.databaseName);if(r)return"databaseName."+r}return n.isString(e.databaseUrl)?null:"databaseUrl: string expected"},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.DatabaseDescriptionProto)return e;var r=new a.keyhole.dbroot.DatabaseDescriptionProto;if(null!=e.databaseName){if("object"!=typeof e.databaseName)throw TypeError(".keyhole.dbroot.DatabaseDescriptionProto.databaseName: object expected");r.databaseName=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.databaseName)}return null!=e.databaseUrl&&(r.databaseUrl=String(e.databaseUrl)),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.databaseName=null,t.databaseUrl=""),null!=e.databaseName&&e.hasOwnProperty("databaseName")&&(t.databaseName=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.databaseName,r)),null!=e.databaseUrl&&e.hasOwnProperty("databaseUrl")&&(t.databaseUrl=e.databaseUrl),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.DatabaseDescriptionProto"},r}(),t.ConfigScriptProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.scriptName="",r.prototype.scriptData="",r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.ConfigScriptProto;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.scriptName=e.string();break;case 2:l.scriptData=e.string();break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("scriptName"))throw n.ProtocolError("missing required 'scriptName'",{instance:l});if(!l.hasOwnProperty("scriptData"))throw n.ProtocolError("missing required 'scriptData'",{instance:l});return l},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":n.isString(e.scriptName)?n.isString(e.scriptData)?null:"scriptData: string expected":"scriptName: string expected"},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.ConfigScriptProto)return e;var r=new a.keyhole.dbroot.ConfigScriptProto;return null!=e.scriptName&&(r.scriptName=String(e.scriptName)),null!=e.scriptData&&(r.scriptData=String(e.scriptData)),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.scriptName="",t.scriptData=""),null!=e.scriptName&&e.hasOwnProperty("scriptName")&&(t.scriptName=e.scriptName),null!=e.scriptData&&e.hasOwnProperty("scriptData")&&(t.scriptData=e.scriptData),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.ConfigScriptProto"},r}(),t.SwoopParamsProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.startDistInMeters=0,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.SwoopParamsProto;e.pos<t;){var l=e.uint32();l>>>3==1?n.startDistInMeters=e.double():e.skipType(7&l)}return n},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":null!=e.startDistInMeters&&e.hasOwnProperty("startDistInMeters")&&"number"!=typeof e.startDistInMeters?"startDistInMeters: number expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.SwoopParamsProto)return e;var r=new a.keyhole.dbroot.SwoopParamsProto;return null!=e.startDistInMeters&&(r.startDistInMeters=Number(e.startDistInMeters)),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.startDistInMeters=0),null!=e.startDistInMeters&&e.hasOwnProperty("startDistInMeters")&&(t.startDistInMeters=r.json&&!isFinite(e.startDistInMeters)?String(e.startDistInMeters):e.startDistInMeters),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.SwoopParamsProto"},r}(),t.PostingServerProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.name=null,r.prototype.baseUrl=null,r.prototype.postWizardPath=null,r.prototype.fileSubmitPath=null,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.PostingServerProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.name=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 2:n.baseUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 3:n.postWizardPath=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 4:n.fileSubmitPath=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;default:e.skipType(7&l)}}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.name&&e.hasOwnProperty("name")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.name);if(r)return"name."+r}if(null!=e.baseUrl&&e.hasOwnProperty("baseUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.baseUrl);if(r)return"baseUrl."+r}if(null!=e.postWizardPath&&e.hasOwnProperty("postWizardPath")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.postWizardPath);if(r)return"postWizardPath."+r}if(null!=e.fileSubmitPath&&e.hasOwnProperty("fileSubmitPath")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.fileSubmitPath);if(r)return"fileSubmitPath."+r}return null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.PostingServerProto)return e;var r=new a.keyhole.dbroot.PostingServerProto;if(null!=e.name){if("object"!=typeof e.name)throw TypeError(".keyhole.dbroot.PostingServerProto.name: object expected");r.name=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.name)}if(null!=e.baseUrl){if("object"!=typeof e.baseUrl)throw TypeError(".keyhole.dbroot.PostingServerProto.baseUrl: object expected");r.baseUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.baseUrl)}if(null!=e.postWizardPath){if("object"!=typeof e.postWizardPath)throw TypeError(".keyhole.dbroot.PostingServerProto.postWizardPath: object expected");r.postWizardPath=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.postWizardPath)}if(null!=e.fileSubmitPath){if("object"!=typeof e.fileSubmitPath)throw TypeError(".keyhole.dbroot.PostingServerProto.fileSubmitPath: object expected");r.fileSubmitPath=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.fileSubmitPath)}return r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.name=null,t.baseUrl=null,t.postWizardPath=null,t.fileSubmitPath=null),null!=e.name&&e.hasOwnProperty("name")&&(t.name=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.name,r)),null!=e.baseUrl&&e.hasOwnProperty("baseUrl")&&(t.baseUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.baseUrl,r)),null!=e.postWizardPath&&e.hasOwnProperty("postWizardPath")&&(t.postWizardPath=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.postWizardPath,r)),null!=e.fileSubmitPath&&e.hasOwnProperty("fileSubmitPath")&&(t.fileSubmitPath=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.fileSubmitPath,r)),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.PostingServerProto"},r}(),t.PlanetaryDatabaseProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.url=null,r.prototype.name=null,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.PlanetaryDatabaseProto;e.pos<t;){var i=e.uint32();switch(i>>>3){case 1:l.url=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 2:l.name=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("url"))throw n.ProtocolError("missing required 'url'",{instance:l});if(!l.hasOwnProperty("name"))throw n.ProtocolError("missing required 'name'",{instance:l});return l},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.url);if(r)return"url."+r;var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.name);return r?"name."+r:null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.PlanetaryDatabaseProto)return e;var r=new a.keyhole.dbroot.PlanetaryDatabaseProto;if(null!=e.url){if("object"!=typeof e.url)throw TypeError(".keyhole.dbroot.PlanetaryDatabaseProto.url: object expected");r.url=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.url)}if(null!=e.name){if("object"!=typeof e.name)throw TypeError(".keyhole.dbroot.PlanetaryDatabaseProto.name: object expected");r.name=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.name)}return r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.url=null,t.name=null),null!=e.url&&e.hasOwnProperty("url")&&(t.url=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.url,r)),null!=e.name&&e.hasOwnProperty("name")&&(t.name=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.name,r)),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.PlanetaryDatabaseProto"},r}(),t.LogServerProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.url=null,r.prototype.enable=!1,r.prototype.throttlingFactor=1,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.LogServerProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.url=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 2:n.enable=e.bool();break;case 3:n.throttlingFactor=e.int32();break;default:e.skipType(7&l)}}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.url&&e.hasOwnProperty("url")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.url);if(r)return"url."+r}return null!=e.enable&&e.hasOwnProperty("enable")&&"boolean"!=typeof e.enable?"enable: boolean expected":null!=e.throttlingFactor&&e.hasOwnProperty("throttlingFactor")&&!n.isInteger(e.throttlingFactor)?"throttlingFactor: integer expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.LogServerProto)return e;var r=new a.keyhole.dbroot.LogServerProto;if(null!=e.url){if("object"!=typeof e.url)throw TypeError(".keyhole.dbroot.LogServerProto.url: object expected");r.url=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.url)}return null!=e.enable&&(r.enable=!!e.enable),null!=e.throttlingFactor&&(r.throttlingFactor=0|e.throttlingFactor),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.url=null,t.enable=!1,t.throttlingFactor=1),null!=e.url&&e.hasOwnProperty("url")&&(t.url=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.url,r)),null!=e.enable&&e.hasOwnProperty("enable")&&(t.enable=e.enable),null!=e.throttlingFactor&&e.hasOwnProperty("throttlingFactor")&&(t.throttlingFactor=e.throttlingFactor),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.LogServerProto"},r}(),t.EndSnippetProto=function(){function r(e){if(this.mfeDomains=[],this.searchTab=[],this.cobrandInfo=[],this.validDatabase=[],this.configScript=[],this.planetaryDatabase=[],this.filmstripConfig=[],e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.model=null,r.prototype.authServerUrl=null,r.prototype.disableAuthentication=!1,r.prototype.mfeDomains=n.emptyArray,r.prototype.mfeLangParam="hl=$5Bhl5D",r.prototype.adsUrlPatterns="",r.prototype.reverseGeocoderUrl=null,r.prototype.reverseGeocoderProtocolVersion=3,r.prototype.skyDatabaseIsAvailable=!0,r.prototype.skyDatabaseUrl=null,r.prototype.defaultWebPageIntlUrl=null,r.prototype.numStartUpTips=17,r.prototype.startUpTipsUrl=null,r.prototype.numProStartUpTips=0,r.prototype.proStartUpTipsUrl=null,r.prototype.startupTipsIntlUrl=null,r.prototype.userGuideIntlUrl=null,r.prototype.supportCenterIntlUrl=null,r.prototype.businessListingIntlUrl=null,r.prototype.supportAnswerIntlUrl=null,r.prototype.supportTopicIntlUrl=null,r.prototype.supportRequestIntlUrl=null,r.prototype.earthIntlUrl=null,r.prototype.addContentUrl=null,r.prototype.sketchupNotInstalledUrl=null,r.prototype.sketchupErrorUrl=null,r.prototype.freeLicenseUrl=null,r.prototype.proLicenseUrl=null,r.prototype.tutorialUrl=null,r.prototype.keyboardShortcutsUrl=null,r.prototype.releaseNotesUrl=null,r.prototype.hideUserData=!1,r.prototype.useGeLogo=!0,r.prototype.dioramaDescriptionUrlBase=null,r.prototype.dioramaDefaultColor=4291281607,r.prototype.dioramaBlacklistUrl=null,r.prototype.clientOptions=null,r.prototype.fetchingOptions=null,r.prototype.timeMachineOptions=null,r.prototype.csiOptions=null,r.prototype.searchTab=n.emptyArray,r.prototype.cobrandInfo=n.emptyArray,r.prototype.validDatabase=n.emptyArray,r.prototype.configScript=n.emptyArray,r.prototype.deauthServerUrl=null,r.prototype.swoopParameters=null,r.prototype.bbsServerInfo=null,r.prototype.dataErrorServerInfo=null,r.prototype.planetaryDatabase=n.emptyArray,r.prototype.logServer=null,r.prototype.autopiaOptions=null,r.prototype.searchConfig=null,r.prototype.searchInfo=null,r.prototype.elevationServiceBaseUrl="http://maps.google.com/maps/api/elevation/",r.prototype.elevationProfileQueryDelay=500,r.prototype.proUpgradeUrl=null,r.prototype.earthCommunityUrl=null,r.prototype.googleMapsUrl=null,r.prototype.sharingUrl=null,r.prototype.privacyPolicyUrl=null,r.prototype.doGplusUserCheck=!1,r.prototype.rocktreeDataProto=null,r.prototype.filmstripConfig=n.emptyArray,r.prototype.showSigninButton=!1,r.prototype.proMeasureUpsellUrl=null,r.prototype.proPrintUpsellUrl=null,r.prototype.starDataProto=null,r.prototype.feedbackUrl=null,r.prototype.oauth2LoginUrl=null,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.EndSnippetProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.model=a.keyhole.dbroot.PlanetModelProto.decode(e,e.uint32());break;case 2:n.authServerUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 3:n.disableAuthentication=e.bool();break;case 4:n.mfeDomains&&n.mfeDomains.length||(n.mfeDomains=[]),n.mfeDomains.push(a.keyhole.dbroot.MfeDomainFeaturesProto.decode(e,e.uint32()));break;case 5:n.mfeLangParam=e.string();break;case 6:n.adsUrlPatterns=e.string();break;case 7:n.reverseGeocoderUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 8:n.reverseGeocoderProtocolVersion=e.int32();break;case 9:n.skyDatabaseIsAvailable=e.bool();break;case 10:n.skyDatabaseUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 11:n.defaultWebPageIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 12:n.numStartUpTips=e.int32();break;case 13:n.startUpTipsUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 51:n.numProStartUpTips=e.int32();break;case 52:n.proStartUpTipsUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 64:n.startupTipsIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 14:n.userGuideIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 15:n.supportCenterIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 16:n.businessListingIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 17:n.supportAnswerIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 18:n.supportTopicIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 19:n.supportRequestIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 20:n.earthIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 21:n.addContentUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 22:n.sketchupNotInstalledUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 23:n.sketchupErrorUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 24:n.freeLicenseUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 25:n.proLicenseUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 48:n.tutorialUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 49:n.keyboardShortcutsUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 50:n.releaseNotesUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 26:n.hideUserData=e.bool();break;case 27:n.useGeLogo=e.bool();break;case 28:n.dioramaDescriptionUrlBase=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 29:n.dioramaDefaultColor=e.uint32();break;case 53:n.dioramaBlacklistUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 30:n.clientOptions=a.keyhole.dbroot.ClientOptionsProto.decode(e,e.uint32());break;case 31:n.fetchingOptions=a.keyhole.dbroot.FetchingOptionsProto.decode(e,e.uint32());break;case 32:n.timeMachineOptions=a.keyhole.dbroot.TimeMachineOptionsProto.decode(e,e.uint32());break;case 33:n.csiOptions=a.keyhole.dbroot.CSIOptionsProto.decode(e,e.uint32());break;case 34:n.searchTab&&n.searchTab.length||(n.searchTab=[]),n.searchTab.push(a.keyhole.dbroot.SearchTabProto.decode(e,e.uint32()));break;case 35:n.cobrandInfo&&n.cobrandInfo.length||(n.cobrandInfo=[]),n.cobrandInfo.push(a.keyhole.dbroot.CobrandProto.decode(e,e.uint32()));break;case 36:n.validDatabase&&n.validDatabase.length||(n.validDatabase=[]),n.validDatabase.push(a.keyhole.dbroot.DatabaseDescriptionProto.decode(e,e.uint32()));break;case 37:n.configScript&&n.configScript.length||(n.configScript=[]),n.configScript.push(a.keyhole.dbroot.ConfigScriptProto.decode(e,e.uint32()));break;case 38:n.deauthServerUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 39:n.swoopParameters=a.keyhole.dbroot.SwoopParamsProto.decode(e,e.uint32());break;case 40:n.bbsServerInfo=a.keyhole.dbroot.PostingServerProto.decode(e,e.uint32());break;case 41:n.dataErrorServerInfo=a.keyhole.dbroot.PostingServerProto.decode(e,e.uint32());break;case 42:n.planetaryDatabase&&n.planetaryDatabase.length||(n.planetaryDatabase=[]),n.planetaryDatabase.push(a.keyhole.dbroot.PlanetaryDatabaseProto.decode(e,e.uint32()));break;case 43:n.logServer=a.keyhole.dbroot.LogServerProto.decode(e,e.uint32());break;case 44:n.autopiaOptions=a.keyhole.dbroot.AutopiaOptionsProto.decode(e,e.uint32());break;case 54:n.searchConfig=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.decode(e,e.uint32());break;case 45:n.searchInfo=a.keyhole.dbroot.EndSnippetProto.SearchInfoProto.decode(e,e.uint32());break;case 46:n.elevationServiceBaseUrl=e.string();break;case 47:n.elevationProfileQueryDelay=e.int32();break;case 55:n.proUpgradeUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 56:n.earthCommunityUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 57:n.googleMapsUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 58:n.sharingUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 59:n.privacyPolicyUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 60:n.doGplusUserCheck=e.bool();break;case 61:n.rocktreeDataProto=a.keyhole.dbroot.EndSnippetProto.RockTreeDataProto.decode(e,e.uint32());break;case 62:n.filmstripConfig&&n.filmstripConfig.length||(n.filmstripConfig=[]),n.filmstripConfig.push(a.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.decode(e,e.uint32()));break;case 63:n.showSigninButton=e.bool();break;case 65:n.proMeasureUpsellUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 66:n.proPrintUpsellUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 67:n.starDataProto=a.keyhole.dbroot.EndSnippetProto.StarDataProto.decode(e,e.uint32());break;case 68:n.feedbackUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 69:n.oauth2LoginUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;default:e.skipType(7&l)}}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.model&&e.hasOwnProperty("model")){var r=a.keyhole.dbroot.PlanetModelProto.verify(e.model);if(r)return"model."+r}if(null!=e.authServerUrl&&e.hasOwnProperty("authServerUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.authServerUrl);if(r)return"authServerUrl."+r}if(null!=e.disableAuthentication&&e.hasOwnProperty("disableAuthentication")&&"boolean"!=typeof e.disableAuthentication)return"disableAuthentication: boolean expected";if(null!=e.mfeDomains&&e.hasOwnProperty("mfeDomains")){if(!Array.isArray(e.mfeDomains))return"mfeDomains: array expected";for(var t=0;t<e.mfeDomains.length;++t){var r=a.keyhole.dbroot.MfeDomainFeaturesProto.verify(e.mfeDomains[t]);if(r)return"mfeDomains."+r}}if(null!=e.mfeLangParam&&e.hasOwnProperty("mfeLangParam")&&!n.isString(e.mfeLangParam))return"mfeLangParam: string expected";if(null!=e.adsUrlPatterns&&e.hasOwnProperty("adsUrlPatterns")&&!n.isString(e.adsUrlPatterns))return"adsUrlPatterns: string expected";if(null!=e.reverseGeocoderUrl&&e.hasOwnProperty("reverseGeocoderUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.reverseGeocoderUrl);if(r)return"reverseGeocoderUrl."+r}if(null!=e.reverseGeocoderProtocolVersion&&e.hasOwnProperty("reverseGeocoderProtocolVersion")&&!n.isInteger(e.reverseGeocoderProtocolVersion))return"reverseGeocoderProtocolVersion: integer expected";if(null!=e.skyDatabaseIsAvailable&&e.hasOwnProperty("skyDatabaseIsAvailable")&&"boolean"!=typeof e.skyDatabaseIsAvailable)return"skyDatabaseIsAvailable: boolean expected";if(null!=e.skyDatabaseUrl&&e.hasOwnProperty("skyDatabaseUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.skyDatabaseUrl);if(r)return"skyDatabaseUrl."+r}if(null!=e.defaultWebPageIntlUrl&&e.hasOwnProperty("defaultWebPageIntlUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.defaultWebPageIntlUrl);if(r)return"defaultWebPageIntlUrl."+r}if(null!=e.numStartUpTips&&e.hasOwnProperty("numStartUpTips")&&!n.isInteger(e.numStartUpTips))return"numStartUpTips: integer expected";if(null!=e.startUpTipsUrl&&e.hasOwnProperty("startUpTipsUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.startUpTipsUrl);if(r)return"startUpTipsUrl."+r}if(null!=e.numProStartUpTips&&e.hasOwnProperty("numProStartUpTips")&&!n.isInteger(e.numProStartUpTips))return"numProStartUpTips: integer expected";if(null!=e.proStartUpTipsUrl&&e.hasOwnProperty("proStartUpTipsUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.proStartUpTipsUrl);if(r)return"proStartUpTipsUrl."+r}if(null!=e.startupTipsIntlUrl&&e.hasOwnProperty("startupTipsIntlUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.startupTipsIntlUrl);if(r)return"startupTipsIntlUrl."+r}if(null!=e.userGuideIntlUrl&&e.hasOwnProperty("userGuideIntlUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.userGuideIntlUrl);if(r)return"userGuideIntlUrl."+r}if(null!=e.supportCenterIntlUrl&&e.hasOwnProperty("supportCenterIntlUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.supportCenterIntlUrl);if(r)return"supportCenterIntlUrl."+r}if(null!=e.businessListingIntlUrl&&e.hasOwnProperty("businessListingIntlUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.businessListingIntlUrl);if(r)return"businessListingIntlUrl."+r}if(null!=e.supportAnswerIntlUrl&&e.hasOwnProperty("supportAnswerIntlUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.supportAnswerIntlUrl);if(r)return"supportAnswerIntlUrl."+r}if(null!=e.supportTopicIntlUrl&&e.hasOwnProperty("supportTopicIntlUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.supportTopicIntlUrl);if(r)return"supportTopicIntlUrl."+r}if(null!=e.supportRequestIntlUrl&&e.hasOwnProperty("supportRequestIntlUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.supportRequestIntlUrl);if(r)return"supportRequestIntlUrl."+r}if(null!=e.earthIntlUrl&&e.hasOwnProperty("earthIntlUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.earthIntlUrl);if(r)return"earthIntlUrl."+r}if(null!=e.addContentUrl&&e.hasOwnProperty("addContentUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.addContentUrl);if(r)return"addContentUrl."+r}if(null!=e.sketchupNotInstalledUrl&&e.hasOwnProperty("sketchupNotInstalledUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.sketchupNotInstalledUrl);if(r)return"sketchupNotInstalledUrl."+r}if(null!=e.sketchupErrorUrl&&e.hasOwnProperty("sketchupErrorUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.sketchupErrorUrl);if(r)return"sketchupErrorUrl."+r}if(null!=e.freeLicenseUrl&&e.hasOwnProperty("freeLicenseUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.freeLicenseUrl);if(r)return"freeLicenseUrl."+r}if(null!=e.proLicenseUrl&&e.hasOwnProperty("proLicenseUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.proLicenseUrl);if(r)return"proLicenseUrl."+r}if(null!=e.tutorialUrl&&e.hasOwnProperty("tutorialUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.tutorialUrl);if(r)return"tutorialUrl."+r}if(null!=e.keyboardShortcutsUrl&&e.hasOwnProperty("keyboardShortcutsUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.keyboardShortcutsUrl);if(r)return"keyboardShortcutsUrl."+r}if(null!=e.releaseNotesUrl&&e.hasOwnProperty("releaseNotesUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.releaseNotesUrl);if(r)return"releaseNotesUrl."+r}if(null!=e.hideUserData&&e.hasOwnProperty("hideUserData")&&"boolean"!=typeof e.hideUserData)return"hideUserData: boolean expected";if(null!=e.useGeLogo&&e.hasOwnProperty("useGeLogo")&&"boolean"!=typeof e.useGeLogo)return"useGeLogo: boolean expected";if(null!=e.dioramaDescriptionUrlBase&&e.hasOwnProperty("dioramaDescriptionUrlBase")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.dioramaDescriptionUrlBase);if(r)return"dioramaDescriptionUrlBase."+r}if(null!=e.dioramaDefaultColor&&e.hasOwnProperty("dioramaDefaultColor")&&!n.isInteger(e.dioramaDefaultColor))return"dioramaDefaultColor: integer expected";if(null!=e.dioramaBlacklistUrl&&e.hasOwnProperty("dioramaBlacklistUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.dioramaBlacklistUrl);if(r)return"dioramaBlacklistUrl."+r}if(null!=e.clientOptions&&e.hasOwnProperty("clientOptions")){var r=a.keyhole.dbroot.ClientOptionsProto.verify(e.clientOptions);if(r)return"clientOptions."+r}if(null!=e.fetchingOptions&&e.hasOwnProperty("fetchingOptions")){var r=a.keyhole.dbroot.FetchingOptionsProto.verify(e.fetchingOptions);if(r)return"fetchingOptions."+r}if(null!=e.timeMachineOptions&&e.hasOwnProperty("timeMachineOptions")){var r=a.keyhole.dbroot.TimeMachineOptionsProto.verify(e.timeMachineOptions);if(r)return"timeMachineOptions."+r}if(null!=e.csiOptions&&e.hasOwnProperty("csiOptions")){var r=a.keyhole.dbroot.CSIOptionsProto.verify(e.csiOptions);if(r)return"csiOptions."+r}if(null!=e.searchTab&&e.hasOwnProperty("searchTab")){if(!Array.isArray(e.searchTab))return"searchTab: array expected";for(var t=0;t<e.searchTab.length;++t){var r=a.keyhole.dbroot.SearchTabProto.verify(e.searchTab[t]);if(r)return"searchTab."+r}}if(null!=e.cobrandInfo&&e.hasOwnProperty("cobrandInfo")){if(!Array.isArray(e.cobrandInfo))return"cobrandInfo: array expected";for(var t=0;t<e.cobrandInfo.length;++t){var r=a.keyhole.dbroot.CobrandProto.verify(e.cobrandInfo[t]);if(r)return"cobrandInfo."+r}}if(null!=e.validDatabase&&e.hasOwnProperty("validDatabase")){if(!Array.isArray(e.validDatabase))return"validDatabase: array expected";for(var t=0;t<e.validDatabase.length;++t){var r=a.keyhole.dbroot.DatabaseDescriptionProto.verify(e.validDatabase[t]);if(r)return"validDatabase."+r}}if(null!=e.configScript&&e.hasOwnProperty("configScript")){if(!Array.isArray(e.configScript))return"configScript: array expected";for(var t=0;t<e.configScript.length;++t){var r=a.keyhole.dbroot.ConfigScriptProto.verify(e.configScript[t]);if(r)return"configScript."+r}}if(null!=e.deauthServerUrl&&e.hasOwnProperty("deauthServerUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.deauthServerUrl);if(r)return"deauthServerUrl."+r}if(null!=e.swoopParameters&&e.hasOwnProperty("swoopParameters")){var r=a.keyhole.dbroot.SwoopParamsProto.verify(e.swoopParameters);if(r)return"swoopParameters."+r}if(null!=e.bbsServerInfo&&e.hasOwnProperty("bbsServerInfo")){var r=a.keyhole.dbroot.PostingServerProto.verify(e.bbsServerInfo);if(r)return"bbsServerInfo."+r}if(null!=e.dataErrorServerInfo&&e.hasOwnProperty("dataErrorServerInfo")){var r=a.keyhole.dbroot.PostingServerProto.verify(e.dataErrorServerInfo);if(r)return"dataErrorServerInfo."+r}if(null!=e.planetaryDatabase&&e.hasOwnProperty("planetaryDatabase")){if(!Array.isArray(e.planetaryDatabase))return"planetaryDatabase: array expected";for(var t=0;t<e.planetaryDatabase.length;++t){var r=a.keyhole.dbroot.PlanetaryDatabaseProto.verify(e.planetaryDatabase[t]);if(r)return"planetaryDatabase."+r}}if(null!=e.logServer&&e.hasOwnProperty("logServer")){var r=a.keyhole.dbroot.LogServerProto.verify(e.logServer);if(r)return"logServer."+r}if(null!=e.autopiaOptions&&e.hasOwnProperty("autopiaOptions")){var r=a.keyhole.dbroot.AutopiaOptionsProto.verify(e.autopiaOptions);if(r)return"autopiaOptions."+r}if(null!=e.searchConfig&&e.hasOwnProperty("searchConfig")){var r=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.verify(e.searchConfig);if(r)return"searchConfig."+r}if(null!=e.searchInfo&&e.hasOwnProperty("searchInfo")){var r=a.keyhole.dbroot.EndSnippetProto.SearchInfoProto.verify(e.searchInfo);if(r)return"searchInfo."+r}if(null!=e.elevationServiceBaseUrl&&e.hasOwnProperty("elevationServiceBaseUrl")&&!n.isString(e.elevationServiceBaseUrl))return"elevationServiceBaseUrl: string expected";if(null!=e.elevationProfileQueryDelay&&e.hasOwnProperty("elevationProfileQueryDelay")&&!n.isInteger(e.elevationProfileQueryDelay))return"elevationProfileQueryDelay: integer expected";if(null!=e.proUpgradeUrl&&e.hasOwnProperty("proUpgradeUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.proUpgradeUrl);if(r)return"proUpgradeUrl."+r}if(null!=e.earthCommunityUrl&&e.hasOwnProperty("earthCommunityUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.earthCommunityUrl);if(r)return"earthCommunityUrl."+r}if(null!=e.googleMapsUrl&&e.hasOwnProperty("googleMapsUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.googleMapsUrl);if(r)return"googleMapsUrl."+r}if(null!=e.sharingUrl&&e.hasOwnProperty("sharingUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.sharingUrl);if(r)return"sharingUrl."+r}if(null!=e.privacyPolicyUrl&&e.hasOwnProperty("privacyPolicyUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.privacyPolicyUrl);if(r)return"privacyPolicyUrl."+r}if(null!=e.doGplusUserCheck&&e.hasOwnProperty("doGplusUserCheck")&&"boolean"!=typeof e.doGplusUserCheck)return"doGplusUserCheck: boolean expected";if(null!=e.rocktreeDataProto&&e.hasOwnProperty("rocktreeDataProto")){var r=a.keyhole.dbroot.EndSnippetProto.RockTreeDataProto.verify(e.rocktreeDataProto);if(r)return"rocktreeDataProto."+r}if(null!=e.filmstripConfig&&e.hasOwnProperty("filmstripConfig")){if(!Array.isArray(e.filmstripConfig))return"filmstripConfig: array expected";for(var t=0;t<e.filmstripConfig.length;++t){var r=a.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.verify(e.filmstripConfig[t]);if(r)return"filmstripConfig."+r}}if(null!=e.showSigninButton&&e.hasOwnProperty("showSigninButton")&&"boolean"!=typeof e.showSigninButton)return"showSigninButton: boolean expected";if(null!=e.proMeasureUpsellUrl&&e.hasOwnProperty("proMeasureUpsellUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.proMeasureUpsellUrl);if(r)return"proMeasureUpsellUrl."+r}if(null!=e.proPrintUpsellUrl&&e.hasOwnProperty("proPrintUpsellUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.proPrintUpsellUrl);if(r)return"proPrintUpsellUrl."+r}if(null!=e.starDataProto&&e.hasOwnProperty("starDataProto")){var r=a.keyhole.dbroot.EndSnippetProto.StarDataProto.verify(e.starDataProto);if(r)return"starDataProto."+r}if(null!=e.feedbackUrl&&e.hasOwnProperty("feedbackUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.feedbackUrl);if(r)return"feedbackUrl."+r}if(null!=e.oauth2LoginUrl&&e.hasOwnProperty("oauth2LoginUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.oauth2LoginUrl);if(r)return"oauth2LoginUrl."+r}return null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.EndSnippetProto)return e;var r=new a.keyhole.dbroot.EndSnippetProto;if(null!=e.model){if("object"!=typeof e.model)throw TypeError(".keyhole.dbroot.EndSnippetProto.model: object expected");r.model=a.keyhole.dbroot.PlanetModelProto.fromObject(e.model)}if(null!=e.authServerUrl){if("object"!=typeof e.authServerUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.authServerUrl: object expected");r.authServerUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.authServerUrl)}if(null!=e.disableAuthentication&&(r.disableAuthentication=!!e.disableAuthentication),e.mfeDomains){if(!Array.isArray(e.mfeDomains))throw TypeError(".keyhole.dbroot.EndSnippetProto.mfeDomains: array expected");r.mfeDomains=[];for(var t=0;t<e.mfeDomains.length;++t){if("object"!=typeof e.mfeDomains[t])throw TypeError(".keyhole.dbroot.EndSnippetProto.mfeDomains: object expected");r.mfeDomains[t]=a.keyhole.dbroot.MfeDomainFeaturesProto.fromObject(e.mfeDomains[t])}}if(null!=e.mfeLangParam&&(r.mfeLangParam=String(e.mfeLangParam)),null!=e.adsUrlPatterns&&(r.adsUrlPatterns=String(e.adsUrlPatterns)),null!=e.reverseGeocoderUrl){if("object"!=typeof e.reverseGeocoderUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.reverseGeocoderUrl: object expected");r.reverseGeocoderUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.reverseGeocoderUrl)}if(null!=e.reverseGeocoderProtocolVersion&&(r.reverseGeocoderProtocolVersion=0|e.reverseGeocoderProtocolVersion),null!=e.skyDatabaseIsAvailable&&(r.skyDatabaseIsAvailable=!!e.skyDatabaseIsAvailable),null!=e.skyDatabaseUrl){if("object"!=typeof e.skyDatabaseUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.skyDatabaseUrl: object expected");r.skyDatabaseUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.skyDatabaseUrl)}if(null!=e.defaultWebPageIntlUrl){if("object"!=typeof e.defaultWebPageIntlUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.defaultWebPageIntlUrl: object expected");r.defaultWebPageIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.defaultWebPageIntlUrl)}if(null!=e.numStartUpTips&&(r.numStartUpTips=0|e.numStartUpTips),null!=e.startUpTipsUrl){if("object"!=typeof e.startUpTipsUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.startUpTipsUrl: object expected");r.startUpTipsUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.startUpTipsUrl)}if(null!=e.numProStartUpTips&&(r.numProStartUpTips=0|e.numProStartUpTips),null!=e.proStartUpTipsUrl){if("object"!=typeof e.proStartUpTipsUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.proStartUpTipsUrl: object expected");r.proStartUpTipsUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.proStartUpTipsUrl)}if(null!=e.startupTipsIntlUrl){if("object"!=typeof e.startupTipsIntlUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.startupTipsIntlUrl: object expected");r.startupTipsIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.startupTipsIntlUrl)}if(null!=e.userGuideIntlUrl){if("object"!=typeof e.userGuideIntlUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.userGuideIntlUrl: object expected");r.userGuideIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.userGuideIntlUrl)}if(null!=e.supportCenterIntlUrl){if("object"!=typeof e.supportCenterIntlUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.supportCenterIntlUrl: object expected");r.supportCenterIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.supportCenterIntlUrl)}if(null!=e.businessListingIntlUrl){if("object"!=typeof e.businessListingIntlUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.businessListingIntlUrl: object expected");r.businessListingIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.businessListingIntlUrl)}if(null!=e.supportAnswerIntlUrl){if("object"!=typeof e.supportAnswerIntlUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.supportAnswerIntlUrl: object expected");r.supportAnswerIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.supportAnswerIntlUrl)}if(null!=e.supportTopicIntlUrl){if("object"!=typeof e.supportTopicIntlUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.supportTopicIntlUrl: object expected");r.supportTopicIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.supportTopicIntlUrl)}if(null!=e.supportRequestIntlUrl){if("object"!=typeof e.supportRequestIntlUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.supportRequestIntlUrl: object expected");r.supportRequestIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.supportRequestIntlUrl)}if(null!=e.earthIntlUrl){if("object"!=typeof e.earthIntlUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.earthIntlUrl: object expected");r.earthIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.earthIntlUrl)}if(null!=e.addContentUrl){if("object"!=typeof e.addContentUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.addContentUrl: object expected");r.addContentUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.addContentUrl)}if(null!=e.sketchupNotInstalledUrl){if("object"!=typeof e.sketchupNotInstalledUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.sketchupNotInstalledUrl: object expected");r.sketchupNotInstalledUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.sketchupNotInstalledUrl)}if(null!=e.sketchupErrorUrl){if("object"!=typeof e.sketchupErrorUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.sketchupErrorUrl: object expected");r.sketchupErrorUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.sketchupErrorUrl)}if(null!=e.freeLicenseUrl){if("object"!=typeof e.freeLicenseUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.freeLicenseUrl: object expected");r.freeLicenseUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.freeLicenseUrl)}if(null!=e.proLicenseUrl){if("object"!=typeof e.proLicenseUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.proLicenseUrl: object expected");r.proLicenseUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.proLicenseUrl)}if(null!=e.tutorialUrl){if("object"!=typeof e.tutorialUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.tutorialUrl: object expected");r.tutorialUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.tutorialUrl)}if(null!=e.keyboardShortcutsUrl){if("object"!=typeof e.keyboardShortcutsUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.keyboardShortcutsUrl: object expected");r.keyboardShortcutsUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.keyboardShortcutsUrl)}if(null!=e.releaseNotesUrl){if("object"!=typeof e.releaseNotesUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.releaseNotesUrl: object expected");r.releaseNotesUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.releaseNotesUrl)}if(null!=e.hideUserData&&(r.hideUserData=!!e.hideUserData),null!=e.useGeLogo&&(r.useGeLogo=!!e.useGeLogo),null!=e.dioramaDescriptionUrlBase){if("object"!=typeof e.dioramaDescriptionUrlBase)throw TypeError(".keyhole.dbroot.EndSnippetProto.dioramaDescriptionUrlBase: object expected");r.dioramaDescriptionUrlBase=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.dioramaDescriptionUrlBase)}if(null!=e.dioramaDefaultColor&&(r.dioramaDefaultColor=e.dioramaDefaultColor>>>0),null!=e.dioramaBlacklistUrl){if("object"!=typeof e.dioramaBlacklistUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.dioramaBlacklistUrl: object expected");r.dioramaBlacklistUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.dioramaBlacklistUrl)}if(null!=e.clientOptions){if("object"!=typeof e.clientOptions)throw TypeError(".keyhole.dbroot.EndSnippetProto.clientOptions: object expected");r.clientOptions=a.keyhole.dbroot.ClientOptionsProto.fromObject(e.clientOptions)}if(null!=e.fetchingOptions){if("object"!=typeof e.fetchingOptions)throw TypeError(".keyhole.dbroot.EndSnippetProto.fetchingOptions: object expected");r.fetchingOptions=a.keyhole.dbroot.FetchingOptionsProto.fromObject(e.fetchingOptions)}if(null!=e.timeMachineOptions){if("object"!=typeof e.timeMachineOptions)throw TypeError(".keyhole.dbroot.EndSnippetProto.timeMachineOptions: object expected");r.timeMachineOptions=a.keyhole.dbroot.TimeMachineOptionsProto.fromObject(e.timeMachineOptions)}if(null!=e.csiOptions){if("object"!=typeof e.csiOptions)throw TypeError(".keyhole.dbroot.EndSnippetProto.csiOptions: object expected");r.csiOptions=a.keyhole.dbroot.CSIOptionsProto.fromObject(e.csiOptions)}if(e.searchTab){if(!Array.isArray(e.searchTab))throw TypeError(".keyhole.dbroot.EndSnippetProto.searchTab: array expected");r.searchTab=[];for(var t=0;t<e.searchTab.length;++t){if("object"!=typeof e.searchTab[t])throw TypeError(".keyhole.dbroot.EndSnippetProto.searchTab: object expected");r.searchTab[t]=a.keyhole.dbroot.SearchTabProto.fromObject(e.searchTab[t])}}if(e.cobrandInfo){if(!Array.isArray(e.cobrandInfo))throw TypeError(".keyhole.dbroot.EndSnippetProto.cobrandInfo: array expected");r.cobrandInfo=[];for(var t=0;t<e.cobrandInfo.length;++t){if("object"!=typeof e.cobrandInfo[t])throw TypeError(".keyhole.dbroot.EndSnippetProto.cobrandInfo: object expected");r.cobrandInfo[t]=a.keyhole.dbroot.CobrandProto.fromObject(e.cobrandInfo[t])}}if(e.validDatabase){if(!Array.isArray(e.validDatabase))throw TypeError(".keyhole.dbroot.EndSnippetProto.validDatabase: array expected");r.validDatabase=[];for(var t=0;t<e.validDatabase.length;++t){if("object"!=typeof e.validDatabase[t])throw TypeError(".keyhole.dbroot.EndSnippetProto.validDatabase: object expected");r.validDatabase[t]=a.keyhole.dbroot.DatabaseDescriptionProto.fromObject(e.validDatabase[t])}}if(e.configScript){if(!Array.isArray(e.configScript))throw TypeError(".keyhole.dbroot.EndSnippetProto.configScript: array expected");r.configScript=[];for(var t=0;t<e.configScript.length;++t){if("object"!=typeof e.configScript[t])throw TypeError(".keyhole.dbroot.EndSnippetProto.configScript: object expected");r.configScript[t]=a.keyhole.dbroot.ConfigScriptProto.fromObject(e.configScript[t])}}if(null!=e.deauthServerUrl){if("object"!=typeof e.deauthServerUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.deauthServerUrl: object expected");r.deauthServerUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.deauthServerUrl)}if(null!=e.swoopParameters){if("object"!=typeof e.swoopParameters)throw TypeError(".keyhole.dbroot.EndSnippetProto.swoopParameters: object expected");r.swoopParameters=a.keyhole.dbroot.SwoopParamsProto.fromObject(e.swoopParameters)}if(null!=e.bbsServerInfo){if("object"!=typeof e.bbsServerInfo)throw TypeError(".keyhole.dbroot.EndSnippetProto.bbsServerInfo: object expected");r.bbsServerInfo=a.keyhole.dbroot.PostingServerProto.fromObject(e.bbsServerInfo)}if(null!=e.dataErrorServerInfo){if("object"!=typeof e.dataErrorServerInfo)throw TypeError(".keyhole.dbroot.EndSnippetProto.dataErrorServerInfo: object expected");r.dataErrorServerInfo=a.keyhole.dbroot.PostingServerProto.fromObject(e.dataErrorServerInfo)}if(e.planetaryDatabase){if(!Array.isArray(e.planetaryDatabase))throw TypeError(".keyhole.dbroot.EndSnippetProto.planetaryDatabase: array expected");r.planetaryDatabase=[];for(var t=0;t<e.planetaryDatabase.length;++t){if("object"!=typeof e.planetaryDatabase[t])throw TypeError(".keyhole.dbroot.EndSnippetProto.planetaryDatabase: object expected");r.planetaryDatabase[t]=a.keyhole.dbroot.PlanetaryDatabaseProto.fromObject(e.planetaryDatabase[t])}}if(null!=e.logServer){if("object"!=typeof e.logServer)throw TypeError(".keyhole.dbroot.EndSnippetProto.logServer: object expected");r.logServer=a.keyhole.dbroot.LogServerProto.fromObject(e.logServer)}if(null!=e.autopiaOptions){if("object"!=typeof e.autopiaOptions)throw TypeError(".keyhole.dbroot.EndSnippetProto.autopiaOptions: object expected");r.autopiaOptions=a.keyhole.dbroot.AutopiaOptionsProto.fromObject(e.autopiaOptions)}if(null!=e.searchConfig){if("object"!=typeof e.searchConfig)throw TypeError(".keyhole.dbroot.EndSnippetProto.searchConfig: object expected");r.searchConfig=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.fromObject(e.searchConfig)}if(null!=e.searchInfo){if("object"!=typeof e.searchInfo)throw TypeError(".keyhole.dbroot.EndSnippetProto.searchInfo: object expected");r.searchInfo=a.keyhole.dbroot.EndSnippetProto.SearchInfoProto.fromObject(e.searchInfo)}if(null!=e.elevationServiceBaseUrl&&(r.elevationServiceBaseUrl=String(e.elevationServiceBaseUrl)),null!=e.elevationProfileQueryDelay&&(r.elevationProfileQueryDelay=0|e.elevationProfileQueryDelay),null!=e.proUpgradeUrl){if("object"!=typeof e.proUpgradeUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.proUpgradeUrl: object expected");r.proUpgradeUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.proUpgradeUrl)}if(null!=e.earthCommunityUrl){if("object"!=typeof e.earthCommunityUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.earthCommunityUrl: object expected");r.earthCommunityUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.earthCommunityUrl)}if(null!=e.googleMapsUrl){if("object"!=typeof e.googleMapsUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.googleMapsUrl: object expected");r.googleMapsUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.googleMapsUrl)}if(null!=e.sharingUrl){if("object"!=typeof e.sharingUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.sharingUrl: object expected");r.sharingUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.sharingUrl)}if(null!=e.privacyPolicyUrl){if("object"!=typeof e.privacyPolicyUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.privacyPolicyUrl: object expected");r.privacyPolicyUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.privacyPolicyUrl)}if(null!=e.doGplusUserCheck&&(r.doGplusUserCheck=!!e.doGplusUserCheck),null!=e.rocktreeDataProto){if("object"!=typeof e.rocktreeDataProto)throw TypeError(".keyhole.dbroot.EndSnippetProto.rocktreeDataProto: object expected");r.rocktreeDataProto=a.keyhole.dbroot.EndSnippetProto.RockTreeDataProto.fromObject(e.rocktreeDataProto)}if(e.filmstripConfig){if(!Array.isArray(e.filmstripConfig))throw TypeError(".keyhole.dbroot.EndSnippetProto.filmstripConfig: array expected");r.filmstripConfig=[];for(var t=0;t<e.filmstripConfig.length;++t){if("object"!=typeof e.filmstripConfig[t])throw TypeError(".keyhole.dbroot.EndSnippetProto.filmstripConfig: object expected");r.filmstripConfig[t]=a.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.fromObject(e.filmstripConfig[t])}}if(null!=e.showSigninButton&&(r.showSigninButton=!!e.showSigninButton),null!=e.proMeasureUpsellUrl){if("object"!=typeof e.proMeasureUpsellUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.proMeasureUpsellUrl: object expected");r.proMeasureUpsellUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.proMeasureUpsellUrl)}if(null!=e.proPrintUpsellUrl){if("object"!=typeof e.proPrintUpsellUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.proPrintUpsellUrl: object expected");r.proPrintUpsellUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.proPrintUpsellUrl)}if(null!=e.starDataProto){if("object"!=typeof e.starDataProto)throw TypeError(".keyhole.dbroot.EndSnippetProto.starDataProto: object expected");r.starDataProto=a.keyhole.dbroot.EndSnippetProto.StarDataProto.fromObject(e.starDataProto)}if(null!=e.feedbackUrl){if("object"!=typeof e.feedbackUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.feedbackUrl: object expected");r.feedbackUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.feedbackUrl)}if(null!=e.oauth2LoginUrl){if("object"!=typeof e.oauth2LoginUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.oauth2LoginUrl: object expected");r.oauth2LoginUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.oauth2LoginUrl)}return r},r.toObject=function(e,r){r||(r={});var t={};if((r.arrays||r.defaults)&&(t.mfeDomains=[],t.searchTab=[],t.cobrandInfo=[],t.validDatabase=[],t.configScript=[],t.planetaryDatabase=[],t.filmstripConfig=[]),r.defaults&&(t.model=null,t.authServerUrl=null,t.disableAuthentication=!1,t.mfeLangParam="hl=$5Bhl5D",t.adsUrlPatterns="",t.reverseGeocoderUrl=null,t.reverseGeocoderProtocolVersion=3,t.skyDatabaseIsAvailable=!0,t.skyDatabaseUrl=null,t.defaultWebPageIntlUrl=null,t.numStartUpTips=17,t.startUpTipsUrl=null,t.userGuideIntlUrl=null,t.supportCenterIntlUrl=null,t.businessListingIntlUrl=null,t.supportAnswerIntlUrl=null,t.supportTopicIntlUrl=null,t.supportRequestIntlUrl=null,t.earthIntlUrl=null,t.addContentUrl=null,t.sketchupNotInstalledUrl=null,t.sketchupErrorUrl=null,t.freeLicenseUrl=null,t.proLicenseUrl=null,t.hideUserData=!1,t.useGeLogo=!0,t.dioramaDescriptionUrlBase=null,t.dioramaDefaultColor=4291281607,t.clientOptions=null,t.fetchingOptions=null,t.timeMachineOptions=null,t.csiOptions=null,t.deauthServerUrl=null,t.swoopParameters=null,t.bbsServerInfo=null,t.dataErrorServerInfo=null,t.logServer=null,t.autopiaOptions=null,t.searchInfo=null,t.elevationServiceBaseUrl="http://maps.google.com/maps/api/elevation/",t.elevationProfileQueryDelay=500,t.tutorialUrl=null,t.keyboardShortcutsUrl=null,t.releaseNotesUrl=null,t.numProStartUpTips=0,t.proStartUpTipsUrl=null,t.dioramaBlacklistUrl=null,t.searchConfig=null,t.proUpgradeUrl=null,t.earthCommunityUrl=null,t.googleMapsUrl=null,t.sharingUrl=null,t.privacyPolicyUrl=null,t.doGplusUserCheck=!1,t.rocktreeDataProto=null,t.showSigninButton=!1,t.startupTipsIntlUrl=null,t.proMeasureUpsellUrl=null,t.proPrintUpsellUrl=null,t.starDataProto=null,t.feedbackUrl=null,t.oauth2LoginUrl=null),null!=e.model&&e.hasOwnProperty("model")&&(t.model=a.keyhole.dbroot.PlanetModelProto.toObject(e.model,r)),null!=e.authServerUrl&&e.hasOwnProperty("authServerUrl")&&(t.authServerUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.authServerUrl,r)),null!=e.disableAuthentication&&e.hasOwnProperty("disableAuthentication")&&(t.disableAuthentication=e.disableAuthentication),e.mfeDomains&&e.mfeDomains.length){t.mfeDomains=[];for(var o=0;o<e.mfeDomains.length;++o)t.mfeDomains[o]=a.keyhole.dbroot.MfeDomainFeaturesProto.toObject(e.mfeDomains[o],r)}if(null!=e.mfeLangParam&&e.hasOwnProperty("mfeLangParam")&&(t.mfeLangParam=e.mfeLangParam),null!=e.adsUrlPatterns&&e.hasOwnProperty("adsUrlPatterns")&&(t.adsUrlPatterns=e.adsUrlPatterns),null!=e.reverseGeocoderUrl&&e.hasOwnProperty("reverseGeocoderUrl")&&(t.reverseGeocoderUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.reverseGeocoderUrl,r)),null!=e.reverseGeocoderProtocolVersion&&e.hasOwnProperty("reverseGeocoderProtocolVersion")&&(t.reverseGeocoderProtocolVersion=e.reverseGeocoderProtocolVersion),null!=e.skyDatabaseIsAvailable&&e.hasOwnProperty("skyDatabaseIsAvailable")&&(t.skyDatabaseIsAvailable=e.skyDatabaseIsAvailable),null!=e.skyDatabaseUrl&&e.hasOwnProperty("skyDatabaseUrl")&&(t.skyDatabaseUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.skyDatabaseUrl,r)),null!=e.defaultWebPageIntlUrl&&e.hasOwnProperty("defaultWebPageIntlUrl")&&(t.defaultWebPageIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.defaultWebPageIntlUrl,r)),null!=e.numStartUpTips&&e.hasOwnProperty("numStartUpTips")&&(t.numStartUpTips=e.numStartUpTips),null!=e.startUpTipsUrl&&e.hasOwnProperty("startUpTipsUrl")&&(t.startUpTipsUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.startUpTipsUrl,r)),null!=e.userGuideIntlUrl&&e.hasOwnProperty("userGuideIntlUrl")&&(t.userGuideIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.userGuideIntlUrl,r)),null!=e.supportCenterIntlUrl&&e.hasOwnProperty("supportCenterIntlUrl")&&(t.supportCenterIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.supportCenterIntlUrl,r)),null!=e.businessListingIntlUrl&&e.hasOwnProperty("businessListingIntlUrl")&&(t.businessListingIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.businessListingIntlUrl,r)),null!=e.supportAnswerIntlUrl&&e.hasOwnProperty("supportAnswerIntlUrl")&&(t.supportAnswerIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.supportAnswerIntlUrl,r)),null!=e.supportTopicIntlUrl&&e.hasOwnProperty("supportTopicIntlUrl")&&(t.supportTopicIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.supportTopicIntlUrl,r)),null!=e.supportRequestIntlUrl&&e.hasOwnProperty("supportRequestIntlUrl")&&(t.supportRequestIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.supportRequestIntlUrl,r)),null!=e.earthIntlUrl&&e.hasOwnProperty("earthIntlUrl")&&(t.earthIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.earthIntlUrl,r)),null!=e.addContentUrl&&e.hasOwnProperty("addContentUrl")&&(t.addContentUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.addContentUrl,r)),null!=e.sketchupNotInstalledUrl&&e.hasOwnProperty("sketchupNotInstalledUrl")&&(t.sketchupNotInstalledUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.sketchupNotInstalledUrl,r)),null!=e.sketchupErrorUrl&&e.hasOwnProperty("sketchupErrorUrl")&&(t.sketchupErrorUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.sketchupErrorUrl,r)),null!=e.freeLicenseUrl&&e.hasOwnProperty("freeLicenseUrl")&&(t.freeLicenseUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.freeLicenseUrl,r)),null!=e.proLicenseUrl&&e.hasOwnProperty("proLicenseUrl")&&(t.proLicenseUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.proLicenseUrl,r)),null!=e.hideUserData&&e.hasOwnProperty("hideUserData")&&(t.hideUserData=e.hideUserData),null!=e.useGeLogo&&e.hasOwnProperty("useGeLogo")&&(t.useGeLogo=e.useGeLogo),null!=e.dioramaDescriptionUrlBase&&e.hasOwnProperty("dioramaDescriptionUrlBase")&&(t.dioramaDescriptionUrlBase=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.dioramaDescriptionUrlBase,r)),null!=e.dioramaDefaultColor&&e.hasOwnProperty("dioramaDefaultColor")&&(t.dioramaDefaultColor=e.dioramaDefaultColor),null!=e.clientOptions&&e.hasOwnProperty("clientOptions")&&(t.clientOptions=a.keyhole.dbroot.ClientOptionsProto.toObject(e.clientOptions,r)),null!=e.fetchingOptions&&e.hasOwnProperty("fetchingOptions")&&(t.fetchingOptions=a.keyhole.dbroot.FetchingOptionsProto.toObject(e.fetchingOptions,r)),null!=e.timeMachineOptions&&e.hasOwnProperty("timeMachineOptions")&&(t.timeMachineOptions=a.keyhole.dbroot.TimeMachineOptionsProto.toObject(e.timeMachineOptions,r)),null!=e.csiOptions&&e.hasOwnProperty("csiOptions")&&(t.csiOptions=a.keyhole.dbroot.CSIOptionsProto.toObject(e.csiOptions,r)),e.searchTab&&e.searchTab.length){t.searchTab=[];for(var o=0;o<e.searchTab.length;++o)t.searchTab[o]=a.keyhole.dbroot.SearchTabProto.toObject(e.searchTab[o],r)}if(e.cobrandInfo&&e.cobrandInfo.length){t.cobrandInfo=[];for(var o=0;o<e.cobrandInfo.length;++o)t.cobrandInfo[o]=a.keyhole.dbroot.CobrandProto.toObject(e.cobrandInfo[o],r)}if(e.validDatabase&&e.validDatabase.length){t.validDatabase=[];for(var o=0;o<e.validDatabase.length;++o)t.validDatabase[o]=a.keyhole.dbroot.DatabaseDescriptionProto.toObject(e.validDatabase[o],r)}if(e.configScript&&e.configScript.length){t.configScript=[];for(var o=0;o<e.configScript.length;++o)t.configScript[o]=a.keyhole.dbroot.ConfigScriptProto.toObject(e.configScript[o],r)}if(null!=e.deauthServerUrl&&e.hasOwnProperty("deauthServerUrl")&&(t.deauthServerUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.deauthServerUrl,r)),null!=e.swoopParameters&&e.hasOwnProperty("swoopParameters")&&(t.swoopParameters=a.keyhole.dbroot.SwoopParamsProto.toObject(e.swoopParameters,r)),null!=e.bbsServerInfo&&e.hasOwnProperty("bbsServerInfo")&&(t.bbsServerInfo=a.keyhole.dbroot.PostingServerProto.toObject(e.bbsServerInfo,r)),null!=e.dataErrorServerInfo&&e.hasOwnProperty("dataErrorServerInfo")&&(t.dataErrorServerInfo=a.keyhole.dbroot.PostingServerProto.toObject(e.dataErrorServerInfo,r)),e.planetaryDatabase&&e.planetaryDatabase.length){t.planetaryDatabase=[];for(var o=0;o<e.planetaryDatabase.length;++o)t.planetaryDatabase[o]=a.keyhole.dbroot.PlanetaryDatabaseProto.toObject(e.planetaryDatabase[o],r)}if(null!=e.logServer&&e.hasOwnProperty("logServer")&&(t.logServer=a.keyhole.dbroot.LogServerProto.toObject(e.logServer,r)),null!=e.autopiaOptions&&e.hasOwnProperty("autopiaOptions")&&(t.autopiaOptions=a.keyhole.dbroot.AutopiaOptionsProto.toObject(e.autopiaOptions,r)),null!=e.searchInfo&&e.hasOwnProperty("searchInfo")&&(t.searchInfo=a.keyhole.dbroot.EndSnippetProto.SearchInfoProto.toObject(e.searchInfo,r)),null!=e.elevationServiceBaseUrl&&e.hasOwnProperty("elevationServiceBaseUrl")&&(t.elevationServiceBaseUrl=e.elevationServiceBaseUrl),null!=e.elevationProfileQueryDelay&&e.hasOwnProperty("elevationProfileQueryDelay")&&(t.elevationProfileQueryDelay=e.elevationProfileQueryDelay),null!=e.tutorialUrl&&e.hasOwnProperty("tutorialUrl")&&(t.tutorialUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.tutorialUrl,r)),null!=e.keyboardShortcutsUrl&&e.hasOwnProperty("keyboardShortcutsUrl")&&(t.keyboardShortcutsUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.keyboardShortcutsUrl,r)),null!=e.releaseNotesUrl&&e.hasOwnProperty("releaseNotesUrl")&&(t.releaseNotesUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.releaseNotesUrl,r)),null!=e.numProStartUpTips&&e.hasOwnProperty("numProStartUpTips")&&(t.numProStartUpTips=e.numProStartUpTips),null!=e.proStartUpTipsUrl&&e.hasOwnProperty("proStartUpTipsUrl")&&(t.proStartUpTipsUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.proStartUpTipsUrl,r)),null!=e.dioramaBlacklistUrl&&e.hasOwnProperty("dioramaBlacklistUrl")&&(t.dioramaBlacklistUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.dioramaBlacklistUrl,r)),null!=e.searchConfig&&e.hasOwnProperty("searchConfig")&&(t.searchConfig=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.toObject(e.searchConfig,r)),null!=e.proUpgradeUrl&&e.hasOwnProperty("proUpgradeUrl")&&(t.proUpgradeUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.proUpgradeUrl,r)),null!=e.earthCommunityUrl&&e.hasOwnProperty("earthCommunityUrl")&&(t.earthCommunityUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.earthCommunityUrl,r)),null!=e.googleMapsUrl&&e.hasOwnProperty("googleMapsUrl")&&(t.googleMapsUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.googleMapsUrl,r)),null!=e.sharingUrl&&e.hasOwnProperty("sharingUrl")&&(t.sharingUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.sharingUrl,r)),null!=e.privacyPolicyUrl&&e.hasOwnProperty("privacyPolicyUrl")&&(t.privacyPolicyUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.privacyPolicyUrl,r)),null!=e.doGplusUserCheck&&e.hasOwnProperty("doGplusUserCheck")&&(t.doGplusUserCheck=e.doGplusUserCheck),null!=e.rocktreeDataProto&&e.hasOwnProperty("rocktreeDataProto")&&(t.rocktreeDataProto=a.keyhole.dbroot.EndSnippetProto.RockTreeDataProto.toObject(e.rocktreeDataProto,r)),e.filmstripConfig&&e.filmstripConfig.length){t.filmstripConfig=[];for(var o=0;o<e.filmstripConfig.length;++o)t.filmstripConfig[o]=a.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.toObject(e.filmstripConfig[o],r)}return null!=e.showSigninButton&&e.hasOwnProperty("showSigninButton")&&(t.showSigninButton=e.showSigninButton),null!=e.startupTipsIntlUrl&&e.hasOwnProperty("startupTipsIntlUrl")&&(t.startupTipsIntlUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.startupTipsIntlUrl,r)),null!=e.proMeasureUpsellUrl&&e.hasOwnProperty("proMeasureUpsellUrl")&&(t.proMeasureUpsellUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.proMeasureUpsellUrl,r)),null!=e.proPrintUpsellUrl&&e.hasOwnProperty("proPrintUpsellUrl")&&(t.proPrintUpsellUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.proPrintUpsellUrl,r)),null!=e.starDataProto&&e.hasOwnProperty("starDataProto")&&(t.starDataProto=a.keyhole.dbroot.EndSnippetProto.StarDataProto.toObject(e.starDataProto,r)),null!=e.feedbackUrl&&e.hasOwnProperty("feedbackUrl")&&(t.feedbackUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.feedbackUrl,r)),null!=e.oauth2LoginUrl&&e.hasOwnProperty("oauth2LoginUrl")&&(t.oauth2LoginUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.oauth2LoginUrl,r)),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.EndSnippetProto"},r.SearchConfigProto=function(){function r(e){if(this.searchServer=[],this.oneboxService=[],e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.searchServer=n.emptyArray,r.prototype.oneboxService=n.emptyArray,r.prototype.kmlSearchUrl=null,r.prototype.kmlRenderUrl=null,r.prototype.searchHistoryUrl=null,r.prototype.errorPageUrl=null,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.EndSnippetProto.SearchConfigProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.searchServer&&n.searchServer.length||(n.searchServer=[]),n.searchServer.push(a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.decode(e,e.uint32()));break;case 2:n.oneboxService&&n.oneboxService.length||(n.oneboxService=[]),n.oneboxService.push(a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto.decode(e,e.uint32()));break;case 3:n.kmlSearchUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 4:n.kmlRenderUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 6:n.searchHistoryUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 5:n.errorPageUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;default:e.skipType(7&l)}}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.searchServer&&e.hasOwnProperty("searchServer")){if(!Array.isArray(e.searchServer))return"searchServer: array expected";for(var r=0;r<e.searchServer.length;++r){var t=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.verify(e.searchServer[r]);if(t)return"searchServer."+t}}if(null!=e.oneboxService&&e.hasOwnProperty("oneboxService")){if(!Array.isArray(e.oneboxService))return"oneboxService: array expected";for(var r=0;r<e.oneboxService.length;++r){var t=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto.verify(e.oneboxService[r]);if(t)return"oneboxService."+t}}if(null!=e.kmlSearchUrl&&e.hasOwnProperty("kmlSearchUrl")){var t=a.keyhole.dbroot.StringIdOrValueProto.verify(e.kmlSearchUrl);if(t)return"kmlSearchUrl."+t}if(null!=e.kmlRenderUrl&&e.hasOwnProperty("kmlRenderUrl")){var t=a.keyhole.dbroot.StringIdOrValueProto.verify(e.kmlRenderUrl);if(t)return"kmlRenderUrl."+t}if(null!=e.searchHistoryUrl&&e.hasOwnProperty("searchHistoryUrl")){var t=a.keyhole.dbroot.StringIdOrValueProto.verify(e.searchHistoryUrl);if(t)return"searchHistoryUrl."+t}if(null!=e.errorPageUrl&&e.hasOwnProperty("errorPageUrl")){var t=a.keyhole.dbroot.StringIdOrValueProto.verify(e.errorPageUrl);if(t)return"errorPageUrl."+t}return null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.EndSnippetProto.SearchConfigProto)return e;var r=new a.keyhole.dbroot.EndSnippetProto.SearchConfigProto;if(e.searchServer){if(!Array.isArray(e.searchServer))throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.searchServer: array expected");r.searchServer=[];for(var t=0;t<e.searchServer.length;++t){if("object"!=typeof e.searchServer[t])throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.searchServer: object expected");r.searchServer[t]=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.fromObject(e.searchServer[t])}}if(e.oneboxService){if(!Array.isArray(e.oneboxService))throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.oneboxService: array expected");r.oneboxService=[];for(var t=0;t<e.oneboxService.length;++t){if("object"!=typeof e.oneboxService[t])throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.oneboxService: object expected");r.oneboxService[t]=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto.fromObject(e.oneboxService[t])}}if(null!=e.kmlSearchUrl){if("object"!=typeof e.kmlSearchUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.kmlSearchUrl: object expected");r.kmlSearchUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.kmlSearchUrl)}if(null!=e.kmlRenderUrl){if("object"!=typeof e.kmlRenderUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.kmlRenderUrl: object expected");r.kmlRenderUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.kmlRenderUrl)}if(null!=e.searchHistoryUrl){if("object"!=typeof e.searchHistoryUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.searchHistoryUrl: object expected");r.searchHistoryUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.searchHistoryUrl)}if(null!=e.errorPageUrl){if("object"!=typeof e.errorPageUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.errorPageUrl: object expected");r.errorPageUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.errorPageUrl)}return r},r.toObject=function(e,r){r||(r={});var t={};if((r.arrays||r.defaults)&&(t.searchServer=[],t.oneboxService=[]),r.defaults&&(t.kmlSearchUrl=null,t.kmlRenderUrl=null,t.errorPageUrl=null,t.searchHistoryUrl=null),e.searchServer&&e.searchServer.length){t.searchServer=[];for(var o=0;o<e.searchServer.length;++o)t.searchServer[o]=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.toObject(e.searchServer[o],r)}if(e.oneboxService&&e.oneboxService.length){t.oneboxService=[];for(var o=0;o<e.oneboxService.length;++o)t.oneboxService[o]=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto.toObject(e.oneboxService[o],r)}return null!=e.kmlSearchUrl&&e.hasOwnProperty("kmlSearchUrl")&&(t.kmlSearchUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.kmlSearchUrl,r)),null!=e.kmlRenderUrl&&e.hasOwnProperty("kmlRenderUrl")&&(t.kmlRenderUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.kmlRenderUrl,r)),null!=e.errorPageUrl&&e.hasOwnProperty("errorPageUrl")&&(t.errorPageUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.errorPageUrl,r)),null!=e.searchHistoryUrl&&e.hasOwnProperty("searchHistoryUrl")&&(t.searchHistoryUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.searchHistoryUrl,r)),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.EndSnippetProto.SearchConfigProto"},r.SearchServer=function(){var r,t;function l(e){if(this.suggestion=[],this.searchlet=[],e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return l.prototype.name=null,l.prototype.url=null,l.prototype.type=0,l.prototype.htmlTransformUrl=null,l.prototype.kmlTransformUrl=null,l.prototype.supplementalUi=null,l.prototype.suggestion=n.emptyArray,l.prototype.searchlet=n.emptyArray,l.prototype.requirements=null,l.prototype.suggestServer=null,l.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.name=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 2:n.url=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 3:n.type=e.int32();break;case 4:n.htmlTransformUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 5:n.kmlTransformUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 6:n.supplementalUi=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi.decode(e,e.uint32());break;case 9:n.suggestion&&n.suggestion.length||(n.suggestion=[]),n.suggestion.push(a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32()));break;case 7:n.searchlet&&n.searchlet.length||(n.searchlet=[]),n.searchlet.push(a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto.decode(e,e.uint32()));break;case 8:n.requirements=a.keyhole.dbroot.RequirementProto.decode(e,e.uint32());break;case 10:n.suggestServer=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;default:e.skipType(7&l)}}return n},l.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.name&&e.hasOwnProperty("name")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.name);if(r)return"name."+r}if(null!=e.url&&e.hasOwnProperty("url")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.url);if(r)return"url."+r}if(null!=e.type&&e.hasOwnProperty("type"))switch(e.type){default:return"type: enum value expected";case 0:case 1:}if(null!=e.htmlTransformUrl&&e.hasOwnProperty("htmlTransformUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.htmlTransformUrl);if(r)return"htmlTransformUrl."+r}if(null!=e.kmlTransformUrl&&e.hasOwnProperty("kmlTransformUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.kmlTransformUrl);if(r)return"kmlTransformUrl."+r}if(null!=e.supplementalUi&&e.hasOwnProperty("supplementalUi")){var r=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi.verify(e.supplementalUi);if(r)return"supplementalUi."+r}if(null!=e.suggestion&&e.hasOwnProperty("suggestion")){if(!Array.isArray(e.suggestion))return"suggestion: array expected";for(var t=0;t<e.suggestion.length;++t){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.suggestion[t]);if(r)return"suggestion."+r}}if(null!=e.searchlet&&e.hasOwnProperty("searchlet")){if(!Array.isArray(e.searchlet))return"searchlet: array expected";for(var t=0;t<e.searchlet.length;++t){var r=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto.verify(e.searchlet[t]);if(r)return"searchlet."+r}}if(null!=e.requirements&&e.hasOwnProperty("requirements")){var r=a.keyhole.dbroot.RequirementProto.verify(e.requirements);if(r)return"requirements."+r}if(null!=e.suggestServer&&e.hasOwnProperty("suggestServer")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.suggestServer);if(r)return"suggestServer."+r}return null},l.fromObject=function(e){if(e instanceof a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer)return e;var r=new a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer;if(null!=e.name){if("object"!=typeof e.name)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.name: object expected");r.name=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.name)}if(null!=e.url){if("object"!=typeof e.url)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.url: object expected");r.url=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.url)}switch(e.type){case"RESULT_TYPE_KML":case 0:r.type=0;break;case"RESULT_TYPE_XML":case 1:r.type=1}if(null!=e.htmlTransformUrl){if("object"!=typeof e.htmlTransformUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.htmlTransformUrl: object expected");r.htmlTransformUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.htmlTransformUrl)}if(null!=e.kmlTransformUrl){if("object"!=typeof e.kmlTransformUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.kmlTransformUrl: object expected");r.kmlTransformUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.kmlTransformUrl)}if(null!=e.supplementalUi){if("object"!=typeof e.supplementalUi)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.supplementalUi: object expected");r.supplementalUi=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi.fromObject(e.supplementalUi)}if(e.suggestion){if(!Array.isArray(e.suggestion))throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.suggestion: array expected");r.suggestion=[];for(var t=0;t<e.suggestion.length;++t){if("object"!=typeof e.suggestion[t])throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.suggestion: object expected");r.suggestion[t]=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.suggestion[t])}}if(e.searchlet){if(!Array.isArray(e.searchlet))throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.searchlet: array expected");r.searchlet=[];for(var t=0;t<e.searchlet.length;++t){if("object"!=typeof e.searchlet[t])throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.searchlet: object expected");r.searchlet[t]=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto.fromObject(e.searchlet[t])}}if(null!=e.requirements){if("object"!=typeof e.requirements)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.requirements: object expected");r.requirements=a.keyhole.dbroot.RequirementProto.fromObject(e.requirements)}if(null!=e.suggestServer){if("object"!=typeof e.suggestServer)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.suggestServer: object expected");r.suggestServer=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.suggestServer)}return r},l.toObject=function(e,r){r||(r={});var t={};if((r.arrays||r.defaults)&&(t.searchlet=[],t.suggestion=[]),r.defaults&&(t.name=null,t.url=null,t.type=r.enums===String?"RESULT_TYPE_KML":0,t.htmlTransformUrl=null,t.kmlTransformUrl=null,t.supplementalUi=null,t.requirements=null,t.suggestServer=null),null!=e.name&&e.hasOwnProperty("name")&&(t.name=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.name,r)),null!=e.url&&e.hasOwnProperty("url")&&(t.url=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.url,r)),null!=e.type&&e.hasOwnProperty("type")&&(t.type=r.enums===String?a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.ResultType[e.type]:e.type),null!=e.htmlTransformUrl&&e.hasOwnProperty("htmlTransformUrl")&&(t.htmlTransformUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.htmlTransformUrl,r)),null!=e.kmlTransformUrl&&e.hasOwnProperty("kmlTransformUrl")&&(t.kmlTransformUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.kmlTransformUrl,r)),null!=e.supplementalUi&&e.hasOwnProperty("supplementalUi")&&(t.supplementalUi=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi.toObject(e.supplementalUi,r)),e.searchlet&&e.searchlet.length){t.searchlet=[];for(var o=0;o<e.searchlet.length;++o)t.searchlet[o]=a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto.toObject(e.searchlet[o],r)}if(null!=e.requirements&&e.hasOwnProperty("requirements")&&(t.requirements=a.keyhole.dbroot.RequirementProto.toObject(e.requirements,r)),e.suggestion&&e.suggestion.length){t.suggestion=[];for(var o=0;o<e.suggestion.length;++o)t.suggestion[o]=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.suggestion[o],r)}return null!=e.suggestServer&&e.hasOwnProperty("suggestServer")&&(t.suggestServer=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.suggestServer,r)),t},l.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},l.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer"},l.ResultType=((t=Object.create(r={}))[r[0]="RESULT_TYPE_KML"]=0,t[r[1]="RESULT_TYPE_XML"]=1,t),l.SupplementalUi=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.url=null,r.prototype.label=null,r.prototype.height=160,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.url=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 2:n.label=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 3:n.height=e.int32();break;default:e.skipType(7&l)}}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.url&&e.hasOwnProperty("url")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.url);if(r)return"url."+r}if(null!=e.label&&e.hasOwnProperty("label")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.label);if(r)return"label."+r}return null!=e.height&&e.hasOwnProperty("height")&&!n.isInteger(e.height)?"height: integer expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi)return e;var r=new a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi;if(null!=e.url){if("object"!=typeof e.url)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi.url: object expected");r.url=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.url)}if(null!=e.label){if("object"!=typeof e.label)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi.label: object expected");r.label=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.label)}return null!=e.height&&(r.height=0|e.height),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.url=null,t.label=null,t.height=160),null!=e.url&&e.hasOwnProperty("url")&&(t.url=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.url,r)),null!=e.label&&e.hasOwnProperty("label")&&(t.label=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.label,r)),null!=e.height&&e.hasOwnProperty("height")&&(t.height=e.height),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi"},r}(),l.SearchletProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.url=null,r.prototype.name=null,r.prototype.requirements=null,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.url=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 2:n.name=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 3:n.requirements=a.keyhole.dbroot.RequirementProto.decode(e,e.uint32());break;default:e.skipType(7&l)}}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.url&&e.hasOwnProperty("url")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.url);if(r)return"url."+r}if(null!=e.name&&e.hasOwnProperty("name")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.name);if(r)return"name."+r}if(null!=e.requirements&&e.hasOwnProperty("requirements")){var r=a.keyhole.dbroot.RequirementProto.verify(e.requirements);if(r)return"requirements."+r}return null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto)return e;var r=new a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto;if(null!=e.url){if("object"!=typeof e.url)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto.url: object expected");r.url=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.url)}if(null!=e.name){if("object"!=typeof e.name)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto.name: object expected");r.name=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.name)}if(null!=e.requirements){if("object"!=typeof e.requirements)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto.requirements: object expected");r.requirements=a.keyhole.dbroot.RequirementProto.fromObject(e.requirements)}return r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.url=null,t.name=null,t.requirements=null),null!=e.url&&e.hasOwnProperty("url")&&(t.url=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.url,r)),null!=e.name&&e.hasOwnProperty("name")&&(t.name=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.name,r)),null!=e.requirements&&e.hasOwnProperty("requirements")&&(t.requirements=a.keyhole.dbroot.RequirementProto.toObject(e.requirements,r)),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto"},r}(),l}(),r.OneboxServiceProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.serviceUrl=null,r.prototype.requirements=null,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.serviceUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 2:n.requirements=a.keyhole.dbroot.RequirementProto.decode(e,e.uint32());break;default:e.skipType(7&l)}}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.serviceUrl&&e.hasOwnProperty("serviceUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.serviceUrl);if(r)return"serviceUrl."+r}if(null!=e.requirements&&e.hasOwnProperty("requirements")){var r=a.keyhole.dbroot.RequirementProto.verify(e.requirements);if(r)return"requirements."+r}return null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto)return e;var r=new a.keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto;if(null!=e.serviceUrl){if("object"!=typeof e.serviceUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto.serviceUrl: object expected");r.serviceUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.serviceUrl)}if(null!=e.requirements){if("object"!=typeof e.requirements)throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto.requirements: object expected");r.requirements=a.keyhole.dbroot.RequirementProto.fromObject(e.requirements)}return r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.serviceUrl=null,t.requirements=null),null!=e.serviceUrl&&e.hasOwnProperty("serviceUrl")&&(t.serviceUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.serviceUrl,r)),null!=e.requirements&&e.hasOwnProperty("requirements")&&(t.requirements=a.keyhole.dbroot.RequirementProto.toObject(e.requirements,r)),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto"},r}(),r}(),r.SearchInfoProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.defaultUrl="http://maps.google.com/maps",r.prototype.geocodeParam="q",r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.EndSnippetProto.SearchInfoProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.defaultUrl=e.string();break;case 2:n.geocodeParam=e.string();break;default:e.skipType(7&l)}}return n},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":null!=e.defaultUrl&&e.hasOwnProperty("defaultUrl")&&!n.isString(e.defaultUrl)?"defaultUrl: string expected":null!=e.geocodeParam&&e.hasOwnProperty("geocodeParam")&&!n.isString(e.geocodeParam)?"geocodeParam: string expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.EndSnippetProto.SearchInfoProto)return e;var r=new a.keyhole.dbroot.EndSnippetProto.SearchInfoProto;return null!=e.defaultUrl&&(r.defaultUrl=String(e.defaultUrl)),null!=e.geocodeParam&&(r.geocodeParam=String(e.geocodeParam)),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.defaultUrl="http://maps.google.com/maps",t.geocodeParam="q"),null!=e.defaultUrl&&e.hasOwnProperty("defaultUrl")&&(t.defaultUrl=e.defaultUrl),null!=e.geocodeParam&&e.hasOwnProperty("geocodeParam")&&(t.geocodeParam=e.geocodeParam),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.EndSnippetProto.SearchInfoProto"},r}(),r.RockTreeDataProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.url=null,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.EndSnippetProto.RockTreeDataProto;e.pos<t;){var l=e.uint32();l>>>3==1?n.url=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32()):e.skipType(7&l)}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.url&&e.hasOwnProperty("url")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.url);if(r)return"url."+r}return null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.EndSnippetProto.RockTreeDataProto)return e;var r=new a.keyhole.dbroot.EndSnippetProto.RockTreeDataProto;if(null!=e.url){if("object"!=typeof e.url)throw TypeError(".keyhole.dbroot.EndSnippetProto.RockTreeDataProto.url: object expected");r.url=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.url)}return r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.url=null),null!=e.url&&e.hasOwnProperty("url")&&(t.url=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.url,r)),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.EndSnippetProto.RockTreeDataProto"},r}(),r.FilmstripConfigProto=function(){function r(e){if(this.imageryType=[],e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.requirements=null,r.prototype.alleycatUrlTemplate=null,r.prototype.fallbackAlleycatUrlTemplate=null,r.prototype.metadataUrlTemplate=null,r.prototype.thumbnailUrlTemplate=null,r.prototype.kmlUrlTemplate=null,r.prototype.featuredToursUrl=null,r.prototype.enableViewportFallback=!1,r.prototype.viewportFallbackDistance=0,r.prototype.imageryType=n.emptyArray,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.requirements=a.keyhole.dbroot.RequirementProto.decode(e,e.uint32());break;case 2:n.alleycatUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 9:n.fallbackAlleycatUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 3:n.metadataUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 4:n.thumbnailUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 5:n.kmlUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 6:n.featuredToursUrl=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 7:n.enableViewportFallback=e.bool();break;case 8:n.viewportFallbackDistance=e.uint32();break;case 10:n.imageryType&&n.imageryType.length||(n.imageryType=[]),n.imageryType.push(a.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto.decode(e,e.uint32()));break;default:e.skipType(7&l)}}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.requirements&&e.hasOwnProperty("requirements")){var r=a.keyhole.dbroot.RequirementProto.verify(e.requirements);if(r)return"requirements."+r}if(null!=e.alleycatUrlTemplate&&e.hasOwnProperty("alleycatUrlTemplate")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.alleycatUrlTemplate);if(r)return"alleycatUrlTemplate."+r}if(null!=e.fallbackAlleycatUrlTemplate&&e.hasOwnProperty("fallbackAlleycatUrlTemplate")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.fallbackAlleycatUrlTemplate);if(r)return"fallbackAlleycatUrlTemplate."+r}if(null!=e.metadataUrlTemplate&&e.hasOwnProperty("metadataUrlTemplate")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.metadataUrlTemplate);if(r)return"metadataUrlTemplate."+r}if(null!=e.thumbnailUrlTemplate&&e.hasOwnProperty("thumbnailUrlTemplate")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.thumbnailUrlTemplate);if(r)return"thumbnailUrlTemplate."+r}if(null!=e.kmlUrlTemplate&&e.hasOwnProperty("kmlUrlTemplate")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.kmlUrlTemplate);if(r)return"kmlUrlTemplate."+r}if(null!=e.featuredToursUrl&&e.hasOwnProperty("featuredToursUrl")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.featuredToursUrl);if(r)return"featuredToursUrl."+r}if(null!=e.enableViewportFallback&&e.hasOwnProperty("enableViewportFallback")&&"boolean"!=typeof e.enableViewportFallback)return"enableViewportFallback: boolean expected";if(null!=e.viewportFallbackDistance&&e.hasOwnProperty("viewportFallbackDistance")&&!n.isInteger(e.viewportFallbackDistance))return"viewportFallbackDistance: integer expected";if(null!=e.imageryType&&e.hasOwnProperty("imageryType")){if(!Array.isArray(e.imageryType))return"imageryType: array expected";for(var t=0;t<e.imageryType.length;++t){var r=a.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto.verify(e.imageryType[t]);if(r)return"imageryType."+r}}return null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto)return e;var r=new a.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto;if(null!=e.requirements){if("object"!=typeof e.requirements)throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.requirements: object expected");r.requirements=a.keyhole.dbroot.RequirementProto.fromObject(e.requirements)}if(null!=e.alleycatUrlTemplate){if("object"!=typeof e.alleycatUrlTemplate)throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.alleycatUrlTemplate: object expected");r.alleycatUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.alleycatUrlTemplate)}if(null!=e.fallbackAlleycatUrlTemplate){if("object"!=typeof e.fallbackAlleycatUrlTemplate)throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.fallbackAlleycatUrlTemplate: object expected");r.fallbackAlleycatUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.fallbackAlleycatUrlTemplate)}if(null!=e.metadataUrlTemplate){if("object"!=typeof e.metadataUrlTemplate)throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.metadataUrlTemplate: object expected");r.metadataUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.metadataUrlTemplate)}if(null!=e.thumbnailUrlTemplate){if("object"!=typeof e.thumbnailUrlTemplate)throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.thumbnailUrlTemplate: object expected");r.thumbnailUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.thumbnailUrlTemplate)}if(null!=e.kmlUrlTemplate){if("object"!=typeof e.kmlUrlTemplate)throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.kmlUrlTemplate: object expected");r.kmlUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.kmlUrlTemplate)}if(null!=e.featuredToursUrl){if("object"!=typeof e.featuredToursUrl)throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.featuredToursUrl: object expected");r.featuredToursUrl=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.featuredToursUrl)}if(null!=e.enableViewportFallback&&(r.enableViewportFallback=!!e.enableViewportFallback),null!=e.viewportFallbackDistance&&(r.viewportFallbackDistance=e.viewportFallbackDistance>>>0),e.imageryType){if(!Array.isArray(e.imageryType))throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.imageryType: array expected");r.imageryType=[];for(var t=0;t<e.imageryType.length;++t){if("object"!=typeof e.imageryType[t])throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.imageryType: object expected");r.imageryType[t]=a.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto.fromObject(e.imageryType[t])}}return r},r.toObject=function(e,r){r||(r={});var t={};if((r.arrays||r.defaults)&&(t.imageryType=[]),r.defaults&&(t.requirements=null,t.alleycatUrlTemplate=null,t.metadataUrlTemplate=null,t.thumbnailUrlTemplate=null,t.kmlUrlTemplate=null,t.featuredToursUrl=null,t.enableViewportFallback=!1,t.viewportFallbackDistance=0,t.fallbackAlleycatUrlTemplate=null),null!=e.requirements&&e.hasOwnProperty("requirements")&&(t.requirements=a.keyhole.dbroot.RequirementProto.toObject(e.requirements,r)),null!=e.alleycatUrlTemplate&&e.hasOwnProperty("alleycatUrlTemplate")&&(t.alleycatUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.alleycatUrlTemplate,r)),null!=e.metadataUrlTemplate&&e.hasOwnProperty("metadataUrlTemplate")&&(t.metadataUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.metadataUrlTemplate,r)),null!=e.thumbnailUrlTemplate&&e.hasOwnProperty("thumbnailUrlTemplate")&&(t.thumbnailUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.thumbnailUrlTemplate,r)),null!=e.kmlUrlTemplate&&e.hasOwnProperty("kmlUrlTemplate")&&(t.kmlUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.kmlUrlTemplate,r)),null!=e.featuredToursUrl&&e.hasOwnProperty("featuredToursUrl")&&(t.featuredToursUrl=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.featuredToursUrl,r)),null!=e.enableViewportFallback&&e.hasOwnProperty("enableViewportFallback")&&(t.enableViewportFallback=e.enableViewportFallback),null!=e.viewportFallbackDistance&&e.hasOwnProperty("viewportFallbackDistance")&&(t.viewportFallbackDistance=e.viewportFallbackDistance),null!=e.fallbackAlleycatUrlTemplate&&e.hasOwnProperty("fallbackAlleycatUrlTemplate")&&(t.fallbackAlleycatUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.fallbackAlleycatUrlTemplate,r)),e.imageryType&&e.imageryType.length){t.imageryType=[];for(var o=0;o<e.imageryType.length;++o)t.imageryType[o]=a.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto.toObject(e.imageryType[o],r)}return t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.EndSnippetProto.FilmstripConfigProto"},r.AlleycatImageryTypeProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.imageryTypeId=0,r.prototype.imageryTypeLabel="",r.prototype.metadataUrlTemplate=null,r.prototype.thumbnailUrlTemplate=null,r.prototype.kmlUrlTemplate=null,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.imageryTypeId=e.int32();break;case 2:n.imageryTypeLabel=e.string();break;case 3:n.metadataUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 4:n.thumbnailUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 5:n.kmlUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;default:e.skipType(7&l)}}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.imageryTypeId&&e.hasOwnProperty("imageryTypeId")&&!n.isInteger(e.imageryTypeId))return"imageryTypeId: integer expected";if(null!=e.imageryTypeLabel&&e.hasOwnProperty("imageryTypeLabel")&&!n.isString(e.imageryTypeLabel))return"imageryTypeLabel: string expected";if(null!=e.metadataUrlTemplate&&e.hasOwnProperty("metadataUrlTemplate")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.metadataUrlTemplate);if(r)return"metadataUrlTemplate."+r}if(null!=e.thumbnailUrlTemplate&&e.hasOwnProperty("thumbnailUrlTemplate")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.thumbnailUrlTemplate);if(r)return"thumbnailUrlTemplate."+r}if(null!=e.kmlUrlTemplate&&e.hasOwnProperty("kmlUrlTemplate")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.kmlUrlTemplate);if(r)return"kmlUrlTemplate."+r}return null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto)return e;var r=new a.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto;if(null!=e.imageryTypeId&&(r.imageryTypeId=0|e.imageryTypeId),null!=e.imageryTypeLabel&&(r.imageryTypeLabel=String(e.imageryTypeLabel)),null!=e.metadataUrlTemplate){if("object"!=typeof e.metadataUrlTemplate)throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto.metadataUrlTemplate: object expected");r.metadataUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.metadataUrlTemplate)}if(null!=e.thumbnailUrlTemplate){if("object"!=typeof e.thumbnailUrlTemplate)throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto.thumbnailUrlTemplate: object expected");r.thumbnailUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.thumbnailUrlTemplate)}if(null!=e.kmlUrlTemplate){if("object"!=typeof e.kmlUrlTemplate)throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto.kmlUrlTemplate: object expected");r.kmlUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.kmlUrlTemplate)}return r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.imageryTypeId=0,t.imageryTypeLabel="",t.metadataUrlTemplate=null,t.thumbnailUrlTemplate=null,t.kmlUrlTemplate=null),null!=e.imageryTypeId&&e.hasOwnProperty("imageryTypeId")&&(t.imageryTypeId=e.imageryTypeId),null!=e.imageryTypeLabel&&e.hasOwnProperty("imageryTypeLabel")&&(t.imageryTypeLabel=e.imageryTypeLabel),null!=e.metadataUrlTemplate&&e.hasOwnProperty("metadataUrlTemplate")&&(t.metadataUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.metadataUrlTemplate,r)),null!=e.thumbnailUrlTemplate&&e.hasOwnProperty("thumbnailUrlTemplate")&&(t.thumbnailUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.thumbnailUrlTemplate,r)),null!=e.kmlUrlTemplate&&e.hasOwnProperty("kmlUrlTemplate")&&(t.kmlUrlTemplate=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.kmlUrlTemplate,r)),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto"},r}(),r}(),r.StarDataProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.url=null,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.EndSnippetProto.StarDataProto;e.pos<t;){var l=e.uint32();l>>>3==1?n.url=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32()):e.skipType(7&l)}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.url&&e.hasOwnProperty("url")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.url);if(r)return"url."+r}return null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.EndSnippetProto.StarDataProto)return e;var r=new a.keyhole.dbroot.EndSnippetProto.StarDataProto;if(null!=e.url){if("object"!=typeof e.url)throw TypeError(".keyhole.dbroot.EndSnippetProto.StarDataProto.url: object expected");r.url=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.url)}return r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.url=null),null!=e.url&&e.hasOwnProperty("url")&&(t.url=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.url,r)),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.EndSnippetProto.StarDataProto"},r}(),r}(),t.DbRootRefProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.url="",r.prototype.isCritical=!1,r.prototype.requirements=null,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.DbRootRefProto;e.pos<t;){var i=e.uint32();switch(i>>>3){case 2:l.url=e.string();break;case 1:l.isCritical=e.bool();break;case 3:l.requirements=a.keyhole.dbroot.RequirementProto.decode(e,e.uint32());break;default:e.skipType(7&i)}}if(!l.hasOwnProperty("url"))throw n.ProtocolError("missing required 'url'",{instance:l});return l},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(!n.isString(e.url))return"url: string expected";if(null!=e.isCritical&&e.hasOwnProperty("isCritical")&&"boolean"!=typeof e.isCritical)return"isCritical: boolean expected";if(null!=e.requirements&&e.hasOwnProperty("requirements")){var r=a.keyhole.dbroot.RequirementProto.verify(e.requirements);if(r)return"requirements."+r}return null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.DbRootRefProto)return e;var r=new a.keyhole.dbroot.DbRootRefProto;if(null!=e.url&&(r.url=String(e.url)),null!=e.isCritical&&(r.isCritical=!!e.isCritical),null!=e.requirements){if("object"!=typeof e.requirements)throw TypeError(".keyhole.dbroot.DbRootRefProto.requirements: object expected");r.requirements=a.keyhole.dbroot.RequirementProto.fromObject(e.requirements)}return r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.isCritical=!1,t.url="",t.requirements=null),null!=e.isCritical&&e.hasOwnProperty("isCritical")&&(t.isCritical=e.isCritical),null!=e.url&&e.hasOwnProperty("url")&&(t.url=e.url),null!=e.requirements&&e.hasOwnProperty("requirements")&&(t.requirements=a.keyhole.dbroot.RequirementProto.toObject(e.requirements,r)),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.DbRootRefProto"},r}(),t.DatabaseVersionProto=function(){function r(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.quadtreeVersion=0,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,l=new a.keyhole.dbroot.DatabaseVersionProto;e.pos<t;){var i=e.uint32();i>>>3==1?l.quadtreeVersion=e.uint32():e.skipType(7&i)}if(!l.hasOwnProperty("quadtreeVersion"))throw n.ProtocolError("missing required 'quadtreeVersion'",{instance:l});return l},r.verify=function(e){return"object"!=typeof e||null===e?"object expected":n.isInteger(e.quadtreeVersion)?null:"quadtreeVersion: integer expected"},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.DatabaseVersionProto)return e;var r=new a.keyhole.dbroot.DatabaseVersionProto;return null!=e.quadtreeVersion&&(r.quadtreeVersion=e.quadtreeVersion>>>0),r},r.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.quadtreeVersion=0),null!=e.quadtreeVersion&&e.hasOwnProperty("quadtreeVersion")&&(t.quadtreeVersion=e.quadtreeVersion),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.DatabaseVersionProto"},r}(),t.DbRootProto=function(){function r(e){if(this.providerInfo=[],this.nestedFeature=[],this.styleAttribute=[],this.styleMap=[],this.translationEntry=[],this.dbrootReference=[],e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return r.prototype.databaseName=null,r.prototype.imageryPresent=!0,r.prototype.protoImagery=!1,r.prototype.terrainPresent=!1,r.prototype.providerInfo=n.emptyArray,r.prototype.nestedFeature=n.emptyArray,r.prototype.styleAttribute=n.emptyArray,r.prototype.styleMap=n.emptyArray,r.prototype.endSnippet=null,r.prototype.translationEntry=n.emptyArray,r.prototype.language="en",r.prototype.version=5,r.prototype.dbrootReference=n.emptyArray,r.prototype.databaseVersion=null,r.prototype.refreshTimeout=0,r.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.DbRootProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 15:n.databaseName=a.keyhole.dbroot.StringIdOrValueProto.decode(e,e.uint32());break;case 1:n.imageryPresent=e.bool();break;case 14:n.protoImagery=e.bool();break;case 2:n.terrainPresent=e.bool();break;case 3:n.providerInfo&&n.providerInfo.length||(n.providerInfo=[]),n.providerInfo.push(a.keyhole.dbroot.ProviderInfoProto.decode(e,e.uint32()));break;case 4:n.nestedFeature&&n.nestedFeature.length||(n.nestedFeature=[]),n.nestedFeature.push(a.keyhole.dbroot.NestedFeatureProto.decode(e,e.uint32()));break;case 5:n.styleAttribute&&n.styleAttribute.length||(n.styleAttribute=[]),n.styleAttribute.push(a.keyhole.dbroot.StyleAttributeProto.decode(e,e.uint32()));break;case 6:n.styleMap&&n.styleMap.length||(n.styleMap=[]),n.styleMap.push(a.keyhole.dbroot.StyleMapProto.decode(e,e.uint32()));break;case 7:n.endSnippet=a.keyhole.dbroot.EndSnippetProto.decode(e,e.uint32());break;case 8:n.translationEntry&&n.translationEntry.length||(n.translationEntry=[]),n.translationEntry.push(a.keyhole.dbroot.StringEntryProto.decode(e,e.uint32()));break;case 9:n.language=e.string();break;case 10:n.version=e.int32();break;case 11:n.dbrootReference&&n.dbrootReference.length||(n.dbrootReference=[]),n.dbrootReference.push(a.keyhole.dbroot.DbRootRefProto.decode(e,e.uint32()));break;case 13:n.databaseVersion=a.keyhole.dbroot.DatabaseVersionProto.decode(e,e.uint32());break;case 16:n.refreshTimeout=e.int32();break;default:e.skipType(7&l)}}return n},r.verify=function(e){if("object"!=typeof e||null===e)return"object expected";if(null!=e.databaseName&&e.hasOwnProperty("databaseName")){var r=a.keyhole.dbroot.StringIdOrValueProto.verify(e.databaseName);if(r)return"databaseName."+r}if(null!=e.imageryPresent&&e.hasOwnProperty("imageryPresent")&&"boolean"!=typeof e.imageryPresent)return"imageryPresent: boolean expected";if(null!=e.protoImagery&&e.hasOwnProperty("protoImagery")&&"boolean"!=typeof e.protoImagery)return"protoImagery: boolean expected";if(null!=e.terrainPresent&&e.hasOwnProperty("terrainPresent")&&"boolean"!=typeof e.terrainPresent)return"terrainPresent: boolean expected";if(null!=e.providerInfo&&e.hasOwnProperty("providerInfo")){if(!Array.isArray(e.providerInfo))return"providerInfo: array expected";for(var t=0;t<e.providerInfo.length;++t){var r=a.keyhole.dbroot.ProviderInfoProto.verify(e.providerInfo[t]);if(r)return"providerInfo."+r}}if(null!=e.nestedFeature&&e.hasOwnProperty("nestedFeature")){if(!Array.isArray(e.nestedFeature))return"nestedFeature: array expected";for(var t=0;t<e.nestedFeature.length;++t){var r=a.keyhole.dbroot.NestedFeatureProto.verify(e.nestedFeature[t]);if(r)return"nestedFeature."+r}}if(null!=e.styleAttribute&&e.hasOwnProperty("styleAttribute")){if(!Array.isArray(e.styleAttribute))return"styleAttribute: array expected";for(var t=0;t<e.styleAttribute.length;++t){var r=a.keyhole.dbroot.StyleAttributeProto.verify(e.styleAttribute[t]);if(r)return"styleAttribute."+r}}if(null!=e.styleMap&&e.hasOwnProperty("styleMap")){if(!Array.isArray(e.styleMap))return"styleMap: array expected";for(var t=0;t<e.styleMap.length;++t){var r=a.keyhole.dbroot.StyleMapProto.verify(e.styleMap[t]);if(r)return"styleMap."+r}}if(null!=e.endSnippet&&e.hasOwnProperty("endSnippet")){var r=a.keyhole.dbroot.EndSnippetProto.verify(e.endSnippet);if(r)return"endSnippet."+r}if(null!=e.translationEntry&&e.hasOwnProperty("translationEntry")){if(!Array.isArray(e.translationEntry))return"translationEntry: array expected";for(var t=0;t<e.translationEntry.length;++t){var r=a.keyhole.dbroot.StringEntryProto.verify(e.translationEntry[t]);if(r)return"translationEntry."+r}}if(null!=e.language&&e.hasOwnProperty("language")&&!n.isString(e.language))return"language: string expected";if(null!=e.version&&e.hasOwnProperty("version")&&!n.isInteger(e.version))return"version: integer expected";if(null!=e.dbrootReference&&e.hasOwnProperty("dbrootReference")){if(!Array.isArray(e.dbrootReference))return"dbrootReference: array expected";for(var t=0;t<e.dbrootReference.length;++t){var r=a.keyhole.dbroot.DbRootRefProto.verify(e.dbrootReference[t]);if(r)return"dbrootReference."+r}}if(null!=e.databaseVersion&&e.hasOwnProperty("databaseVersion")){var r=a.keyhole.dbroot.DatabaseVersionProto.verify(e.databaseVersion);if(r)return"databaseVersion."+r}return null!=e.refreshTimeout&&e.hasOwnProperty("refreshTimeout")&&!n.isInteger(e.refreshTimeout)?"refreshTimeout: integer expected":null},r.fromObject=function(e){if(e instanceof a.keyhole.dbroot.DbRootProto)return e;var r=new a.keyhole.dbroot.DbRootProto;if(null!=e.databaseName){if("object"!=typeof e.databaseName)throw TypeError(".keyhole.dbroot.DbRootProto.databaseName: object expected");r.databaseName=a.keyhole.dbroot.StringIdOrValueProto.fromObject(e.databaseName)}if(null!=e.imageryPresent&&(r.imageryPresent=!!e.imageryPresent),null!=e.protoImagery&&(r.protoImagery=!!e.protoImagery),null!=e.terrainPresent&&(r.terrainPresent=!!e.terrainPresent),e.providerInfo){if(!Array.isArray(e.providerInfo))throw TypeError(".keyhole.dbroot.DbRootProto.providerInfo: array expected");r.providerInfo=[];for(var t=0;t<e.providerInfo.length;++t){if("object"!=typeof e.providerInfo[t])throw TypeError(".keyhole.dbroot.DbRootProto.providerInfo: object expected");r.providerInfo[t]=a.keyhole.dbroot.ProviderInfoProto.fromObject(e.providerInfo[t])}}if(e.nestedFeature){if(!Array.isArray(e.nestedFeature))throw TypeError(".keyhole.dbroot.DbRootProto.nestedFeature: array expected");r.nestedFeature=[];for(var t=0;t<e.nestedFeature.length;++t){if("object"!=typeof e.nestedFeature[t])throw TypeError(".keyhole.dbroot.DbRootProto.nestedFeature: object expected");r.nestedFeature[t]=a.keyhole.dbroot.NestedFeatureProto.fromObject(e.nestedFeature[t])}}if(e.styleAttribute){if(!Array.isArray(e.styleAttribute))throw TypeError(".keyhole.dbroot.DbRootProto.styleAttribute: array expected");r.styleAttribute=[];for(var t=0;t<e.styleAttribute.length;++t){if("object"!=typeof e.styleAttribute[t])throw TypeError(".keyhole.dbroot.DbRootProto.styleAttribute: object expected");r.styleAttribute[t]=a.keyhole.dbroot.StyleAttributeProto.fromObject(e.styleAttribute[t])}}if(e.styleMap){if(!Array.isArray(e.styleMap))throw TypeError(".keyhole.dbroot.DbRootProto.styleMap: array expected");r.styleMap=[];for(var t=0;t<e.styleMap.length;++t){if("object"!=typeof e.styleMap[t])throw TypeError(".keyhole.dbroot.DbRootProto.styleMap: object expected");r.styleMap[t]=a.keyhole.dbroot.StyleMapProto.fromObject(e.styleMap[t])}}if(null!=e.endSnippet){if("object"!=typeof e.endSnippet)throw TypeError(".keyhole.dbroot.DbRootProto.endSnippet: object expected");r.endSnippet=a.keyhole.dbroot.EndSnippetProto.fromObject(e.endSnippet)}if(e.translationEntry){if(!Array.isArray(e.translationEntry))throw TypeError(".keyhole.dbroot.DbRootProto.translationEntry: array expected");r.translationEntry=[];for(var t=0;t<e.translationEntry.length;++t){if("object"!=typeof e.translationEntry[t])throw TypeError(".keyhole.dbroot.DbRootProto.translationEntry: object expected");r.translationEntry[t]=a.keyhole.dbroot.StringEntryProto.fromObject(e.translationEntry[t])}}if(null!=e.language&&(r.language=String(e.language)),null!=e.version&&(r.version=0|e.version),e.dbrootReference){if(!Array.isArray(e.dbrootReference))throw TypeError(".keyhole.dbroot.DbRootProto.dbrootReference: array expected");r.dbrootReference=[];for(var t=0;t<e.dbrootReference.length;++t){if("object"!=typeof e.dbrootReference[t])throw TypeError(".keyhole.dbroot.DbRootProto.dbrootReference: object expected");r.dbrootReference[t]=a.keyhole.dbroot.DbRootRefProto.fromObject(e.dbrootReference[t])}}if(null!=e.databaseVersion){if("object"!=typeof e.databaseVersion)throw TypeError(".keyhole.dbroot.DbRootProto.databaseVersion: object expected");r.databaseVersion=a.keyhole.dbroot.DatabaseVersionProto.fromObject(e.databaseVersion)}return null!=e.refreshTimeout&&(r.refreshTimeout=0|e.refreshTimeout),r},r.toObject=function(e,r){r||(r={});var t={};if((r.arrays||r.defaults)&&(t.providerInfo=[],t.nestedFeature=[],t.styleAttribute=[],t.styleMap=[],t.translationEntry=[],t.dbrootReference=[]),r.defaults&&(t.imageryPresent=!0,t.terrainPresent=!1,t.endSnippet=null,t.language="en",t.version=5,t.databaseVersion=null,t.protoImagery=!1,t.databaseName=null,t.refreshTimeout=0),null!=e.imageryPresent&&e.hasOwnProperty("imageryPresent")&&(t.imageryPresent=e.imageryPresent),null!=e.terrainPresent&&e.hasOwnProperty("terrainPresent")&&(t.terrainPresent=e.terrainPresent),e.providerInfo&&e.providerInfo.length){t.providerInfo=[];for(var o=0;o<e.providerInfo.length;++o)t.providerInfo[o]=a.keyhole.dbroot.ProviderInfoProto.toObject(e.providerInfo[o],r)}if(e.nestedFeature&&e.nestedFeature.length){t.nestedFeature=[];for(var o=0;o<e.nestedFeature.length;++o)t.nestedFeature[o]=a.keyhole.dbroot.NestedFeatureProto.toObject(e.nestedFeature[o],r)}if(e.styleAttribute&&e.styleAttribute.length){t.styleAttribute=[];for(var o=0;o<e.styleAttribute.length;++o)t.styleAttribute[o]=a.keyhole.dbroot.StyleAttributeProto.toObject(e.styleAttribute[o],r)}if(e.styleMap&&e.styleMap.length){t.styleMap=[];for(var o=0;o<e.styleMap.length;++o)t.styleMap[o]=a.keyhole.dbroot.StyleMapProto.toObject(e.styleMap[o],r)}if(null!=e.endSnippet&&e.hasOwnProperty("endSnippet")&&(t.endSnippet=a.keyhole.dbroot.EndSnippetProto.toObject(e.endSnippet,r)),e.translationEntry&&e.translationEntry.length){t.translationEntry=[];for(var o=0;o<e.translationEntry.length;++o)t.translationEntry[o]=a.keyhole.dbroot.StringEntryProto.toObject(e.translationEntry[o],r)}if(null!=e.language&&e.hasOwnProperty("language")&&(t.language=e.language),null!=e.version&&e.hasOwnProperty("version")&&(t.version=e.version),e.dbrootReference&&e.dbrootReference.length){t.dbrootReference=[];for(var o=0;o<e.dbrootReference.length;++o)t.dbrootReference[o]=a.keyhole.dbroot.DbRootRefProto.toObject(e.dbrootReference[o],r)}return null!=e.databaseVersion&&e.hasOwnProperty("databaseVersion")&&(t.databaseVersion=a.keyhole.dbroot.DatabaseVersionProto.toObject(e.databaseVersion,r)),null!=e.protoImagery&&e.hasOwnProperty("protoImagery")&&(t.protoImagery=e.protoImagery),null!=e.databaseName&&e.hasOwnProperty("databaseName")&&(t.databaseName=a.keyhole.dbroot.StringIdOrValueProto.toObject(e.databaseName,r)),null!=e.refreshTimeout&&e.hasOwnProperty("refreshTimeout")&&(t.refreshTimeout=e.refreshTimeout),t},r.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},r.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.DbRootProto"},r}(),t.EncryptedDbRootProto=function(){var r,t;function l(e){if(e)for(var r=Object.keys(e),t=0;t<r.length;++t)null!=e[r[t]]&&(this[r[t]]=e[r[t]])}return l.prototype.encryptionType=0,l.prototype.encryptionData=n.newBuffer([]),l.prototype.dbrootData=n.newBuffer([]),l.decode=function(e,r){e instanceof o||(e=o.create(e));for(var t=void 0===r?e.len:e.pos+r,n=new a.keyhole.dbroot.EncryptedDbRootProto;e.pos<t;){var l=e.uint32();switch(l>>>3){case 1:n.encryptionType=e.int32();break;case 2:n.encryptionData=e.bytes();break;case 3:n.dbrootData=e.bytes();break;default:e.skipType(7&l)}}return n},l.verify=function(e){return"object"!=typeof e||null===e?"object expected":null!=e.encryptionType&&e.hasOwnProperty("encryptionType")&&0!==e.encryptionType?"encryptionType: enum value expected":null!=e.encryptionData&&e.hasOwnProperty("encryptionData")&&!(e.encryptionData&&"number"==typeof e.encryptionData.length||n.isString(e.encryptionData))?"encryptionData: buffer expected":null!=e.dbrootData&&e.hasOwnProperty("dbrootData")&&!(e.dbrootData&&"number"==typeof e.dbrootData.length||n.isString(e.dbrootData))?"dbrootData: buffer expected":null},l.fromObject=function(e){if(e instanceof a.keyhole.dbroot.EncryptedDbRootProto)return e;var r=new a.keyhole.dbroot.EncryptedDbRootProto;switch(e.encryptionType){case"ENCRYPTION_XOR":case 0:r.encryptionType=0}return null!=e.encryptionData&&("string"==typeof e.encryptionData?n.base64.decode(e.encryptionData,r.encryptionData=n.newBuffer(n.base64.length(e.encryptionData)),0):e.encryptionData.length>=0&&(r.encryptionData=e.encryptionData)),null!=e.dbrootData&&("string"==typeof e.dbrootData?n.base64.decode(e.dbrootData,r.dbrootData=n.newBuffer(n.base64.length(e.dbrootData)),0):e.dbrootData.length>=0&&(r.dbrootData=e.dbrootData)),r},l.toObject=function(e,r){r||(r={});var t={};return r.defaults&&(t.encryptionType=r.enums===String?"ENCRYPTION_XOR":0,r.bytes===String?t.encryptionData="":(t.encryptionData=[],r.bytes!==Array&&(t.encryptionData=n.newBuffer(t.encryptionData))),r.bytes===String?t.dbrootData="":(t.dbrootData=[],r.bytes!==Array&&(t.dbrootData=n.newBuffer(t.dbrootData)))),null!=e.encryptionType&&e.hasOwnProperty("encryptionType")&&(t.encryptionType=r.enums===String?a.keyhole.dbroot.EncryptedDbRootProto.EncryptionType[e.encryptionType]:e.encryptionType),null!=e.encryptionData&&e.hasOwnProperty("encryptionData")&&(t.encryptionData=r.bytes===String?n.base64.encode(e.encryptionData,0,e.encryptionData.length):r.bytes===Array?Array.prototype.slice.call(e.encryptionData):e.encryptionData),null!=e.dbrootData&&e.hasOwnProperty("dbrootData")&&(t.dbrootData=r.bytes===String?n.base64.encode(e.dbrootData,0,e.dbrootData.length):r.bytes===Array?Array.prototype.slice.call(e.dbrootData):e.dbrootData),t},l.prototype.toJSON=function(){return this.constructor.toObject(this,e.util.toJSONOptions)},l.getTypeUrl=function(e){return void 0===e&&(e="type.googleapis.com"),e+"/keyhole.dbroot.EncryptedDbRootProto"},l.EncryptionType=((t=Object.create(r={}))[r[0]="ENCRYPTION_XOR"]=0,t),l}(),t),r),a.keyhole.dbroot};
+(() => {
+  // packages/engine/Source/ThirdParty/google-earth-dbroot-parser.js
+  window.cesiumGoogleEarthDbRootParser = function($protobuf) {
+    "use strict";
+    var $Reader = $protobuf.Reader, $util = $protobuf.util;
+    var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
+    $root.keyhole = function() {
+      var keyhole = {};
+      keyhole.dbroot = function() {
+        var dbroot = {};
+        dbroot.StringEntryProto = function() {
+          function StringEntryProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          StringEntryProto.prototype.stringId = 0;
+          StringEntryProto.prototype.stringValue = "";
+          StringEntryProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.StringEntryProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.stringId = reader.fixed32();
+                  break;
+                }
+                case 2: {
+                  message.stringValue = reader.string();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("stringId"))
+              throw $util.ProtocolError("missing required 'stringId'", { instance: message });
+            if (!message.hasOwnProperty("stringValue"))
+              throw $util.ProtocolError("missing required 'stringValue'", { instance: message });
+            return message;
+          };
+          StringEntryProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (!$util.isInteger(message.stringId))
+              return "stringId: integer expected";
+            if (!$util.isString(message.stringValue))
+              return "stringValue: string expected";
+            return null;
+          };
+          StringEntryProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.StringEntryProto)
+              return object;
+            var message = new $root.keyhole.dbroot.StringEntryProto();
+            if (object.stringId != null)
+              message.stringId = object.stringId >>> 0;
+            if (object.stringValue != null)
+              message.stringValue = String(object.stringValue);
+            return message;
+          };
+          StringEntryProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.stringId = 0;
+              object.stringValue = "";
+            }
+            if (message.stringId != null && message.hasOwnProperty("stringId"))
+              object.stringId = message.stringId;
+            if (message.stringValue != null && message.hasOwnProperty("stringValue"))
+              object.stringValue = message.stringValue;
+            return object;
+          };
+          StringEntryProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          StringEntryProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.StringEntryProto";
+          };
+          return StringEntryProto;
+        }();
+        dbroot.StringIdOrValueProto = function() {
+          function StringIdOrValueProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          StringIdOrValueProto.prototype.stringId = 0;
+          StringIdOrValueProto.prototype.value = "";
+          StringIdOrValueProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.StringIdOrValueProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.stringId = reader.fixed32();
+                  break;
+                }
+                case 2: {
+                  message.value = reader.string();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          StringIdOrValueProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.stringId != null && message.hasOwnProperty("stringId")) {
+              if (!$util.isInteger(message.stringId))
+                return "stringId: integer expected";
+            }
+            if (message.value != null && message.hasOwnProperty("value")) {
+              if (!$util.isString(message.value))
+                return "value: string expected";
+            }
+            return null;
+          };
+          StringIdOrValueProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.StringIdOrValueProto)
+              return object;
+            var message = new $root.keyhole.dbroot.StringIdOrValueProto();
+            if (object.stringId != null)
+              message.stringId = object.stringId >>> 0;
+            if (object.value != null)
+              message.value = String(object.value);
+            return message;
+          };
+          StringIdOrValueProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.stringId = 0;
+              object.value = "";
+            }
+            if (message.stringId != null && message.hasOwnProperty("stringId"))
+              object.stringId = message.stringId;
+            if (message.value != null && message.hasOwnProperty("value"))
+              object.value = message.value;
+            return object;
+          };
+          StringIdOrValueProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          StringIdOrValueProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.StringIdOrValueProto";
+          };
+          return StringIdOrValueProto;
+        }();
+        dbroot.PlanetModelProto = function() {
+          function PlanetModelProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          PlanetModelProto.prototype.radius = 6378.137;
+          PlanetModelProto.prototype.flattening = 0.00335281066474748;
+          PlanetModelProto.prototype.elevationBias = 0;
+          PlanetModelProto.prototype.negativeAltitudeExponentBias = 0;
+          PlanetModelProto.prototype.compressedNegativeAltitudeThreshold = 0;
+          PlanetModelProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.PlanetModelProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.radius = reader.double();
+                  break;
+                }
+                case 2: {
+                  message.flattening = reader.double();
+                  break;
+                }
+                case 4: {
+                  message.elevationBias = reader.double();
+                  break;
+                }
+                case 5: {
+                  message.negativeAltitudeExponentBias = reader.int32();
+                  break;
+                }
+                case 6: {
+                  message.compressedNegativeAltitudeThreshold = reader.double();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          PlanetModelProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.radius != null && message.hasOwnProperty("radius")) {
+              if (typeof message.radius !== "number")
+                return "radius: number expected";
+            }
+            if (message.flattening != null && message.hasOwnProperty("flattening")) {
+              if (typeof message.flattening !== "number")
+                return "flattening: number expected";
+            }
+            if (message.elevationBias != null && message.hasOwnProperty("elevationBias")) {
+              if (typeof message.elevationBias !== "number")
+                return "elevationBias: number expected";
+            }
+            if (message.negativeAltitudeExponentBias != null && message.hasOwnProperty("negativeAltitudeExponentBias")) {
+              if (!$util.isInteger(message.negativeAltitudeExponentBias))
+                return "negativeAltitudeExponentBias: integer expected";
+            }
+            if (message.compressedNegativeAltitudeThreshold != null && message.hasOwnProperty("compressedNegativeAltitudeThreshold")) {
+              if (typeof message.compressedNegativeAltitudeThreshold !== "number")
+                return "compressedNegativeAltitudeThreshold: number expected";
+            }
+            return null;
+          };
+          PlanetModelProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.PlanetModelProto)
+              return object;
+            var message = new $root.keyhole.dbroot.PlanetModelProto();
+            if (object.radius != null)
+              message.radius = Number(object.radius);
+            if (object.flattening != null)
+              message.flattening = Number(object.flattening);
+            if (object.elevationBias != null)
+              message.elevationBias = Number(object.elevationBias);
+            if (object.negativeAltitudeExponentBias != null)
+              message.negativeAltitudeExponentBias = object.negativeAltitudeExponentBias | 0;
+            if (object.compressedNegativeAltitudeThreshold != null)
+              message.compressedNegativeAltitudeThreshold = Number(object.compressedNegativeAltitudeThreshold);
+            return message;
+          };
+          PlanetModelProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.radius = 6378.137;
+              object.flattening = 0.00335281066474748;
+              object.elevationBias = 0;
+              object.negativeAltitudeExponentBias = 0;
+              object.compressedNegativeAltitudeThreshold = 0;
+            }
+            if (message.radius != null && message.hasOwnProperty("radius"))
+              object.radius = options.json && !isFinite(message.radius) ? String(message.radius) : message.radius;
+            if (message.flattening != null && message.hasOwnProperty("flattening"))
+              object.flattening = options.json && !isFinite(message.flattening) ? String(message.flattening) : message.flattening;
+            if (message.elevationBias != null && message.hasOwnProperty("elevationBias"))
+              object.elevationBias = options.json && !isFinite(message.elevationBias) ? String(message.elevationBias) : message.elevationBias;
+            if (message.negativeAltitudeExponentBias != null && message.hasOwnProperty("negativeAltitudeExponentBias"))
+              object.negativeAltitudeExponentBias = message.negativeAltitudeExponentBias;
+            if (message.compressedNegativeAltitudeThreshold != null && message.hasOwnProperty("compressedNegativeAltitudeThreshold"))
+              object.compressedNegativeAltitudeThreshold = options.json && !isFinite(message.compressedNegativeAltitudeThreshold) ? String(message.compressedNegativeAltitudeThreshold) : message.compressedNegativeAltitudeThreshold;
+            return object;
+          };
+          PlanetModelProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          PlanetModelProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.PlanetModelProto";
+          };
+          return PlanetModelProto;
+        }();
+        dbroot.ProviderInfoProto = function() {
+          function ProviderInfoProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          ProviderInfoProto.prototype.providerId = 0;
+          ProviderInfoProto.prototype.copyrightString = null;
+          ProviderInfoProto.prototype.verticalPixelOffset = -1;
+          ProviderInfoProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.ProviderInfoProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.providerId = reader.int32();
+                  break;
+                }
+                case 2: {
+                  message.copyrightString = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 3: {
+                  message.verticalPixelOffset = reader.int32();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("providerId"))
+              throw $util.ProtocolError("missing required 'providerId'", { instance: message });
+            return message;
+          };
+          ProviderInfoProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (!$util.isInteger(message.providerId))
+              return "providerId: integer expected";
+            if (message.copyrightString != null && message.hasOwnProperty("copyrightString")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.copyrightString);
+              if (error)
+                return "copyrightString." + error;
+            }
+            if (message.verticalPixelOffset != null && message.hasOwnProperty("verticalPixelOffset")) {
+              if (!$util.isInteger(message.verticalPixelOffset))
+                return "verticalPixelOffset: integer expected";
+            }
+            return null;
+          };
+          ProviderInfoProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.ProviderInfoProto)
+              return object;
+            var message = new $root.keyhole.dbroot.ProviderInfoProto();
+            if (object.providerId != null)
+              message.providerId = object.providerId | 0;
+            if (object.copyrightString != null) {
+              if (typeof object.copyrightString !== "object")
+                throw TypeError(".keyhole.dbroot.ProviderInfoProto.copyrightString: object expected");
+              message.copyrightString = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.copyrightString);
+            }
+            if (object.verticalPixelOffset != null)
+              message.verticalPixelOffset = object.verticalPixelOffset | 0;
+            return message;
+          };
+          ProviderInfoProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.providerId = 0;
+              object.copyrightString = null;
+              object.verticalPixelOffset = -1;
+            }
+            if (message.providerId != null && message.hasOwnProperty("providerId"))
+              object.providerId = message.providerId;
+            if (message.copyrightString != null && message.hasOwnProperty("copyrightString"))
+              object.copyrightString = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.copyrightString, options);
+            if (message.verticalPixelOffset != null && message.hasOwnProperty("verticalPixelOffset"))
+              object.verticalPixelOffset = message.verticalPixelOffset;
+            return object;
+          };
+          ProviderInfoProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          ProviderInfoProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.ProviderInfoProto";
+          };
+          return ProviderInfoProto;
+        }();
+        dbroot.PopUpProto = function() {
+          function PopUpProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          PopUpProto.prototype.isBalloonStyle = false;
+          PopUpProto.prototype.text = null;
+          PopUpProto.prototype.backgroundColorAbgr = 4294967295;
+          PopUpProto.prototype.textColorAbgr = 4278190080;
+          PopUpProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.PopUpProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.isBalloonStyle = reader.bool();
+                  break;
+                }
+                case 2: {
+                  message.text = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 3: {
+                  message.backgroundColorAbgr = reader.fixed32();
+                  break;
+                }
+                case 4: {
+                  message.textColorAbgr = reader.fixed32();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          PopUpProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.isBalloonStyle != null && message.hasOwnProperty("isBalloonStyle")) {
+              if (typeof message.isBalloonStyle !== "boolean")
+                return "isBalloonStyle: boolean expected";
+            }
+            if (message.text != null && message.hasOwnProperty("text")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.text);
+              if (error)
+                return "text." + error;
+            }
+            if (message.backgroundColorAbgr != null && message.hasOwnProperty("backgroundColorAbgr")) {
+              if (!$util.isInteger(message.backgroundColorAbgr))
+                return "backgroundColorAbgr: integer expected";
+            }
+            if (message.textColorAbgr != null && message.hasOwnProperty("textColorAbgr")) {
+              if (!$util.isInteger(message.textColorAbgr))
+                return "textColorAbgr: integer expected";
+            }
+            return null;
+          };
+          PopUpProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.PopUpProto)
+              return object;
+            var message = new $root.keyhole.dbroot.PopUpProto();
+            if (object.isBalloonStyle != null)
+              message.isBalloonStyle = Boolean(object.isBalloonStyle);
+            if (object.text != null) {
+              if (typeof object.text !== "object")
+                throw TypeError(".keyhole.dbroot.PopUpProto.text: object expected");
+              message.text = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.text);
+            }
+            if (object.backgroundColorAbgr != null)
+              message.backgroundColorAbgr = object.backgroundColorAbgr >>> 0;
+            if (object.textColorAbgr != null)
+              message.textColorAbgr = object.textColorAbgr >>> 0;
+            return message;
+          };
+          PopUpProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.isBalloonStyle = false;
+              object.text = null;
+              object.backgroundColorAbgr = 4294967295;
+              object.textColorAbgr = 4278190080;
+            }
+            if (message.isBalloonStyle != null && message.hasOwnProperty("isBalloonStyle"))
+              object.isBalloonStyle = message.isBalloonStyle;
+            if (message.text != null && message.hasOwnProperty("text"))
+              object.text = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.text, options);
+            if (message.backgroundColorAbgr != null && message.hasOwnProperty("backgroundColorAbgr"))
+              object.backgroundColorAbgr = message.backgroundColorAbgr;
+            if (message.textColorAbgr != null && message.hasOwnProperty("textColorAbgr"))
+              object.textColorAbgr = message.textColorAbgr;
+            return object;
+          };
+          PopUpProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          PopUpProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.PopUpProto";
+          };
+          return PopUpProto;
+        }();
+        dbroot.StyleAttributeProto = function() {
+          function StyleAttributeProto(properties) {
+            this.drawFlag = [];
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          StyleAttributeProto.prototype.styleId = "";
+          StyleAttributeProto.prototype.providerId = 0;
+          StyleAttributeProto.prototype.polyColorAbgr = 4294967295;
+          StyleAttributeProto.prototype.lineColorAbgr = 4294967295;
+          StyleAttributeProto.prototype.lineWidth = 1;
+          StyleAttributeProto.prototype.labelColorAbgr = 4294967295;
+          StyleAttributeProto.prototype.labelScale = 1;
+          StyleAttributeProto.prototype.placemarkIconColorAbgr = 4294967295;
+          StyleAttributeProto.prototype.placemarkIconScale = 1;
+          StyleAttributeProto.prototype.placemarkIconPath = null;
+          StyleAttributeProto.prototype.placemarkIconX = 0;
+          StyleAttributeProto.prototype.placemarkIconY = 0;
+          StyleAttributeProto.prototype.placemarkIconWidth = 32;
+          StyleAttributeProto.prototype.placemarkIconHeight = 32;
+          StyleAttributeProto.prototype.popUp = null;
+          StyleAttributeProto.prototype.drawFlag = $util.emptyArray;
+          StyleAttributeProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.StyleAttributeProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.styleId = reader.string();
+                  break;
+                }
+                case 3: {
+                  message.providerId = reader.int32();
+                  break;
+                }
+                case 4: {
+                  message.polyColorAbgr = reader.fixed32();
+                  break;
+                }
+                case 5: {
+                  message.lineColorAbgr = reader.fixed32();
+                  break;
+                }
+                case 6: {
+                  message.lineWidth = reader.float();
+                  break;
+                }
+                case 7: {
+                  message.labelColorAbgr = reader.fixed32();
+                  break;
+                }
+                case 8: {
+                  message.labelScale = reader.float();
+                  break;
+                }
+                case 9: {
+                  message.placemarkIconColorAbgr = reader.fixed32();
+                  break;
+                }
+                case 10: {
+                  message.placemarkIconScale = reader.float();
+                  break;
+                }
+                case 11: {
+                  message.placemarkIconPath = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 12: {
+                  message.placemarkIconX = reader.int32();
+                  break;
+                }
+                case 13: {
+                  message.placemarkIconY = reader.int32();
+                  break;
+                }
+                case 14: {
+                  message.placemarkIconWidth = reader.int32();
+                  break;
+                }
+                case 15: {
+                  message.placemarkIconHeight = reader.int32();
+                  break;
+                }
+                case 16: {
+                  message.popUp = $root.keyhole.dbroot.PopUpProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 17: {
+                  if (!(message.drawFlag && message.drawFlag.length))
+                    message.drawFlag = [];
+                  message.drawFlag.push($root.keyhole.dbroot.DrawFlagProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("styleId"))
+              throw $util.ProtocolError("missing required 'styleId'", { instance: message });
+            return message;
+          };
+          StyleAttributeProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (!$util.isString(message.styleId))
+              return "styleId: string expected";
+            if (message.providerId != null && message.hasOwnProperty("providerId")) {
+              if (!$util.isInteger(message.providerId))
+                return "providerId: integer expected";
+            }
+            if (message.polyColorAbgr != null && message.hasOwnProperty("polyColorAbgr")) {
+              if (!$util.isInteger(message.polyColorAbgr))
+                return "polyColorAbgr: integer expected";
+            }
+            if (message.lineColorAbgr != null && message.hasOwnProperty("lineColorAbgr")) {
+              if (!$util.isInteger(message.lineColorAbgr))
+                return "lineColorAbgr: integer expected";
+            }
+            if (message.lineWidth != null && message.hasOwnProperty("lineWidth")) {
+              if (typeof message.lineWidth !== "number")
+                return "lineWidth: number expected";
+            }
+            if (message.labelColorAbgr != null && message.hasOwnProperty("labelColorAbgr")) {
+              if (!$util.isInteger(message.labelColorAbgr))
+                return "labelColorAbgr: integer expected";
+            }
+            if (message.labelScale != null && message.hasOwnProperty("labelScale")) {
+              if (typeof message.labelScale !== "number")
+                return "labelScale: number expected";
+            }
+            if (message.placemarkIconColorAbgr != null && message.hasOwnProperty("placemarkIconColorAbgr")) {
+              if (!$util.isInteger(message.placemarkIconColorAbgr))
+                return "placemarkIconColorAbgr: integer expected";
+            }
+            if (message.placemarkIconScale != null && message.hasOwnProperty("placemarkIconScale")) {
+              if (typeof message.placemarkIconScale !== "number")
+                return "placemarkIconScale: number expected";
+            }
+            if (message.placemarkIconPath != null && message.hasOwnProperty("placemarkIconPath")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.placemarkIconPath);
+              if (error)
+                return "placemarkIconPath." + error;
+            }
+            if (message.placemarkIconX != null && message.hasOwnProperty("placemarkIconX")) {
+              if (!$util.isInteger(message.placemarkIconX))
+                return "placemarkIconX: integer expected";
+            }
+            if (message.placemarkIconY != null && message.hasOwnProperty("placemarkIconY")) {
+              if (!$util.isInteger(message.placemarkIconY))
+                return "placemarkIconY: integer expected";
+            }
+            if (message.placemarkIconWidth != null && message.hasOwnProperty("placemarkIconWidth")) {
+              if (!$util.isInteger(message.placemarkIconWidth))
+                return "placemarkIconWidth: integer expected";
+            }
+            if (message.placemarkIconHeight != null && message.hasOwnProperty("placemarkIconHeight")) {
+              if (!$util.isInteger(message.placemarkIconHeight))
+                return "placemarkIconHeight: integer expected";
+            }
+            if (message.popUp != null && message.hasOwnProperty("popUp")) {
+              var error = $root.keyhole.dbroot.PopUpProto.verify(message.popUp);
+              if (error)
+                return "popUp." + error;
+            }
+            if (message.drawFlag != null && message.hasOwnProperty("drawFlag")) {
+              if (!Array.isArray(message.drawFlag))
+                return "drawFlag: array expected";
+              for (var i = 0; i < message.drawFlag.length; ++i) {
+                var error = $root.keyhole.dbroot.DrawFlagProto.verify(message.drawFlag[i]);
+                if (error)
+                  return "drawFlag." + error;
+              }
+            }
+            return null;
+          };
+          StyleAttributeProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.StyleAttributeProto)
+              return object;
+            var message = new $root.keyhole.dbroot.StyleAttributeProto();
+            if (object.styleId != null)
+              message.styleId = String(object.styleId);
+            if (object.providerId != null)
+              message.providerId = object.providerId | 0;
+            if (object.polyColorAbgr != null)
+              message.polyColorAbgr = object.polyColorAbgr >>> 0;
+            if (object.lineColorAbgr != null)
+              message.lineColorAbgr = object.lineColorAbgr >>> 0;
+            if (object.lineWidth != null)
+              message.lineWidth = Number(object.lineWidth);
+            if (object.labelColorAbgr != null)
+              message.labelColorAbgr = object.labelColorAbgr >>> 0;
+            if (object.labelScale != null)
+              message.labelScale = Number(object.labelScale);
+            if (object.placemarkIconColorAbgr != null)
+              message.placemarkIconColorAbgr = object.placemarkIconColorAbgr >>> 0;
+            if (object.placemarkIconScale != null)
+              message.placemarkIconScale = Number(object.placemarkIconScale);
+            if (object.placemarkIconPath != null) {
+              if (typeof object.placemarkIconPath !== "object")
+                throw TypeError(".keyhole.dbroot.StyleAttributeProto.placemarkIconPath: object expected");
+              message.placemarkIconPath = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.placemarkIconPath);
+            }
+            if (object.placemarkIconX != null)
+              message.placemarkIconX = object.placemarkIconX | 0;
+            if (object.placemarkIconY != null)
+              message.placemarkIconY = object.placemarkIconY | 0;
+            if (object.placemarkIconWidth != null)
+              message.placemarkIconWidth = object.placemarkIconWidth | 0;
+            if (object.placemarkIconHeight != null)
+              message.placemarkIconHeight = object.placemarkIconHeight | 0;
+            if (object.popUp != null) {
+              if (typeof object.popUp !== "object")
+                throw TypeError(".keyhole.dbroot.StyleAttributeProto.popUp: object expected");
+              message.popUp = $root.keyhole.dbroot.PopUpProto.fromObject(object.popUp);
+            }
+            if (object.drawFlag) {
+              if (!Array.isArray(object.drawFlag))
+                throw TypeError(".keyhole.dbroot.StyleAttributeProto.drawFlag: array expected");
+              message.drawFlag = [];
+              for (var i = 0; i < object.drawFlag.length; ++i) {
+                if (typeof object.drawFlag[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.StyleAttributeProto.drawFlag: object expected");
+                message.drawFlag[i] = $root.keyhole.dbroot.DrawFlagProto.fromObject(object.drawFlag[i]);
+              }
+            }
+            return message;
+          };
+          StyleAttributeProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+              object.drawFlag = [];
+            if (options.defaults) {
+              object.styleId = "";
+              object.providerId = 0;
+              object.polyColorAbgr = 4294967295;
+              object.lineColorAbgr = 4294967295;
+              object.lineWidth = 1;
+              object.labelColorAbgr = 4294967295;
+              object.labelScale = 1;
+              object.placemarkIconColorAbgr = 4294967295;
+              object.placemarkIconScale = 1;
+              object.placemarkIconPath = null;
+              object.placemarkIconX = 0;
+              object.placemarkIconY = 0;
+              object.placemarkIconWidth = 32;
+              object.placemarkIconHeight = 32;
+              object.popUp = null;
+            }
+            if (message.styleId != null && message.hasOwnProperty("styleId"))
+              object.styleId = message.styleId;
+            if (message.providerId != null && message.hasOwnProperty("providerId"))
+              object.providerId = message.providerId;
+            if (message.polyColorAbgr != null && message.hasOwnProperty("polyColorAbgr"))
+              object.polyColorAbgr = message.polyColorAbgr;
+            if (message.lineColorAbgr != null && message.hasOwnProperty("lineColorAbgr"))
+              object.lineColorAbgr = message.lineColorAbgr;
+            if (message.lineWidth != null && message.hasOwnProperty("lineWidth"))
+              object.lineWidth = options.json && !isFinite(message.lineWidth) ? String(message.lineWidth) : message.lineWidth;
+            if (message.labelColorAbgr != null && message.hasOwnProperty("labelColorAbgr"))
+              object.labelColorAbgr = message.labelColorAbgr;
+            if (message.labelScale != null && message.hasOwnProperty("labelScale"))
+              object.labelScale = options.json && !isFinite(message.labelScale) ? String(message.labelScale) : message.labelScale;
+            if (message.placemarkIconColorAbgr != null && message.hasOwnProperty("placemarkIconColorAbgr"))
+              object.placemarkIconColorAbgr = message.placemarkIconColorAbgr;
+            if (message.placemarkIconScale != null && message.hasOwnProperty("placemarkIconScale"))
+              object.placemarkIconScale = options.json && !isFinite(message.placemarkIconScale) ? String(message.placemarkIconScale) : message.placemarkIconScale;
+            if (message.placemarkIconPath != null && message.hasOwnProperty("placemarkIconPath"))
+              object.placemarkIconPath = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.placemarkIconPath, options);
+            if (message.placemarkIconX != null && message.hasOwnProperty("placemarkIconX"))
+              object.placemarkIconX = message.placemarkIconX;
+            if (message.placemarkIconY != null && message.hasOwnProperty("placemarkIconY"))
+              object.placemarkIconY = message.placemarkIconY;
+            if (message.placemarkIconWidth != null && message.hasOwnProperty("placemarkIconWidth"))
+              object.placemarkIconWidth = message.placemarkIconWidth;
+            if (message.placemarkIconHeight != null && message.hasOwnProperty("placemarkIconHeight"))
+              object.placemarkIconHeight = message.placemarkIconHeight;
+            if (message.popUp != null && message.hasOwnProperty("popUp"))
+              object.popUp = $root.keyhole.dbroot.PopUpProto.toObject(message.popUp, options);
+            if (message.drawFlag && message.drawFlag.length) {
+              object.drawFlag = [];
+              for (var j = 0; j < message.drawFlag.length; ++j)
+                object.drawFlag[j] = $root.keyhole.dbroot.DrawFlagProto.toObject(message.drawFlag[j], options);
+            }
+            return object;
+          };
+          StyleAttributeProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          StyleAttributeProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.StyleAttributeProto";
+          };
+          return StyleAttributeProto;
+        }();
+        dbroot.StyleMapProto = function() {
+          function StyleMapProto(properties) {
+            this.channelId = [];
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          StyleMapProto.prototype.styleMapId = 0;
+          StyleMapProto.prototype.channelId = $util.emptyArray;
+          StyleMapProto.prototype.normalStyleAttribute = 0;
+          StyleMapProto.prototype.highlightStyleAttribute = 0;
+          StyleMapProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.StyleMapProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.styleMapId = reader.int32();
+                  break;
+                }
+                case 2: {
+                  if (!(message.channelId && message.channelId.length))
+                    message.channelId = [];
+                  if ((tag & 7) === 2) {
+                    var end2 = reader.uint32() + reader.pos;
+                    while (reader.pos < end2)
+                      message.channelId.push(reader.int32());
+                  } else
+                    message.channelId.push(reader.int32());
+                  break;
+                }
+                case 3: {
+                  message.normalStyleAttribute = reader.int32();
+                  break;
+                }
+                case 4: {
+                  message.highlightStyleAttribute = reader.int32();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("styleMapId"))
+              throw $util.ProtocolError("missing required 'styleMapId'", { instance: message });
+            return message;
+          };
+          StyleMapProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (!$util.isInteger(message.styleMapId))
+              return "styleMapId: integer expected";
+            if (message.channelId != null && message.hasOwnProperty("channelId")) {
+              if (!Array.isArray(message.channelId))
+                return "channelId: array expected";
+              for (var i = 0; i < message.channelId.length; ++i)
+                if (!$util.isInteger(message.channelId[i]))
+                  return "channelId: integer[] expected";
+            }
+            if (message.normalStyleAttribute != null && message.hasOwnProperty("normalStyleAttribute")) {
+              if (!$util.isInteger(message.normalStyleAttribute))
+                return "normalStyleAttribute: integer expected";
+            }
+            if (message.highlightStyleAttribute != null && message.hasOwnProperty("highlightStyleAttribute")) {
+              if (!$util.isInteger(message.highlightStyleAttribute))
+                return "highlightStyleAttribute: integer expected";
+            }
+            return null;
+          };
+          StyleMapProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.StyleMapProto)
+              return object;
+            var message = new $root.keyhole.dbroot.StyleMapProto();
+            if (object.styleMapId != null)
+              message.styleMapId = object.styleMapId | 0;
+            if (object.channelId) {
+              if (!Array.isArray(object.channelId))
+                throw TypeError(".keyhole.dbroot.StyleMapProto.channelId: array expected");
+              message.channelId = [];
+              for (var i = 0; i < object.channelId.length; ++i)
+                message.channelId[i] = object.channelId[i] | 0;
+            }
+            if (object.normalStyleAttribute != null)
+              message.normalStyleAttribute = object.normalStyleAttribute | 0;
+            if (object.highlightStyleAttribute != null)
+              message.highlightStyleAttribute = object.highlightStyleAttribute | 0;
+            return message;
+          };
+          StyleMapProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+              object.channelId = [];
+            if (options.defaults) {
+              object.styleMapId = 0;
+              object.normalStyleAttribute = 0;
+              object.highlightStyleAttribute = 0;
+            }
+            if (message.styleMapId != null && message.hasOwnProperty("styleMapId"))
+              object.styleMapId = message.styleMapId;
+            if (message.channelId && message.channelId.length) {
+              object.channelId = [];
+              for (var j = 0; j < message.channelId.length; ++j)
+                object.channelId[j] = message.channelId[j];
+            }
+            if (message.normalStyleAttribute != null && message.hasOwnProperty("normalStyleAttribute"))
+              object.normalStyleAttribute = message.normalStyleAttribute;
+            if (message.highlightStyleAttribute != null && message.hasOwnProperty("highlightStyleAttribute"))
+              object.highlightStyleAttribute = message.highlightStyleAttribute;
+            return object;
+          };
+          StyleMapProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          StyleMapProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.StyleMapProto";
+          };
+          return StyleMapProto;
+        }();
+        dbroot.ZoomRangeProto = function() {
+          function ZoomRangeProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          ZoomRangeProto.prototype.minZoom = 0;
+          ZoomRangeProto.prototype.maxZoom = 0;
+          ZoomRangeProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.ZoomRangeProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.minZoom = reader.int32();
+                  break;
+                }
+                case 2: {
+                  message.maxZoom = reader.int32();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("minZoom"))
+              throw $util.ProtocolError("missing required 'minZoom'", { instance: message });
+            if (!message.hasOwnProperty("maxZoom"))
+              throw $util.ProtocolError("missing required 'maxZoom'", { instance: message });
+            return message;
+          };
+          ZoomRangeProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (!$util.isInteger(message.minZoom))
+              return "minZoom: integer expected";
+            if (!$util.isInteger(message.maxZoom))
+              return "maxZoom: integer expected";
+            return null;
+          };
+          ZoomRangeProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.ZoomRangeProto)
+              return object;
+            var message = new $root.keyhole.dbroot.ZoomRangeProto();
+            if (object.minZoom != null)
+              message.minZoom = object.minZoom | 0;
+            if (object.maxZoom != null)
+              message.maxZoom = object.maxZoom | 0;
+            return message;
+          };
+          ZoomRangeProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.minZoom = 0;
+              object.maxZoom = 0;
+            }
+            if (message.minZoom != null && message.hasOwnProperty("minZoom"))
+              object.minZoom = message.minZoom;
+            if (message.maxZoom != null && message.hasOwnProperty("maxZoom"))
+              object.maxZoom = message.maxZoom;
+            return object;
+          };
+          ZoomRangeProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          ZoomRangeProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.ZoomRangeProto";
+          };
+          return ZoomRangeProto;
+        }();
+        dbroot.DrawFlagProto = function() {
+          function DrawFlagProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          DrawFlagProto.prototype.drawFlagType = 1;
+          DrawFlagProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.DrawFlagProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.drawFlagType = reader.int32();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("drawFlagType"))
+              throw $util.ProtocolError("missing required 'drawFlagType'", { instance: message });
+            return message;
+          };
+          DrawFlagProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            switch (message.drawFlagType) {
+              default:
+                return "drawFlagType: enum value expected";
+              case 1:
+              case 2:
+              case 3:
+              case 4:
+              case 5:
+                break;
+            }
+            return null;
+          };
+          DrawFlagProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.DrawFlagProto)
+              return object;
+            var message = new $root.keyhole.dbroot.DrawFlagProto();
+            switch (object.drawFlagType) {
+              case "TYPE_FILL_ONLY":
+              case 1:
+                message.drawFlagType = 1;
+                break;
+              case "TYPE_OUTLINE_ONLY":
+              case 2:
+                message.drawFlagType = 2;
+                break;
+              case "TYPE_FILL_AND_OUTLINE":
+              case 3:
+                message.drawFlagType = 3;
+                break;
+              case "TYPE_ANTIALIASING":
+              case 4:
+                message.drawFlagType = 4;
+                break;
+              case "TYPE_CENTER_LABEL":
+              case 5:
+                message.drawFlagType = 5;
+                break;
+            }
+            return message;
+          };
+          DrawFlagProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults)
+              object.drawFlagType = options.enums === String ? "TYPE_FILL_ONLY" : 1;
+            if (message.drawFlagType != null && message.hasOwnProperty("drawFlagType"))
+              object.drawFlagType = options.enums === String ? $root.keyhole.dbroot.DrawFlagProto.DrawFlagType[message.drawFlagType] : message.drawFlagType;
+            return object;
+          };
+          DrawFlagProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          DrawFlagProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.DrawFlagProto";
+          };
+          DrawFlagProto.DrawFlagType = function() {
+            var valuesById = {}, values = Object.create(valuesById);
+            values[valuesById[1] = "TYPE_FILL_ONLY"] = 1;
+            values[valuesById[2] = "TYPE_OUTLINE_ONLY"] = 2;
+            values[valuesById[3] = "TYPE_FILL_AND_OUTLINE"] = 3;
+            values[valuesById[4] = "TYPE_ANTIALIASING"] = 4;
+            values[valuesById[5] = "TYPE_CENTER_LABEL"] = 5;
+            return values;
+          }();
+          return DrawFlagProto;
+        }();
+        dbroot.LayerProto = function() {
+          function LayerProto(properties) {
+            this.zoomRange = [];
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          LayerProto.prototype.zoomRange = $util.emptyArray;
+          LayerProto.prototype.preserveTextLevel = 30;
+          LayerProto.prototype.lodBeginTransition = false;
+          LayerProto.prototype.lodEndTransition = false;
+          LayerProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.LayerProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  if (!(message.zoomRange && message.zoomRange.length))
+                    message.zoomRange = [];
+                  message.zoomRange.push($root.keyhole.dbroot.ZoomRangeProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 2: {
+                  message.preserveTextLevel = reader.int32();
+                  break;
+                }
+                case 4: {
+                  message.lodBeginTransition = reader.bool();
+                  break;
+                }
+                case 5: {
+                  message.lodEndTransition = reader.bool();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          LayerProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.zoomRange != null && message.hasOwnProperty("zoomRange")) {
+              if (!Array.isArray(message.zoomRange))
+                return "zoomRange: array expected";
+              for (var i = 0; i < message.zoomRange.length; ++i) {
+                var error = $root.keyhole.dbroot.ZoomRangeProto.verify(message.zoomRange[i]);
+                if (error)
+                  return "zoomRange." + error;
+              }
+            }
+            if (message.preserveTextLevel != null && message.hasOwnProperty("preserveTextLevel")) {
+              if (!$util.isInteger(message.preserveTextLevel))
+                return "preserveTextLevel: integer expected";
+            }
+            if (message.lodBeginTransition != null && message.hasOwnProperty("lodBeginTransition")) {
+              if (typeof message.lodBeginTransition !== "boolean")
+                return "lodBeginTransition: boolean expected";
+            }
+            if (message.lodEndTransition != null && message.hasOwnProperty("lodEndTransition")) {
+              if (typeof message.lodEndTransition !== "boolean")
+                return "lodEndTransition: boolean expected";
+            }
+            return null;
+          };
+          LayerProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.LayerProto)
+              return object;
+            var message = new $root.keyhole.dbroot.LayerProto();
+            if (object.zoomRange) {
+              if (!Array.isArray(object.zoomRange))
+                throw TypeError(".keyhole.dbroot.LayerProto.zoomRange: array expected");
+              message.zoomRange = [];
+              for (var i = 0; i < object.zoomRange.length; ++i) {
+                if (typeof object.zoomRange[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.LayerProto.zoomRange: object expected");
+                message.zoomRange[i] = $root.keyhole.dbroot.ZoomRangeProto.fromObject(object.zoomRange[i]);
+              }
+            }
+            if (object.preserveTextLevel != null)
+              message.preserveTextLevel = object.preserveTextLevel | 0;
+            if (object.lodBeginTransition != null)
+              message.lodBeginTransition = Boolean(object.lodBeginTransition);
+            if (object.lodEndTransition != null)
+              message.lodEndTransition = Boolean(object.lodEndTransition);
+            return message;
+          };
+          LayerProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+              object.zoomRange = [];
+            if (options.defaults) {
+              object.preserveTextLevel = 30;
+              object.lodBeginTransition = false;
+              object.lodEndTransition = false;
+            }
+            if (message.zoomRange && message.zoomRange.length) {
+              object.zoomRange = [];
+              for (var j = 0; j < message.zoomRange.length; ++j)
+                object.zoomRange[j] = $root.keyhole.dbroot.ZoomRangeProto.toObject(message.zoomRange[j], options);
+            }
+            if (message.preserveTextLevel != null && message.hasOwnProperty("preserveTextLevel"))
+              object.preserveTextLevel = message.preserveTextLevel;
+            if (message.lodBeginTransition != null && message.hasOwnProperty("lodBeginTransition"))
+              object.lodBeginTransition = message.lodBeginTransition;
+            if (message.lodEndTransition != null && message.hasOwnProperty("lodEndTransition"))
+              object.lodEndTransition = message.lodEndTransition;
+            return object;
+          };
+          LayerProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          LayerProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.LayerProto";
+          };
+          return LayerProto;
+        }();
+        dbroot.FolderProto = function() {
+          function FolderProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          FolderProto.prototype.isExpandable = true;
+          FolderProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.FolderProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.isExpandable = reader.bool();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          FolderProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.isExpandable != null && message.hasOwnProperty("isExpandable")) {
+              if (typeof message.isExpandable !== "boolean")
+                return "isExpandable: boolean expected";
+            }
+            return null;
+          };
+          FolderProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.FolderProto)
+              return object;
+            var message = new $root.keyhole.dbroot.FolderProto();
+            if (object.isExpandable != null)
+              message.isExpandable = Boolean(object.isExpandable);
+            return message;
+          };
+          FolderProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults)
+              object.isExpandable = true;
+            if (message.isExpandable != null && message.hasOwnProperty("isExpandable"))
+              object.isExpandable = message.isExpandable;
+            return object;
+          };
+          FolderProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          FolderProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.FolderProto";
+          };
+          return FolderProto;
+        }();
+        dbroot.RequirementProto = function() {
+          function RequirementProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          RequirementProto.prototype.requiredVram = "";
+          RequirementProto.prototype.requiredClientVer = "";
+          RequirementProto.prototype.probability = "";
+          RequirementProto.prototype.requiredUserAgent = "";
+          RequirementProto.prototype.requiredClientCapabilities = "";
+          RequirementProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.RequirementProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 3: {
+                  message.requiredVram = reader.string();
+                  break;
+                }
+                case 4: {
+                  message.requiredClientVer = reader.string();
+                  break;
+                }
+                case 5: {
+                  message.probability = reader.string();
+                  break;
+                }
+                case 6: {
+                  message.requiredUserAgent = reader.string();
+                  break;
+                }
+                case 7: {
+                  message.requiredClientCapabilities = reader.string();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          RequirementProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.requiredVram != null && message.hasOwnProperty("requiredVram")) {
+              if (!$util.isString(message.requiredVram))
+                return "requiredVram: string expected";
+            }
+            if (message.requiredClientVer != null && message.hasOwnProperty("requiredClientVer")) {
+              if (!$util.isString(message.requiredClientVer))
+                return "requiredClientVer: string expected";
+            }
+            if (message.probability != null && message.hasOwnProperty("probability")) {
+              if (!$util.isString(message.probability))
+                return "probability: string expected";
+            }
+            if (message.requiredUserAgent != null && message.hasOwnProperty("requiredUserAgent")) {
+              if (!$util.isString(message.requiredUserAgent))
+                return "requiredUserAgent: string expected";
+            }
+            if (message.requiredClientCapabilities != null && message.hasOwnProperty("requiredClientCapabilities")) {
+              if (!$util.isString(message.requiredClientCapabilities))
+                return "requiredClientCapabilities: string expected";
+            }
+            return null;
+          };
+          RequirementProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.RequirementProto)
+              return object;
+            var message = new $root.keyhole.dbroot.RequirementProto();
+            if (object.requiredVram != null)
+              message.requiredVram = String(object.requiredVram);
+            if (object.requiredClientVer != null)
+              message.requiredClientVer = String(object.requiredClientVer);
+            if (object.probability != null)
+              message.probability = String(object.probability);
+            if (object.requiredUserAgent != null)
+              message.requiredUserAgent = String(object.requiredUserAgent);
+            if (object.requiredClientCapabilities != null)
+              message.requiredClientCapabilities = String(object.requiredClientCapabilities);
+            return message;
+          };
+          RequirementProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.requiredVram = "";
+              object.requiredClientVer = "";
+              object.probability = "";
+              object.requiredUserAgent = "";
+              object.requiredClientCapabilities = "";
+            }
+            if (message.requiredVram != null && message.hasOwnProperty("requiredVram"))
+              object.requiredVram = message.requiredVram;
+            if (message.requiredClientVer != null && message.hasOwnProperty("requiredClientVer"))
+              object.requiredClientVer = message.requiredClientVer;
+            if (message.probability != null && message.hasOwnProperty("probability"))
+              object.probability = message.probability;
+            if (message.requiredUserAgent != null && message.hasOwnProperty("requiredUserAgent"))
+              object.requiredUserAgent = message.requiredUserAgent;
+            if (message.requiredClientCapabilities != null && message.hasOwnProperty("requiredClientCapabilities"))
+              object.requiredClientCapabilities = message.requiredClientCapabilities;
+            return object;
+          };
+          RequirementProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          RequirementProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.RequirementProto";
+          };
+          return RequirementProto;
+        }();
+        dbroot.LookAtProto = function() {
+          function LookAtProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          LookAtProto.prototype.longitude = 0;
+          LookAtProto.prototype.latitude = 0;
+          LookAtProto.prototype.range = 0;
+          LookAtProto.prototype.tilt = 0;
+          LookAtProto.prototype.heading = 0;
+          LookAtProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.LookAtProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.longitude = reader.float();
+                  break;
+                }
+                case 2: {
+                  message.latitude = reader.float();
+                  break;
+                }
+                case 3: {
+                  message.range = reader.float();
+                  break;
+                }
+                case 4: {
+                  message.tilt = reader.float();
+                  break;
+                }
+                case 5: {
+                  message.heading = reader.float();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("longitude"))
+              throw $util.ProtocolError("missing required 'longitude'", { instance: message });
+            if (!message.hasOwnProperty("latitude"))
+              throw $util.ProtocolError("missing required 'latitude'", { instance: message });
+            return message;
+          };
+          LookAtProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (typeof message.longitude !== "number")
+              return "longitude: number expected";
+            if (typeof message.latitude !== "number")
+              return "latitude: number expected";
+            if (message.range != null && message.hasOwnProperty("range")) {
+              if (typeof message.range !== "number")
+                return "range: number expected";
+            }
+            if (message.tilt != null && message.hasOwnProperty("tilt")) {
+              if (typeof message.tilt !== "number")
+                return "tilt: number expected";
+            }
+            if (message.heading != null && message.hasOwnProperty("heading")) {
+              if (typeof message.heading !== "number")
+                return "heading: number expected";
+            }
+            return null;
+          };
+          LookAtProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.LookAtProto)
+              return object;
+            var message = new $root.keyhole.dbroot.LookAtProto();
+            if (object.longitude != null)
+              message.longitude = Number(object.longitude);
+            if (object.latitude != null)
+              message.latitude = Number(object.latitude);
+            if (object.range != null)
+              message.range = Number(object.range);
+            if (object.tilt != null)
+              message.tilt = Number(object.tilt);
+            if (object.heading != null)
+              message.heading = Number(object.heading);
+            return message;
+          };
+          LookAtProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.longitude = 0;
+              object.latitude = 0;
+              object.range = 0;
+              object.tilt = 0;
+              object.heading = 0;
+            }
+            if (message.longitude != null && message.hasOwnProperty("longitude"))
+              object.longitude = options.json && !isFinite(message.longitude) ? String(message.longitude) : message.longitude;
+            if (message.latitude != null && message.hasOwnProperty("latitude"))
+              object.latitude = options.json && !isFinite(message.latitude) ? String(message.latitude) : message.latitude;
+            if (message.range != null && message.hasOwnProperty("range"))
+              object.range = options.json && !isFinite(message.range) ? String(message.range) : message.range;
+            if (message.tilt != null && message.hasOwnProperty("tilt"))
+              object.tilt = options.json && !isFinite(message.tilt) ? String(message.tilt) : message.tilt;
+            if (message.heading != null && message.hasOwnProperty("heading"))
+              object.heading = options.json && !isFinite(message.heading) ? String(message.heading) : message.heading;
+            return object;
+          };
+          LookAtProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          LookAtProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.LookAtProto";
+          };
+          return LookAtProto;
+        }();
+        dbroot.NestedFeatureProto = function() {
+          function NestedFeatureProto(properties) {
+            this.children = [];
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          NestedFeatureProto.prototype.featureType = 1;
+          NestedFeatureProto.prototype.kmlUrl = null;
+          NestedFeatureProto.prototype.databaseUrl = "";
+          NestedFeatureProto.prototype.layer = null;
+          NestedFeatureProto.prototype.folder = null;
+          NestedFeatureProto.prototype.requirement = null;
+          NestedFeatureProto.prototype.channelId = 0;
+          NestedFeatureProto.prototype.displayName = null;
+          NestedFeatureProto.prototype.isVisible = true;
+          NestedFeatureProto.prototype.isEnabled = true;
+          NestedFeatureProto.prototype.isChecked = false;
+          NestedFeatureProto.prototype.layerMenuIconPath = "icons/773_l.png";
+          NestedFeatureProto.prototype.description = null;
+          NestedFeatureProto.prototype.lookAt = null;
+          NestedFeatureProto.prototype.assetUuid = "";
+          NestedFeatureProto.prototype.isSaveLocked = true;
+          NestedFeatureProto.prototype.children = $util.emptyArray;
+          NestedFeatureProto.prototype.clientConfigScriptName = "";
+          NestedFeatureProto.prototype.dioramaDataChannelBase = -1;
+          NestedFeatureProto.prototype.replicaDataChannelBase = -1;
+          NestedFeatureProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.NestedFeatureProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.featureType = reader.int32();
+                  break;
+                }
+                case 2: {
+                  message.kmlUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 21: {
+                  message.databaseUrl = reader.string();
+                  break;
+                }
+                case 3: {
+                  message.layer = $root.keyhole.dbroot.LayerProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 4: {
+                  message.folder = $root.keyhole.dbroot.FolderProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 5: {
+                  message.requirement = $root.keyhole.dbroot.RequirementProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 6: {
+                  message.channelId = reader.int32();
+                  break;
+                }
+                case 7: {
+                  message.displayName = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 8: {
+                  message.isVisible = reader.bool();
+                  break;
+                }
+                case 9: {
+                  message.isEnabled = reader.bool();
+                  break;
+                }
+                case 10: {
+                  message.isChecked = reader.bool();
+                  break;
+                }
+                case 11: {
+                  message.layerMenuIconPath = reader.string();
+                  break;
+                }
+                case 12: {
+                  message.description = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 13: {
+                  message.lookAt = $root.keyhole.dbroot.LookAtProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 15: {
+                  message.assetUuid = reader.string();
+                  break;
+                }
+                case 16: {
+                  message.isSaveLocked = reader.bool();
+                  break;
+                }
+                case 17: {
+                  if (!(message.children && message.children.length))
+                    message.children = [];
+                  message.children.push($root.keyhole.dbroot.NestedFeatureProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 18: {
+                  message.clientConfigScriptName = reader.string();
+                  break;
+                }
+                case 19: {
+                  message.dioramaDataChannelBase = reader.int32();
+                  break;
+                }
+                case 20: {
+                  message.replicaDataChannelBase = reader.int32();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("channelId"))
+              throw $util.ProtocolError("missing required 'channelId'", { instance: message });
+            return message;
+          };
+          NestedFeatureProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.featureType != null && message.hasOwnProperty("featureType"))
+              switch (message.featureType) {
+                default:
+                  return "featureType: enum value expected";
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                  break;
+              }
+            if (message.kmlUrl != null && message.hasOwnProperty("kmlUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.kmlUrl);
+              if (error)
+                return "kmlUrl." + error;
+            }
+            if (message.databaseUrl != null && message.hasOwnProperty("databaseUrl")) {
+              if (!$util.isString(message.databaseUrl))
+                return "databaseUrl: string expected";
+            }
+            if (message.layer != null && message.hasOwnProperty("layer")) {
+              var error = $root.keyhole.dbroot.LayerProto.verify(message.layer);
+              if (error)
+                return "layer." + error;
+            }
+            if (message.folder != null && message.hasOwnProperty("folder")) {
+              var error = $root.keyhole.dbroot.FolderProto.verify(message.folder);
+              if (error)
+                return "folder." + error;
+            }
+            if (message.requirement != null && message.hasOwnProperty("requirement")) {
+              var error = $root.keyhole.dbroot.RequirementProto.verify(message.requirement);
+              if (error)
+                return "requirement." + error;
+            }
+            if (!$util.isInteger(message.channelId))
+              return "channelId: integer expected";
+            if (message.displayName != null && message.hasOwnProperty("displayName")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.displayName);
+              if (error)
+                return "displayName." + error;
+            }
+            if (message.isVisible != null && message.hasOwnProperty("isVisible")) {
+              if (typeof message.isVisible !== "boolean")
+                return "isVisible: boolean expected";
+            }
+            if (message.isEnabled != null && message.hasOwnProperty("isEnabled")) {
+              if (typeof message.isEnabled !== "boolean")
+                return "isEnabled: boolean expected";
+            }
+            if (message.isChecked != null && message.hasOwnProperty("isChecked")) {
+              if (typeof message.isChecked !== "boolean")
+                return "isChecked: boolean expected";
+            }
+            if (message.layerMenuIconPath != null && message.hasOwnProperty("layerMenuIconPath")) {
+              if (!$util.isString(message.layerMenuIconPath))
+                return "layerMenuIconPath: string expected";
+            }
+            if (message.description != null && message.hasOwnProperty("description")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.description);
+              if (error)
+                return "description." + error;
+            }
+            if (message.lookAt != null && message.hasOwnProperty("lookAt")) {
+              var error = $root.keyhole.dbroot.LookAtProto.verify(message.lookAt);
+              if (error)
+                return "lookAt." + error;
+            }
+            if (message.assetUuid != null && message.hasOwnProperty("assetUuid")) {
+              if (!$util.isString(message.assetUuid))
+                return "assetUuid: string expected";
+            }
+            if (message.isSaveLocked != null && message.hasOwnProperty("isSaveLocked")) {
+              if (typeof message.isSaveLocked !== "boolean")
+                return "isSaveLocked: boolean expected";
+            }
+            if (message.children != null && message.hasOwnProperty("children")) {
+              if (!Array.isArray(message.children))
+                return "children: array expected";
+              for (var i = 0; i < message.children.length; ++i) {
+                var error = $root.keyhole.dbroot.NestedFeatureProto.verify(message.children[i]);
+                if (error)
+                  return "children." + error;
+              }
+            }
+            if (message.clientConfigScriptName != null && message.hasOwnProperty("clientConfigScriptName")) {
+              if (!$util.isString(message.clientConfigScriptName))
+                return "clientConfigScriptName: string expected";
+            }
+            if (message.dioramaDataChannelBase != null && message.hasOwnProperty("dioramaDataChannelBase")) {
+              if (!$util.isInteger(message.dioramaDataChannelBase))
+                return "dioramaDataChannelBase: integer expected";
+            }
+            if (message.replicaDataChannelBase != null && message.hasOwnProperty("replicaDataChannelBase")) {
+              if (!$util.isInteger(message.replicaDataChannelBase))
+                return "replicaDataChannelBase: integer expected";
+            }
+            return null;
+          };
+          NestedFeatureProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.NestedFeatureProto)
+              return object;
+            var message = new $root.keyhole.dbroot.NestedFeatureProto();
+            switch (object.featureType) {
+              case "TYPE_POINT_Z":
+              case 1:
+                message.featureType = 1;
+                break;
+              case "TYPE_POLYGON_Z":
+              case 2:
+                message.featureType = 2;
+                break;
+              case "TYPE_LINE_Z":
+              case 3:
+                message.featureType = 3;
+                break;
+              case "TYPE_TERRAIN":
+              case 4:
+                message.featureType = 4;
+                break;
+            }
+            if (object.kmlUrl != null) {
+              if (typeof object.kmlUrl !== "object")
+                throw TypeError(".keyhole.dbroot.NestedFeatureProto.kmlUrl: object expected");
+              message.kmlUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.kmlUrl);
+            }
+            if (object.databaseUrl != null)
+              message.databaseUrl = String(object.databaseUrl);
+            if (object.layer != null) {
+              if (typeof object.layer !== "object")
+                throw TypeError(".keyhole.dbroot.NestedFeatureProto.layer: object expected");
+              message.layer = $root.keyhole.dbroot.LayerProto.fromObject(object.layer);
+            }
+            if (object.folder != null) {
+              if (typeof object.folder !== "object")
+                throw TypeError(".keyhole.dbroot.NestedFeatureProto.folder: object expected");
+              message.folder = $root.keyhole.dbroot.FolderProto.fromObject(object.folder);
+            }
+            if (object.requirement != null) {
+              if (typeof object.requirement !== "object")
+                throw TypeError(".keyhole.dbroot.NestedFeatureProto.requirement: object expected");
+              message.requirement = $root.keyhole.dbroot.RequirementProto.fromObject(object.requirement);
+            }
+            if (object.channelId != null)
+              message.channelId = object.channelId | 0;
+            if (object.displayName != null) {
+              if (typeof object.displayName !== "object")
+                throw TypeError(".keyhole.dbroot.NestedFeatureProto.displayName: object expected");
+              message.displayName = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.displayName);
+            }
+            if (object.isVisible != null)
+              message.isVisible = Boolean(object.isVisible);
+            if (object.isEnabled != null)
+              message.isEnabled = Boolean(object.isEnabled);
+            if (object.isChecked != null)
+              message.isChecked = Boolean(object.isChecked);
+            if (object.layerMenuIconPath != null)
+              message.layerMenuIconPath = String(object.layerMenuIconPath);
+            if (object.description != null) {
+              if (typeof object.description !== "object")
+                throw TypeError(".keyhole.dbroot.NestedFeatureProto.description: object expected");
+              message.description = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.description);
+            }
+            if (object.lookAt != null) {
+              if (typeof object.lookAt !== "object")
+                throw TypeError(".keyhole.dbroot.NestedFeatureProto.lookAt: object expected");
+              message.lookAt = $root.keyhole.dbroot.LookAtProto.fromObject(object.lookAt);
+            }
+            if (object.assetUuid != null)
+              message.assetUuid = String(object.assetUuid);
+            if (object.isSaveLocked != null)
+              message.isSaveLocked = Boolean(object.isSaveLocked);
+            if (object.children) {
+              if (!Array.isArray(object.children))
+                throw TypeError(".keyhole.dbroot.NestedFeatureProto.children: array expected");
+              message.children = [];
+              for (var i = 0; i < object.children.length; ++i) {
+                if (typeof object.children[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.NestedFeatureProto.children: object expected");
+                message.children[i] = $root.keyhole.dbroot.NestedFeatureProto.fromObject(object.children[i]);
+              }
+            }
+            if (object.clientConfigScriptName != null)
+              message.clientConfigScriptName = String(object.clientConfigScriptName);
+            if (object.dioramaDataChannelBase != null)
+              message.dioramaDataChannelBase = object.dioramaDataChannelBase | 0;
+            if (object.replicaDataChannelBase != null)
+              message.replicaDataChannelBase = object.replicaDataChannelBase | 0;
+            return message;
+          };
+          NestedFeatureProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+              object.children = [];
+            if (options.defaults) {
+              object.featureType = options.enums === String ? "TYPE_POINT_Z" : 1;
+              object.kmlUrl = null;
+              object.layer = null;
+              object.folder = null;
+              object.requirement = null;
+              object.channelId = 0;
+              object.displayName = null;
+              object.isVisible = true;
+              object.isEnabled = true;
+              object.isChecked = false;
+              object.layerMenuIconPath = "icons/773_l.png";
+              object.description = null;
+              object.lookAt = null;
+              object.assetUuid = "";
+              object.isSaveLocked = true;
+              object.clientConfigScriptName = "";
+              object.dioramaDataChannelBase = -1;
+              object.replicaDataChannelBase = -1;
+              object.databaseUrl = "";
+            }
+            if (message.featureType != null && message.hasOwnProperty("featureType"))
+              object.featureType = options.enums === String ? $root.keyhole.dbroot.NestedFeatureProto.FeatureType[message.featureType] : message.featureType;
+            if (message.kmlUrl != null && message.hasOwnProperty("kmlUrl"))
+              object.kmlUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.kmlUrl, options);
+            if (message.layer != null && message.hasOwnProperty("layer"))
+              object.layer = $root.keyhole.dbroot.LayerProto.toObject(message.layer, options);
+            if (message.folder != null && message.hasOwnProperty("folder"))
+              object.folder = $root.keyhole.dbroot.FolderProto.toObject(message.folder, options);
+            if (message.requirement != null && message.hasOwnProperty("requirement"))
+              object.requirement = $root.keyhole.dbroot.RequirementProto.toObject(message.requirement, options);
+            if (message.channelId != null && message.hasOwnProperty("channelId"))
+              object.channelId = message.channelId;
+            if (message.displayName != null && message.hasOwnProperty("displayName"))
+              object.displayName = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.displayName, options);
+            if (message.isVisible != null && message.hasOwnProperty("isVisible"))
+              object.isVisible = message.isVisible;
+            if (message.isEnabled != null && message.hasOwnProperty("isEnabled"))
+              object.isEnabled = message.isEnabled;
+            if (message.isChecked != null && message.hasOwnProperty("isChecked"))
+              object.isChecked = message.isChecked;
+            if (message.layerMenuIconPath != null && message.hasOwnProperty("layerMenuIconPath"))
+              object.layerMenuIconPath = message.layerMenuIconPath;
+            if (message.description != null && message.hasOwnProperty("description"))
+              object.description = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.description, options);
+            if (message.lookAt != null && message.hasOwnProperty("lookAt"))
+              object.lookAt = $root.keyhole.dbroot.LookAtProto.toObject(message.lookAt, options);
+            if (message.assetUuid != null && message.hasOwnProperty("assetUuid"))
+              object.assetUuid = message.assetUuid;
+            if (message.isSaveLocked != null && message.hasOwnProperty("isSaveLocked"))
+              object.isSaveLocked = message.isSaveLocked;
+            if (message.children && message.children.length) {
+              object.children = [];
+              for (var j = 0; j < message.children.length; ++j)
+                object.children[j] = $root.keyhole.dbroot.NestedFeatureProto.toObject(message.children[j], options);
+            }
+            if (message.clientConfigScriptName != null && message.hasOwnProperty("clientConfigScriptName"))
+              object.clientConfigScriptName = message.clientConfigScriptName;
+            if (message.dioramaDataChannelBase != null && message.hasOwnProperty("dioramaDataChannelBase"))
+              object.dioramaDataChannelBase = message.dioramaDataChannelBase;
+            if (message.replicaDataChannelBase != null && message.hasOwnProperty("replicaDataChannelBase"))
+              object.replicaDataChannelBase = message.replicaDataChannelBase;
+            if (message.databaseUrl != null && message.hasOwnProperty("databaseUrl"))
+              object.databaseUrl = message.databaseUrl;
+            return object;
+          };
+          NestedFeatureProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          NestedFeatureProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.NestedFeatureProto";
+          };
+          NestedFeatureProto.FeatureType = function() {
+            var valuesById = {}, values = Object.create(valuesById);
+            values[valuesById[1] = "TYPE_POINT_Z"] = 1;
+            values[valuesById[2] = "TYPE_POLYGON_Z"] = 2;
+            values[valuesById[3] = "TYPE_LINE_Z"] = 3;
+            values[valuesById[4] = "TYPE_TERRAIN"] = 4;
+            return values;
+          }();
+          return NestedFeatureProto;
+        }();
+        dbroot.MfeDomainFeaturesProto = function() {
+          function MfeDomainFeaturesProto(properties) {
+            this.supportedFeatures = [];
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          MfeDomainFeaturesProto.prototype.countryCode = "";
+          MfeDomainFeaturesProto.prototype.domainName = "";
+          MfeDomainFeaturesProto.prototype.supportedFeatures = $util.emptyArray;
+          MfeDomainFeaturesProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.MfeDomainFeaturesProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.countryCode = reader.string();
+                  break;
+                }
+                case 2: {
+                  message.domainName = reader.string();
+                  break;
+                }
+                case 3: {
+                  if (!(message.supportedFeatures && message.supportedFeatures.length))
+                    message.supportedFeatures = [];
+                  if ((tag & 7) === 2) {
+                    var end2 = reader.uint32() + reader.pos;
+                    while (reader.pos < end2)
+                      message.supportedFeatures.push(reader.int32());
+                  } else
+                    message.supportedFeatures.push(reader.int32());
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("countryCode"))
+              throw $util.ProtocolError("missing required 'countryCode'", { instance: message });
+            if (!message.hasOwnProperty("domainName"))
+              throw $util.ProtocolError("missing required 'domainName'", { instance: message });
+            return message;
+          };
+          MfeDomainFeaturesProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (!$util.isString(message.countryCode))
+              return "countryCode: string expected";
+            if (!$util.isString(message.domainName))
+              return "domainName: string expected";
+            if (message.supportedFeatures != null && message.hasOwnProperty("supportedFeatures")) {
+              if (!Array.isArray(message.supportedFeatures))
+                return "supportedFeatures: array expected";
+              for (var i = 0; i < message.supportedFeatures.length; ++i)
+                switch (message.supportedFeatures[i]) {
+                  default:
+                    return "supportedFeatures: enum value[] expected";
+                  case 0:
+                  case 1:
+                  case 2:
+                    break;
+                }
+            }
+            return null;
+          };
+          MfeDomainFeaturesProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.MfeDomainFeaturesProto)
+              return object;
+            var message = new $root.keyhole.dbroot.MfeDomainFeaturesProto();
+            if (object.countryCode != null)
+              message.countryCode = String(object.countryCode);
+            if (object.domainName != null)
+              message.domainName = String(object.domainName);
+            if (object.supportedFeatures) {
+              if (!Array.isArray(object.supportedFeatures))
+                throw TypeError(".keyhole.dbroot.MfeDomainFeaturesProto.supportedFeatures: array expected");
+              message.supportedFeatures = [];
+              for (var i = 0; i < object.supportedFeatures.length; ++i)
+                switch (object.supportedFeatures[i]) {
+                  default:
+                  case "GEOCODING":
+                  case 0:
+                    message.supportedFeatures[i] = 0;
+                    break;
+                  case "LOCAL_SEARCH":
+                  case 1:
+                    message.supportedFeatures[i] = 1;
+                    break;
+                  case "DRIVING_DIRECTIONS":
+                  case 2:
+                    message.supportedFeatures[i] = 2;
+                    break;
+                }
+            }
+            return message;
+          };
+          MfeDomainFeaturesProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+              object.supportedFeatures = [];
+            if (options.defaults) {
+              object.countryCode = "";
+              object.domainName = "";
+            }
+            if (message.countryCode != null && message.hasOwnProperty("countryCode"))
+              object.countryCode = message.countryCode;
+            if (message.domainName != null && message.hasOwnProperty("domainName"))
+              object.domainName = message.domainName;
+            if (message.supportedFeatures && message.supportedFeatures.length) {
+              object.supportedFeatures = [];
+              for (var j = 0; j < message.supportedFeatures.length; ++j)
+                object.supportedFeatures[j] = options.enums === String ? $root.keyhole.dbroot.MfeDomainFeaturesProto.SupportedFeature[message.supportedFeatures[j]] : message.supportedFeatures[j];
+            }
+            return object;
+          };
+          MfeDomainFeaturesProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          MfeDomainFeaturesProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.MfeDomainFeaturesProto";
+          };
+          MfeDomainFeaturesProto.SupportedFeature = function() {
+            var valuesById = {}, values = Object.create(valuesById);
+            values[valuesById[0] = "GEOCODING"] = 0;
+            values[valuesById[1] = "LOCAL_SEARCH"] = 1;
+            values[valuesById[2] = "DRIVING_DIRECTIONS"] = 2;
+            return values;
+          }();
+          return MfeDomainFeaturesProto;
+        }();
+        dbroot.ClientOptionsProto = function() {
+          function ClientOptionsProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          ClientOptionsProto.prototype.disableDiskCache = false;
+          ClientOptionsProto.prototype.disableEmbeddedBrowserVista = false;
+          ClientOptionsProto.prototype.drawAtmosphere = true;
+          ClientOptionsProto.prototype.drawStars = true;
+          ClientOptionsProto.prototype.shaderFilePrefix = "";
+          ClientOptionsProto.prototype.useProtobufQuadtreePackets = false;
+          ClientOptionsProto.prototype.useExtendedCopyrightIds = true;
+          ClientOptionsProto.prototype.precipitationsOptions = null;
+          ClientOptionsProto.prototype.captureOptions = null;
+          ClientOptionsProto.prototype.show_2dMapsIcon = true;
+          ClientOptionsProto.prototype.disableInternalBrowser = false;
+          ClientOptionsProto.prototype.internalBrowserBlacklist = "";
+          ClientOptionsProto.prototype.internalBrowserOriginWhitelist = "*";
+          ClientOptionsProto.prototype.polarTileMergingLevel = 0;
+          ClientOptionsProto.prototype.jsBridgeRequestWhitelist = "http://*.google.com/*";
+          ClientOptionsProto.prototype.mapsOptions = null;
+          ClientOptionsProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.ClientOptionsProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.disableDiskCache = reader.bool();
+                  break;
+                }
+                case 2: {
+                  message.disableEmbeddedBrowserVista = reader.bool();
+                  break;
+                }
+                case 3: {
+                  message.drawAtmosphere = reader.bool();
+                  break;
+                }
+                case 4: {
+                  message.drawStars = reader.bool();
+                  break;
+                }
+                case 5: {
+                  message.shaderFilePrefix = reader.string();
+                  break;
+                }
+                case 6: {
+                  message.useProtobufQuadtreePackets = reader.bool();
+                  break;
+                }
+                case 7: {
+                  message.useExtendedCopyrightIds = reader.bool();
+                  break;
+                }
+                case 8: {
+                  message.precipitationsOptions = $root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.decode(reader, reader.uint32());
+                  break;
+                }
+                case 9: {
+                  message.captureOptions = $root.keyhole.dbroot.ClientOptionsProto.CaptureOptions.decode(reader, reader.uint32());
+                  break;
+                }
+                case 10: {
+                  message.show_2dMapsIcon = reader.bool();
+                  break;
+                }
+                case 11: {
+                  message.disableInternalBrowser = reader.bool();
+                  break;
+                }
+                case 12: {
+                  message.internalBrowserBlacklist = reader.string();
+                  break;
+                }
+                case 13: {
+                  message.internalBrowserOriginWhitelist = reader.string();
+                  break;
+                }
+                case 14: {
+                  message.polarTileMergingLevel = reader.int32();
+                  break;
+                }
+                case 15: {
+                  message.jsBridgeRequestWhitelist = reader.string();
+                  break;
+                }
+                case 16: {
+                  message.mapsOptions = $root.keyhole.dbroot.ClientOptionsProto.MapsOptions.decode(reader, reader.uint32());
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          ClientOptionsProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.disableDiskCache != null && message.hasOwnProperty("disableDiskCache")) {
+              if (typeof message.disableDiskCache !== "boolean")
+                return "disableDiskCache: boolean expected";
+            }
+            if (message.disableEmbeddedBrowserVista != null && message.hasOwnProperty("disableEmbeddedBrowserVista")) {
+              if (typeof message.disableEmbeddedBrowserVista !== "boolean")
+                return "disableEmbeddedBrowserVista: boolean expected";
+            }
+            if (message.drawAtmosphere != null && message.hasOwnProperty("drawAtmosphere")) {
+              if (typeof message.drawAtmosphere !== "boolean")
+                return "drawAtmosphere: boolean expected";
+            }
+            if (message.drawStars != null && message.hasOwnProperty("drawStars")) {
+              if (typeof message.drawStars !== "boolean")
+                return "drawStars: boolean expected";
+            }
+            if (message.shaderFilePrefix != null && message.hasOwnProperty("shaderFilePrefix")) {
+              if (!$util.isString(message.shaderFilePrefix))
+                return "shaderFilePrefix: string expected";
+            }
+            if (message.useProtobufQuadtreePackets != null && message.hasOwnProperty("useProtobufQuadtreePackets")) {
+              if (typeof message.useProtobufQuadtreePackets !== "boolean")
+                return "useProtobufQuadtreePackets: boolean expected";
+            }
+            if (message.useExtendedCopyrightIds != null && message.hasOwnProperty("useExtendedCopyrightIds")) {
+              if (typeof message.useExtendedCopyrightIds !== "boolean")
+                return "useExtendedCopyrightIds: boolean expected";
+            }
+            if (message.precipitationsOptions != null && message.hasOwnProperty("precipitationsOptions")) {
+              var error = $root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.verify(message.precipitationsOptions);
+              if (error)
+                return "precipitationsOptions." + error;
+            }
+            if (message.captureOptions != null && message.hasOwnProperty("captureOptions")) {
+              var error = $root.keyhole.dbroot.ClientOptionsProto.CaptureOptions.verify(message.captureOptions);
+              if (error)
+                return "captureOptions." + error;
+            }
+            if (message.show_2dMapsIcon != null && message.hasOwnProperty("show_2dMapsIcon")) {
+              if (typeof message.show_2dMapsIcon !== "boolean")
+                return "show_2dMapsIcon: boolean expected";
+            }
+            if (message.disableInternalBrowser != null && message.hasOwnProperty("disableInternalBrowser")) {
+              if (typeof message.disableInternalBrowser !== "boolean")
+                return "disableInternalBrowser: boolean expected";
+            }
+            if (message.internalBrowserBlacklist != null && message.hasOwnProperty("internalBrowserBlacklist")) {
+              if (!$util.isString(message.internalBrowserBlacklist))
+                return "internalBrowserBlacklist: string expected";
+            }
+            if (message.internalBrowserOriginWhitelist != null && message.hasOwnProperty("internalBrowserOriginWhitelist")) {
+              if (!$util.isString(message.internalBrowserOriginWhitelist))
+                return "internalBrowserOriginWhitelist: string expected";
+            }
+            if (message.polarTileMergingLevel != null && message.hasOwnProperty("polarTileMergingLevel")) {
+              if (!$util.isInteger(message.polarTileMergingLevel))
+                return "polarTileMergingLevel: integer expected";
+            }
+            if (message.jsBridgeRequestWhitelist != null && message.hasOwnProperty("jsBridgeRequestWhitelist")) {
+              if (!$util.isString(message.jsBridgeRequestWhitelist))
+                return "jsBridgeRequestWhitelist: string expected";
+            }
+            if (message.mapsOptions != null && message.hasOwnProperty("mapsOptions")) {
+              var error = $root.keyhole.dbroot.ClientOptionsProto.MapsOptions.verify(message.mapsOptions);
+              if (error)
+                return "mapsOptions." + error;
+            }
+            return null;
+          };
+          ClientOptionsProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.ClientOptionsProto)
+              return object;
+            var message = new $root.keyhole.dbroot.ClientOptionsProto();
+            if (object.disableDiskCache != null)
+              message.disableDiskCache = Boolean(object.disableDiskCache);
+            if (object.disableEmbeddedBrowserVista != null)
+              message.disableEmbeddedBrowserVista = Boolean(object.disableEmbeddedBrowserVista);
+            if (object.drawAtmosphere != null)
+              message.drawAtmosphere = Boolean(object.drawAtmosphere);
+            if (object.drawStars != null)
+              message.drawStars = Boolean(object.drawStars);
+            if (object.shaderFilePrefix != null)
+              message.shaderFilePrefix = String(object.shaderFilePrefix);
+            if (object.useProtobufQuadtreePackets != null)
+              message.useProtobufQuadtreePackets = Boolean(object.useProtobufQuadtreePackets);
+            if (object.useExtendedCopyrightIds != null)
+              message.useExtendedCopyrightIds = Boolean(object.useExtendedCopyrightIds);
+            if (object.precipitationsOptions != null) {
+              if (typeof object.precipitationsOptions !== "object")
+                throw TypeError(".keyhole.dbroot.ClientOptionsProto.precipitationsOptions: object expected");
+              message.precipitationsOptions = $root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.fromObject(object.precipitationsOptions);
+            }
+            if (object.captureOptions != null) {
+              if (typeof object.captureOptions !== "object")
+                throw TypeError(".keyhole.dbroot.ClientOptionsProto.captureOptions: object expected");
+              message.captureOptions = $root.keyhole.dbroot.ClientOptionsProto.CaptureOptions.fromObject(object.captureOptions);
+            }
+            if (object.show_2dMapsIcon != null)
+              message.show_2dMapsIcon = Boolean(object.show_2dMapsIcon);
+            if (object.disableInternalBrowser != null)
+              message.disableInternalBrowser = Boolean(object.disableInternalBrowser);
+            if (object.internalBrowserBlacklist != null)
+              message.internalBrowserBlacklist = String(object.internalBrowserBlacklist);
+            if (object.internalBrowserOriginWhitelist != null)
+              message.internalBrowserOriginWhitelist = String(object.internalBrowserOriginWhitelist);
+            if (object.polarTileMergingLevel != null)
+              message.polarTileMergingLevel = object.polarTileMergingLevel | 0;
+            if (object.jsBridgeRequestWhitelist != null)
+              message.jsBridgeRequestWhitelist = String(object.jsBridgeRequestWhitelist);
+            if (object.mapsOptions != null) {
+              if (typeof object.mapsOptions !== "object")
+                throw TypeError(".keyhole.dbroot.ClientOptionsProto.mapsOptions: object expected");
+              message.mapsOptions = $root.keyhole.dbroot.ClientOptionsProto.MapsOptions.fromObject(object.mapsOptions);
+            }
+            return message;
+          };
+          ClientOptionsProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.disableDiskCache = false;
+              object.disableEmbeddedBrowserVista = false;
+              object.drawAtmosphere = true;
+              object.drawStars = true;
+              object.shaderFilePrefix = "";
+              object.useProtobufQuadtreePackets = false;
+              object.useExtendedCopyrightIds = true;
+              object.precipitationsOptions = null;
+              object.captureOptions = null;
+              object.show_2dMapsIcon = true;
+              object.disableInternalBrowser = false;
+              object.internalBrowserBlacklist = "";
+              object.internalBrowserOriginWhitelist = "*";
+              object.polarTileMergingLevel = 0;
+              object.jsBridgeRequestWhitelist = "http://*.google.com/*";
+              object.mapsOptions = null;
+            }
+            if (message.disableDiskCache != null && message.hasOwnProperty("disableDiskCache"))
+              object.disableDiskCache = message.disableDiskCache;
+            if (message.disableEmbeddedBrowserVista != null && message.hasOwnProperty("disableEmbeddedBrowserVista"))
+              object.disableEmbeddedBrowserVista = message.disableEmbeddedBrowserVista;
+            if (message.drawAtmosphere != null && message.hasOwnProperty("drawAtmosphere"))
+              object.drawAtmosphere = message.drawAtmosphere;
+            if (message.drawStars != null && message.hasOwnProperty("drawStars"))
+              object.drawStars = message.drawStars;
+            if (message.shaderFilePrefix != null && message.hasOwnProperty("shaderFilePrefix"))
+              object.shaderFilePrefix = message.shaderFilePrefix;
+            if (message.useProtobufQuadtreePackets != null && message.hasOwnProperty("useProtobufQuadtreePackets"))
+              object.useProtobufQuadtreePackets = message.useProtobufQuadtreePackets;
+            if (message.useExtendedCopyrightIds != null && message.hasOwnProperty("useExtendedCopyrightIds"))
+              object.useExtendedCopyrightIds = message.useExtendedCopyrightIds;
+            if (message.precipitationsOptions != null && message.hasOwnProperty("precipitationsOptions"))
+              object.precipitationsOptions = $root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.toObject(message.precipitationsOptions, options);
+            if (message.captureOptions != null && message.hasOwnProperty("captureOptions"))
+              object.captureOptions = $root.keyhole.dbroot.ClientOptionsProto.CaptureOptions.toObject(message.captureOptions, options);
+            if (message.show_2dMapsIcon != null && message.hasOwnProperty("show_2dMapsIcon"))
+              object.show_2dMapsIcon = message.show_2dMapsIcon;
+            if (message.disableInternalBrowser != null && message.hasOwnProperty("disableInternalBrowser"))
+              object.disableInternalBrowser = message.disableInternalBrowser;
+            if (message.internalBrowserBlacklist != null && message.hasOwnProperty("internalBrowserBlacklist"))
+              object.internalBrowserBlacklist = message.internalBrowserBlacklist;
+            if (message.internalBrowserOriginWhitelist != null && message.hasOwnProperty("internalBrowserOriginWhitelist"))
+              object.internalBrowserOriginWhitelist = message.internalBrowserOriginWhitelist;
+            if (message.polarTileMergingLevel != null && message.hasOwnProperty("polarTileMergingLevel"))
+              object.polarTileMergingLevel = message.polarTileMergingLevel;
+            if (message.jsBridgeRequestWhitelist != null && message.hasOwnProperty("jsBridgeRequestWhitelist"))
+              object.jsBridgeRequestWhitelist = message.jsBridgeRequestWhitelist;
+            if (message.mapsOptions != null && message.hasOwnProperty("mapsOptions"))
+              object.mapsOptions = $root.keyhole.dbroot.ClientOptionsProto.MapsOptions.toObject(message.mapsOptions, options);
+            return object;
+          };
+          ClientOptionsProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          ClientOptionsProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.ClientOptionsProto";
+          };
+          ClientOptionsProto.PrecipitationsOptions = function() {
+            function PrecipitationsOptions(properties) {
+              this.weatherMapping = [];
+              if (properties) {
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                  if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+              }
+            }
+            PrecipitationsOptions.prototype.imageUrl = "";
+            PrecipitationsOptions.prototype.imageExpireTime = 900;
+            PrecipitationsOptions.prototype.maxColorDistance = 20;
+            PrecipitationsOptions.prototype.imageLevel = 5;
+            PrecipitationsOptions.prototype.weatherMapping = $util.emptyArray;
+            PrecipitationsOptions.prototype.cloudsLayerUrl = "";
+            PrecipitationsOptions.prototype.animationDecelerationDelay = 20;
+            PrecipitationsOptions.decode = function decode(reader, length) {
+              if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+              var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions();
+              while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                  case 1: {
+                    message.imageUrl = reader.string();
+                    break;
+                  }
+                  case 2: {
+                    message.imageExpireTime = reader.int32();
+                    break;
+                  }
+                  case 3: {
+                    message.maxColorDistance = reader.int32();
+                    break;
+                  }
+                  case 4: {
+                    message.imageLevel = reader.int32();
+                    break;
+                  }
+                  case 5: {
+                    if (!(message.weatherMapping && message.weatherMapping.length))
+                      message.weatherMapping = [];
+                    message.weatherMapping.push($root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping.decode(reader, reader.uint32()));
+                    break;
+                  }
+                  case 6: {
+                    message.cloudsLayerUrl = reader.string();
+                    break;
+                  }
+                  case 7: {
+                    message.animationDecelerationDelay = reader.float();
+                    break;
+                  }
+                  default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+              }
+              return message;
+            };
+            PrecipitationsOptions.verify = function verify(message) {
+              if (typeof message !== "object" || message === null)
+                return "object expected";
+              if (message.imageUrl != null && message.hasOwnProperty("imageUrl")) {
+                if (!$util.isString(message.imageUrl))
+                  return "imageUrl: string expected";
+              }
+              if (message.imageExpireTime != null && message.hasOwnProperty("imageExpireTime")) {
+                if (!$util.isInteger(message.imageExpireTime))
+                  return "imageExpireTime: integer expected";
+              }
+              if (message.maxColorDistance != null && message.hasOwnProperty("maxColorDistance")) {
+                if (!$util.isInteger(message.maxColorDistance))
+                  return "maxColorDistance: integer expected";
+              }
+              if (message.imageLevel != null && message.hasOwnProperty("imageLevel")) {
+                if (!$util.isInteger(message.imageLevel))
+                  return "imageLevel: integer expected";
+              }
+              if (message.weatherMapping != null && message.hasOwnProperty("weatherMapping")) {
+                if (!Array.isArray(message.weatherMapping))
+                  return "weatherMapping: array expected";
+                for (var i = 0; i < message.weatherMapping.length; ++i) {
+                  var error = $root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping.verify(message.weatherMapping[i]);
+                  if (error)
+                    return "weatherMapping." + error;
+                }
+              }
+              if (message.cloudsLayerUrl != null && message.hasOwnProperty("cloudsLayerUrl")) {
+                if (!$util.isString(message.cloudsLayerUrl))
+                  return "cloudsLayerUrl: string expected";
+              }
+              if (message.animationDecelerationDelay != null && message.hasOwnProperty("animationDecelerationDelay")) {
+                if (typeof message.animationDecelerationDelay !== "number")
+                  return "animationDecelerationDelay: number expected";
+              }
+              return null;
+            };
+            PrecipitationsOptions.fromObject = function fromObject(object) {
+              if (object instanceof $root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions)
+                return object;
+              var message = new $root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions();
+              if (object.imageUrl != null)
+                message.imageUrl = String(object.imageUrl);
+              if (object.imageExpireTime != null)
+                message.imageExpireTime = object.imageExpireTime | 0;
+              if (object.maxColorDistance != null)
+                message.maxColorDistance = object.maxColorDistance | 0;
+              if (object.imageLevel != null)
+                message.imageLevel = object.imageLevel | 0;
+              if (object.weatherMapping) {
+                if (!Array.isArray(object.weatherMapping))
+                  throw TypeError(".keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.weatherMapping: array expected");
+                message.weatherMapping = [];
+                for (var i = 0; i < object.weatherMapping.length; ++i) {
+                  if (typeof object.weatherMapping[i] !== "object")
+                    throw TypeError(".keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.weatherMapping: object expected");
+                  message.weatherMapping[i] = $root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping.fromObject(object.weatherMapping[i]);
+                }
+              }
+              if (object.cloudsLayerUrl != null)
+                message.cloudsLayerUrl = String(object.cloudsLayerUrl);
+              if (object.animationDecelerationDelay != null)
+                message.animationDecelerationDelay = Number(object.animationDecelerationDelay);
+              return message;
+            };
+            PrecipitationsOptions.toObject = function toObject(message, options) {
+              if (!options)
+                options = {};
+              var object = {};
+              if (options.arrays || options.defaults)
+                object.weatherMapping = [];
+              if (options.defaults) {
+                object.imageUrl = "";
+                object.imageExpireTime = 900;
+                object.maxColorDistance = 20;
+                object.imageLevel = 5;
+                object.cloudsLayerUrl = "";
+                object.animationDecelerationDelay = 20;
+              }
+              if (message.imageUrl != null && message.hasOwnProperty("imageUrl"))
+                object.imageUrl = message.imageUrl;
+              if (message.imageExpireTime != null && message.hasOwnProperty("imageExpireTime"))
+                object.imageExpireTime = message.imageExpireTime;
+              if (message.maxColorDistance != null && message.hasOwnProperty("maxColorDistance"))
+                object.maxColorDistance = message.maxColorDistance;
+              if (message.imageLevel != null && message.hasOwnProperty("imageLevel"))
+                object.imageLevel = message.imageLevel;
+              if (message.weatherMapping && message.weatherMapping.length) {
+                object.weatherMapping = [];
+                for (var j = 0; j < message.weatherMapping.length; ++j)
+                  object.weatherMapping[j] = $root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping.toObject(message.weatherMapping[j], options);
+              }
+              if (message.cloudsLayerUrl != null && message.hasOwnProperty("cloudsLayerUrl"))
+                object.cloudsLayerUrl = message.cloudsLayerUrl;
+              if (message.animationDecelerationDelay != null && message.hasOwnProperty("animationDecelerationDelay"))
+                object.animationDecelerationDelay = options.json && !isFinite(message.animationDecelerationDelay) ? String(message.animationDecelerationDelay) : message.animationDecelerationDelay;
+              return object;
+            };
+            PrecipitationsOptions.prototype.toJSON = function toJSON() {
+              return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+            PrecipitationsOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+              if (typeUrlPrefix === void 0) {
+                typeUrlPrefix = "type.googleapis.com";
+              }
+              return typeUrlPrefix + "/keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions";
+            };
+            PrecipitationsOptions.WeatherMapping = function() {
+              function WeatherMapping(properties) {
+                if (properties) {
+                  for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                      this[keys[i]] = properties[keys[i]];
+                }
+              }
+              WeatherMapping.prototype.colorAbgr = 0;
+              WeatherMapping.prototype.weatherType = 0;
+              WeatherMapping.prototype.elongation = 1;
+              WeatherMapping.prototype.opacity = 0;
+              WeatherMapping.prototype.fogDensity = 0;
+              WeatherMapping.prototype.speed0 = 0;
+              WeatherMapping.prototype.speed1 = 0;
+              WeatherMapping.prototype.speed2 = 0;
+              WeatherMapping.prototype.speed3 = 0;
+              WeatherMapping.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                  reader = $Reader.create(reader);
+                var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping();
+                while (reader.pos < end) {
+                  var tag = reader.uint32();
+                  switch (tag >>> 3) {
+                    case 1: {
+                      message.colorAbgr = reader.uint32();
+                      break;
+                    }
+                    case 2: {
+                      message.weatherType = reader.int32();
+                      break;
+                    }
+                    case 3: {
+                      message.elongation = reader.float();
+                      break;
+                    }
+                    case 4: {
+                      message.opacity = reader.float();
+                      break;
+                    }
+                    case 5: {
+                      message.fogDensity = reader.float();
+                      break;
+                    }
+                    case 6: {
+                      message.speed0 = reader.float();
+                      break;
+                    }
+                    case 7: {
+                      message.speed1 = reader.float();
+                      break;
+                    }
+                    case 8: {
+                      message.speed2 = reader.float();
+                      break;
+                    }
+                    case 9: {
+                      message.speed3 = reader.float();
+                      break;
+                    }
+                    default:
+                      reader.skipType(tag & 7);
+                      break;
+                  }
+                }
+                if (!message.hasOwnProperty("colorAbgr"))
+                  throw $util.ProtocolError("missing required 'colorAbgr'", { instance: message });
+                if (!message.hasOwnProperty("weatherType"))
+                  throw $util.ProtocolError("missing required 'weatherType'", { instance: message });
+                return message;
+              };
+              WeatherMapping.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                  return "object expected";
+                if (!$util.isInteger(message.colorAbgr))
+                  return "colorAbgr: integer expected";
+                switch (message.weatherType) {
+                  default:
+                    return "weatherType: enum value expected";
+                  case 0:
+                  case 1:
+                  case 2:
+                    break;
+                }
+                if (message.elongation != null && message.hasOwnProperty("elongation")) {
+                  if (typeof message.elongation !== "number")
+                    return "elongation: number expected";
+                }
+                if (message.opacity != null && message.hasOwnProperty("opacity")) {
+                  if (typeof message.opacity !== "number")
+                    return "opacity: number expected";
+                }
+                if (message.fogDensity != null && message.hasOwnProperty("fogDensity")) {
+                  if (typeof message.fogDensity !== "number")
+                    return "fogDensity: number expected";
+                }
+                if (message.speed0 != null && message.hasOwnProperty("speed0")) {
+                  if (typeof message.speed0 !== "number")
+                    return "speed0: number expected";
+                }
+                if (message.speed1 != null && message.hasOwnProperty("speed1")) {
+                  if (typeof message.speed1 !== "number")
+                    return "speed1: number expected";
+                }
+                if (message.speed2 != null && message.hasOwnProperty("speed2")) {
+                  if (typeof message.speed2 !== "number")
+                    return "speed2: number expected";
+                }
+                if (message.speed3 != null && message.hasOwnProperty("speed3")) {
+                  if (typeof message.speed3 !== "number")
+                    return "speed3: number expected";
+                }
+                return null;
+              };
+              WeatherMapping.fromObject = function fromObject(object) {
+                if (object instanceof $root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping)
+                  return object;
+                var message = new $root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping();
+                if (object.colorAbgr != null)
+                  message.colorAbgr = object.colorAbgr >>> 0;
+                switch (object.weatherType) {
+                  case "NO_PRECIPITATION":
+                  case 0:
+                    message.weatherType = 0;
+                    break;
+                  case "RAIN":
+                  case 1:
+                    message.weatherType = 1;
+                    break;
+                  case "SNOW":
+                  case 2:
+                    message.weatherType = 2;
+                    break;
+                }
+                if (object.elongation != null)
+                  message.elongation = Number(object.elongation);
+                if (object.opacity != null)
+                  message.opacity = Number(object.opacity);
+                if (object.fogDensity != null)
+                  message.fogDensity = Number(object.fogDensity);
+                if (object.speed0 != null)
+                  message.speed0 = Number(object.speed0);
+                if (object.speed1 != null)
+                  message.speed1 = Number(object.speed1);
+                if (object.speed2 != null)
+                  message.speed2 = Number(object.speed2);
+                if (object.speed3 != null)
+                  message.speed3 = Number(object.speed3);
+                return message;
+              };
+              WeatherMapping.toObject = function toObject(message, options) {
+                if (!options)
+                  options = {};
+                var object = {};
+                if (options.defaults) {
+                  object.colorAbgr = 0;
+                  object.weatherType = options.enums === String ? "NO_PRECIPITATION" : 0;
+                  object.elongation = 1;
+                  object.opacity = 0;
+                  object.fogDensity = 0;
+                  object.speed0 = 0;
+                  object.speed1 = 0;
+                  object.speed2 = 0;
+                  object.speed3 = 0;
+                }
+                if (message.colorAbgr != null && message.hasOwnProperty("colorAbgr"))
+                  object.colorAbgr = message.colorAbgr;
+                if (message.weatherType != null && message.hasOwnProperty("weatherType"))
+                  object.weatherType = options.enums === String ? $root.keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping.WeatherType[message.weatherType] : message.weatherType;
+                if (message.elongation != null && message.hasOwnProperty("elongation"))
+                  object.elongation = options.json && !isFinite(message.elongation) ? String(message.elongation) : message.elongation;
+                if (message.opacity != null && message.hasOwnProperty("opacity"))
+                  object.opacity = options.json && !isFinite(message.opacity) ? String(message.opacity) : message.opacity;
+                if (message.fogDensity != null && message.hasOwnProperty("fogDensity"))
+                  object.fogDensity = options.json && !isFinite(message.fogDensity) ? String(message.fogDensity) : message.fogDensity;
+                if (message.speed0 != null && message.hasOwnProperty("speed0"))
+                  object.speed0 = options.json && !isFinite(message.speed0) ? String(message.speed0) : message.speed0;
+                if (message.speed1 != null && message.hasOwnProperty("speed1"))
+                  object.speed1 = options.json && !isFinite(message.speed1) ? String(message.speed1) : message.speed1;
+                if (message.speed2 != null && message.hasOwnProperty("speed2"))
+                  object.speed2 = options.json && !isFinite(message.speed2) ? String(message.speed2) : message.speed2;
+                if (message.speed3 != null && message.hasOwnProperty("speed3"))
+                  object.speed3 = options.json && !isFinite(message.speed3) ? String(message.speed3) : message.speed3;
+                return object;
+              };
+              WeatherMapping.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+              };
+              WeatherMapping.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                if (typeUrlPrefix === void 0) {
+                  typeUrlPrefix = "type.googleapis.com";
+                }
+                return typeUrlPrefix + "/keyhole.dbroot.ClientOptionsProto.PrecipitationsOptions.WeatherMapping";
+              };
+              WeatherMapping.WeatherType = function() {
+                var valuesById = {}, values = Object.create(valuesById);
+                values[valuesById[0] = "NO_PRECIPITATION"] = 0;
+                values[valuesById[1] = "RAIN"] = 1;
+                values[valuesById[2] = "SNOW"] = 2;
+                return values;
+              }();
+              return WeatherMapping;
+            }();
+            return PrecipitationsOptions;
+          }();
+          ClientOptionsProto.CaptureOptions = function() {
+            function CaptureOptions(properties) {
+              if (properties) {
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                  if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+              }
+            }
+            CaptureOptions.prototype.allowSaveAsImage = true;
+            CaptureOptions.prototype.maxFreeCaptureRes = 2400;
+            CaptureOptions.prototype.maxPremiumCaptureRes = 4800;
+            CaptureOptions.decode = function decode(reader, length) {
+              if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+              var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.ClientOptionsProto.CaptureOptions();
+              while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                  case 1: {
+                    message.allowSaveAsImage = reader.bool();
+                    break;
+                  }
+                  case 2: {
+                    message.maxFreeCaptureRes = reader.int32();
+                    break;
+                  }
+                  case 3: {
+                    message.maxPremiumCaptureRes = reader.int32();
+                    break;
+                  }
+                  default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+              }
+              return message;
+            };
+            CaptureOptions.verify = function verify(message) {
+              if (typeof message !== "object" || message === null)
+                return "object expected";
+              if (message.allowSaveAsImage != null && message.hasOwnProperty("allowSaveAsImage")) {
+                if (typeof message.allowSaveAsImage !== "boolean")
+                  return "allowSaveAsImage: boolean expected";
+              }
+              if (message.maxFreeCaptureRes != null && message.hasOwnProperty("maxFreeCaptureRes")) {
+                if (!$util.isInteger(message.maxFreeCaptureRes))
+                  return "maxFreeCaptureRes: integer expected";
+              }
+              if (message.maxPremiumCaptureRes != null && message.hasOwnProperty("maxPremiumCaptureRes")) {
+                if (!$util.isInteger(message.maxPremiumCaptureRes))
+                  return "maxPremiumCaptureRes: integer expected";
+              }
+              return null;
+            };
+            CaptureOptions.fromObject = function fromObject(object) {
+              if (object instanceof $root.keyhole.dbroot.ClientOptionsProto.CaptureOptions)
+                return object;
+              var message = new $root.keyhole.dbroot.ClientOptionsProto.CaptureOptions();
+              if (object.allowSaveAsImage != null)
+                message.allowSaveAsImage = Boolean(object.allowSaveAsImage);
+              if (object.maxFreeCaptureRes != null)
+                message.maxFreeCaptureRes = object.maxFreeCaptureRes | 0;
+              if (object.maxPremiumCaptureRes != null)
+                message.maxPremiumCaptureRes = object.maxPremiumCaptureRes | 0;
+              return message;
+            };
+            CaptureOptions.toObject = function toObject(message, options) {
+              if (!options)
+                options = {};
+              var object = {};
+              if (options.defaults) {
+                object.allowSaveAsImage = true;
+                object.maxFreeCaptureRes = 2400;
+                object.maxPremiumCaptureRes = 4800;
+              }
+              if (message.allowSaveAsImage != null && message.hasOwnProperty("allowSaveAsImage"))
+                object.allowSaveAsImage = message.allowSaveAsImage;
+              if (message.maxFreeCaptureRes != null && message.hasOwnProperty("maxFreeCaptureRes"))
+                object.maxFreeCaptureRes = message.maxFreeCaptureRes;
+              if (message.maxPremiumCaptureRes != null && message.hasOwnProperty("maxPremiumCaptureRes"))
+                object.maxPremiumCaptureRes = message.maxPremiumCaptureRes;
+              return object;
+            };
+            CaptureOptions.prototype.toJSON = function toJSON() {
+              return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+            CaptureOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+              if (typeUrlPrefix === void 0) {
+                typeUrlPrefix = "type.googleapis.com";
+              }
+              return typeUrlPrefix + "/keyhole.dbroot.ClientOptionsProto.CaptureOptions";
+            };
+            return CaptureOptions;
+          }();
+          ClientOptionsProto.MapsOptions = function() {
+            function MapsOptions(properties) {
+              if (properties) {
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                  if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+              }
+            }
+            MapsOptions.prototype.enableMaps = false;
+            MapsOptions.prototype.docsAutoDownloadEnabled = false;
+            MapsOptions.prototype.docsAutoDownloadInterval = 0;
+            MapsOptions.prototype.docsAutoUploadEnabled = false;
+            MapsOptions.prototype.docsAutoUploadDelay = 0;
+            MapsOptions.decode = function decode(reader, length) {
+              if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+              var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.ClientOptionsProto.MapsOptions();
+              while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                  case 1: {
+                    message.enableMaps = reader.bool();
+                    break;
+                  }
+                  case 2: {
+                    message.docsAutoDownloadEnabled = reader.bool();
+                    break;
+                  }
+                  case 3: {
+                    message.docsAutoDownloadInterval = reader.int32();
+                    break;
+                  }
+                  case 4: {
+                    message.docsAutoUploadEnabled = reader.bool();
+                    break;
+                  }
+                  case 5: {
+                    message.docsAutoUploadDelay = reader.int32();
+                    break;
+                  }
+                  default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+              }
+              return message;
+            };
+            MapsOptions.verify = function verify(message) {
+              if (typeof message !== "object" || message === null)
+                return "object expected";
+              if (message.enableMaps != null && message.hasOwnProperty("enableMaps")) {
+                if (typeof message.enableMaps !== "boolean")
+                  return "enableMaps: boolean expected";
+              }
+              if (message.docsAutoDownloadEnabled != null && message.hasOwnProperty("docsAutoDownloadEnabled")) {
+                if (typeof message.docsAutoDownloadEnabled !== "boolean")
+                  return "docsAutoDownloadEnabled: boolean expected";
+              }
+              if (message.docsAutoDownloadInterval != null && message.hasOwnProperty("docsAutoDownloadInterval")) {
+                if (!$util.isInteger(message.docsAutoDownloadInterval))
+                  return "docsAutoDownloadInterval: integer expected";
+              }
+              if (message.docsAutoUploadEnabled != null && message.hasOwnProperty("docsAutoUploadEnabled")) {
+                if (typeof message.docsAutoUploadEnabled !== "boolean")
+                  return "docsAutoUploadEnabled: boolean expected";
+              }
+              if (message.docsAutoUploadDelay != null && message.hasOwnProperty("docsAutoUploadDelay")) {
+                if (!$util.isInteger(message.docsAutoUploadDelay))
+                  return "docsAutoUploadDelay: integer expected";
+              }
+              return null;
+            };
+            MapsOptions.fromObject = function fromObject(object) {
+              if (object instanceof $root.keyhole.dbroot.ClientOptionsProto.MapsOptions)
+                return object;
+              var message = new $root.keyhole.dbroot.ClientOptionsProto.MapsOptions();
+              if (object.enableMaps != null)
+                message.enableMaps = Boolean(object.enableMaps);
+              if (object.docsAutoDownloadEnabled != null)
+                message.docsAutoDownloadEnabled = Boolean(object.docsAutoDownloadEnabled);
+              if (object.docsAutoDownloadInterval != null)
+                message.docsAutoDownloadInterval = object.docsAutoDownloadInterval | 0;
+              if (object.docsAutoUploadEnabled != null)
+                message.docsAutoUploadEnabled = Boolean(object.docsAutoUploadEnabled);
+              if (object.docsAutoUploadDelay != null)
+                message.docsAutoUploadDelay = object.docsAutoUploadDelay | 0;
+              return message;
+            };
+            MapsOptions.toObject = function toObject(message, options) {
+              if (!options)
+                options = {};
+              var object = {};
+              if (options.defaults) {
+                object.enableMaps = false;
+                object.docsAutoDownloadEnabled = false;
+                object.docsAutoDownloadInterval = 0;
+                object.docsAutoUploadEnabled = false;
+                object.docsAutoUploadDelay = 0;
+              }
+              if (message.enableMaps != null && message.hasOwnProperty("enableMaps"))
+                object.enableMaps = message.enableMaps;
+              if (message.docsAutoDownloadEnabled != null && message.hasOwnProperty("docsAutoDownloadEnabled"))
+                object.docsAutoDownloadEnabled = message.docsAutoDownloadEnabled;
+              if (message.docsAutoDownloadInterval != null && message.hasOwnProperty("docsAutoDownloadInterval"))
+                object.docsAutoDownloadInterval = message.docsAutoDownloadInterval;
+              if (message.docsAutoUploadEnabled != null && message.hasOwnProperty("docsAutoUploadEnabled"))
+                object.docsAutoUploadEnabled = message.docsAutoUploadEnabled;
+              if (message.docsAutoUploadDelay != null && message.hasOwnProperty("docsAutoUploadDelay"))
+                object.docsAutoUploadDelay = message.docsAutoUploadDelay;
+              return object;
+            };
+            MapsOptions.prototype.toJSON = function toJSON() {
+              return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+            MapsOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+              if (typeUrlPrefix === void 0) {
+                typeUrlPrefix = "type.googleapis.com";
+              }
+              return typeUrlPrefix + "/keyhole.dbroot.ClientOptionsProto.MapsOptions";
+            };
+            return MapsOptions;
+          }();
+          return ClientOptionsProto;
+        }();
+        dbroot.FetchingOptionsProto = function() {
+          function FetchingOptionsProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          FetchingOptionsProto.prototype.maxRequestsPerQuery = 1;
+          FetchingOptionsProto.prototype.forceMaxRequestsPerQuery = false;
+          FetchingOptionsProto.prototype.sortBatches = false;
+          FetchingOptionsProto.prototype.maxDrawable = 2;
+          FetchingOptionsProto.prototype.maxImagery = 2;
+          FetchingOptionsProto.prototype.maxTerrain = 5;
+          FetchingOptionsProto.prototype.maxQuadtree = 5;
+          FetchingOptionsProto.prototype.maxDioramaMetadata = 1;
+          FetchingOptionsProto.prototype.maxDioramaData = 0;
+          FetchingOptionsProto.prototype.maxConsumerFetchRatio = 1;
+          FetchingOptionsProto.prototype.maxProEcFetchRatio = 0;
+          FetchingOptionsProto.prototype.safeOverallQps = 0;
+          FetchingOptionsProto.prototype.safeImageryQps = 0;
+          FetchingOptionsProto.prototype.domainsForHttps = "google.com gstatic.com";
+          FetchingOptionsProto.prototype.hostsForHttp = "";
+          FetchingOptionsProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.FetchingOptionsProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.maxRequestsPerQuery = reader.int32();
+                  break;
+                }
+                case 12: {
+                  message.forceMaxRequestsPerQuery = reader.bool();
+                  break;
+                }
+                case 13: {
+                  message.sortBatches = reader.bool();
+                  break;
+                }
+                case 2: {
+                  message.maxDrawable = reader.int32();
+                  break;
+                }
+                case 3: {
+                  message.maxImagery = reader.int32();
+                  break;
+                }
+                case 4: {
+                  message.maxTerrain = reader.int32();
+                  break;
+                }
+                case 5: {
+                  message.maxQuadtree = reader.int32();
+                  break;
+                }
+                case 6: {
+                  message.maxDioramaMetadata = reader.int32();
+                  break;
+                }
+                case 7: {
+                  message.maxDioramaData = reader.int32();
+                  break;
+                }
+                case 8: {
+                  message.maxConsumerFetchRatio = reader.float();
+                  break;
+                }
+                case 9: {
+                  message.maxProEcFetchRatio = reader.float();
+                  break;
+                }
+                case 10: {
+                  message.safeOverallQps = reader.float();
+                  break;
+                }
+                case 11: {
+                  message.safeImageryQps = reader.float();
+                  break;
+                }
+                case 14: {
+                  message.domainsForHttps = reader.string();
+                  break;
+                }
+                case 15: {
+                  message.hostsForHttp = reader.string();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          FetchingOptionsProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.maxRequestsPerQuery != null && message.hasOwnProperty("maxRequestsPerQuery")) {
+              if (!$util.isInteger(message.maxRequestsPerQuery))
+                return "maxRequestsPerQuery: integer expected";
+            }
+            if (message.forceMaxRequestsPerQuery != null && message.hasOwnProperty("forceMaxRequestsPerQuery")) {
+              if (typeof message.forceMaxRequestsPerQuery !== "boolean")
+                return "forceMaxRequestsPerQuery: boolean expected";
+            }
+            if (message.sortBatches != null && message.hasOwnProperty("sortBatches")) {
+              if (typeof message.sortBatches !== "boolean")
+                return "sortBatches: boolean expected";
+            }
+            if (message.maxDrawable != null && message.hasOwnProperty("maxDrawable")) {
+              if (!$util.isInteger(message.maxDrawable))
+                return "maxDrawable: integer expected";
+            }
+            if (message.maxImagery != null && message.hasOwnProperty("maxImagery")) {
+              if (!$util.isInteger(message.maxImagery))
+                return "maxImagery: integer expected";
+            }
+            if (message.maxTerrain != null && message.hasOwnProperty("maxTerrain")) {
+              if (!$util.isInteger(message.maxTerrain))
+                return "maxTerrain: integer expected";
+            }
+            if (message.maxQuadtree != null && message.hasOwnProperty("maxQuadtree")) {
+              if (!$util.isInteger(message.maxQuadtree))
+                return "maxQuadtree: integer expected";
+            }
+            if (message.maxDioramaMetadata != null && message.hasOwnProperty("maxDioramaMetadata")) {
+              if (!$util.isInteger(message.maxDioramaMetadata))
+                return "maxDioramaMetadata: integer expected";
+            }
+            if (message.maxDioramaData != null && message.hasOwnProperty("maxDioramaData")) {
+              if (!$util.isInteger(message.maxDioramaData))
+                return "maxDioramaData: integer expected";
+            }
+            if (message.maxConsumerFetchRatio != null && message.hasOwnProperty("maxConsumerFetchRatio")) {
+              if (typeof message.maxConsumerFetchRatio !== "number")
+                return "maxConsumerFetchRatio: number expected";
+            }
+            if (message.maxProEcFetchRatio != null && message.hasOwnProperty("maxProEcFetchRatio")) {
+              if (typeof message.maxProEcFetchRatio !== "number")
+                return "maxProEcFetchRatio: number expected";
+            }
+            if (message.safeOverallQps != null && message.hasOwnProperty("safeOverallQps")) {
+              if (typeof message.safeOverallQps !== "number")
+                return "safeOverallQps: number expected";
+            }
+            if (message.safeImageryQps != null && message.hasOwnProperty("safeImageryQps")) {
+              if (typeof message.safeImageryQps !== "number")
+                return "safeImageryQps: number expected";
+            }
+            if (message.domainsForHttps != null && message.hasOwnProperty("domainsForHttps")) {
+              if (!$util.isString(message.domainsForHttps))
+                return "domainsForHttps: string expected";
+            }
+            if (message.hostsForHttp != null && message.hasOwnProperty("hostsForHttp")) {
+              if (!$util.isString(message.hostsForHttp))
+                return "hostsForHttp: string expected";
+            }
+            return null;
+          };
+          FetchingOptionsProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.FetchingOptionsProto)
+              return object;
+            var message = new $root.keyhole.dbroot.FetchingOptionsProto();
+            if (object.maxRequestsPerQuery != null)
+              message.maxRequestsPerQuery = object.maxRequestsPerQuery | 0;
+            if (object.forceMaxRequestsPerQuery != null)
+              message.forceMaxRequestsPerQuery = Boolean(object.forceMaxRequestsPerQuery);
+            if (object.sortBatches != null)
+              message.sortBatches = Boolean(object.sortBatches);
+            if (object.maxDrawable != null)
+              message.maxDrawable = object.maxDrawable | 0;
+            if (object.maxImagery != null)
+              message.maxImagery = object.maxImagery | 0;
+            if (object.maxTerrain != null)
+              message.maxTerrain = object.maxTerrain | 0;
+            if (object.maxQuadtree != null)
+              message.maxQuadtree = object.maxQuadtree | 0;
+            if (object.maxDioramaMetadata != null)
+              message.maxDioramaMetadata = object.maxDioramaMetadata | 0;
+            if (object.maxDioramaData != null)
+              message.maxDioramaData = object.maxDioramaData | 0;
+            if (object.maxConsumerFetchRatio != null)
+              message.maxConsumerFetchRatio = Number(object.maxConsumerFetchRatio);
+            if (object.maxProEcFetchRatio != null)
+              message.maxProEcFetchRatio = Number(object.maxProEcFetchRatio);
+            if (object.safeOverallQps != null)
+              message.safeOverallQps = Number(object.safeOverallQps);
+            if (object.safeImageryQps != null)
+              message.safeImageryQps = Number(object.safeImageryQps);
+            if (object.domainsForHttps != null)
+              message.domainsForHttps = String(object.domainsForHttps);
+            if (object.hostsForHttp != null)
+              message.hostsForHttp = String(object.hostsForHttp);
+            return message;
+          };
+          FetchingOptionsProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.maxRequestsPerQuery = 1;
+              object.maxDrawable = 2;
+              object.maxImagery = 2;
+              object.maxTerrain = 5;
+              object.maxQuadtree = 5;
+              object.maxDioramaMetadata = 1;
+              object.maxDioramaData = 0;
+              object.maxConsumerFetchRatio = 1;
+              object.maxProEcFetchRatio = 0;
+              object.safeOverallQps = 0;
+              object.safeImageryQps = 0;
+              object.forceMaxRequestsPerQuery = false;
+              object.sortBatches = false;
+              object.domainsForHttps = "google.com gstatic.com";
+              object.hostsForHttp = "";
+            }
+            if (message.maxRequestsPerQuery != null && message.hasOwnProperty("maxRequestsPerQuery"))
+              object.maxRequestsPerQuery = message.maxRequestsPerQuery;
+            if (message.maxDrawable != null && message.hasOwnProperty("maxDrawable"))
+              object.maxDrawable = message.maxDrawable;
+            if (message.maxImagery != null && message.hasOwnProperty("maxImagery"))
+              object.maxImagery = message.maxImagery;
+            if (message.maxTerrain != null && message.hasOwnProperty("maxTerrain"))
+              object.maxTerrain = message.maxTerrain;
+            if (message.maxQuadtree != null && message.hasOwnProperty("maxQuadtree"))
+              object.maxQuadtree = message.maxQuadtree;
+            if (message.maxDioramaMetadata != null && message.hasOwnProperty("maxDioramaMetadata"))
+              object.maxDioramaMetadata = message.maxDioramaMetadata;
+            if (message.maxDioramaData != null && message.hasOwnProperty("maxDioramaData"))
+              object.maxDioramaData = message.maxDioramaData;
+            if (message.maxConsumerFetchRatio != null && message.hasOwnProperty("maxConsumerFetchRatio"))
+              object.maxConsumerFetchRatio = options.json && !isFinite(message.maxConsumerFetchRatio) ? String(message.maxConsumerFetchRatio) : message.maxConsumerFetchRatio;
+            if (message.maxProEcFetchRatio != null && message.hasOwnProperty("maxProEcFetchRatio"))
+              object.maxProEcFetchRatio = options.json && !isFinite(message.maxProEcFetchRatio) ? String(message.maxProEcFetchRatio) : message.maxProEcFetchRatio;
+            if (message.safeOverallQps != null && message.hasOwnProperty("safeOverallQps"))
+              object.safeOverallQps = options.json && !isFinite(message.safeOverallQps) ? String(message.safeOverallQps) : message.safeOverallQps;
+            if (message.safeImageryQps != null && message.hasOwnProperty("safeImageryQps"))
+              object.safeImageryQps = options.json && !isFinite(message.safeImageryQps) ? String(message.safeImageryQps) : message.safeImageryQps;
+            if (message.forceMaxRequestsPerQuery != null && message.hasOwnProperty("forceMaxRequestsPerQuery"))
+              object.forceMaxRequestsPerQuery = message.forceMaxRequestsPerQuery;
+            if (message.sortBatches != null && message.hasOwnProperty("sortBatches"))
+              object.sortBatches = message.sortBatches;
+            if (message.domainsForHttps != null && message.hasOwnProperty("domainsForHttps"))
+              object.domainsForHttps = message.domainsForHttps;
+            if (message.hostsForHttp != null && message.hasOwnProperty("hostsForHttp"))
+              object.hostsForHttp = message.hostsForHttp;
+            return object;
+          };
+          FetchingOptionsProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          FetchingOptionsProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.FetchingOptionsProto";
+          };
+          return FetchingOptionsProto;
+        }();
+        dbroot.TimeMachineOptionsProto = function() {
+          function TimeMachineOptionsProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          TimeMachineOptionsProto.prototype.serverUrl = "";
+          TimeMachineOptionsProto.prototype.isTimemachine = false;
+          TimeMachineOptionsProto.prototype.dwellTimeMs = 500;
+          TimeMachineOptionsProto.prototype.discoverabilityAltitudeMeters = 15e3;
+          TimeMachineOptionsProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.TimeMachineOptionsProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.serverUrl = reader.string();
+                  break;
+                }
+                case 2: {
+                  message.isTimemachine = reader.bool();
+                  break;
+                }
+                case 3: {
+                  message.dwellTimeMs = reader.int32();
+                  break;
+                }
+                case 4: {
+                  message.discoverabilityAltitudeMeters = reader.int32();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          TimeMachineOptionsProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.serverUrl != null && message.hasOwnProperty("serverUrl")) {
+              if (!$util.isString(message.serverUrl))
+                return "serverUrl: string expected";
+            }
+            if (message.isTimemachine != null && message.hasOwnProperty("isTimemachine")) {
+              if (typeof message.isTimemachine !== "boolean")
+                return "isTimemachine: boolean expected";
+            }
+            if (message.dwellTimeMs != null && message.hasOwnProperty("dwellTimeMs")) {
+              if (!$util.isInteger(message.dwellTimeMs))
+                return "dwellTimeMs: integer expected";
+            }
+            if (message.discoverabilityAltitudeMeters != null && message.hasOwnProperty("discoverabilityAltitudeMeters")) {
+              if (!$util.isInteger(message.discoverabilityAltitudeMeters))
+                return "discoverabilityAltitudeMeters: integer expected";
+            }
+            return null;
+          };
+          TimeMachineOptionsProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.TimeMachineOptionsProto)
+              return object;
+            var message = new $root.keyhole.dbroot.TimeMachineOptionsProto();
+            if (object.serverUrl != null)
+              message.serverUrl = String(object.serverUrl);
+            if (object.isTimemachine != null)
+              message.isTimemachine = Boolean(object.isTimemachine);
+            if (object.dwellTimeMs != null)
+              message.dwellTimeMs = object.dwellTimeMs | 0;
+            if (object.discoverabilityAltitudeMeters != null)
+              message.discoverabilityAltitudeMeters = object.discoverabilityAltitudeMeters | 0;
+            return message;
+          };
+          TimeMachineOptionsProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.serverUrl = "";
+              object.isTimemachine = false;
+              object.dwellTimeMs = 500;
+              object.discoverabilityAltitudeMeters = 15e3;
+            }
+            if (message.serverUrl != null && message.hasOwnProperty("serverUrl"))
+              object.serverUrl = message.serverUrl;
+            if (message.isTimemachine != null && message.hasOwnProperty("isTimemachine"))
+              object.isTimemachine = message.isTimemachine;
+            if (message.dwellTimeMs != null && message.hasOwnProperty("dwellTimeMs"))
+              object.dwellTimeMs = message.dwellTimeMs;
+            if (message.discoverabilityAltitudeMeters != null && message.hasOwnProperty("discoverabilityAltitudeMeters"))
+              object.discoverabilityAltitudeMeters = message.discoverabilityAltitudeMeters;
+            return object;
+          };
+          TimeMachineOptionsProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          TimeMachineOptionsProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.TimeMachineOptionsProto";
+          };
+          return TimeMachineOptionsProto;
+        }();
+        dbroot.AutopiaOptionsProto = function() {
+          function AutopiaOptionsProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          AutopiaOptionsProto.prototype.metadataServerUrl = "http://cbk0.google.com/cbk";
+          AutopiaOptionsProto.prototype.depthmapServerUrl = "http://cbk0.google.com/cbk";
+          AutopiaOptionsProto.prototype.coverageOverlayUrl = "";
+          AutopiaOptionsProto.prototype.maxImageryQps = 0;
+          AutopiaOptionsProto.prototype.maxMetadataDepthmapQps = 0;
+          AutopiaOptionsProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.AutopiaOptionsProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.metadataServerUrl = reader.string();
+                  break;
+                }
+                case 2: {
+                  message.depthmapServerUrl = reader.string();
+                  break;
+                }
+                case 3: {
+                  message.coverageOverlayUrl = reader.string();
+                  break;
+                }
+                case 4: {
+                  message.maxImageryQps = reader.float();
+                  break;
+                }
+                case 5: {
+                  message.maxMetadataDepthmapQps = reader.float();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          AutopiaOptionsProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.metadataServerUrl != null && message.hasOwnProperty("metadataServerUrl")) {
+              if (!$util.isString(message.metadataServerUrl))
+                return "metadataServerUrl: string expected";
+            }
+            if (message.depthmapServerUrl != null && message.hasOwnProperty("depthmapServerUrl")) {
+              if (!$util.isString(message.depthmapServerUrl))
+                return "depthmapServerUrl: string expected";
+            }
+            if (message.coverageOverlayUrl != null && message.hasOwnProperty("coverageOverlayUrl")) {
+              if (!$util.isString(message.coverageOverlayUrl))
+                return "coverageOverlayUrl: string expected";
+            }
+            if (message.maxImageryQps != null && message.hasOwnProperty("maxImageryQps")) {
+              if (typeof message.maxImageryQps !== "number")
+                return "maxImageryQps: number expected";
+            }
+            if (message.maxMetadataDepthmapQps != null && message.hasOwnProperty("maxMetadataDepthmapQps")) {
+              if (typeof message.maxMetadataDepthmapQps !== "number")
+                return "maxMetadataDepthmapQps: number expected";
+            }
+            return null;
+          };
+          AutopiaOptionsProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.AutopiaOptionsProto)
+              return object;
+            var message = new $root.keyhole.dbroot.AutopiaOptionsProto();
+            if (object.metadataServerUrl != null)
+              message.metadataServerUrl = String(object.metadataServerUrl);
+            if (object.depthmapServerUrl != null)
+              message.depthmapServerUrl = String(object.depthmapServerUrl);
+            if (object.coverageOverlayUrl != null)
+              message.coverageOverlayUrl = String(object.coverageOverlayUrl);
+            if (object.maxImageryQps != null)
+              message.maxImageryQps = Number(object.maxImageryQps);
+            if (object.maxMetadataDepthmapQps != null)
+              message.maxMetadataDepthmapQps = Number(object.maxMetadataDepthmapQps);
+            return message;
+          };
+          AutopiaOptionsProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.metadataServerUrl = "http://cbk0.google.com/cbk";
+              object.depthmapServerUrl = "http://cbk0.google.com/cbk";
+              object.coverageOverlayUrl = "";
+              object.maxImageryQps = 0;
+              object.maxMetadataDepthmapQps = 0;
+            }
+            if (message.metadataServerUrl != null && message.hasOwnProperty("metadataServerUrl"))
+              object.metadataServerUrl = message.metadataServerUrl;
+            if (message.depthmapServerUrl != null && message.hasOwnProperty("depthmapServerUrl"))
+              object.depthmapServerUrl = message.depthmapServerUrl;
+            if (message.coverageOverlayUrl != null && message.hasOwnProperty("coverageOverlayUrl"))
+              object.coverageOverlayUrl = message.coverageOverlayUrl;
+            if (message.maxImageryQps != null && message.hasOwnProperty("maxImageryQps"))
+              object.maxImageryQps = options.json && !isFinite(message.maxImageryQps) ? String(message.maxImageryQps) : message.maxImageryQps;
+            if (message.maxMetadataDepthmapQps != null && message.hasOwnProperty("maxMetadataDepthmapQps"))
+              object.maxMetadataDepthmapQps = options.json && !isFinite(message.maxMetadataDepthmapQps) ? String(message.maxMetadataDepthmapQps) : message.maxMetadataDepthmapQps;
+            return object;
+          };
+          AutopiaOptionsProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          AutopiaOptionsProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.AutopiaOptionsProto";
+          };
+          return AutopiaOptionsProto;
+        }();
+        dbroot.CSIOptionsProto = function() {
+          function CSIOptionsProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          CSIOptionsProto.prototype.samplingPercentage = 0;
+          CSIOptionsProto.prototype.experimentId = "";
+          CSIOptionsProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.CSIOptionsProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.samplingPercentage = reader.int32();
+                  break;
+                }
+                case 2: {
+                  message.experimentId = reader.string();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          CSIOptionsProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.samplingPercentage != null && message.hasOwnProperty("samplingPercentage")) {
+              if (!$util.isInteger(message.samplingPercentage))
+                return "samplingPercentage: integer expected";
+            }
+            if (message.experimentId != null && message.hasOwnProperty("experimentId")) {
+              if (!$util.isString(message.experimentId))
+                return "experimentId: string expected";
+            }
+            return null;
+          };
+          CSIOptionsProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.CSIOptionsProto)
+              return object;
+            var message = new $root.keyhole.dbroot.CSIOptionsProto();
+            if (object.samplingPercentage != null)
+              message.samplingPercentage = object.samplingPercentage | 0;
+            if (object.experimentId != null)
+              message.experimentId = String(object.experimentId);
+            return message;
+          };
+          CSIOptionsProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.samplingPercentage = 0;
+              object.experimentId = "";
+            }
+            if (message.samplingPercentage != null && message.hasOwnProperty("samplingPercentage"))
+              object.samplingPercentage = message.samplingPercentage;
+            if (message.experimentId != null && message.hasOwnProperty("experimentId"))
+              object.experimentId = message.experimentId;
+            return object;
+          };
+          CSIOptionsProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          CSIOptionsProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.CSIOptionsProto";
+          };
+          return CSIOptionsProto;
+        }();
+        dbroot.SearchTabProto = function() {
+          function SearchTabProto(properties) {
+            this.inputBox = [];
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          SearchTabProto.prototype.isVisible = false;
+          SearchTabProto.prototype.tabLabel = null;
+          SearchTabProto.prototype.baseUrl = "";
+          SearchTabProto.prototype.viewportPrefix = "";
+          SearchTabProto.prototype.inputBox = $util.emptyArray;
+          SearchTabProto.prototype.requirement = null;
+          SearchTabProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.SearchTabProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.isVisible = reader.bool();
+                  break;
+                }
+                case 2: {
+                  message.tabLabel = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 3: {
+                  message.baseUrl = reader.string();
+                  break;
+                }
+                case 4: {
+                  message.viewportPrefix = reader.string();
+                  break;
+                }
+                case 5: {
+                  if (!(message.inputBox && message.inputBox.length))
+                    message.inputBox = [];
+                  message.inputBox.push($root.keyhole.dbroot.SearchTabProto.InputBoxInfo.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 6: {
+                  message.requirement = $root.keyhole.dbroot.RequirementProto.decode(reader, reader.uint32());
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("isVisible"))
+              throw $util.ProtocolError("missing required 'isVisible'", { instance: message });
+            return message;
+          };
+          SearchTabProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (typeof message.isVisible !== "boolean")
+              return "isVisible: boolean expected";
+            if (message.tabLabel != null && message.hasOwnProperty("tabLabel")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.tabLabel);
+              if (error)
+                return "tabLabel." + error;
+            }
+            if (message.baseUrl != null && message.hasOwnProperty("baseUrl")) {
+              if (!$util.isString(message.baseUrl))
+                return "baseUrl: string expected";
+            }
+            if (message.viewportPrefix != null && message.hasOwnProperty("viewportPrefix")) {
+              if (!$util.isString(message.viewportPrefix))
+                return "viewportPrefix: string expected";
+            }
+            if (message.inputBox != null && message.hasOwnProperty("inputBox")) {
+              if (!Array.isArray(message.inputBox))
+                return "inputBox: array expected";
+              for (var i = 0; i < message.inputBox.length; ++i) {
+                var error = $root.keyhole.dbroot.SearchTabProto.InputBoxInfo.verify(message.inputBox[i]);
+                if (error)
+                  return "inputBox." + error;
+              }
+            }
+            if (message.requirement != null && message.hasOwnProperty("requirement")) {
+              var error = $root.keyhole.dbroot.RequirementProto.verify(message.requirement);
+              if (error)
+                return "requirement." + error;
+            }
+            return null;
+          };
+          SearchTabProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.SearchTabProto)
+              return object;
+            var message = new $root.keyhole.dbroot.SearchTabProto();
+            if (object.isVisible != null)
+              message.isVisible = Boolean(object.isVisible);
+            if (object.tabLabel != null) {
+              if (typeof object.tabLabel !== "object")
+                throw TypeError(".keyhole.dbroot.SearchTabProto.tabLabel: object expected");
+              message.tabLabel = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.tabLabel);
+            }
+            if (object.baseUrl != null)
+              message.baseUrl = String(object.baseUrl);
+            if (object.viewportPrefix != null)
+              message.viewportPrefix = String(object.viewportPrefix);
+            if (object.inputBox) {
+              if (!Array.isArray(object.inputBox))
+                throw TypeError(".keyhole.dbroot.SearchTabProto.inputBox: array expected");
+              message.inputBox = [];
+              for (var i = 0; i < object.inputBox.length; ++i) {
+                if (typeof object.inputBox[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.SearchTabProto.inputBox: object expected");
+                message.inputBox[i] = $root.keyhole.dbroot.SearchTabProto.InputBoxInfo.fromObject(object.inputBox[i]);
+              }
+            }
+            if (object.requirement != null) {
+              if (typeof object.requirement !== "object")
+                throw TypeError(".keyhole.dbroot.SearchTabProto.requirement: object expected");
+              message.requirement = $root.keyhole.dbroot.RequirementProto.fromObject(object.requirement);
+            }
+            return message;
+          };
+          SearchTabProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+              object.inputBox = [];
+            if (options.defaults) {
+              object.isVisible = false;
+              object.tabLabel = null;
+              object.baseUrl = "";
+              object.viewportPrefix = "";
+              object.requirement = null;
+            }
+            if (message.isVisible != null && message.hasOwnProperty("isVisible"))
+              object.isVisible = message.isVisible;
+            if (message.tabLabel != null && message.hasOwnProperty("tabLabel"))
+              object.tabLabel = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.tabLabel, options);
+            if (message.baseUrl != null && message.hasOwnProperty("baseUrl"))
+              object.baseUrl = message.baseUrl;
+            if (message.viewportPrefix != null && message.hasOwnProperty("viewportPrefix"))
+              object.viewportPrefix = message.viewportPrefix;
+            if (message.inputBox && message.inputBox.length) {
+              object.inputBox = [];
+              for (var j = 0; j < message.inputBox.length; ++j)
+                object.inputBox[j] = $root.keyhole.dbroot.SearchTabProto.InputBoxInfo.toObject(message.inputBox[j], options);
+            }
+            if (message.requirement != null && message.hasOwnProperty("requirement"))
+              object.requirement = $root.keyhole.dbroot.RequirementProto.toObject(message.requirement, options);
+            return object;
+          };
+          SearchTabProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          SearchTabProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.SearchTabProto";
+          };
+          SearchTabProto.InputBoxInfo = function() {
+            function InputBoxInfo(properties) {
+              if (properties) {
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                  if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+              }
+            }
+            InputBoxInfo.prototype.label = null;
+            InputBoxInfo.prototype.queryVerb = "";
+            InputBoxInfo.prototype.queryPrepend = "";
+            InputBoxInfo.decode = function decode(reader, length) {
+              if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+              var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.SearchTabProto.InputBoxInfo();
+              while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                  case 1: {
+                    message.label = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                    break;
+                  }
+                  case 2: {
+                    message.queryVerb = reader.string();
+                    break;
+                  }
+                  case 3: {
+                    message.queryPrepend = reader.string();
+                    break;
+                  }
+                  default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+              }
+              if (!message.hasOwnProperty("label"))
+                throw $util.ProtocolError("missing required 'label'", { instance: message });
+              if (!message.hasOwnProperty("queryVerb"))
+                throw $util.ProtocolError("missing required 'queryVerb'", { instance: message });
+              return message;
+            };
+            InputBoxInfo.verify = function verify(message) {
+              if (typeof message !== "object" || message === null)
+                return "object expected";
+              {
+                var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.label);
+                if (error)
+                  return "label." + error;
+              }
+              if (!$util.isString(message.queryVerb))
+                return "queryVerb: string expected";
+              if (message.queryPrepend != null && message.hasOwnProperty("queryPrepend")) {
+                if (!$util.isString(message.queryPrepend))
+                  return "queryPrepend: string expected";
+              }
+              return null;
+            };
+            InputBoxInfo.fromObject = function fromObject(object) {
+              if (object instanceof $root.keyhole.dbroot.SearchTabProto.InputBoxInfo)
+                return object;
+              var message = new $root.keyhole.dbroot.SearchTabProto.InputBoxInfo();
+              if (object.label != null) {
+                if (typeof object.label !== "object")
+                  throw TypeError(".keyhole.dbroot.SearchTabProto.InputBoxInfo.label: object expected");
+                message.label = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.label);
+              }
+              if (object.queryVerb != null)
+                message.queryVerb = String(object.queryVerb);
+              if (object.queryPrepend != null)
+                message.queryPrepend = String(object.queryPrepend);
+              return message;
+            };
+            InputBoxInfo.toObject = function toObject(message, options) {
+              if (!options)
+                options = {};
+              var object = {};
+              if (options.defaults) {
+                object.label = null;
+                object.queryVerb = "";
+                object.queryPrepend = "";
+              }
+              if (message.label != null && message.hasOwnProperty("label"))
+                object.label = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.label, options);
+              if (message.queryVerb != null && message.hasOwnProperty("queryVerb"))
+                object.queryVerb = message.queryVerb;
+              if (message.queryPrepend != null && message.hasOwnProperty("queryPrepend"))
+                object.queryPrepend = message.queryPrepend;
+              return object;
+            };
+            InputBoxInfo.prototype.toJSON = function toJSON() {
+              return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+            InputBoxInfo.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+              if (typeUrlPrefix === void 0) {
+                typeUrlPrefix = "type.googleapis.com";
+              }
+              return typeUrlPrefix + "/keyhole.dbroot.SearchTabProto.InputBoxInfo";
+            };
+            return InputBoxInfo;
+          }();
+          return SearchTabProto;
+        }();
+        dbroot.CobrandProto = function() {
+          function CobrandProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          CobrandProto.prototype.logoUrl = "";
+          CobrandProto.prototype.xCoord = null;
+          CobrandProto.prototype.yCoord = null;
+          CobrandProto.prototype.tiePoint = 6;
+          CobrandProto.prototype.screenSize = 0;
+          CobrandProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.CobrandProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.logoUrl = reader.string();
+                  break;
+                }
+                case 2: {
+                  message.xCoord = $root.keyhole.dbroot.CobrandProto.Coord.decode(reader, reader.uint32());
+                  break;
+                }
+                case 3: {
+                  message.yCoord = $root.keyhole.dbroot.CobrandProto.Coord.decode(reader, reader.uint32());
+                  break;
+                }
+                case 4: {
+                  message.tiePoint = reader.int32();
+                  break;
+                }
+                case 5: {
+                  message.screenSize = reader.double();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("logoUrl"))
+              throw $util.ProtocolError("missing required 'logoUrl'", { instance: message });
+            return message;
+          };
+          CobrandProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (!$util.isString(message.logoUrl))
+              return "logoUrl: string expected";
+            if (message.xCoord != null && message.hasOwnProperty("xCoord")) {
+              var error = $root.keyhole.dbroot.CobrandProto.Coord.verify(message.xCoord);
+              if (error)
+                return "xCoord." + error;
+            }
+            if (message.yCoord != null && message.hasOwnProperty("yCoord")) {
+              var error = $root.keyhole.dbroot.CobrandProto.Coord.verify(message.yCoord);
+              if (error)
+                return "yCoord." + error;
+            }
+            if (message.tiePoint != null && message.hasOwnProperty("tiePoint"))
+              switch (message.tiePoint) {
+                default:
+                  return "tiePoint: enum value expected";
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                  break;
+              }
+            if (message.screenSize != null && message.hasOwnProperty("screenSize")) {
+              if (typeof message.screenSize !== "number")
+                return "screenSize: number expected";
+            }
+            return null;
+          };
+          CobrandProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.CobrandProto)
+              return object;
+            var message = new $root.keyhole.dbroot.CobrandProto();
+            if (object.logoUrl != null)
+              message.logoUrl = String(object.logoUrl);
+            if (object.xCoord != null) {
+              if (typeof object.xCoord !== "object")
+                throw TypeError(".keyhole.dbroot.CobrandProto.xCoord: object expected");
+              message.xCoord = $root.keyhole.dbroot.CobrandProto.Coord.fromObject(object.xCoord);
+            }
+            if (object.yCoord != null) {
+              if (typeof object.yCoord !== "object")
+                throw TypeError(".keyhole.dbroot.CobrandProto.yCoord: object expected");
+              message.yCoord = $root.keyhole.dbroot.CobrandProto.Coord.fromObject(object.yCoord);
+            }
+            switch (object.tiePoint) {
+              case "TOP_LEFT":
+              case 0:
+                message.tiePoint = 0;
+                break;
+              case "TOP_CENTER":
+              case 1:
+                message.tiePoint = 1;
+                break;
+              case "TOP_RIGHT":
+              case 2:
+                message.tiePoint = 2;
+                break;
+              case "MID_LEFT":
+              case 3:
+                message.tiePoint = 3;
+                break;
+              case "MID_CENTER":
+              case 4:
+                message.tiePoint = 4;
+                break;
+              case "MID_RIGHT":
+              case 5:
+                message.tiePoint = 5;
+                break;
+              case "BOTTOM_LEFT":
+              case 6:
+                message.tiePoint = 6;
+                break;
+              case "BOTTOM_CENTER":
+              case 7:
+                message.tiePoint = 7;
+                break;
+              case "BOTTOM_RIGHT":
+              case 8:
+                message.tiePoint = 8;
+                break;
+            }
+            if (object.screenSize != null)
+              message.screenSize = Number(object.screenSize);
+            return message;
+          };
+          CobrandProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.logoUrl = "";
+              object.xCoord = null;
+              object.yCoord = null;
+              object.tiePoint = options.enums === String ? "BOTTOM_LEFT" : 6;
+              object.screenSize = 0;
+            }
+            if (message.logoUrl != null && message.hasOwnProperty("logoUrl"))
+              object.logoUrl = message.logoUrl;
+            if (message.xCoord != null && message.hasOwnProperty("xCoord"))
+              object.xCoord = $root.keyhole.dbroot.CobrandProto.Coord.toObject(message.xCoord, options);
+            if (message.yCoord != null && message.hasOwnProperty("yCoord"))
+              object.yCoord = $root.keyhole.dbroot.CobrandProto.Coord.toObject(message.yCoord, options);
+            if (message.tiePoint != null && message.hasOwnProperty("tiePoint"))
+              object.tiePoint = options.enums === String ? $root.keyhole.dbroot.CobrandProto.TiePoint[message.tiePoint] : message.tiePoint;
+            if (message.screenSize != null && message.hasOwnProperty("screenSize"))
+              object.screenSize = options.json && !isFinite(message.screenSize) ? String(message.screenSize) : message.screenSize;
+            return object;
+          };
+          CobrandProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          CobrandProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.CobrandProto";
+          };
+          CobrandProto.Coord = function() {
+            function Coord(properties) {
+              if (properties) {
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                  if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+              }
+            }
+            Coord.prototype.value = 0;
+            Coord.prototype.isRelative = false;
+            Coord.decode = function decode(reader, length) {
+              if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+              var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.CobrandProto.Coord();
+              while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                  case 1: {
+                    message.value = reader.double();
+                    break;
+                  }
+                  case 2: {
+                    message.isRelative = reader.bool();
+                    break;
+                  }
+                  default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+              }
+              if (!message.hasOwnProperty("value"))
+                throw $util.ProtocolError("missing required 'value'", { instance: message });
+              return message;
+            };
+            Coord.verify = function verify(message) {
+              if (typeof message !== "object" || message === null)
+                return "object expected";
+              if (typeof message.value !== "number")
+                return "value: number expected";
+              if (message.isRelative != null && message.hasOwnProperty("isRelative")) {
+                if (typeof message.isRelative !== "boolean")
+                  return "isRelative: boolean expected";
+              }
+              return null;
+            };
+            Coord.fromObject = function fromObject(object) {
+              if (object instanceof $root.keyhole.dbroot.CobrandProto.Coord)
+                return object;
+              var message = new $root.keyhole.dbroot.CobrandProto.Coord();
+              if (object.value != null)
+                message.value = Number(object.value);
+              if (object.isRelative != null)
+                message.isRelative = Boolean(object.isRelative);
+              return message;
+            };
+            Coord.toObject = function toObject(message, options) {
+              if (!options)
+                options = {};
+              var object = {};
+              if (options.defaults) {
+                object.value = 0;
+                object.isRelative = false;
+              }
+              if (message.value != null && message.hasOwnProperty("value"))
+                object.value = options.json && !isFinite(message.value) ? String(message.value) : message.value;
+              if (message.isRelative != null && message.hasOwnProperty("isRelative"))
+                object.isRelative = message.isRelative;
+              return object;
+            };
+            Coord.prototype.toJSON = function toJSON() {
+              return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+            Coord.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+              if (typeUrlPrefix === void 0) {
+                typeUrlPrefix = "type.googleapis.com";
+              }
+              return typeUrlPrefix + "/keyhole.dbroot.CobrandProto.Coord";
+            };
+            return Coord;
+          }();
+          CobrandProto.TiePoint = function() {
+            var valuesById = {}, values = Object.create(valuesById);
+            values[valuesById[0] = "TOP_LEFT"] = 0;
+            values[valuesById[1] = "TOP_CENTER"] = 1;
+            values[valuesById[2] = "TOP_RIGHT"] = 2;
+            values[valuesById[3] = "MID_LEFT"] = 3;
+            values[valuesById[4] = "MID_CENTER"] = 4;
+            values[valuesById[5] = "MID_RIGHT"] = 5;
+            values[valuesById[6] = "BOTTOM_LEFT"] = 6;
+            values[valuesById[7] = "BOTTOM_CENTER"] = 7;
+            values[valuesById[8] = "BOTTOM_RIGHT"] = 8;
+            return values;
+          }();
+          return CobrandProto;
+        }();
+        dbroot.DatabaseDescriptionProto = function() {
+          function DatabaseDescriptionProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          DatabaseDescriptionProto.prototype.databaseName = null;
+          DatabaseDescriptionProto.prototype.databaseUrl = "";
+          DatabaseDescriptionProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.DatabaseDescriptionProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.databaseName = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 2: {
+                  message.databaseUrl = reader.string();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("databaseUrl"))
+              throw $util.ProtocolError("missing required 'databaseUrl'", { instance: message });
+            return message;
+          };
+          DatabaseDescriptionProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.databaseName != null && message.hasOwnProperty("databaseName")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.databaseName);
+              if (error)
+                return "databaseName." + error;
+            }
+            if (!$util.isString(message.databaseUrl))
+              return "databaseUrl: string expected";
+            return null;
+          };
+          DatabaseDescriptionProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.DatabaseDescriptionProto)
+              return object;
+            var message = new $root.keyhole.dbroot.DatabaseDescriptionProto();
+            if (object.databaseName != null) {
+              if (typeof object.databaseName !== "object")
+                throw TypeError(".keyhole.dbroot.DatabaseDescriptionProto.databaseName: object expected");
+              message.databaseName = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.databaseName);
+            }
+            if (object.databaseUrl != null)
+              message.databaseUrl = String(object.databaseUrl);
+            return message;
+          };
+          DatabaseDescriptionProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.databaseName = null;
+              object.databaseUrl = "";
+            }
+            if (message.databaseName != null && message.hasOwnProperty("databaseName"))
+              object.databaseName = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.databaseName, options);
+            if (message.databaseUrl != null && message.hasOwnProperty("databaseUrl"))
+              object.databaseUrl = message.databaseUrl;
+            return object;
+          };
+          DatabaseDescriptionProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          DatabaseDescriptionProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.DatabaseDescriptionProto";
+          };
+          return DatabaseDescriptionProto;
+        }();
+        dbroot.ConfigScriptProto = function() {
+          function ConfigScriptProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          ConfigScriptProto.prototype.scriptName = "";
+          ConfigScriptProto.prototype.scriptData = "";
+          ConfigScriptProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.ConfigScriptProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.scriptName = reader.string();
+                  break;
+                }
+                case 2: {
+                  message.scriptData = reader.string();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("scriptName"))
+              throw $util.ProtocolError("missing required 'scriptName'", { instance: message });
+            if (!message.hasOwnProperty("scriptData"))
+              throw $util.ProtocolError("missing required 'scriptData'", { instance: message });
+            return message;
+          };
+          ConfigScriptProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (!$util.isString(message.scriptName))
+              return "scriptName: string expected";
+            if (!$util.isString(message.scriptData))
+              return "scriptData: string expected";
+            return null;
+          };
+          ConfigScriptProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.ConfigScriptProto)
+              return object;
+            var message = new $root.keyhole.dbroot.ConfigScriptProto();
+            if (object.scriptName != null)
+              message.scriptName = String(object.scriptName);
+            if (object.scriptData != null)
+              message.scriptData = String(object.scriptData);
+            return message;
+          };
+          ConfigScriptProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.scriptName = "";
+              object.scriptData = "";
+            }
+            if (message.scriptName != null && message.hasOwnProperty("scriptName"))
+              object.scriptName = message.scriptName;
+            if (message.scriptData != null && message.hasOwnProperty("scriptData"))
+              object.scriptData = message.scriptData;
+            return object;
+          };
+          ConfigScriptProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          ConfigScriptProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.ConfigScriptProto";
+          };
+          return ConfigScriptProto;
+        }();
+        dbroot.SwoopParamsProto = function() {
+          function SwoopParamsProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          SwoopParamsProto.prototype.startDistInMeters = 0;
+          SwoopParamsProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.SwoopParamsProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.startDistInMeters = reader.double();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          SwoopParamsProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.startDistInMeters != null && message.hasOwnProperty("startDistInMeters")) {
+              if (typeof message.startDistInMeters !== "number")
+                return "startDistInMeters: number expected";
+            }
+            return null;
+          };
+          SwoopParamsProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.SwoopParamsProto)
+              return object;
+            var message = new $root.keyhole.dbroot.SwoopParamsProto();
+            if (object.startDistInMeters != null)
+              message.startDistInMeters = Number(object.startDistInMeters);
+            return message;
+          };
+          SwoopParamsProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults)
+              object.startDistInMeters = 0;
+            if (message.startDistInMeters != null && message.hasOwnProperty("startDistInMeters"))
+              object.startDistInMeters = options.json && !isFinite(message.startDistInMeters) ? String(message.startDistInMeters) : message.startDistInMeters;
+            return object;
+          };
+          SwoopParamsProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          SwoopParamsProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.SwoopParamsProto";
+          };
+          return SwoopParamsProto;
+        }();
+        dbroot.PostingServerProto = function() {
+          function PostingServerProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          PostingServerProto.prototype.name = null;
+          PostingServerProto.prototype.baseUrl = null;
+          PostingServerProto.prototype.postWizardPath = null;
+          PostingServerProto.prototype.fileSubmitPath = null;
+          PostingServerProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.PostingServerProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.name = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 2: {
+                  message.baseUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 3: {
+                  message.postWizardPath = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 4: {
+                  message.fileSubmitPath = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          PostingServerProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.name != null && message.hasOwnProperty("name")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.name);
+              if (error)
+                return "name." + error;
+            }
+            if (message.baseUrl != null && message.hasOwnProperty("baseUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.baseUrl);
+              if (error)
+                return "baseUrl." + error;
+            }
+            if (message.postWizardPath != null && message.hasOwnProperty("postWizardPath")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.postWizardPath);
+              if (error)
+                return "postWizardPath." + error;
+            }
+            if (message.fileSubmitPath != null && message.hasOwnProperty("fileSubmitPath")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.fileSubmitPath);
+              if (error)
+                return "fileSubmitPath." + error;
+            }
+            return null;
+          };
+          PostingServerProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.PostingServerProto)
+              return object;
+            var message = new $root.keyhole.dbroot.PostingServerProto();
+            if (object.name != null) {
+              if (typeof object.name !== "object")
+                throw TypeError(".keyhole.dbroot.PostingServerProto.name: object expected");
+              message.name = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.name);
+            }
+            if (object.baseUrl != null) {
+              if (typeof object.baseUrl !== "object")
+                throw TypeError(".keyhole.dbroot.PostingServerProto.baseUrl: object expected");
+              message.baseUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.baseUrl);
+            }
+            if (object.postWizardPath != null) {
+              if (typeof object.postWizardPath !== "object")
+                throw TypeError(".keyhole.dbroot.PostingServerProto.postWizardPath: object expected");
+              message.postWizardPath = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.postWizardPath);
+            }
+            if (object.fileSubmitPath != null) {
+              if (typeof object.fileSubmitPath !== "object")
+                throw TypeError(".keyhole.dbroot.PostingServerProto.fileSubmitPath: object expected");
+              message.fileSubmitPath = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.fileSubmitPath);
+            }
+            return message;
+          };
+          PostingServerProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.name = null;
+              object.baseUrl = null;
+              object.postWizardPath = null;
+              object.fileSubmitPath = null;
+            }
+            if (message.name != null && message.hasOwnProperty("name"))
+              object.name = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.name, options);
+            if (message.baseUrl != null && message.hasOwnProperty("baseUrl"))
+              object.baseUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.baseUrl, options);
+            if (message.postWizardPath != null && message.hasOwnProperty("postWizardPath"))
+              object.postWizardPath = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.postWizardPath, options);
+            if (message.fileSubmitPath != null && message.hasOwnProperty("fileSubmitPath"))
+              object.fileSubmitPath = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.fileSubmitPath, options);
+            return object;
+          };
+          PostingServerProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          PostingServerProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.PostingServerProto";
+          };
+          return PostingServerProto;
+        }();
+        dbroot.PlanetaryDatabaseProto = function() {
+          function PlanetaryDatabaseProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          PlanetaryDatabaseProto.prototype.url = null;
+          PlanetaryDatabaseProto.prototype.name = null;
+          PlanetaryDatabaseProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.PlanetaryDatabaseProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.url = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 2: {
+                  message.name = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("url"))
+              throw $util.ProtocolError("missing required 'url'", { instance: message });
+            if (!message.hasOwnProperty("name"))
+              throw $util.ProtocolError("missing required 'name'", { instance: message });
+            return message;
+          };
+          PlanetaryDatabaseProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.url);
+              if (error)
+                return "url." + error;
+            }
+            {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.name);
+              if (error)
+                return "name." + error;
+            }
+            return null;
+          };
+          PlanetaryDatabaseProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.PlanetaryDatabaseProto)
+              return object;
+            var message = new $root.keyhole.dbroot.PlanetaryDatabaseProto();
+            if (object.url != null) {
+              if (typeof object.url !== "object")
+                throw TypeError(".keyhole.dbroot.PlanetaryDatabaseProto.url: object expected");
+              message.url = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.url);
+            }
+            if (object.name != null) {
+              if (typeof object.name !== "object")
+                throw TypeError(".keyhole.dbroot.PlanetaryDatabaseProto.name: object expected");
+              message.name = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.name);
+            }
+            return message;
+          };
+          PlanetaryDatabaseProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.url = null;
+              object.name = null;
+            }
+            if (message.url != null && message.hasOwnProperty("url"))
+              object.url = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.url, options);
+            if (message.name != null && message.hasOwnProperty("name"))
+              object.name = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.name, options);
+            return object;
+          };
+          PlanetaryDatabaseProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          PlanetaryDatabaseProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.PlanetaryDatabaseProto";
+          };
+          return PlanetaryDatabaseProto;
+        }();
+        dbroot.LogServerProto = function() {
+          function LogServerProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          LogServerProto.prototype.url = null;
+          LogServerProto.prototype.enable = false;
+          LogServerProto.prototype.throttlingFactor = 1;
+          LogServerProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.LogServerProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.url = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 2: {
+                  message.enable = reader.bool();
+                  break;
+                }
+                case 3: {
+                  message.throttlingFactor = reader.int32();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          LogServerProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.url != null && message.hasOwnProperty("url")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.url);
+              if (error)
+                return "url." + error;
+            }
+            if (message.enable != null && message.hasOwnProperty("enable")) {
+              if (typeof message.enable !== "boolean")
+                return "enable: boolean expected";
+            }
+            if (message.throttlingFactor != null && message.hasOwnProperty("throttlingFactor")) {
+              if (!$util.isInteger(message.throttlingFactor))
+                return "throttlingFactor: integer expected";
+            }
+            return null;
+          };
+          LogServerProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.LogServerProto)
+              return object;
+            var message = new $root.keyhole.dbroot.LogServerProto();
+            if (object.url != null) {
+              if (typeof object.url !== "object")
+                throw TypeError(".keyhole.dbroot.LogServerProto.url: object expected");
+              message.url = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.url);
+            }
+            if (object.enable != null)
+              message.enable = Boolean(object.enable);
+            if (object.throttlingFactor != null)
+              message.throttlingFactor = object.throttlingFactor | 0;
+            return message;
+          };
+          LogServerProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.url = null;
+              object.enable = false;
+              object.throttlingFactor = 1;
+            }
+            if (message.url != null && message.hasOwnProperty("url"))
+              object.url = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.url, options);
+            if (message.enable != null && message.hasOwnProperty("enable"))
+              object.enable = message.enable;
+            if (message.throttlingFactor != null && message.hasOwnProperty("throttlingFactor"))
+              object.throttlingFactor = message.throttlingFactor;
+            return object;
+          };
+          LogServerProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          LogServerProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.LogServerProto";
+          };
+          return LogServerProto;
+        }();
+        dbroot.EndSnippetProto = function() {
+          function EndSnippetProto(properties) {
+            this.mfeDomains = [];
+            this.searchTab = [];
+            this.cobrandInfo = [];
+            this.validDatabase = [];
+            this.configScript = [];
+            this.planetaryDatabase = [];
+            this.filmstripConfig = [];
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          EndSnippetProto.prototype.model = null;
+          EndSnippetProto.prototype.authServerUrl = null;
+          EndSnippetProto.prototype.disableAuthentication = false;
+          EndSnippetProto.prototype.mfeDomains = $util.emptyArray;
+          EndSnippetProto.prototype.mfeLangParam = "hl=$5Bhl5D";
+          EndSnippetProto.prototype.adsUrlPatterns = "";
+          EndSnippetProto.prototype.reverseGeocoderUrl = null;
+          EndSnippetProto.prototype.reverseGeocoderProtocolVersion = 3;
+          EndSnippetProto.prototype.skyDatabaseIsAvailable = true;
+          EndSnippetProto.prototype.skyDatabaseUrl = null;
+          EndSnippetProto.prototype.defaultWebPageIntlUrl = null;
+          EndSnippetProto.prototype.numStartUpTips = 17;
+          EndSnippetProto.prototype.startUpTipsUrl = null;
+          EndSnippetProto.prototype.numProStartUpTips = 0;
+          EndSnippetProto.prototype.proStartUpTipsUrl = null;
+          EndSnippetProto.prototype.startupTipsIntlUrl = null;
+          EndSnippetProto.prototype.userGuideIntlUrl = null;
+          EndSnippetProto.prototype.supportCenterIntlUrl = null;
+          EndSnippetProto.prototype.businessListingIntlUrl = null;
+          EndSnippetProto.prototype.supportAnswerIntlUrl = null;
+          EndSnippetProto.prototype.supportTopicIntlUrl = null;
+          EndSnippetProto.prototype.supportRequestIntlUrl = null;
+          EndSnippetProto.prototype.earthIntlUrl = null;
+          EndSnippetProto.prototype.addContentUrl = null;
+          EndSnippetProto.prototype.sketchupNotInstalledUrl = null;
+          EndSnippetProto.prototype.sketchupErrorUrl = null;
+          EndSnippetProto.prototype.freeLicenseUrl = null;
+          EndSnippetProto.prototype.proLicenseUrl = null;
+          EndSnippetProto.prototype.tutorialUrl = null;
+          EndSnippetProto.prototype.keyboardShortcutsUrl = null;
+          EndSnippetProto.prototype.releaseNotesUrl = null;
+          EndSnippetProto.prototype.hideUserData = false;
+          EndSnippetProto.prototype.useGeLogo = true;
+          EndSnippetProto.prototype.dioramaDescriptionUrlBase = null;
+          EndSnippetProto.prototype.dioramaDefaultColor = 4291281607;
+          EndSnippetProto.prototype.dioramaBlacklistUrl = null;
+          EndSnippetProto.prototype.clientOptions = null;
+          EndSnippetProto.prototype.fetchingOptions = null;
+          EndSnippetProto.prototype.timeMachineOptions = null;
+          EndSnippetProto.prototype.csiOptions = null;
+          EndSnippetProto.prototype.searchTab = $util.emptyArray;
+          EndSnippetProto.prototype.cobrandInfo = $util.emptyArray;
+          EndSnippetProto.prototype.validDatabase = $util.emptyArray;
+          EndSnippetProto.prototype.configScript = $util.emptyArray;
+          EndSnippetProto.prototype.deauthServerUrl = null;
+          EndSnippetProto.prototype.swoopParameters = null;
+          EndSnippetProto.prototype.bbsServerInfo = null;
+          EndSnippetProto.prototype.dataErrorServerInfo = null;
+          EndSnippetProto.prototype.planetaryDatabase = $util.emptyArray;
+          EndSnippetProto.prototype.logServer = null;
+          EndSnippetProto.prototype.autopiaOptions = null;
+          EndSnippetProto.prototype.searchConfig = null;
+          EndSnippetProto.prototype.searchInfo = null;
+          EndSnippetProto.prototype.elevationServiceBaseUrl = "http://maps.google.com/maps/api/elevation/";
+          EndSnippetProto.prototype.elevationProfileQueryDelay = 500;
+          EndSnippetProto.prototype.proUpgradeUrl = null;
+          EndSnippetProto.prototype.earthCommunityUrl = null;
+          EndSnippetProto.prototype.googleMapsUrl = null;
+          EndSnippetProto.prototype.sharingUrl = null;
+          EndSnippetProto.prototype.privacyPolicyUrl = null;
+          EndSnippetProto.prototype.doGplusUserCheck = false;
+          EndSnippetProto.prototype.rocktreeDataProto = null;
+          EndSnippetProto.prototype.filmstripConfig = $util.emptyArray;
+          EndSnippetProto.prototype.showSigninButton = false;
+          EndSnippetProto.prototype.proMeasureUpsellUrl = null;
+          EndSnippetProto.prototype.proPrintUpsellUrl = null;
+          EndSnippetProto.prototype.starDataProto = null;
+          EndSnippetProto.prototype.feedbackUrl = null;
+          EndSnippetProto.prototype.oauth2LoginUrl = null;
+          EndSnippetProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.EndSnippetProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.model = $root.keyhole.dbroot.PlanetModelProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 2: {
+                  message.authServerUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 3: {
+                  message.disableAuthentication = reader.bool();
+                  break;
+                }
+                case 4: {
+                  if (!(message.mfeDomains && message.mfeDomains.length))
+                    message.mfeDomains = [];
+                  message.mfeDomains.push($root.keyhole.dbroot.MfeDomainFeaturesProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 5: {
+                  message.mfeLangParam = reader.string();
+                  break;
+                }
+                case 6: {
+                  message.adsUrlPatterns = reader.string();
+                  break;
+                }
+                case 7: {
+                  message.reverseGeocoderUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 8: {
+                  message.reverseGeocoderProtocolVersion = reader.int32();
+                  break;
+                }
+                case 9: {
+                  message.skyDatabaseIsAvailable = reader.bool();
+                  break;
+                }
+                case 10: {
+                  message.skyDatabaseUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 11: {
+                  message.defaultWebPageIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 12: {
+                  message.numStartUpTips = reader.int32();
+                  break;
+                }
+                case 13: {
+                  message.startUpTipsUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 51: {
+                  message.numProStartUpTips = reader.int32();
+                  break;
+                }
+                case 52: {
+                  message.proStartUpTipsUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 64: {
+                  message.startupTipsIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 14: {
+                  message.userGuideIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 15: {
+                  message.supportCenterIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 16: {
+                  message.businessListingIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 17: {
+                  message.supportAnswerIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 18: {
+                  message.supportTopicIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 19: {
+                  message.supportRequestIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 20: {
+                  message.earthIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 21: {
+                  message.addContentUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 22: {
+                  message.sketchupNotInstalledUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 23: {
+                  message.sketchupErrorUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 24: {
+                  message.freeLicenseUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 25: {
+                  message.proLicenseUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 48: {
+                  message.tutorialUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 49: {
+                  message.keyboardShortcutsUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 50: {
+                  message.releaseNotesUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 26: {
+                  message.hideUserData = reader.bool();
+                  break;
+                }
+                case 27: {
+                  message.useGeLogo = reader.bool();
+                  break;
+                }
+                case 28: {
+                  message.dioramaDescriptionUrlBase = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 29: {
+                  message.dioramaDefaultColor = reader.uint32();
+                  break;
+                }
+                case 53: {
+                  message.dioramaBlacklistUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 30: {
+                  message.clientOptions = $root.keyhole.dbroot.ClientOptionsProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 31: {
+                  message.fetchingOptions = $root.keyhole.dbroot.FetchingOptionsProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 32: {
+                  message.timeMachineOptions = $root.keyhole.dbroot.TimeMachineOptionsProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 33: {
+                  message.csiOptions = $root.keyhole.dbroot.CSIOptionsProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 34: {
+                  if (!(message.searchTab && message.searchTab.length))
+                    message.searchTab = [];
+                  message.searchTab.push($root.keyhole.dbroot.SearchTabProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 35: {
+                  if (!(message.cobrandInfo && message.cobrandInfo.length))
+                    message.cobrandInfo = [];
+                  message.cobrandInfo.push($root.keyhole.dbroot.CobrandProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 36: {
+                  if (!(message.validDatabase && message.validDatabase.length))
+                    message.validDatabase = [];
+                  message.validDatabase.push($root.keyhole.dbroot.DatabaseDescriptionProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 37: {
+                  if (!(message.configScript && message.configScript.length))
+                    message.configScript = [];
+                  message.configScript.push($root.keyhole.dbroot.ConfigScriptProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 38: {
+                  message.deauthServerUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 39: {
+                  message.swoopParameters = $root.keyhole.dbroot.SwoopParamsProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 40: {
+                  message.bbsServerInfo = $root.keyhole.dbroot.PostingServerProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 41: {
+                  message.dataErrorServerInfo = $root.keyhole.dbroot.PostingServerProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 42: {
+                  if (!(message.planetaryDatabase && message.planetaryDatabase.length))
+                    message.planetaryDatabase = [];
+                  message.planetaryDatabase.push($root.keyhole.dbroot.PlanetaryDatabaseProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 43: {
+                  message.logServer = $root.keyhole.dbroot.LogServerProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 44: {
+                  message.autopiaOptions = $root.keyhole.dbroot.AutopiaOptionsProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 54: {
+                  message.searchConfig = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 45: {
+                  message.searchInfo = $root.keyhole.dbroot.EndSnippetProto.SearchInfoProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 46: {
+                  message.elevationServiceBaseUrl = reader.string();
+                  break;
+                }
+                case 47: {
+                  message.elevationProfileQueryDelay = reader.int32();
+                  break;
+                }
+                case 55: {
+                  message.proUpgradeUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 56: {
+                  message.earthCommunityUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 57: {
+                  message.googleMapsUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 58: {
+                  message.sharingUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 59: {
+                  message.privacyPolicyUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 60: {
+                  message.doGplusUserCheck = reader.bool();
+                  break;
+                }
+                case 61: {
+                  message.rocktreeDataProto = $root.keyhole.dbroot.EndSnippetProto.RockTreeDataProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 62: {
+                  if (!(message.filmstripConfig && message.filmstripConfig.length))
+                    message.filmstripConfig = [];
+                  message.filmstripConfig.push($root.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 63: {
+                  message.showSigninButton = reader.bool();
+                  break;
+                }
+                case 65: {
+                  message.proMeasureUpsellUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 66: {
+                  message.proPrintUpsellUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 67: {
+                  message.starDataProto = $root.keyhole.dbroot.EndSnippetProto.StarDataProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 68: {
+                  message.feedbackUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 69: {
+                  message.oauth2LoginUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          EndSnippetProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.model != null && message.hasOwnProperty("model")) {
+              var error = $root.keyhole.dbroot.PlanetModelProto.verify(message.model);
+              if (error)
+                return "model." + error;
+            }
+            if (message.authServerUrl != null && message.hasOwnProperty("authServerUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.authServerUrl);
+              if (error)
+                return "authServerUrl." + error;
+            }
+            if (message.disableAuthentication != null && message.hasOwnProperty("disableAuthentication")) {
+              if (typeof message.disableAuthentication !== "boolean")
+                return "disableAuthentication: boolean expected";
+            }
+            if (message.mfeDomains != null && message.hasOwnProperty("mfeDomains")) {
+              if (!Array.isArray(message.mfeDomains))
+                return "mfeDomains: array expected";
+              for (var i = 0; i < message.mfeDomains.length; ++i) {
+                var error = $root.keyhole.dbroot.MfeDomainFeaturesProto.verify(message.mfeDomains[i]);
+                if (error)
+                  return "mfeDomains." + error;
+              }
+            }
+            if (message.mfeLangParam != null && message.hasOwnProperty("mfeLangParam")) {
+              if (!$util.isString(message.mfeLangParam))
+                return "mfeLangParam: string expected";
+            }
+            if (message.adsUrlPatterns != null && message.hasOwnProperty("adsUrlPatterns")) {
+              if (!$util.isString(message.adsUrlPatterns))
+                return "adsUrlPatterns: string expected";
+            }
+            if (message.reverseGeocoderUrl != null && message.hasOwnProperty("reverseGeocoderUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.reverseGeocoderUrl);
+              if (error)
+                return "reverseGeocoderUrl." + error;
+            }
+            if (message.reverseGeocoderProtocolVersion != null && message.hasOwnProperty("reverseGeocoderProtocolVersion")) {
+              if (!$util.isInteger(message.reverseGeocoderProtocolVersion))
+                return "reverseGeocoderProtocolVersion: integer expected";
+            }
+            if (message.skyDatabaseIsAvailable != null && message.hasOwnProperty("skyDatabaseIsAvailable")) {
+              if (typeof message.skyDatabaseIsAvailable !== "boolean")
+                return "skyDatabaseIsAvailable: boolean expected";
+            }
+            if (message.skyDatabaseUrl != null && message.hasOwnProperty("skyDatabaseUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.skyDatabaseUrl);
+              if (error)
+                return "skyDatabaseUrl." + error;
+            }
+            if (message.defaultWebPageIntlUrl != null && message.hasOwnProperty("defaultWebPageIntlUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.defaultWebPageIntlUrl);
+              if (error)
+                return "defaultWebPageIntlUrl." + error;
+            }
+            if (message.numStartUpTips != null && message.hasOwnProperty("numStartUpTips")) {
+              if (!$util.isInteger(message.numStartUpTips))
+                return "numStartUpTips: integer expected";
+            }
+            if (message.startUpTipsUrl != null && message.hasOwnProperty("startUpTipsUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.startUpTipsUrl);
+              if (error)
+                return "startUpTipsUrl." + error;
+            }
+            if (message.numProStartUpTips != null && message.hasOwnProperty("numProStartUpTips")) {
+              if (!$util.isInteger(message.numProStartUpTips))
+                return "numProStartUpTips: integer expected";
+            }
+            if (message.proStartUpTipsUrl != null && message.hasOwnProperty("proStartUpTipsUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.proStartUpTipsUrl);
+              if (error)
+                return "proStartUpTipsUrl." + error;
+            }
+            if (message.startupTipsIntlUrl != null && message.hasOwnProperty("startupTipsIntlUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.startupTipsIntlUrl);
+              if (error)
+                return "startupTipsIntlUrl." + error;
+            }
+            if (message.userGuideIntlUrl != null && message.hasOwnProperty("userGuideIntlUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.userGuideIntlUrl);
+              if (error)
+                return "userGuideIntlUrl." + error;
+            }
+            if (message.supportCenterIntlUrl != null && message.hasOwnProperty("supportCenterIntlUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.supportCenterIntlUrl);
+              if (error)
+                return "supportCenterIntlUrl." + error;
+            }
+            if (message.businessListingIntlUrl != null && message.hasOwnProperty("businessListingIntlUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.businessListingIntlUrl);
+              if (error)
+                return "businessListingIntlUrl." + error;
+            }
+            if (message.supportAnswerIntlUrl != null && message.hasOwnProperty("supportAnswerIntlUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.supportAnswerIntlUrl);
+              if (error)
+                return "supportAnswerIntlUrl." + error;
+            }
+            if (message.supportTopicIntlUrl != null && message.hasOwnProperty("supportTopicIntlUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.supportTopicIntlUrl);
+              if (error)
+                return "supportTopicIntlUrl." + error;
+            }
+            if (message.supportRequestIntlUrl != null && message.hasOwnProperty("supportRequestIntlUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.supportRequestIntlUrl);
+              if (error)
+                return "supportRequestIntlUrl." + error;
+            }
+            if (message.earthIntlUrl != null && message.hasOwnProperty("earthIntlUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.earthIntlUrl);
+              if (error)
+                return "earthIntlUrl." + error;
+            }
+            if (message.addContentUrl != null && message.hasOwnProperty("addContentUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.addContentUrl);
+              if (error)
+                return "addContentUrl." + error;
+            }
+            if (message.sketchupNotInstalledUrl != null && message.hasOwnProperty("sketchupNotInstalledUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.sketchupNotInstalledUrl);
+              if (error)
+                return "sketchupNotInstalledUrl." + error;
+            }
+            if (message.sketchupErrorUrl != null && message.hasOwnProperty("sketchupErrorUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.sketchupErrorUrl);
+              if (error)
+                return "sketchupErrorUrl." + error;
+            }
+            if (message.freeLicenseUrl != null && message.hasOwnProperty("freeLicenseUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.freeLicenseUrl);
+              if (error)
+                return "freeLicenseUrl." + error;
+            }
+            if (message.proLicenseUrl != null && message.hasOwnProperty("proLicenseUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.proLicenseUrl);
+              if (error)
+                return "proLicenseUrl." + error;
+            }
+            if (message.tutorialUrl != null && message.hasOwnProperty("tutorialUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.tutorialUrl);
+              if (error)
+                return "tutorialUrl." + error;
+            }
+            if (message.keyboardShortcutsUrl != null && message.hasOwnProperty("keyboardShortcutsUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.keyboardShortcutsUrl);
+              if (error)
+                return "keyboardShortcutsUrl." + error;
+            }
+            if (message.releaseNotesUrl != null && message.hasOwnProperty("releaseNotesUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.releaseNotesUrl);
+              if (error)
+                return "releaseNotesUrl." + error;
+            }
+            if (message.hideUserData != null && message.hasOwnProperty("hideUserData")) {
+              if (typeof message.hideUserData !== "boolean")
+                return "hideUserData: boolean expected";
+            }
+            if (message.useGeLogo != null && message.hasOwnProperty("useGeLogo")) {
+              if (typeof message.useGeLogo !== "boolean")
+                return "useGeLogo: boolean expected";
+            }
+            if (message.dioramaDescriptionUrlBase != null && message.hasOwnProperty("dioramaDescriptionUrlBase")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.dioramaDescriptionUrlBase);
+              if (error)
+                return "dioramaDescriptionUrlBase." + error;
+            }
+            if (message.dioramaDefaultColor != null && message.hasOwnProperty("dioramaDefaultColor")) {
+              if (!$util.isInteger(message.dioramaDefaultColor))
+                return "dioramaDefaultColor: integer expected";
+            }
+            if (message.dioramaBlacklistUrl != null && message.hasOwnProperty("dioramaBlacklistUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.dioramaBlacklistUrl);
+              if (error)
+                return "dioramaBlacklistUrl." + error;
+            }
+            if (message.clientOptions != null && message.hasOwnProperty("clientOptions")) {
+              var error = $root.keyhole.dbroot.ClientOptionsProto.verify(message.clientOptions);
+              if (error)
+                return "clientOptions." + error;
+            }
+            if (message.fetchingOptions != null && message.hasOwnProperty("fetchingOptions")) {
+              var error = $root.keyhole.dbroot.FetchingOptionsProto.verify(message.fetchingOptions);
+              if (error)
+                return "fetchingOptions." + error;
+            }
+            if (message.timeMachineOptions != null && message.hasOwnProperty("timeMachineOptions")) {
+              var error = $root.keyhole.dbroot.TimeMachineOptionsProto.verify(message.timeMachineOptions);
+              if (error)
+                return "timeMachineOptions." + error;
+            }
+            if (message.csiOptions != null && message.hasOwnProperty("csiOptions")) {
+              var error = $root.keyhole.dbroot.CSIOptionsProto.verify(message.csiOptions);
+              if (error)
+                return "csiOptions." + error;
+            }
+            if (message.searchTab != null && message.hasOwnProperty("searchTab")) {
+              if (!Array.isArray(message.searchTab))
+                return "searchTab: array expected";
+              for (var i = 0; i < message.searchTab.length; ++i) {
+                var error = $root.keyhole.dbroot.SearchTabProto.verify(message.searchTab[i]);
+                if (error)
+                  return "searchTab." + error;
+              }
+            }
+            if (message.cobrandInfo != null && message.hasOwnProperty("cobrandInfo")) {
+              if (!Array.isArray(message.cobrandInfo))
+                return "cobrandInfo: array expected";
+              for (var i = 0; i < message.cobrandInfo.length; ++i) {
+                var error = $root.keyhole.dbroot.CobrandProto.verify(message.cobrandInfo[i]);
+                if (error)
+                  return "cobrandInfo." + error;
+              }
+            }
+            if (message.validDatabase != null && message.hasOwnProperty("validDatabase")) {
+              if (!Array.isArray(message.validDatabase))
+                return "validDatabase: array expected";
+              for (var i = 0; i < message.validDatabase.length; ++i) {
+                var error = $root.keyhole.dbroot.DatabaseDescriptionProto.verify(message.validDatabase[i]);
+                if (error)
+                  return "validDatabase." + error;
+              }
+            }
+            if (message.configScript != null && message.hasOwnProperty("configScript")) {
+              if (!Array.isArray(message.configScript))
+                return "configScript: array expected";
+              for (var i = 0; i < message.configScript.length; ++i) {
+                var error = $root.keyhole.dbroot.ConfigScriptProto.verify(message.configScript[i]);
+                if (error)
+                  return "configScript." + error;
+              }
+            }
+            if (message.deauthServerUrl != null && message.hasOwnProperty("deauthServerUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.deauthServerUrl);
+              if (error)
+                return "deauthServerUrl." + error;
+            }
+            if (message.swoopParameters != null && message.hasOwnProperty("swoopParameters")) {
+              var error = $root.keyhole.dbroot.SwoopParamsProto.verify(message.swoopParameters);
+              if (error)
+                return "swoopParameters." + error;
+            }
+            if (message.bbsServerInfo != null && message.hasOwnProperty("bbsServerInfo")) {
+              var error = $root.keyhole.dbroot.PostingServerProto.verify(message.bbsServerInfo);
+              if (error)
+                return "bbsServerInfo." + error;
+            }
+            if (message.dataErrorServerInfo != null && message.hasOwnProperty("dataErrorServerInfo")) {
+              var error = $root.keyhole.dbroot.PostingServerProto.verify(message.dataErrorServerInfo);
+              if (error)
+                return "dataErrorServerInfo." + error;
+            }
+            if (message.planetaryDatabase != null && message.hasOwnProperty("planetaryDatabase")) {
+              if (!Array.isArray(message.planetaryDatabase))
+                return "planetaryDatabase: array expected";
+              for (var i = 0; i < message.planetaryDatabase.length; ++i) {
+                var error = $root.keyhole.dbroot.PlanetaryDatabaseProto.verify(message.planetaryDatabase[i]);
+                if (error)
+                  return "planetaryDatabase." + error;
+              }
+            }
+            if (message.logServer != null && message.hasOwnProperty("logServer")) {
+              var error = $root.keyhole.dbroot.LogServerProto.verify(message.logServer);
+              if (error)
+                return "logServer." + error;
+            }
+            if (message.autopiaOptions != null && message.hasOwnProperty("autopiaOptions")) {
+              var error = $root.keyhole.dbroot.AutopiaOptionsProto.verify(message.autopiaOptions);
+              if (error)
+                return "autopiaOptions." + error;
+            }
+            if (message.searchConfig != null && message.hasOwnProperty("searchConfig")) {
+              var error = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.verify(message.searchConfig);
+              if (error)
+                return "searchConfig." + error;
+            }
+            if (message.searchInfo != null && message.hasOwnProperty("searchInfo")) {
+              var error = $root.keyhole.dbroot.EndSnippetProto.SearchInfoProto.verify(message.searchInfo);
+              if (error)
+                return "searchInfo." + error;
+            }
+            if (message.elevationServiceBaseUrl != null && message.hasOwnProperty("elevationServiceBaseUrl")) {
+              if (!$util.isString(message.elevationServiceBaseUrl))
+                return "elevationServiceBaseUrl: string expected";
+            }
+            if (message.elevationProfileQueryDelay != null && message.hasOwnProperty("elevationProfileQueryDelay")) {
+              if (!$util.isInteger(message.elevationProfileQueryDelay))
+                return "elevationProfileQueryDelay: integer expected";
+            }
+            if (message.proUpgradeUrl != null && message.hasOwnProperty("proUpgradeUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.proUpgradeUrl);
+              if (error)
+                return "proUpgradeUrl." + error;
+            }
+            if (message.earthCommunityUrl != null && message.hasOwnProperty("earthCommunityUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.earthCommunityUrl);
+              if (error)
+                return "earthCommunityUrl." + error;
+            }
+            if (message.googleMapsUrl != null && message.hasOwnProperty("googleMapsUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.googleMapsUrl);
+              if (error)
+                return "googleMapsUrl." + error;
+            }
+            if (message.sharingUrl != null && message.hasOwnProperty("sharingUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.sharingUrl);
+              if (error)
+                return "sharingUrl." + error;
+            }
+            if (message.privacyPolicyUrl != null && message.hasOwnProperty("privacyPolicyUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.privacyPolicyUrl);
+              if (error)
+                return "privacyPolicyUrl." + error;
+            }
+            if (message.doGplusUserCheck != null && message.hasOwnProperty("doGplusUserCheck")) {
+              if (typeof message.doGplusUserCheck !== "boolean")
+                return "doGplusUserCheck: boolean expected";
+            }
+            if (message.rocktreeDataProto != null && message.hasOwnProperty("rocktreeDataProto")) {
+              var error = $root.keyhole.dbroot.EndSnippetProto.RockTreeDataProto.verify(message.rocktreeDataProto);
+              if (error)
+                return "rocktreeDataProto." + error;
+            }
+            if (message.filmstripConfig != null && message.hasOwnProperty("filmstripConfig")) {
+              if (!Array.isArray(message.filmstripConfig))
+                return "filmstripConfig: array expected";
+              for (var i = 0; i < message.filmstripConfig.length; ++i) {
+                var error = $root.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.verify(message.filmstripConfig[i]);
+                if (error)
+                  return "filmstripConfig." + error;
+              }
+            }
+            if (message.showSigninButton != null && message.hasOwnProperty("showSigninButton")) {
+              if (typeof message.showSigninButton !== "boolean")
+                return "showSigninButton: boolean expected";
+            }
+            if (message.proMeasureUpsellUrl != null && message.hasOwnProperty("proMeasureUpsellUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.proMeasureUpsellUrl);
+              if (error)
+                return "proMeasureUpsellUrl." + error;
+            }
+            if (message.proPrintUpsellUrl != null && message.hasOwnProperty("proPrintUpsellUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.proPrintUpsellUrl);
+              if (error)
+                return "proPrintUpsellUrl." + error;
+            }
+            if (message.starDataProto != null && message.hasOwnProperty("starDataProto")) {
+              var error = $root.keyhole.dbroot.EndSnippetProto.StarDataProto.verify(message.starDataProto);
+              if (error)
+                return "starDataProto." + error;
+            }
+            if (message.feedbackUrl != null && message.hasOwnProperty("feedbackUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.feedbackUrl);
+              if (error)
+                return "feedbackUrl." + error;
+            }
+            if (message.oauth2LoginUrl != null && message.hasOwnProperty("oauth2LoginUrl")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.oauth2LoginUrl);
+              if (error)
+                return "oauth2LoginUrl." + error;
+            }
+            return null;
+          };
+          EndSnippetProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.EndSnippetProto)
+              return object;
+            var message = new $root.keyhole.dbroot.EndSnippetProto();
+            if (object.model != null) {
+              if (typeof object.model !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.model: object expected");
+              message.model = $root.keyhole.dbroot.PlanetModelProto.fromObject(object.model);
+            }
+            if (object.authServerUrl != null) {
+              if (typeof object.authServerUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.authServerUrl: object expected");
+              message.authServerUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.authServerUrl);
+            }
+            if (object.disableAuthentication != null)
+              message.disableAuthentication = Boolean(object.disableAuthentication);
+            if (object.mfeDomains) {
+              if (!Array.isArray(object.mfeDomains))
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.mfeDomains: array expected");
+              message.mfeDomains = [];
+              for (var i = 0; i < object.mfeDomains.length; ++i) {
+                if (typeof object.mfeDomains[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.mfeDomains: object expected");
+                message.mfeDomains[i] = $root.keyhole.dbroot.MfeDomainFeaturesProto.fromObject(object.mfeDomains[i]);
+              }
+            }
+            if (object.mfeLangParam != null)
+              message.mfeLangParam = String(object.mfeLangParam);
+            if (object.adsUrlPatterns != null)
+              message.adsUrlPatterns = String(object.adsUrlPatterns);
+            if (object.reverseGeocoderUrl != null) {
+              if (typeof object.reverseGeocoderUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.reverseGeocoderUrl: object expected");
+              message.reverseGeocoderUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.reverseGeocoderUrl);
+            }
+            if (object.reverseGeocoderProtocolVersion != null)
+              message.reverseGeocoderProtocolVersion = object.reverseGeocoderProtocolVersion | 0;
+            if (object.skyDatabaseIsAvailable != null)
+              message.skyDatabaseIsAvailable = Boolean(object.skyDatabaseIsAvailable);
+            if (object.skyDatabaseUrl != null) {
+              if (typeof object.skyDatabaseUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.skyDatabaseUrl: object expected");
+              message.skyDatabaseUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.skyDatabaseUrl);
+            }
+            if (object.defaultWebPageIntlUrl != null) {
+              if (typeof object.defaultWebPageIntlUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.defaultWebPageIntlUrl: object expected");
+              message.defaultWebPageIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.defaultWebPageIntlUrl);
+            }
+            if (object.numStartUpTips != null)
+              message.numStartUpTips = object.numStartUpTips | 0;
+            if (object.startUpTipsUrl != null) {
+              if (typeof object.startUpTipsUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.startUpTipsUrl: object expected");
+              message.startUpTipsUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.startUpTipsUrl);
+            }
+            if (object.numProStartUpTips != null)
+              message.numProStartUpTips = object.numProStartUpTips | 0;
+            if (object.proStartUpTipsUrl != null) {
+              if (typeof object.proStartUpTipsUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.proStartUpTipsUrl: object expected");
+              message.proStartUpTipsUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.proStartUpTipsUrl);
+            }
+            if (object.startupTipsIntlUrl != null) {
+              if (typeof object.startupTipsIntlUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.startupTipsIntlUrl: object expected");
+              message.startupTipsIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.startupTipsIntlUrl);
+            }
+            if (object.userGuideIntlUrl != null) {
+              if (typeof object.userGuideIntlUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.userGuideIntlUrl: object expected");
+              message.userGuideIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.userGuideIntlUrl);
+            }
+            if (object.supportCenterIntlUrl != null) {
+              if (typeof object.supportCenterIntlUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.supportCenterIntlUrl: object expected");
+              message.supportCenterIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.supportCenterIntlUrl);
+            }
+            if (object.businessListingIntlUrl != null) {
+              if (typeof object.businessListingIntlUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.businessListingIntlUrl: object expected");
+              message.businessListingIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.businessListingIntlUrl);
+            }
+            if (object.supportAnswerIntlUrl != null) {
+              if (typeof object.supportAnswerIntlUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.supportAnswerIntlUrl: object expected");
+              message.supportAnswerIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.supportAnswerIntlUrl);
+            }
+            if (object.supportTopicIntlUrl != null) {
+              if (typeof object.supportTopicIntlUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.supportTopicIntlUrl: object expected");
+              message.supportTopicIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.supportTopicIntlUrl);
+            }
+            if (object.supportRequestIntlUrl != null) {
+              if (typeof object.supportRequestIntlUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.supportRequestIntlUrl: object expected");
+              message.supportRequestIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.supportRequestIntlUrl);
+            }
+            if (object.earthIntlUrl != null) {
+              if (typeof object.earthIntlUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.earthIntlUrl: object expected");
+              message.earthIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.earthIntlUrl);
+            }
+            if (object.addContentUrl != null) {
+              if (typeof object.addContentUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.addContentUrl: object expected");
+              message.addContentUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.addContentUrl);
+            }
+            if (object.sketchupNotInstalledUrl != null) {
+              if (typeof object.sketchupNotInstalledUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.sketchupNotInstalledUrl: object expected");
+              message.sketchupNotInstalledUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.sketchupNotInstalledUrl);
+            }
+            if (object.sketchupErrorUrl != null) {
+              if (typeof object.sketchupErrorUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.sketchupErrorUrl: object expected");
+              message.sketchupErrorUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.sketchupErrorUrl);
+            }
+            if (object.freeLicenseUrl != null) {
+              if (typeof object.freeLicenseUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.freeLicenseUrl: object expected");
+              message.freeLicenseUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.freeLicenseUrl);
+            }
+            if (object.proLicenseUrl != null) {
+              if (typeof object.proLicenseUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.proLicenseUrl: object expected");
+              message.proLicenseUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.proLicenseUrl);
+            }
+            if (object.tutorialUrl != null) {
+              if (typeof object.tutorialUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.tutorialUrl: object expected");
+              message.tutorialUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.tutorialUrl);
+            }
+            if (object.keyboardShortcutsUrl != null) {
+              if (typeof object.keyboardShortcutsUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.keyboardShortcutsUrl: object expected");
+              message.keyboardShortcutsUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.keyboardShortcutsUrl);
+            }
+            if (object.releaseNotesUrl != null) {
+              if (typeof object.releaseNotesUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.releaseNotesUrl: object expected");
+              message.releaseNotesUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.releaseNotesUrl);
+            }
+            if (object.hideUserData != null)
+              message.hideUserData = Boolean(object.hideUserData);
+            if (object.useGeLogo != null)
+              message.useGeLogo = Boolean(object.useGeLogo);
+            if (object.dioramaDescriptionUrlBase != null) {
+              if (typeof object.dioramaDescriptionUrlBase !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.dioramaDescriptionUrlBase: object expected");
+              message.dioramaDescriptionUrlBase = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.dioramaDescriptionUrlBase);
+            }
+            if (object.dioramaDefaultColor != null)
+              message.dioramaDefaultColor = object.dioramaDefaultColor >>> 0;
+            if (object.dioramaBlacklistUrl != null) {
+              if (typeof object.dioramaBlacklistUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.dioramaBlacklistUrl: object expected");
+              message.dioramaBlacklistUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.dioramaBlacklistUrl);
+            }
+            if (object.clientOptions != null) {
+              if (typeof object.clientOptions !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.clientOptions: object expected");
+              message.clientOptions = $root.keyhole.dbroot.ClientOptionsProto.fromObject(object.clientOptions);
+            }
+            if (object.fetchingOptions != null) {
+              if (typeof object.fetchingOptions !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.fetchingOptions: object expected");
+              message.fetchingOptions = $root.keyhole.dbroot.FetchingOptionsProto.fromObject(object.fetchingOptions);
+            }
+            if (object.timeMachineOptions != null) {
+              if (typeof object.timeMachineOptions !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.timeMachineOptions: object expected");
+              message.timeMachineOptions = $root.keyhole.dbroot.TimeMachineOptionsProto.fromObject(object.timeMachineOptions);
+            }
+            if (object.csiOptions != null) {
+              if (typeof object.csiOptions !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.csiOptions: object expected");
+              message.csiOptions = $root.keyhole.dbroot.CSIOptionsProto.fromObject(object.csiOptions);
+            }
+            if (object.searchTab) {
+              if (!Array.isArray(object.searchTab))
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.searchTab: array expected");
+              message.searchTab = [];
+              for (var i = 0; i < object.searchTab.length; ++i) {
+                if (typeof object.searchTab[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.searchTab: object expected");
+                message.searchTab[i] = $root.keyhole.dbroot.SearchTabProto.fromObject(object.searchTab[i]);
+              }
+            }
+            if (object.cobrandInfo) {
+              if (!Array.isArray(object.cobrandInfo))
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.cobrandInfo: array expected");
+              message.cobrandInfo = [];
+              for (var i = 0; i < object.cobrandInfo.length; ++i) {
+                if (typeof object.cobrandInfo[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.cobrandInfo: object expected");
+                message.cobrandInfo[i] = $root.keyhole.dbroot.CobrandProto.fromObject(object.cobrandInfo[i]);
+              }
+            }
+            if (object.validDatabase) {
+              if (!Array.isArray(object.validDatabase))
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.validDatabase: array expected");
+              message.validDatabase = [];
+              for (var i = 0; i < object.validDatabase.length; ++i) {
+                if (typeof object.validDatabase[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.validDatabase: object expected");
+                message.validDatabase[i] = $root.keyhole.dbroot.DatabaseDescriptionProto.fromObject(object.validDatabase[i]);
+              }
+            }
+            if (object.configScript) {
+              if (!Array.isArray(object.configScript))
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.configScript: array expected");
+              message.configScript = [];
+              for (var i = 0; i < object.configScript.length; ++i) {
+                if (typeof object.configScript[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.configScript: object expected");
+                message.configScript[i] = $root.keyhole.dbroot.ConfigScriptProto.fromObject(object.configScript[i]);
+              }
+            }
+            if (object.deauthServerUrl != null) {
+              if (typeof object.deauthServerUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.deauthServerUrl: object expected");
+              message.deauthServerUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.deauthServerUrl);
+            }
+            if (object.swoopParameters != null) {
+              if (typeof object.swoopParameters !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.swoopParameters: object expected");
+              message.swoopParameters = $root.keyhole.dbroot.SwoopParamsProto.fromObject(object.swoopParameters);
+            }
+            if (object.bbsServerInfo != null) {
+              if (typeof object.bbsServerInfo !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.bbsServerInfo: object expected");
+              message.bbsServerInfo = $root.keyhole.dbroot.PostingServerProto.fromObject(object.bbsServerInfo);
+            }
+            if (object.dataErrorServerInfo != null) {
+              if (typeof object.dataErrorServerInfo !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.dataErrorServerInfo: object expected");
+              message.dataErrorServerInfo = $root.keyhole.dbroot.PostingServerProto.fromObject(object.dataErrorServerInfo);
+            }
+            if (object.planetaryDatabase) {
+              if (!Array.isArray(object.planetaryDatabase))
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.planetaryDatabase: array expected");
+              message.planetaryDatabase = [];
+              for (var i = 0; i < object.planetaryDatabase.length; ++i) {
+                if (typeof object.planetaryDatabase[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.planetaryDatabase: object expected");
+                message.planetaryDatabase[i] = $root.keyhole.dbroot.PlanetaryDatabaseProto.fromObject(object.planetaryDatabase[i]);
+              }
+            }
+            if (object.logServer != null) {
+              if (typeof object.logServer !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.logServer: object expected");
+              message.logServer = $root.keyhole.dbroot.LogServerProto.fromObject(object.logServer);
+            }
+            if (object.autopiaOptions != null) {
+              if (typeof object.autopiaOptions !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.autopiaOptions: object expected");
+              message.autopiaOptions = $root.keyhole.dbroot.AutopiaOptionsProto.fromObject(object.autopiaOptions);
+            }
+            if (object.searchConfig != null) {
+              if (typeof object.searchConfig !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.searchConfig: object expected");
+              message.searchConfig = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.fromObject(object.searchConfig);
+            }
+            if (object.searchInfo != null) {
+              if (typeof object.searchInfo !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.searchInfo: object expected");
+              message.searchInfo = $root.keyhole.dbroot.EndSnippetProto.SearchInfoProto.fromObject(object.searchInfo);
+            }
+            if (object.elevationServiceBaseUrl != null)
+              message.elevationServiceBaseUrl = String(object.elevationServiceBaseUrl);
+            if (object.elevationProfileQueryDelay != null)
+              message.elevationProfileQueryDelay = object.elevationProfileQueryDelay | 0;
+            if (object.proUpgradeUrl != null) {
+              if (typeof object.proUpgradeUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.proUpgradeUrl: object expected");
+              message.proUpgradeUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.proUpgradeUrl);
+            }
+            if (object.earthCommunityUrl != null) {
+              if (typeof object.earthCommunityUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.earthCommunityUrl: object expected");
+              message.earthCommunityUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.earthCommunityUrl);
+            }
+            if (object.googleMapsUrl != null) {
+              if (typeof object.googleMapsUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.googleMapsUrl: object expected");
+              message.googleMapsUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.googleMapsUrl);
+            }
+            if (object.sharingUrl != null) {
+              if (typeof object.sharingUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.sharingUrl: object expected");
+              message.sharingUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.sharingUrl);
+            }
+            if (object.privacyPolicyUrl != null) {
+              if (typeof object.privacyPolicyUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.privacyPolicyUrl: object expected");
+              message.privacyPolicyUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.privacyPolicyUrl);
+            }
+            if (object.doGplusUserCheck != null)
+              message.doGplusUserCheck = Boolean(object.doGplusUserCheck);
+            if (object.rocktreeDataProto != null) {
+              if (typeof object.rocktreeDataProto !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.rocktreeDataProto: object expected");
+              message.rocktreeDataProto = $root.keyhole.dbroot.EndSnippetProto.RockTreeDataProto.fromObject(object.rocktreeDataProto);
+            }
+            if (object.filmstripConfig) {
+              if (!Array.isArray(object.filmstripConfig))
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.filmstripConfig: array expected");
+              message.filmstripConfig = [];
+              for (var i = 0; i < object.filmstripConfig.length; ++i) {
+                if (typeof object.filmstripConfig[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.filmstripConfig: object expected");
+                message.filmstripConfig[i] = $root.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.fromObject(object.filmstripConfig[i]);
+              }
+            }
+            if (object.showSigninButton != null)
+              message.showSigninButton = Boolean(object.showSigninButton);
+            if (object.proMeasureUpsellUrl != null) {
+              if (typeof object.proMeasureUpsellUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.proMeasureUpsellUrl: object expected");
+              message.proMeasureUpsellUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.proMeasureUpsellUrl);
+            }
+            if (object.proPrintUpsellUrl != null) {
+              if (typeof object.proPrintUpsellUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.proPrintUpsellUrl: object expected");
+              message.proPrintUpsellUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.proPrintUpsellUrl);
+            }
+            if (object.starDataProto != null) {
+              if (typeof object.starDataProto !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.starDataProto: object expected");
+              message.starDataProto = $root.keyhole.dbroot.EndSnippetProto.StarDataProto.fromObject(object.starDataProto);
+            }
+            if (object.feedbackUrl != null) {
+              if (typeof object.feedbackUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.feedbackUrl: object expected");
+              message.feedbackUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.feedbackUrl);
+            }
+            if (object.oauth2LoginUrl != null) {
+              if (typeof object.oauth2LoginUrl !== "object")
+                throw TypeError(".keyhole.dbroot.EndSnippetProto.oauth2LoginUrl: object expected");
+              message.oauth2LoginUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.oauth2LoginUrl);
+            }
+            return message;
+          };
+          EndSnippetProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.arrays || options.defaults) {
+              object.mfeDomains = [];
+              object.searchTab = [];
+              object.cobrandInfo = [];
+              object.validDatabase = [];
+              object.configScript = [];
+              object.planetaryDatabase = [];
+              object.filmstripConfig = [];
+            }
+            if (options.defaults) {
+              object.model = null;
+              object.authServerUrl = null;
+              object.disableAuthentication = false;
+              object.mfeLangParam = "hl=$5Bhl5D";
+              object.adsUrlPatterns = "";
+              object.reverseGeocoderUrl = null;
+              object.reverseGeocoderProtocolVersion = 3;
+              object.skyDatabaseIsAvailable = true;
+              object.skyDatabaseUrl = null;
+              object.defaultWebPageIntlUrl = null;
+              object.numStartUpTips = 17;
+              object.startUpTipsUrl = null;
+              object.userGuideIntlUrl = null;
+              object.supportCenterIntlUrl = null;
+              object.businessListingIntlUrl = null;
+              object.supportAnswerIntlUrl = null;
+              object.supportTopicIntlUrl = null;
+              object.supportRequestIntlUrl = null;
+              object.earthIntlUrl = null;
+              object.addContentUrl = null;
+              object.sketchupNotInstalledUrl = null;
+              object.sketchupErrorUrl = null;
+              object.freeLicenseUrl = null;
+              object.proLicenseUrl = null;
+              object.hideUserData = false;
+              object.useGeLogo = true;
+              object.dioramaDescriptionUrlBase = null;
+              object.dioramaDefaultColor = 4291281607;
+              object.clientOptions = null;
+              object.fetchingOptions = null;
+              object.timeMachineOptions = null;
+              object.csiOptions = null;
+              object.deauthServerUrl = null;
+              object.swoopParameters = null;
+              object.bbsServerInfo = null;
+              object.dataErrorServerInfo = null;
+              object.logServer = null;
+              object.autopiaOptions = null;
+              object.searchInfo = null;
+              object.elevationServiceBaseUrl = "http://maps.google.com/maps/api/elevation/";
+              object.elevationProfileQueryDelay = 500;
+              object.tutorialUrl = null;
+              object.keyboardShortcutsUrl = null;
+              object.releaseNotesUrl = null;
+              object.numProStartUpTips = 0;
+              object.proStartUpTipsUrl = null;
+              object.dioramaBlacklistUrl = null;
+              object.searchConfig = null;
+              object.proUpgradeUrl = null;
+              object.earthCommunityUrl = null;
+              object.googleMapsUrl = null;
+              object.sharingUrl = null;
+              object.privacyPolicyUrl = null;
+              object.doGplusUserCheck = false;
+              object.rocktreeDataProto = null;
+              object.showSigninButton = false;
+              object.startupTipsIntlUrl = null;
+              object.proMeasureUpsellUrl = null;
+              object.proPrintUpsellUrl = null;
+              object.starDataProto = null;
+              object.feedbackUrl = null;
+              object.oauth2LoginUrl = null;
+            }
+            if (message.model != null && message.hasOwnProperty("model"))
+              object.model = $root.keyhole.dbroot.PlanetModelProto.toObject(message.model, options);
+            if (message.authServerUrl != null && message.hasOwnProperty("authServerUrl"))
+              object.authServerUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.authServerUrl, options);
+            if (message.disableAuthentication != null && message.hasOwnProperty("disableAuthentication"))
+              object.disableAuthentication = message.disableAuthentication;
+            if (message.mfeDomains && message.mfeDomains.length) {
+              object.mfeDomains = [];
+              for (var j = 0; j < message.mfeDomains.length; ++j)
+                object.mfeDomains[j] = $root.keyhole.dbroot.MfeDomainFeaturesProto.toObject(message.mfeDomains[j], options);
+            }
+            if (message.mfeLangParam != null && message.hasOwnProperty("mfeLangParam"))
+              object.mfeLangParam = message.mfeLangParam;
+            if (message.adsUrlPatterns != null && message.hasOwnProperty("adsUrlPatterns"))
+              object.adsUrlPatterns = message.adsUrlPatterns;
+            if (message.reverseGeocoderUrl != null && message.hasOwnProperty("reverseGeocoderUrl"))
+              object.reverseGeocoderUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.reverseGeocoderUrl, options);
+            if (message.reverseGeocoderProtocolVersion != null && message.hasOwnProperty("reverseGeocoderProtocolVersion"))
+              object.reverseGeocoderProtocolVersion = message.reverseGeocoderProtocolVersion;
+            if (message.skyDatabaseIsAvailable != null && message.hasOwnProperty("skyDatabaseIsAvailable"))
+              object.skyDatabaseIsAvailable = message.skyDatabaseIsAvailable;
+            if (message.skyDatabaseUrl != null && message.hasOwnProperty("skyDatabaseUrl"))
+              object.skyDatabaseUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.skyDatabaseUrl, options);
+            if (message.defaultWebPageIntlUrl != null && message.hasOwnProperty("defaultWebPageIntlUrl"))
+              object.defaultWebPageIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.defaultWebPageIntlUrl, options);
+            if (message.numStartUpTips != null && message.hasOwnProperty("numStartUpTips"))
+              object.numStartUpTips = message.numStartUpTips;
+            if (message.startUpTipsUrl != null && message.hasOwnProperty("startUpTipsUrl"))
+              object.startUpTipsUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.startUpTipsUrl, options);
+            if (message.userGuideIntlUrl != null && message.hasOwnProperty("userGuideIntlUrl"))
+              object.userGuideIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.userGuideIntlUrl, options);
+            if (message.supportCenterIntlUrl != null && message.hasOwnProperty("supportCenterIntlUrl"))
+              object.supportCenterIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.supportCenterIntlUrl, options);
+            if (message.businessListingIntlUrl != null && message.hasOwnProperty("businessListingIntlUrl"))
+              object.businessListingIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.businessListingIntlUrl, options);
+            if (message.supportAnswerIntlUrl != null && message.hasOwnProperty("supportAnswerIntlUrl"))
+              object.supportAnswerIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.supportAnswerIntlUrl, options);
+            if (message.supportTopicIntlUrl != null && message.hasOwnProperty("supportTopicIntlUrl"))
+              object.supportTopicIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.supportTopicIntlUrl, options);
+            if (message.supportRequestIntlUrl != null && message.hasOwnProperty("supportRequestIntlUrl"))
+              object.supportRequestIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.supportRequestIntlUrl, options);
+            if (message.earthIntlUrl != null && message.hasOwnProperty("earthIntlUrl"))
+              object.earthIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.earthIntlUrl, options);
+            if (message.addContentUrl != null && message.hasOwnProperty("addContentUrl"))
+              object.addContentUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.addContentUrl, options);
+            if (message.sketchupNotInstalledUrl != null && message.hasOwnProperty("sketchupNotInstalledUrl"))
+              object.sketchupNotInstalledUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.sketchupNotInstalledUrl, options);
+            if (message.sketchupErrorUrl != null && message.hasOwnProperty("sketchupErrorUrl"))
+              object.sketchupErrorUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.sketchupErrorUrl, options);
+            if (message.freeLicenseUrl != null && message.hasOwnProperty("freeLicenseUrl"))
+              object.freeLicenseUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.freeLicenseUrl, options);
+            if (message.proLicenseUrl != null && message.hasOwnProperty("proLicenseUrl"))
+              object.proLicenseUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.proLicenseUrl, options);
+            if (message.hideUserData != null && message.hasOwnProperty("hideUserData"))
+              object.hideUserData = message.hideUserData;
+            if (message.useGeLogo != null && message.hasOwnProperty("useGeLogo"))
+              object.useGeLogo = message.useGeLogo;
+            if (message.dioramaDescriptionUrlBase != null && message.hasOwnProperty("dioramaDescriptionUrlBase"))
+              object.dioramaDescriptionUrlBase = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.dioramaDescriptionUrlBase, options);
+            if (message.dioramaDefaultColor != null && message.hasOwnProperty("dioramaDefaultColor"))
+              object.dioramaDefaultColor = message.dioramaDefaultColor;
+            if (message.clientOptions != null && message.hasOwnProperty("clientOptions"))
+              object.clientOptions = $root.keyhole.dbroot.ClientOptionsProto.toObject(message.clientOptions, options);
+            if (message.fetchingOptions != null && message.hasOwnProperty("fetchingOptions"))
+              object.fetchingOptions = $root.keyhole.dbroot.FetchingOptionsProto.toObject(message.fetchingOptions, options);
+            if (message.timeMachineOptions != null && message.hasOwnProperty("timeMachineOptions"))
+              object.timeMachineOptions = $root.keyhole.dbroot.TimeMachineOptionsProto.toObject(message.timeMachineOptions, options);
+            if (message.csiOptions != null && message.hasOwnProperty("csiOptions"))
+              object.csiOptions = $root.keyhole.dbroot.CSIOptionsProto.toObject(message.csiOptions, options);
+            if (message.searchTab && message.searchTab.length) {
+              object.searchTab = [];
+              for (var j = 0; j < message.searchTab.length; ++j)
+                object.searchTab[j] = $root.keyhole.dbroot.SearchTabProto.toObject(message.searchTab[j], options);
+            }
+            if (message.cobrandInfo && message.cobrandInfo.length) {
+              object.cobrandInfo = [];
+              for (var j = 0; j < message.cobrandInfo.length; ++j)
+                object.cobrandInfo[j] = $root.keyhole.dbroot.CobrandProto.toObject(message.cobrandInfo[j], options);
+            }
+            if (message.validDatabase && message.validDatabase.length) {
+              object.validDatabase = [];
+              for (var j = 0; j < message.validDatabase.length; ++j)
+                object.validDatabase[j] = $root.keyhole.dbroot.DatabaseDescriptionProto.toObject(message.validDatabase[j], options);
+            }
+            if (message.configScript && message.configScript.length) {
+              object.configScript = [];
+              for (var j = 0; j < message.configScript.length; ++j)
+                object.configScript[j] = $root.keyhole.dbroot.ConfigScriptProto.toObject(message.configScript[j], options);
+            }
+            if (message.deauthServerUrl != null && message.hasOwnProperty("deauthServerUrl"))
+              object.deauthServerUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.deauthServerUrl, options);
+            if (message.swoopParameters != null && message.hasOwnProperty("swoopParameters"))
+              object.swoopParameters = $root.keyhole.dbroot.SwoopParamsProto.toObject(message.swoopParameters, options);
+            if (message.bbsServerInfo != null && message.hasOwnProperty("bbsServerInfo"))
+              object.bbsServerInfo = $root.keyhole.dbroot.PostingServerProto.toObject(message.bbsServerInfo, options);
+            if (message.dataErrorServerInfo != null && message.hasOwnProperty("dataErrorServerInfo"))
+              object.dataErrorServerInfo = $root.keyhole.dbroot.PostingServerProto.toObject(message.dataErrorServerInfo, options);
+            if (message.planetaryDatabase && message.planetaryDatabase.length) {
+              object.planetaryDatabase = [];
+              for (var j = 0; j < message.planetaryDatabase.length; ++j)
+                object.planetaryDatabase[j] = $root.keyhole.dbroot.PlanetaryDatabaseProto.toObject(message.planetaryDatabase[j], options);
+            }
+            if (message.logServer != null && message.hasOwnProperty("logServer"))
+              object.logServer = $root.keyhole.dbroot.LogServerProto.toObject(message.logServer, options);
+            if (message.autopiaOptions != null && message.hasOwnProperty("autopiaOptions"))
+              object.autopiaOptions = $root.keyhole.dbroot.AutopiaOptionsProto.toObject(message.autopiaOptions, options);
+            if (message.searchInfo != null && message.hasOwnProperty("searchInfo"))
+              object.searchInfo = $root.keyhole.dbroot.EndSnippetProto.SearchInfoProto.toObject(message.searchInfo, options);
+            if (message.elevationServiceBaseUrl != null && message.hasOwnProperty("elevationServiceBaseUrl"))
+              object.elevationServiceBaseUrl = message.elevationServiceBaseUrl;
+            if (message.elevationProfileQueryDelay != null && message.hasOwnProperty("elevationProfileQueryDelay"))
+              object.elevationProfileQueryDelay = message.elevationProfileQueryDelay;
+            if (message.tutorialUrl != null && message.hasOwnProperty("tutorialUrl"))
+              object.tutorialUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.tutorialUrl, options);
+            if (message.keyboardShortcutsUrl != null && message.hasOwnProperty("keyboardShortcutsUrl"))
+              object.keyboardShortcutsUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.keyboardShortcutsUrl, options);
+            if (message.releaseNotesUrl != null && message.hasOwnProperty("releaseNotesUrl"))
+              object.releaseNotesUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.releaseNotesUrl, options);
+            if (message.numProStartUpTips != null && message.hasOwnProperty("numProStartUpTips"))
+              object.numProStartUpTips = message.numProStartUpTips;
+            if (message.proStartUpTipsUrl != null && message.hasOwnProperty("proStartUpTipsUrl"))
+              object.proStartUpTipsUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.proStartUpTipsUrl, options);
+            if (message.dioramaBlacklistUrl != null && message.hasOwnProperty("dioramaBlacklistUrl"))
+              object.dioramaBlacklistUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.dioramaBlacklistUrl, options);
+            if (message.searchConfig != null && message.hasOwnProperty("searchConfig"))
+              object.searchConfig = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.toObject(message.searchConfig, options);
+            if (message.proUpgradeUrl != null && message.hasOwnProperty("proUpgradeUrl"))
+              object.proUpgradeUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.proUpgradeUrl, options);
+            if (message.earthCommunityUrl != null && message.hasOwnProperty("earthCommunityUrl"))
+              object.earthCommunityUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.earthCommunityUrl, options);
+            if (message.googleMapsUrl != null && message.hasOwnProperty("googleMapsUrl"))
+              object.googleMapsUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.googleMapsUrl, options);
+            if (message.sharingUrl != null && message.hasOwnProperty("sharingUrl"))
+              object.sharingUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.sharingUrl, options);
+            if (message.privacyPolicyUrl != null && message.hasOwnProperty("privacyPolicyUrl"))
+              object.privacyPolicyUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.privacyPolicyUrl, options);
+            if (message.doGplusUserCheck != null && message.hasOwnProperty("doGplusUserCheck"))
+              object.doGplusUserCheck = message.doGplusUserCheck;
+            if (message.rocktreeDataProto != null && message.hasOwnProperty("rocktreeDataProto"))
+              object.rocktreeDataProto = $root.keyhole.dbroot.EndSnippetProto.RockTreeDataProto.toObject(message.rocktreeDataProto, options);
+            if (message.filmstripConfig && message.filmstripConfig.length) {
+              object.filmstripConfig = [];
+              for (var j = 0; j < message.filmstripConfig.length; ++j)
+                object.filmstripConfig[j] = $root.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.toObject(message.filmstripConfig[j], options);
+            }
+            if (message.showSigninButton != null && message.hasOwnProperty("showSigninButton"))
+              object.showSigninButton = message.showSigninButton;
+            if (message.startupTipsIntlUrl != null && message.hasOwnProperty("startupTipsIntlUrl"))
+              object.startupTipsIntlUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.startupTipsIntlUrl, options);
+            if (message.proMeasureUpsellUrl != null && message.hasOwnProperty("proMeasureUpsellUrl"))
+              object.proMeasureUpsellUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.proMeasureUpsellUrl, options);
+            if (message.proPrintUpsellUrl != null && message.hasOwnProperty("proPrintUpsellUrl"))
+              object.proPrintUpsellUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.proPrintUpsellUrl, options);
+            if (message.starDataProto != null && message.hasOwnProperty("starDataProto"))
+              object.starDataProto = $root.keyhole.dbroot.EndSnippetProto.StarDataProto.toObject(message.starDataProto, options);
+            if (message.feedbackUrl != null && message.hasOwnProperty("feedbackUrl"))
+              object.feedbackUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.feedbackUrl, options);
+            if (message.oauth2LoginUrl != null && message.hasOwnProperty("oauth2LoginUrl"))
+              object.oauth2LoginUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.oauth2LoginUrl, options);
+            return object;
+          };
+          EndSnippetProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          EndSnippetProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.EndSnippetProto";
+          };
+          EndSnippetProto.SearchConfigProto = function() {
+            function SearchConfigProto(properties) {
+              this.searchServer = [];
+              this.oneboxService = [];
+              if (properties) {
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                  if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+              }
+            }
+            SearchConfigProto.prototype.searchServer = $util.emptyArray;
+            SearchConfigProto.prototype.oneboxService = $util.emptyArray;
+            SearchConfigProto.prototype.kmlSearchUrl = null;
+            SearchConfigProto.prototype.kmlRenderUrl = null;
+            SearchConfigProto.prototype.searchHistoryUrl = null;
+            SearchConfigProto.prototype.errorPageUrl = null;
+            SearchConfigProto.decode = function decode(reader, length) {
+              if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+              var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto();
+              while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                  case 1: {
+                    if (!(message.searchServer && message.searchServer.length))
+                      message.searchServer = [];
+                    message.searchServer.push($root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.decode(reader, reader.uint32()));
+                    break;
+                  }
+                  case 2: {
+                    if (!(message.oneboxService && message.oneboxService.length))
+                      message.oneboxService = [];
+                    message.oneboxService.push($root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto.decode(reader, reader.uint32()));
+                    break;
+                  }
+                  case 3: {
+                    message.kmlSearchUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                    break;
+                  }
+                  case 4: {
+                    message.kmlRenderUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                    break;
+                  }
+                  case 6: {
+                    message.searchHistoryUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                    break;
+                  }
+                  case 5: {
+                    message.errorPageUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                    break;
+                  }
+                  default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+              }
+              return message;
+            };
+            SearchConfigProto.verify = function verify(message) {
+              if (typeof message !== "object" || message === null)
+                return "object expected";
+              if (message.searchServer != null && message.hasOwnProperty("searchServer")) {
+                if (!Array.isArray(message.searchServer))
+                  return "searchServer: array expected";
+                for (var i = 0; i < message.searchServer.length; ++i) {
+                  var error = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.verify(message.searchServer[i]);
+                  if (error)
+                    return "searchServer." + error;
+                }
+              }
+              if (message.oneboxService != null && message.hasOwnProperty("oneboxService")) {
+                if (!Array.isArray(message.oneboxService))
+                  return "oneboxService: array expected";
+                for (var i = 0; i < message.oneboxService.length; ++i) {
+                  var error = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto.verify(message.oneboxService[i]);
+                  if (error)
+                    return "oneboxService." + error;
+                }
+              }
+              if (message.kmlSearchUrl != null && message.hasOwnProperty("kmlSearchUrl")) {
+                var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.kmlSearchUrl);
+                if (error)
+                  return "kmlSearchUrl." + error;
+              }
+              if (message.kmlRenderUrl != null && message.hasOwnProperty("kmlRenderUrl")) {
+                var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.kmlRenderUrl);
+                if (error)
+                  return "kmlRenderUrl." + error;
+              }
+              if (message.searchHistoryUrl != null && message.hasOwnProperty("searchHistoryUrl")) {
+                var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.searchHistoryUrl);
+                if (error)
+                  return "searchHistoryUrl." + error;
+              }
+              if (message.errorPageUrl != null && message.hasOwnProperty("errorPageUrl")) {
+                var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.errorPageUrl);
+                if (error)
+                  return "errorPageUrl." + error;
+              }
+              return null;
+            };
+            SearchConfigProto.fromObject = function fromObject(object) {
+              if (object instanceof $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto)
+                return object;
+              var message = new $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto();
+              if (object.searchServer) {
+                if (!Array.isArray(object.searchServer))
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.searchServer: array expected");
+                message.searchServer = [];
+                for (var i = 0; i < object.searchServer.length; ++i) {
+                  if (typeof object.searchServer[i] !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.searchServer: object expected");
+                  message.searchServer[i] = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.fromObject(object.searchServer[i]);
+                }
+              }
+              if (object.oneboxService) {
+                if (!Array.isArray(object.oneboxService))
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.oneboxService: array expected");
+                message.oneboxService = [];
+                for (var i = 0; i < object.oneboxService.length; ++i) {
+                  if (typeof object.oneboxService[i] !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.oneboxService: object expected");
+                  message.oneboxService[i] = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto.fromObject(object.oneboxService[i]);
+                }
+              }
+              if (object.kmlSearchUrl != null) {
+                if (typeof object.kmlSearchUrl !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.kmlSearchUrl: object expected");
+                message.kmlSearchUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.kmlSearchUrl);
+              }
+              if (object.kmlRenderUrl != null) {
+                if (typeof object.kmlRenderUrl !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.kmlRenderUrl: object expected");
+                message.kmlRenderUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.kmlRenderUrl);
+              }
+              if (object.searchHistoryUrl != null) {
+                if (typeof object.searchHistoryUrl !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.searchHistoryUrl: object expected");
+                message.searchHistoryUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.searchHistoryUrl);
+              }
+              if (object.errorPageUrl != null) {
+                if (typeof object.errorPageUrl !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.errorPageUrl: object expected");
+                message.errorPageUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.errorPageUrl);
+              }
+              return message;
+            };
+            SearchConfigProto.toObject = function toObject(message, options) {
+              if (!options)
+                options = {};
+              var object = {};
+              if (options.arrays || options.defaults) {
+                object.searchServer = [];
+                object.oneboxService = [];
+              }
+              if (options.defaults) {
+                object.kmlSearchUrl = null;
+                object.kmlRenderUrl = null;
+                object.errorPageUrl = null;
+                object.searchHistoryUrl = null;
+              }
+              if (message.searchServer && message.searchServer.length) {
+                object.searchServer = [];
+                for (var j = 0; j < message.searchServer.length; ++j)
+                  object.searchServer[j] = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.toObject(message.searchServer[j], options);
+              }
+              if (message.oneboxService && message.oneboxService.length) {
+                object.oneboxService = [];
+                for (var j = 0; j < message.oneboxService.length; ++j)
+                  object.oneboxService[j] = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto.toObject(message.oneboxService[j], options);
+              }
+              if (message.kmlSearchUrl != null && message.hasOwnProperty("kmlSearchUrl"))
+                object.kmlSearchUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.kmlSearchUrl, options);
+              if (message.kmlRenderUrl != null && message.hasOwnProperty("kmlRenderUrl"))
+                object.kmlRenderUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.kmlRenderUrl, options);
+              if (message.errorPageUrl != null && message.hasOwnProperty("errorPageUrl"))
+                object.errorPageUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.errorPageUrl, options);
+              if (message.searchHistoryUrl != null && message.hasOwnProperty("searchHistoryUrl"))
+                object.searchHistoryUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.searchHistoryUrl, options);
+              return object;
+            };
+            SearchConfigProto.prototype.toJSON = function toJSON() {
+              return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+            SearchConfigProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+              if (typeUrlPrefix === void 0) {
+                typeUrlPrefix = "type.googleapis.com";
+              }
+              return typeUrlPrefix + "/keyhole.dbroot.EndSnippetProto.SearchConfigProto";
+            };
+            SearchConfigProto.SearchServer = function() {
+              function SearchServer(properties) {
+                this.suggestion = [];
+                this.searchlet = [];
+                if (properties) {
+                  for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                      this[keys[i]] = properties[keys[i]];
+                }
+              }
+              SearchServer.prototype.name = null;
+              SearchServer.prototype.url = null;
+              SearchServer.prototype.type = 0;
+              SearchServer.prototype.htmlTransformUrl = null;
+              SearchServer.prototype.kmlTransformUrl = null;
+              SearchServer.prototype.supplementalUi = null;
+              SearchServer.prototype.suggestion = $util.emptyArray;
+              SearchServer.prototype.searchlet = $util.emptyArray;
+              SearchServer.prototype.requirements = null;
+              SearchServer.prototype.suggestServer = null;
+              SearchServer.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                  reader = $Reader.create(reader);
+                var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer();
+                while (reader.pos < end) {
+                  var tag = reader.uint32();
+                  switch (tag >>> 3) {
+                    case 1: {
+                      message.name = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                      break;
+                    }
+                    case 2: {
+                      message.url = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                      break;
+                    }
+                    case 3: {
+                      message.type = reader.int32();
+                      break;
+                    }
+                    case 4: {
+                      message.htmlTransformUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                      break;
+                    }
+                    case 5: {
+                      message.kmlTransformUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                      break;
+                    }
+                    case 6: {
+                      message.supplementalUi = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi.decode(reader, reader.uint32());
+                      break;
+                    }
+                    case 9: {
+                      if (!(message.suggestion && message.suggestion.length))
+                        message.suggestion = [];
+                      message.suggestion.push($root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32()));
+                      break;
+                    }
+                    case 7: {
+                      if (!(message.searchlet && message.searchlet.length))
+                        message.searchlet = [];
+                      message.searchlet.push($root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto.decode(reader, reader.uint32()));
+                      break;
+                    }
+                    case 8: {
+                      message.requirements = $root.keyhole.dbroot.RequirementProto.decode(reader, reader.uint32());
+                      break;
+                    }
+                    case 10: {
+                      message.suggestServer = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                      break;
+                    }
+                    default:
+                      reader.skipType(tag & 7);
+                      break;
+                  }
+                }
+                return message;
+              };
+              SearchServer.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                  return "object expected";
+                if (message.name != null && message.hasOwnProperty("name")) {
+                  var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.name);
+                  if (error)
+                    return "name." + error;
+                }
+                if (message.url != null && message.hasOwnProperty("url")) {
+                  var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.url);
+                  if (error)
+                    return "url." + error;
+                }
+                if (message.type != null && message.hasOwnProperty("type"))
+                  switch (message.type) {
+                    default:
+                      return "type: enum value expected";
+                    case 0:
+                    case 1:
+                      break;
+                  }
+                if (message.htmlTransformUrl != null && message.hasOwnProperty("htmlTransformUrl")) {
+                  var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.htmlTransformUrl);
+                  if (error)
+                    return "htmlTransformUrl." + error;
+                }
+                if (message.kmlTransformUrl != null && message.hasOwnProperty("kmlTransformUrl")) {
+                  var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.kmlTransformUrl);
+                  if (error)
+                    return "kmlTransformUrl." + error;
+                }
+                if (message.supplementalUi != null && message.hasOwnProperty("supplementalUi")) {
+                  var error = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi.verify(message.supplementalUi);
+                  if (error)
+                    return "supplementalUi." + error;
+                }
+                if (message.suggestion != null && message.hasOwnProperty("suggestion")) {
+                  if (!Array.isArray(message.suggestion))
+                    return "suggestion: array expected";
+                  for (var i = 0; i < message.suggestion.length; ++i) {
+                    var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.suggestion[i]);
+                    if (error)
+                      return "suggestion." + error;
+                  }
+                }
+                if (message.searchlet != null && message.hasOwnProperty("searchlet")) {
+                  if (!Array.isArray(message.searchlet))
+                    return "searchlet: array expected";
+                  for (var i = 0; i < message.searchlet.length; ++i) {
+                    var error = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto.verify(message.searchlet[i]);
+                    if (error)
+                      return "searchlet." + error;
+                  }
+                }
+                if (message.requirements != null && message.hasOwnProperty("requirements")) {
+                  var error = $root.keyhole.dbroot.RequirementProto.verify(message.requirements);
+                  if (error)
+                    return "requirements." + error;
+                }
+                if (message.suggestServer != null && message.hasOwnProperty("suggestServer")) {
+                  var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.suggestServer);
+                  if (error)
+                    return "suggestServer." + error;
+                }
+                return null;
+              };
+              SearchServer.fromObject = function fromObject(object) {
+                if (object instanceof $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer)
+                  return object;
+                var message = new $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer();
+                if (object.name != null) {
+                  if (typeof object.name !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.name: object expected");
+                  message.name = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.name);
+                }
+                if (object.url != null) {
+                  if (typeof object.url !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.url: object expected");
+                  message.url = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.url);
+                }
+                switch (object.type) {
+                  case "RESULT_TYPE_KML":
+                  case 0:
+                    message.type = 0;
+                    break;
+                  case "RESULT_TYPE_XML":
+                  case 1:
+                    message.type = 1;
+                    break;
+                }
+                if (object.htmlTransformUrl != null) {
+                  if (typeof object.htmlTransformUrl !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.htmlTransformUrl: object expected");
+                  message.htmlTransformUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.htmlTransformUrl);
+                }
+                if (object.kmlTransformUrl != null) {
+                  if (typeof object.kmlTransformUrl !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.kmlTransformUrl: object expected");
+                  message.kmlTransformUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.kmlTransformUrl);
+                }
+                if (object.supplementalUi != null) {
+                  if (typeof object.supplementalUi !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.supplementalUi: object expected");
+                  message.supplementalUi = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi.fromObject(object.supplementalUi);
+                }
+                if (object.suggestion) {
+                  if (!Array.isArray(object.suggestion))
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.suggestion: array expected");
+                  message.suggestion = [];
+                  for (var i = 0; i < object.suggestion.length; ++i) {
+                    if (typeof object.suggestion[i] !== "object")
+                      throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.suggestion: object expected");
+                    message.suggestion[i] = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.suggestion[i]);
+                  }
+                }
+                if (object.searchlet) {
+                  if (!Array.isArray(object.searchlet))
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.searchlet: array expected");
+                  message.searchlet = [];
+                  for (var i = 0; i < object.searchlet.length; ++i) {
+                    if (typeof object.searchlet[i] !== "object")
+                      throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.searchlet: object expected");
+                    message.searchlet[i] = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto.fromObject(object.searchlet[i]);
+                  }
+                }
+                if (object.requirements != null) {
+                  if (typeof object.requirements !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.requirements: object expected");
+                  message.requirements = $root.keyhole.dbroot.RequirementProto.fromObject(object.requirements);
+                }
+                if (object.suggestServer != null) {
+                  if (typeof object.suggestServer !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.suggestServer: object expected");
+                  message.suggestServer = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.suggestServer);
+                }
+                return message;
+              };
+              SearchServer.toObject = function toObject(message, options) {
+                if (!options)
+                  options = {};
+                var object = {};
+                if (options.arrays || options.defaults) {
+                  object.searchlet = [];
+                  object.suggestion = [];
+                }
+                if (options.defaults) {
+                  object.name = null;
+                  object.url = null;
+                  object.type = options.enums === String ? "RESULT_TYPE_KML" : 0;
+                  object.htmlTransformUrl = null;
+                  object.kmlTransformUrl = null;
+                  object.supplementalUi = null;
+                  object.requirements = null;
+                  object.suggestServer = null;
+                }
+                if (message.name != null && message.hasOwnProperty("name"))
+                  object.name = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.name, options);
+                if (message.url != null && message.hasOwnProperty("url"))
+                  object.url = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.url, options);
+                if (message.type != null && message.hasOwnProperty("type"))
+                  object.type = options.enums === String ? $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.ResultType[message.type] : message.type;
+                if (message.htmlTransformUrl != null && message.hasOwnProperty("htmlTransformUrl"))
+                  object.htmlTransformUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.htmlTransformUrl, options);
+                if (message.kmlTransformUrl != null && message.hasOwnProperty("kmlTransformUrl"))
+                  object.kmlTransformUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.kmlTransformUrl, options);
+                if (message.supplementalUi != null && message.hasOwnProperty("supplementalUi"))
+                  object.supplementalUi = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi.toObject(message.supplementalUi, options);
+                if (message.searchlet && message.searchlet.length) {
+                  object.searchlet = [];
+                  for (var j = 0; j < message.searchlet.length; ++j)
+                    object.searchlet[j] = $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto.toObject(message.searchlet[j], options);
+                }
+                if (message.requirements != null && message.hasOwnProperty("requirements"))
+                  object.requirements = $root.keyhole.dbroot.RequirementProto.toObject(message.requirements, options);
+                if (message.suggestion && message.suggestion.length) {
+                  object.suggestion = [];
+                  for (var j = 0; j < message.suggestion.length; ++j)
+                    object.suggestion[j] = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.suggestion[j], options);
+                }
+                if (message.suggestServer != null && message.hasOwnProperty("suggestServer"))
+                  object.suggestServer = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.suggestServer, options);
+                return object;
+              };
+              SearchServer.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+              };
+              SearchServer.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                if (typeUrlPrefix === void 0) {
+                  typeUrlPrefix = "type.googleapis.com";
+                }
+                return typeUrlPrefix + "/keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer";
+              };
+              SearchServer.ResultType = function() {
+                var valuesById = {}, values = Object.create(valuesById);
+                values[valuesById[0] = "RESULT_TYPE_KML"] = 0;
+                values[valuesById[1] = "RESULT_TYPE_XML"] = 1;
+                return values;
+              }();
+              SearchServer.SupplementalUi = function() {
+                function SupplementalUi(properties) {
+                  if (properties) {
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                      if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+                  }
+                }
+                SupplementalUi.prototype.url = null;
+                SupplementalUi.prototype.label = null;
+                SupplementalUi.prototype.height = 160;
+                SupplementalUi.decode = function decode(reader, length) {
+                  if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                  var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi();
+                  while (reader.pos < end) {
+                    var tag = reader.uint32();
+                    switch (tag >>> 3) {
+                      case 1: {
+                        message.url = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                        break;
+                      }
+                      case 2: {
+                        message.label = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                        break;
+                      }
+                      case 3: {
+                        message.height = reader.int32();
+                        break;
+                      }
+                      default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                  }
+                  return message;
+                };
+                SupplementalUi.verify = function verify(message) {
+                  if (typeof message !== "object" || message === null)
+                    return "object expected";
+                  if (message.url != null && message.hasOwnProperty("url")) {
+                    var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.url);
+                    if (error)
+                      return "url." + error;
+                  }
+                  if (message.label != null && message.hasOwnProperty("label")) {
+                    var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.label);
+                    if (error)
+                      return "label." + error;
+                  }
+                  if (message.height != null && message.hasOwnProperty("height")) {
+                    if (!$util.isInteger(message.height))
+                      return "height: integer expected";
+                  }
+                  return null;
+                };
+                SupplementalUi.fromObject = function fromObject(object) {
+                  if (object instanceof $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi)
+                    return object;
+                  var message = new $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi();
+                  if (object.url != null) {
+                    if (typeof object.url !== "object")
+                      throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi.url: object expected");
+                    message.url = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.url);
+                  }
+                  if (object.label != null) {
+                    if (typeof object.label !== "object")
+                      throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi.label: object expected");
+                    message.label = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.label);
+                  }
+                  if (object.height != null)
+                    message.height = object.height | 0;
+                  return message;
+                };
+                SupplementalUi.toObject = function toObject(message, options) {
+                  if (!options)
+                    options = {};
+                  var object = {};
+                  if (options.defaults) {
+                    object.url = null;
+                    object.label = null;
+                    object.height = 160;
+                  }
+                  if (message.url != null && message.hasOwnProperty("url"))
+                    object.url = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.url, options);
+                  if (message.label != null && message.hasOwnProperty("label"))
+                    object.label = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.label, options);
+                  if (message.height != null && message.hasOwnProperty("height"))
+                    object.height = message.height;
+                  return object;
+                };
+                SupplementalUi.prototype.toJSON = function toJSON() {
+                  return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+                SupplementalUi.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                  if (typeUrlPrefix === void 0) {
+                    typeUrlPrefix = "type.googleapis.com";
+                  }
+                  return typeUrlPrefix + "/keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SupplementalUi";
+                };
+                return SupplementalUi;
+              }();
+              SearchServer.SearchletProto = function() {
+                function SearchletProto(properties) {
+                  if (properties) {
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                      if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+                  }
+                }
+                SearchletProto.prototype.url = null;
+                SearchletProto.prototype.name = null;
+                SearchletProto.prototype.requirements = null;
+                SearchletProto.decode = function decode(reader, length) {
+                  if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                  var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto();
+                  while (reader.pos < end) {
+                    var tag = reader.uint32();
+                    switch (tag >>> 3) {
+                      case 1: {
+                        message.url = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                        break;
+                      }
+                      case 2: {
+                        message.name = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                        break;
+                      }
+                      case 3: {
+                        message.requirements = $root.keyhole.dbroot.RequirementProto.decode(reader, reader.uint32());
+                        break;
+                      }
+                      default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                  }
+                  return message;
+                };
+                SearchletProto.verify = function verify(message) {
+                  if (typeof message !== "object" || message === null)
+                    return "object expected";
+                  if (message.url != null && message.hasOwnProperty("url")) {
+                    var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.url);
+                    if (error)
+                      return "url." + error;
+                  }
+                  if (message.name != null && message.hasOwnProperty("name")) {
+                    var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.name);
+                    if (error)
+                      return "name." + error;
+                  }
+                  if (message.requirements != null && message.hasOwnProperty("requirements")) {
+                    var error = $root.keyhole.dbroot.RequirementProto.verify(message.requirements);
+                    if (error)
+                      return "requirements." + error;
+                  }
+                  return null;
+                };
+                SearchletProto.fromObject = function fromObject(object) {
+                  if (object instanceof $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto)
+                    return object;
+                  var message = new $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto();
+                  if (object.url != null) {
+                    if (typeof object.url !== "object")
+                      throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto.url: object expected");
+                    message.url = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.url);
+                  }
+                  if (object.name != null) {
+                    if (typeof object.name !== "object")
+                      throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto.name: object expected");
+                    message.name = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.name);
+                  }
+                  if (object.requirements != null) {
+                    if (typeof object.requirements !== "object")
+                      throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto.requirements: object expected");
+                    message.requirements = $root.keyhole.dbroot.RequirementProto.fromObject(object.requirements);
+                  }
+                  return message;
+                };
+                SearchletProto.toObject = function toObject(message, options) {
+                  if (!options)
+                    options = {};
+                  var object = {};
+                  if (options.defaults) {
+                    object.url = null;
+                    object.name = null;
+                    object.requirements = null;
+                  }
+                  if (message.url != null && message.hasOwnProperty("url"))
+                    object.url = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.url, options);
+                  if (message.name != null && message.hasOwnProperty("name"))
+                    object.name = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.name, options);
+                  if (message.requirements != null && message.hasOwnProperty("requirements"))
+                    object.requirements = $root.keyhole.dbroot.RequirementProto.toObject(message.requirements, options);
+                  return object;
+                };
+                SearchletProto.prototype.toJSON = function toJSON() {
+                  return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+                SearchletProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                  if (typeUrlPrefix === void 0) {
+                    typeUrlPrefix = "type.googleapis.com";
+                  }
+                  return typeUrlPrefix + "/keyhole.dbroot.EndSnippetProto.SearchConfigProto.SearchServer.SearchletProto";
+                };
+                return SearchletProto;
+              }();
+              return SearchServer;
+            }();
+            SearchConfigProto.OneboxServiceProto = function() {
+              function OneboxServiceProto(properties) {
+                if (properties) {
+                  for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                      this[keys[i]] = properties[keys[i]];
+                }
+              }
+              OneboxServiceProto.prototype.serviceUrl = null;
+              OneboxServiceProto.prototype.requirements = null;
+              OneboxServiceProto.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                  reader = $Reader.create(reader);
+                var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto();
+                while (reader.pos < end) {
+                  var tag = reader.uint32();
+                  switch (tag >>> 3) {
+                    case 1: {
+                      message.serviceUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                      break;
+                    }
+                    case 2: {
+                      message.requirements = $root.keyhole.dbroot.RequirementProto.decode(reader, reader.uint32());
+                      break;
+                    }
+                    default:
+                      reader.skipType(tag & 7);
+                      break;
+                  }
+                }
+                return message;
+              };
+              OneboxServiceProto.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                  return "object expected";
+                if (message.serviceUrl != null && message.hasOwnProperty("serviceUrl")) {
+                  var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.serviceUrl);
+                  if (error)
+                    return "serviceUrl." + error;
+                }
+                if (message.requirements != null && message.hasOwnProperty("requirements")) {
+                  var error = $root.keyhole.dbroot.RequirementProto.verify(message.requirements);
+                  if (error)
+                    return "requirements." + error;
+                }
+                return null;
+              };
+              OneboxServiceProto.fromObject = function fromObject(object) {
+                if (object instanceof $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto)
+                  return object;
+                var message = new $root.keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto();
+                if (object.serviceUrl != null) {
+                  if (typeof object.serviceUrl !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto.serviceUrl: object expected");
+                  message.serviceUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.serviceUrl);
+                }
+                if (object.requirements != null) {
+                  if (typeof object.requirements !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto.requirements: object expected");
+                  message.requirements = $root.keyhole.dbroot.RequirementProto.fromObject(object.requirements);
+                }
+                return message;
+              };
+              OneboxServiceProto.toObject = function toObject(message, options) {
+                if (!options)
+                  options = {};
+                var object = {};
+                if (options.defaults) {
+                  object.serviceUrl = null;
+                  object.requirements = null;
+                }
+                if (message.serviceUrl != null && message.hasOwnProperty("serviceUrl"))
+                  object.serviceUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.serviceUrl, options);
+                if (message.requirements != null && message.hasOwnProperty("requirements"))
+                  object.requirements = $root.keyhole.dbroot.RequirementProto.toObject(message.requirements, options);
+                return object;
+              };
+              OneboxServiceProto.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+              };
+              OneboxServiceProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                if (typeUrlPrefix === void 0) {
+                  typeUrlPrefix = "type.googleapis.com";
+                }
+                return typeUrlPrefix + "/keyhole.dbroot.EndSnippetProto.SearchConfigProto.OneboxServiceProto";
+              };
+              return OneboxServiceProto;
+            }();
+            return SearchConfigProto;
+          }();
+          EndSnippetProto.SearchInfoProto = function() {
+            function SearchInfoProto(properties) {
+              if (properties) {
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                  if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+              }
+            }
+            SearchInfoProto.prototype.defaultUrl = "http://maps.google.com/maps";
+            SearchInfoProto.prototype.geocodeParam = "q";
+            SearchInfoProto.decode = function decode(reader, length) {
+              if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+              var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.EndSnippetProto.SearchInfoProto();
+              while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                  case 1: {
+                    message.defaultUrl = reader.string();
+                    break;
+                  }
+                  case 2: {
+                    message.geocodeParam = reader.string();
+                    break;
+                  }
+                  default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+              }
+              return message;
+            };
+            SearchInfoProto.verify = function verify(message) {
+              if (typeof message !== "object" || message === null)
+                return "object expected";
+              if (message.defaultUrl != null && message.hasOwnProperty("defaultUrl")) {
+                if (!$util.isString(message.defaultUrl))
+                  return "defaultUrl: string expected";
+              }
+              if (message.geocodeParam != null && message.hasOwnProperty("geocodeParam")) {
+                if (!$util.isString(message.geocodeParam))
+                  return "geocodeParam: string expected";
+              }
+              return null;
+            };
+            SearchInfoProto.fromObject = function fromObject(object) {
+              if (object instanceof $root.keyhole.dbroot.EndSnippetProto.SearchInfoProto)
+                return object;
+              var message = new $root.keyhole.dbroot.EndSnippetProto.SearchInfoProto();
+              if (object.defaultUrl != null)
+                message.defaultUrl = String(object.defaultUrl);
+              if (object.geocodeParam != null)
+                message.geocodeParam = String(object.geocodeParam);
+              return message;
+            };
+            SearchInfoProto.toObject = function toObject(message, options) {
+              if (!options)
+                options = {};
+              var object = {};
+              if (options.defaults) {
+                object.defaultUrl = "http://maps.google.com/maps";
+                object.geocodeParam = "q";
+              }
+              if (message.defaultUrl != null && message.hasOwnProperty("defaultUrl"))
+                object.defaultUrl = message.defaultUrl;
+              if (message.geocodeParam != null && message.hasOwnProperty("geocodeParam"))
+                object.geocodeParam = message.geocodeParam;
+              return object;
+            };
+            SearchInfoProto.prototype.toJSON = function toJSON() {
+              return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+            SearchInfoProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+              if (typeUrlPrefix === void 0) {
+                typeUrlPrefix = "type.googleapis.com";
+              }
+              return typeUrlPrefix + "/keyhole.dbroot.EndSnippetProto.SearchInfoProto";
+            };
+            return SearchInfoProto;
+          }();
+          EndSnippetProto.RockTreeDataProto = function() {
+            function RockTreeDataProto(properties) {
+              if (properties) {
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                  if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+              }
+            }
+            RockTreeDataProto.prototype.url = null;
+            RockTreeDataProto.decode = function decode(reader, length) {
+              if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+              var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.EndSnippetProto.RockTreeDataProto();
+              while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                  case 1: {
+                    message.url = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                    break;
+                  }
+                  default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+              }
+              return message;
+            };
+            RockTreeDataProto.verify = function verify(message) {
+              if (typeof message !== "object" || message === null)
+                return "object expected";
+              if (message.url != null && message.hasOwnProperty("url")) {
+                var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.url);
+                if (error)
+                  return "url." + error;
+              }
+              return null;
+            };
+            RockTreeDataProto.fromObject = function fromObject(object) {
+              if (object instanceof $root.keyhole.dbroot.EndSnippetProto.RockTreeDataProto)
+                return object;
+              var message = new $root.keyhole.dbroot.EndSnippetProto.RockTreeDataProto();
+              if (object.url != null) {
+                if (typeof object.url !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.RockTreeDataProto.url: object expected");
+                message.url = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.url);
+              }
+              return message;
+            };
+            RockTreeDataProto.toObject = function toObject(message, options) {
+              if (!options)
+                options = {};
+              var object = {};
+              if (options.defaults)
+                object.url = null;
+              if (message.url != null && message.hasOwnProperty("url"))
+                object.url = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.url, options);
+              return object;
+            };
+            RockTreeDataProto.prototype.toJSON = function toJSON() {
+              return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+            RockTreeDataProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+              if (typeUrlPrefix === void 0) {
+                typeUrlPrefix = "type.googleapis.com";
+              }
+              return typeUrlPrefix + "/keyhole.dbroot.EndSnippetProto.RockTreeDataProto";
+            };
+            return RockTreeDataProto;
+          }();
+          EndSnippetProto.FilmstripConfigProto = function() {
+            function FilmstripConfigProto(properties) {
+              this.imageryType = [];
+              if (properties) {
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                  if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+              }
+            }
+            FilmstripConfigProto.prototype.requirements = null;
+            FilmstripConfigProto.prototype.alleycatUrlTemplate = null;
+            FilmstripConfigProto.prototype.fallbackAlleycatUrlTemplate = null;
+            FilmstripConfigProto.prototype.metadataUrlTemplate = null;
+            FilmstripConfigProto.prototype.thumbnailUrlTemplate = null;
+            FilmstripConfigProto.prototype.kmlUrlTemplate = null;
+            FilmstripConfigProto.prototype.featuredToursUrl = null;
+            FilmstripConfigProto.prototype.enableViewportFallback = false;
+            FilmstripConfigProto.prototype.viewportFallbackDistance = 0;
+            FilmstripConfigProto.prototype.imageryType = $util.emptyArray;
+            FilmstripConfigProto.decode = function decode(reader, length) {
+              if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+              var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto();
+              while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                  case 1: {
+                    message.requirements = $root.keyhole.dbroot.RequirementProto.decode(reader, reader.uint32());
+                    break;
+                  }
+                  case 2: {
+                    message.alleycatUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                    break;
+                  }
+                  case 9: {
+                    message.fallbackAlleycatUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                    break;
+                  }
+                  case 3: {
+                    message.metadataUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                    break;
+                  }
+                  case 4: {
+                    message.thumbnailUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                    break;
+                  }
+                  case 5: {
+                    message.kmlUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                    break;
+                  }
+                  case 6: {
+                    message.featuredToursUrl = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                    break;
+                  }
+                  case 7: {
+                    message.enableViewportFallback = reader.bool();
+                    break;
+                  }
+                  case 8: {
+                    message.viewportFallbackDistance = reader.uint32();
+                    break;
+                  }
+                  case 10: {
+                    if (!(message.imageryType && message.imageryType.length))
+                      message.imageryType = [];
+                    message.imageryType.push($root.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto.decode(reader, reader.uint32()));
+                    break;
+                  }
+                  default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+              }
+              return message;
+            };
+            FilmstripConfigProto.verify = function verify(message) {
+              if (typeof message !== "object" || message === null)
+                return "object expected";
+              if (message.requirements != null && message.hasOwnProperty("requirements")) {
+                var error = $root.keyhole.dbroot.RequirementProto.verify(message.requirements);
+                if (error)
+                  return "requirements." + error;
+              }
+              if (message.alleycatUrlTemplate != null && message.hasOwnProperty("alleycatUrlTemplate")) {
+                var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.alleycatUrlTemplate);
+                if (error)
+                  return "alleycatUrlTemplate." + error;
+              }
+              if (message.fallbackAlleycatUrlTemplate != null && message.hasOwnProperty("fallbackAlleycatUrlTemplate")) {
+                var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.fallbackAlleycatUrlTemplate);
+                if (error)
+                  return "fallbackAlleycatUrlTemplate." + error;
+              }
+              if (message.metadataUrlTemplate != null && message.hasOwnProperty("metadataUrlTemplate")) {
+                var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.metadataUrlTemplate);
+                if (error)
+                  return "metadataUrlTemplate." + error;
+              }
+              if (message.thumbnailUrlTemplate != null && message.hasOwnProperty("thumbnailUrlTemplate")) {
+                var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.thumbnailUrlTemplate);
+                if (error)
+                  return "thumbnailUrlTemplate." + error;
+              }
+              if (message.kmlUrlTemplate != null && message.hasOwnProperty("kmlUrlTemplate")) {
+                var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.kmlUrlTemplate);
+                if (error)
+                  return "kmlUrlTemplate." + error;
+              }
+              if (message.featuredToursUrl != null && message.hasOwnProperty("featuredToursUrl")) {
+                var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.featuredToursUrl);
+                if (error)
+                  return "featuredToursUrl." + error;
+              }
+              if (message.enableViewportFallback != null && message.hasOwnProperty("enableViewportFallback")) {
+                if (typeof message.enableViewportFallback !== "boolean")
+                  return "enableViewportFallback: boolean expected";
+              }
+              if (message.viewportFallbackDistance != null && message.hasOwnProperty("viewportFallbackDistance")) {
+                if (!$util.isInteger(message.viewportFallbackDistance))
+                  return "viewportFallbackDistance: integer expected";
+              }
+              if (message.imageryType != null && message.hasOwnProperty("imageryType")) {
+                if (!Array.isArray(message.imageryType))
+                  return "imageryType: array expected";
+                for (var i = 0; i < message.imageryType.length; ++i) {
+                  var error = $root.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto.verify(message.imageryType[i]);
+                  if (error)
+                    return "imageryType." + error;
+                }
+              }
+              return null;
+            };
+            FilmstripConfigProto.fromObject = function fromObject(object) {
+              if (object instanceof $root.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto)
+                return object;
+              var message = new $root.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto();
+              if (object.requirements != null) {
+                if (typeof object.requirements !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.requirements: object expected");
+                message.requirements = $root.keyhole.dbroot.RequirementProto.fromObject(object.requirements);
+              }
+              if (object.alleycatUrlTemplate != null) {
+                if (typeof object.alleycatUrlTemplate !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.alleycatUrlTemplate: object expected");
+                message.alleycatUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.alleycatUrlTemplate);
+              }
+              if (object.fallbackAlleycatUrlTemplate != null) {
+                if (typeof object.fallbackAlleycatUrlTemplate !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.fallbackAlleycatUrlTemplate: object expected");
+                message.fallbackAlleycatUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.fallbackAlleycatUrlTemplate);
+              }
+              if (object.metadataUrlTemplate != null) {
+                if (typeof object.metadataUrlTemplate !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.metadataUrlTemplate: object expected");
+                message.metadataUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.metadataUrlTemplate);
+              }
+              if (object.thumbnailUrlTemplate != null) {
+                if (typeof object.thumbnailUrlTemplate !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.thumbnailUrlTemplate: object expected");
+                message.thumbnailUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.thumbnailUrlTemplate);
+              }
+              if (object.kmlUrlTemplate != null) {
+                if (typeof object.kmlUrlTemplate !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.kmlUrlTemplate: object expected");
+                message.kmlUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.kmlUrlTemplate);
+              }
+              if (object.featuredToursUrl != null) {
+                if (typeof object.featuredToursUrl !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.featuredToursUrl: object expected");
+                message.featuredToursUrl = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.featuredToursUrl);
+              }
+              if (object.enableViewportFallback != null)
+                message.enableViewportFallback = Boolean(object.enableViewportFallback);
+              if (object.viewportFallbackDistance != null)
+                message.viewportFallbackDistance = object.viewportFallbackDistance >>> 0;
+              if (object.imageryType) {
+                if (!Array.isArray(object.imageryType))
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.imageryType: array expected");
+                message.imageryType = [];
+                for (var i = 0; i < object.imageryType.length; ++i) {
+                  if (typeof object.imageryType[i] !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.imageryType: object expected");
+                  message.imageryType[i] = $root.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto.fromObject(object.imageryType[i]);
+                }
+              }
+              return message;
+            };
+            FilmstripConfigProto.toObject = function toObject(message, options) {
+              if (!options)
+                options = {};
+              var object = {};
+              if (options.arrays || options.defaults)
+                object.imageryType = [];
+              if (options.defaults) {
+                object.requirements = null;
+                object.alleycatUrlTemplate = null;
+                object.metadataUrlTemplate = null;
+                object.thumbnailUrlTemplate = null;
+                object.kmlUrlTemplate = null;
+                object.featuredToursUrl = null;
+                object.enableViewportFallback = false;
+                object.viewportFallbackDistance = 0;
+                object.fallbackAlleycatUrlTemplate = null;
+              }
+              if (message.requirements != null && message.hasOwnProperty("requirements"))
+                object.requirements = $root.keyhole.dbroot.RequirementProto.toObject(message.requirements, options);
+              if (message.alleycatUrlTemplate != null && message.hasOwnProperty("alleycatUrlTemplate"))
+                object.alleycatUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.alleycatUrlTemplate, options);
+              if (message.metadataUrlTemplate != null && message.hasOwnProperty("metadataUrlTemplate"))
+                object.metadataUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.metadataUrlTemplate, options);
+              if (message.thumbnailUrlTemplate != null && message.hasOwnProperty("thumbnailUrlTemplate"))
+                object.thumbnailUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.thumbnailUrlTemplate, options);
+              if (message.kmlUrlTemplate != null && message.hasOwnProperty("kmlUrlTemplate"))
+                object.kmlUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.kmlUrlTemplate, options);
+              if (message.featuredToursUrl != null && message.hasOwnProperty("featuredToursUrl"))
+                object.featuredToursUrl = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.featuredToursUrl, options);
+              if (message.enableViewportFallback != null && message.hasOwnProperty("enableViewportFallback"))
+                object.enableViewportFallback = message.enableViewportFallback;
+              if (message.viewportFallbackDistance != null && message.hasOwnProperty("viewportFallbackDistance"))
+                object.viewportFallbackDistance = message.viewportFallbackDistance;
+              if (message.fallbackAlleycatUrlTemplate != null && message.hasOwnProperty("fallbackAlleycatUrlTemplate"))
+                object.fallbackAlleycatUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.fallbackAlleycatUrlTemplate, options);
+              if (message.imageryType && message.imageryType.length) {
+                object.imageryType = [];
+                for (var j = 0; j < message.imageryType.length; ++j)
+                  object.imageryType[j] = $root.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto.toObject(message.imageryType[j], options);
+              }
+              return object;
+            };
+            FilmstripConfigProto.prototype.toJSON = function toJSON() {
+              return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+            FilmstripConfigProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+              if (typeUrlPrefix === void 0) {
+                typeUrlPrefix = "type.googleapis.com";
+              }
+              return typeUrlPrefix + "/keyhole.dbroot.EndSnippetProto.FilmstripConfigProto";
+            };
+            FilmstripConfigProto.AlleycatImageryTypeProto = function() {
+              function AlleycatImageryTypeProto(properties) {
+                if (properties) {
+                  for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                      this[keys[i]] = properties[keys[i]];
+                }
+              }
+              AlleycatImageryTypeProto.prototype.imageryTypeId = 0;
+              AlleycatImageryTypeProto.prototype.imageryTypeLabel = "";
+              AlleycatImageryTypeProto.prototype.metadataUrlTemplate = null;
+              AlleycatImageryTypeProto.prototype.thumbnailUrlTemplate = null;
+              AlleycatImageryTypeProto.prototype.kmlUrlTemplate = null;
+              AlleycatImageryTypeProto.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                  reader = $Reader.create(reader);
+                var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto();
+                while (reader.pos < end) {
+                  var tag = reader.uint32();
+                  switch (tag >>> 3) {
+                    case 1: {
+                      message.imageryTypeId = reader.int32();
+                      break;
+                    }
+                    case 2: {
+                      message.imageryTypeLabel = reader.string();
+                      break;
+                    }
+                    case 3: {
+                      message.metadataUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                      break;
+                    }
+                    case 4: {
+                      message.thumbnailUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                      break;
+                    }
+                    case 5: {
+                      message.kmlUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                      break;
+                    }
+                    default:
+                      reader.skipType(tag & 7);
+                      break;
+                  }
+                }
+                return message;
+              };
+              AlleycatImageryTypeProto.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                  return "object expected";
+                if (message.imageryTypeId != null && message.hasOwnProperty("imageryTypeId")) {
+                  if (!$util.isInteger(message.imageryTypeId))
+                    return "imageryTypeId: integer expected";
+                }
+                if (message.imageryTypeLabel != null && message.hasOwnProperty("imageryTypeLabel")) {
+                  if (!$util.isString(message.imageryTypeLabel))
+                    return "imageryTypeLabel: string expected";
+                }
+                if (message.metadataUrlTemplate != null && message.hasOwnProperty("metadataUrlTemplate")) {
+                  var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.metadataUrlTemplate);
+                  if (error)
+                    return "metadataUrlTemplate." + error;
+                }
+                if (message.thumbnailUrlTemplate != null && message.hasOwnProperty("thumbnailUrlTemplate")) {
+                  var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.thumbnailUrlTemplate);
+                  if (error)
+                    return "thumbnailUrlTemplate." + error;
+                }
+                if (message.kmlUrlTemplate != null && message.hasOwnProperty("kmlUrlTemplate")) {
+                  var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.kmlUrlTemplate);
+                  if (error)
+                    return "kmlUrlTemplate." + error;
+                }
+                return null;
+              };
+              AlleycatImageryTypeProto.fromObject = function fromObject(object) {
+                if (object instanceof $root.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto)
+                  return object;
+                var message = new $root.keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto();
+                if (object.imageryTypeId != null)
+                  message.imageryTypeId = object.imageryTypeId | 0;
+                if (object.imageryTypeLabel != null)
+                  message.imageryTypeLabel = String(object.imageryTypeLabel);
+                if (object.metadataUrlTemplate != null) {
+                  if (typeof object.metadataUrlTemplate !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto.metadataUrlTemplate: object expected");
+                  message.metadataUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.metadataUrlTemplate);
+                }
+                if (object.thumbnailUrlTemplate != null) {
+                  if (typeof object.thumbnailUrlTemplate !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto.thumbnailUrlTemplate: object expected");
+                  message.thumbnailUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.thumbnailUrlTemplate);
+                }
+                if (object.kmlUrlTemplate != null) {
+                  if (typeof object.kmlUrlTemplate !== "object")
+                    throw TypeError(".keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto.kmlUrlTemplate: object expected");
+                  message.kmlUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.kmlUrlTemplate);
+                }
+                return message;
+              };
+              AlleycatImageryTypeProto.toObject = function toObject(message, options) {
+                if (!options)
+                  options = {};
+                var object = {};
+                if (options.defaults) {
+                  object.imageryTypeId = 0;
+                  object.imageryTypeLabel = "";
+                  object.metadataUrlTemplate = null;
+                  object.thumbnailUrlTemplate = null;
+                  object.kmlUrlTemplate = null;
+                }
+                if (message.imageryTypeId != null && message.hasOwnProperty("imageryTypeId"))
+                  object.imageryTypeId = message.imageryTypeId;
+                if (message.imageryTypeLabel != null && message.hasOwnProperty("imageryTypeLabel"))
+                  object.imageryTypeLabel = message.imageryTypeLabel;
+                if (message.metadataUrlTemplate != null && message.hasOwnProperty("metadataUrlTemplate"))
+                  object.metadataUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.metadataUrlTemplate, options);
+                if (message.thumbnailUrlTemplate != null && message.hasOwnProperty("thumbnailUrlTemplate"))
+                  object.thumbnailUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.thumbnailUrlTemplate, options);
+                if (message.kmlUrlTemplate != null && message.hasOwnProperty("kmlUrlTemplate"))
+                  object.kmlUrlTemplate = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.kmlUrlTemplate, options);
+                return object;
+              };
+              AlleycatImageryTypeProto.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+              };
+              AlleycatImageryTypeProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                if (typeUrlPrefix === void 0) {
+                  typeUrlPrefix = "type.googleapis.com";
+                }
+                return typeUrlPrefix + "/keyhole.dbroot.EndSnippetProto.FilmstripConfigProto.AlleycatImageryTypeProto";
+              };
+              return AlleycatImageryTypeProto;
+            }();
+            return FilmstripConfigProto;
+          }();
+          EndSnippetProto.StarDataProto = function() {
+            function StarDataProto(properties) {
+              if (properties) {
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                  if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+              }
+            }
+            StarDataProto.prototype.url = null;
+            StarDataProto.decode = function decode(reader, length) {
+              if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+              var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.EndSnippetProto.StarDataProto();
+              while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                  case 1: {
+                    message.url = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                    break;
+                  }
+                  default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+              }
+              return message;
+            };
+            StarDataProto.verify = function verify(message) {
+              if (typeof message !== "object" || message === null)
+                return "object expected";
+              if (message.url != null && message.hasOwnProperty("url")) {
+                var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.url);
+                if (error)
+                  return "url." + error;
+              }
+              return null;
+            };
+            StarDataProto.fromObject = function fromObject(object) {
+              if (object instanceof $root.keyhole.dbroot.EndSnippetProto.StarDataProto)
+                return object;
+              var message = new $root.keyhole.dbroot.EndSnippetProto.StarDataProto();
+              if (object.url != null) {
+                if (typeof object.url !== "object")
+                  throw TypeError(".keyhole.dbroot.EndSnippetProto.StarDataProto.url: object expected");
+                message.url = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.url);
+              }
+              return message;
+            };
+            StarDataProto.toObject = function toObject(message, options) {
+              if (!options)
+                options = {};
+              var object = {};
+              if (options.defaults)
+                object.url = null;
+              if (message.url != null && message.hasOwnProperty("url"))
+                object.url = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.url, options);
+              return object;
+            };
+            StarDataProto.prototype.toJSON = function toJSON() {
+              return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+            StarDataProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+              if (typeUrlPrefix === void 0) {
+                typeUrlPrefix = "type.googleapis.com";
+              }
+              return typeUrlPrefix + "/keyhole.dbroot.EndSnippetProto.StarDataProto";
+            };
+            return StarDataProto;
+          }();
+          return EndSnippetProto;
+        }();
+        dbroot.DbRootRefProto = function() {
+          function DbRootRefProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          DbRootRefProto.prototype.url = "";
+          DbRootRefProto.prototype.isCritical = false;
+          DbRootRefProto.prototype.requirements = null;
+          DbRootRefProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.DbRootRefProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 2: {
+                  message.url = reader.string();
+                  break;
+                }
+                case 1: {
+                  message.isCritical = reader.bool();
+                  break;
+                }
+                case 3: {
+                  message.requirements = $root.keyhole.dbroot.RequirementProto.decode(reader, reader.uint32());
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("url"))
+              throw $util.ProtocolError("missing required 'url'", { instance: message });
+            return message;
+          };
+          DbRootRefProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (!$util.isString(message.url))
+              return "url: string expected";
+            if (message.isCritical != null && message.hasOwnProperty("isCritical")) {
+              if (typeof message.isCritical !== "boolean")
+                return "isCritical: boolean expected";
+            }
+            if (message.requirements != null && message.hasOwnProperty("requirements")) {
+              var error = $root.keyhole.dbroot.RequirementProto.verify(message.requirements);
+              if (error)
+                return "requirements." + error;
+            }
+            return null;
+          };
+          DbRootRefProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.DbRootRefProto)
+              return object;
+            var message = new $root.keyhole.dbroot.DbRootRefProto();
+            if (object.url != null)
+              message.url = String(object.url);
+            if (object.isCritical != null)
+              message.isCritical = Boolean(object.isCritical);
+            if (object.requirements != null) {
+              if (typeof object.requirements !== "object")
+                throw TypeError(".keyhole.dbroot.DbRootRefProto.requirements: object expected");
+              message.requirements = $root.keyhole.dbroot.RequirementProto.fromObject(object.requirements);
+            }
+            return message;
+          };
+          DbRootRefProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.isCritical = false;
+              object.url = "";
+              object.requirements = null;
+            }
+            if (message.isCritical != null && message.hasOwnProperty("isCritical"))
+              object.isCritical = message.isCritical;
+            if (message.url != null && message.hasOwnProperty("url"))
+              object.url = message.url;
+            if (message.requirements != null && message.hasOwnProperty("requirements"))
+              object.requirements = $root.keyhole.dbroot.RequirementProto.toObject(message.requirements, options);
+            return object;
+          };
+          DbRootRefProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          DbRootRefProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.DbRootRefProto";
+          };
+          return DbRootRefProto;
+        }();
+        dbroot.DatabaseVersionProto = function() {
+          function DatabaseVersionProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          DatabaseVersionProto.prototype.quadtreeVersion = 0;
+          DatabaseVersionProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.DatabaseVersionProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.quadtreeVersion = reader.uint32();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            if (!message.hasOwnProperty("quadtreeVersion"))
+              throw $util.ProtocolError("missing required 'quadtreeVersion'", { instance: message });
+            return message;
+          };
+          DatabaseVersionProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (!$util.isInteger(message.quadtreeVersion))
+              return "quadtreeVersion: integer expected";
+            return null;
+          };
+          DatabaseVersionProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.DatabaseVersionProto)
+              return object;
+            var message = new $root.keyhole.dbroot.DatabaseVersionProto();
+            if (object.quadtreeVersion != null)
+              message.quadtreeVersion = object.quadtreeVersion >>> 0;
+            return message;
+          };
+          DatabaseVersionProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults)
+              object.quadtreeVersion = 0;
+            if (message.quadtreeVersion != null && message.hasOwnProperty("quadtreeVersion"))
+              object.quadtreeVersion = message.quadtreeVersion;
+            return object;
+          };
+          DatabaseVersionProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          DatabaseVersionProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.DatabaseVersionProto";
+          };
+          return DatabaseVersionProto;
+        }();
+        dbroot.DbRootProto = function() {
+          function DbRootProto(properties) {
+            this.providerInfo = [];
+            this.nestedFeature = [];
+            this.styleAttribute = [];
+            this.styleMap = [];
+            this.translationEntry = [];
+            this.dbrootReference = [];
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          DbRootProto.prototype.databaseName = null;
+          DbRootProto.prototype.imageryPresent = true;
+          DbRootProto.prototype.protoImagery = false;
+          DbRootProto.prototype.terrainPresent = false;
+          DbRootProto.prototype.providerInfo = $util.emptyArray;
+          DbRootProto.prototype.nestedFeature = $util.emptyArray;
+          DbRootProto.prototype.styleAttribute = $util.emptyArray;
+          DbRootProto.prototype.styleMap = $util.emptyArray;
+          DbRootProto.prototype.endSnippet = null;
+          DbRootProto.prototype.translationEntry = $util.emptyArray;
+          DbRootProto.prototype.language = "en";
+          DbRootProto.prototype.version = 5;
+          DbRootProto.prototype.dbrootReference = $util.emptyArray;
+          DbRootProto.prototype.databaseVersion = null;
+          DbRootProto.prototype.refreshTimeout = 0;
+          DbRootProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.DbRootProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 15: {
+                  message.databaseName = $root.keyhole.dbroot.StringIdOrValueProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 1: {
+                  message.imageryPresent = reader.bool();
+                  break;
+                }
+                case 14: {
+                  message.protoImagery = reader.bool();
+                  break;
+                }
+                case 2: {
+                  message.terrainPresent = reader.bool();
+                  break;
+                }
+                case 3: {
+                  if (!(message.providerInfo && message.providerInfo.length))
+                    message.providerInfo = [];
+                  message.providerInfo.push($root.keyhole.dbroot.ProviderInfoProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 4: {
+                  if (!(message.nestedFeature && message.nestedFeature.length))
+                    message.nestedFeature = [];
+                  message.nestedFeature.push($root.keyhole.dbroot.NestedFeatureProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 5: {
+                  if (!(message.styleAttribute && message.styleAttribute.length))
+                    message.styleAttribute = [];
+                  message.styleAttribute.push($root.keyhole.dbroot.StyleAttributeProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 6: {
+                  if (!(message.styleMap && message.styleMap.length))
+                    message.styleMap = [];
+                  message.styleMap.push($root.keyhole.dbroot.StyleMapProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 7: {
+                  message.endSnippet = $root.keyhole.dbroot.EndSnippetProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 8: {
+                  if (!(message.translationEntry && message.translationEntry.length))
+                    message.translationEntry = [];
+                  message.translationEntry.push($root.keyhole.dbroot.StringEntryProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 9: {
+                  message.language = reader.string();
+                  break;
+                }
+                case 10: {
+                  message.version = reader.int32();
+                  break;
+                }
+                case 11: {
+                  if (!(message.dbrootReference && message.dbrootReference.length))
+                    message.dbrootReference = [];
+                  message.dbrootReference.push($root.keyhole.dbroot.DbRootRefProto.decode(reader, reader.uint32()));
+                  break;
+                }
+                case 13: {
+                  message.databaseVersion = $root.keyhole.dbroot.DatabaseVersionProto.decode(reader, reader.uint32());
+                  break;
+                }
+                case 16: {
+                  message.refreshTimeout = reader.int32();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          DbRootProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.databaseName != null && message.hasOwnProperty("databaseName")) {
+              var error = $root.keyhole.dbroot.StringIdOrValueProto.verify(message.databaseName);
+              if (error)
+                return "databaseName." + error;
+            }
+            if (message.imageryPresent != null && message.hasOwnProperty("imageryPresent")) {
+              if (typeof message.imageryPresent !== "boolean")
+                return "imageryPresent: boolean expected";
+            }
+            if (message.protoImagery != null && message.hasOwnProperty("protoImagery")) {
+              if (typeof message.protoImagery !== "boolean")
+                return "protoImagery: boolean expected";
+            }
+            if (message.terrainPresent != null && message.hasOwnProperty("terrainPresent")) {
+              if (typeof message.terrainPresent !== "boolean")
+                return "terrainPresent: boolean expected";
+            }
+            if (message.providerInfo != null && message.hasOwnProperty("providerInfo")) {
+              if (!Array.isArray(message.providerInfo))
+                return "providerInfo: array expected";
+              for (var i = 0; i < message.providerInfo.length; ++i) {
+                var error = $root.keyhole.dbroot.ProviderInfoProto.verify(message.providerInfo[i]);
+                if (error)
+                  return "providerInfo." + error;
+              }
+            }
+            if (message.nestedFeature != null && message.hasOwnProperty("nestedFeature")) {
+              if (!Array.isArray(message.nestedFeature))
+                return "nestedFeature: array expected";
+              for (var i = 0; i < message.nestedFeature.length; ++i) {
+                var error = $root.keyhole.dbroot.NestedFeatureProto.verify(message.nestedFeature[i]);
+                if (error)
+                  return "nestedFeature." + error;
+              }
+            }
+            if (message.styleAttribute != null && message.hasOwnProperty("styleAttribute")) {
+              if (!Array.isArray(message.styleAttribute))
+                return "styleAttribute: array expected";
+              for (var i = 0; i < message.styleAttribute.length; ++i) {
+                var error = $root.keyhole.dbroot.StyleAttributeProto.verify(message.styleAttribute[i]);
+                if (error)
+                  return "styleAttribute." + error;
+              }
+            }
+            if (message.styleMap != null && message.hasOwnProperty("styleMap")) {
+              if (!Array.isArray(message.styleMap))
+                return "styleMap: array expected";
+              for (var i = 0; i < message.styleMap.length; ++i) {
+                var error = $root.keyhole.dbroot.StyleMapProto.verify(message.styleMap[i]);
+                if (error)
+                  return "styleMap." + error;
+              }
+            }
+            if (message.endSnippet != null && message.hasOwnProperty("endSnippet")) {
+              var error = $root.keyhole.dbroot.EndSnippetProto.verify(message.endSnippet);
+              if (error)
+                return "endSnippet." + error;
+            }
+            if (message.translationEntry != null && message.hasOwnProperty("translationEntry")) {
+              if (!Array.isArray(message.translationEntry))
+                return "translationEntry: array expected";
+              for (var i = 0; i < message.translationEntry.length; ++i) {
+                var error = $root.keyhole.dbroot.StringEntryProto.verify(message.translationEntry[i]);
+                if (error)
+                  return "translationEntry." + error;
+              }
+            }
+            if (message.language != null && message.hasOwnProperty("language")) {
+              if (!$util.isString(message.language))
+                return "language: string expected";
+            }
+            if (message.version != null && message.hasOwnProperty("version")) {
+              if (!$util.isInteger(message.version))
+                return "version: integer expected";
+            }
+            if (message.dbrootReference != null && message.hasOwnProperty("dbrootReference")) {
+              if (!Array.isArray(message.dbrootReference))
+                return "dbrootReference: array expected";
+              for (var i = 0; i < message.dbrootReference.length; ++i) {
+                var error = $root.keyhole.dbroot.DbRootRefProto.verify(message.dbrootReference[i]);
+                if (error)
+                  return "dbrootReference." + error;
+              }
+            }
+            if (message.databaseVersion != null && message.hasOwnProperty("databaseVersion")) {
+              var error = $root.keyhole.dbroot.DatabaseVersionProto.verify(message.databaseVersion);
+              if (error)
+                return "databaseVersion." + error;
+            }
+            if (message.refreshTimeout != null && message.hasOwnProperty("refreshTimeout")) {
+              if (!$util.isInteger(message.refreshTimeout))
+                return "refreshTimeout: integer expected";
+            }
+            return null;
+          };
+          DbRootProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.DbRootProto)
+              return object;
+            var message = new $root.keyhole.dbroot.DbRootProto();
+            if (object.databaseName != null) {
+              if (typeof object.databaseName !== "object")
+                throw TypeError(".keyhole.dbroot.DbRootProto.databaseName: object expected");
+              message.databaseName = $root.keyhole.dbroot.StringIdOrValueProto.fromObject(object.databaseName);
+            }
+            if (object.imageryPresent != null)
+              message.imageryPresent = Boolean(object.imageryPresent);
+            if (object.protoImagery != null)
+              message.protoImagery = Boolean(object.protoImagery);
+            if (object.terrainPresent != null)
+              message.terrainPresent = Boolean(object.terrainPresent);
+            if (object.providerInfo) {
+              if (!Array.isArray(object.providerInfo))
+                throw TypeError(".keyhole.dbroot.DbRootProto.providerInfo: array expected");
+              message.providerInfo = [];
+              for (var i = 0; i < object.providerInfo.length; ++i) {
+                if (typeof object.providerInfo[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.DbRootProto.providerInfo: object expected");
+                message.providerInfo[i] = $root.keyhole.dbroot.ProviderInfoProto.fromObject(object.providerInfo[i]);
+              }
+            }
+            if (object.nestedFeature) {
+              if (!Array.isArray(object.nestedFeature))
+                throw TypeError(".keyhole.dbroot.DbRootProto.nestedFeature: array expected");
+              message.nestedFeature = [];
+              for (var i = 0; i < object.nestedFeature.length; ++i) {
+                if (typeof object.nestedFeature[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.DbRootProto.nestedFeature: object expected");
+                message.nestedFeature[i] = $root.keyhole.dbroot.NestedFeatureProto.fromObject(object.nestedFeature[i]);
+              }
+            }
+            if (object.styleAttribute) {
+              if (!Array.isArray(object.styleAttribute))
+                throw TypeError(".keyhole.dbroot.DbRootProto.styleAttribute: array expected");
+              message.styleAttribute = [];
+              for (var i = 0; i < object.styleAttribute.length; ++i) {
+                if (typeof object.styleAttribute[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.DbRootProto.styleAttribute: object expected");
+                message.styleAttribute[i] = $root.keyhole.dbroot.StyleAttributeProto.fromObject(object.styleAttribute[i]);
+              }
+            }
+            if (object.styleMap) {
+              if (!Array.isArray(object.styleMap))
+                throw TypeError(".keyhole.dbroot.DbRootProto.styleMap: array expected");
+              message.styleMap = [];
+              for (var i = 0; i < object.styleMap.length; ++i) {
+                if (typeof object.styleMap[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.DbRootProto.styleMap: object expected");
+                message.styleMap[i] = $root.keyhole.dbroot.StyleMapProto.fromObject(object.styleMap[i]);
+              }
+            }
+            if (object.endSnippet != null) {
+              if (typeof object.endSnippet !== "object")
+                throw TypeError(".keyhole.dbroot.DbRootProto.endSnippet: object expected");
+              message.endSnippet = $root.keyhole.dbroot.EndSnippetProto.fromObject(object.endSnippet);
+            }
+            if (object.translationEntry) {
+              if (!Array.isArray(object.translationEntry))
+                throw TypeError(".keyhole.dbroot.DbRootProto.translationEntry: array expected");
+              message.translationEntry = [];
+              for (var i = 0; i < object.translationEntry.length; ++i) {
+                if (typeof object.translationEntry[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.DbRootProto.translationEntry: object expected");
+                message.translationEntry[i] = $root.keyhole.dbroot.StringEntryProto.fromObject(object.translationEntry[i]);
+              }
+            }
+            if (object.language != null)
+              message.language = String(object.language);
+            if (object.version != null)
+              message.version = object.version | 0;
+            if (object.dbrootReference) {
+              if (!Array.isArray(object.dbrootReference))
+                throw TypeError(".keyhole.dbroot.DbRootProto.dbrootReference: array expected");
+              message.dbrootReference = [];
+              for (var i = 0; i < object.dbrootReference.length; ++i) {
+                if (typeof object.dbrootReference[i] !== "object")
+                  throw TypeError(".keyhole.dbroot.DbRootProto.dbrootReference: object expected");
+                message.dbrootReference[i] = $root.keyhole.dbroot.DbRootRefProto.fromObject(object.dbrootReference[i]);
+              }
+            }
+            if (object.databaseVersion != null) {
+              if (typeof object.databaseVersion !== "object")
+                throw TypeError(".keyhole.dbroot.DbRootProto.databaseVersion: object expected");
+              message.databaseVersion = $root.keyhole.dbroot.DatabaseVersionProto.fromObject(object.databaseVersion);
+            }
+            if (object.refreshTimeout != null)
+              message.refreshTimeout = object.refreshTimeout | 0;
+            return message;
+          };
+          DbRootProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.arrays || options.defaults) {
+              object.providerInfo = [];
+              object.nestedFeature = [];
+              object.styleAttribute = [];
+              object.styleMap = [];
+              object.translationEntry = [];
+              object.dbrootReference = [];
+            }
+            if (options.defaults) {
+              object.imageryPresent = true;
+              object.terrainPresent = false;
+              object.endSnippet = null;
+              object.language = "en";
+              object.version = 5;
+              object.databaseVersion = null;
+              object.protoImagery = false;
+              object.databaseName = null;
+              object.refreshTimeout = 0;
+            }
+            if (message.imageryPresent != null && message.hasOwnProperty("imageryPresent"))
+              object.imageryPresent = message.imageryPresent;
+            if (message.terrainPresent != null && message.hasOwnProperty("terrainPresent"))
+              object.terrainPresent = message.terrainPresent;
+            if (message.providerInfo && message.providerInfo.length) {
+              object.providerInfo = [];
+              for (var j = 0; j < message.providerInfo.length; ++j)
+                object.providerInfo[j] = $root.keyhole.dbroot.ProviderInfoProto.toObject(message.providerInfo[j], options);
+            }
+            if (message.nestedFeature && message.nestedFeature.length) {
+              object.nestedFeature = [];
+              for (var j = 0; j < message.nestedFeature.length; ++j)
+                object.nestedFeature[j] = $root.keyhole.dbroot.NestedFeatureProto.toObject(message.nestedFeature[j], options);
+            }
+            if (message.styleAttribute && message.styleAttribute.length) {
+              object.styleAttribute = [];
+              for (var j = 0; j < message.styleAttribute.length; ++j)
+                object.styleAttribute[j] = $root.keyhole.dbroot.StyleAttributeProto.toObject(message.styleAttribute[j], options);
+            }
+            if (message.styleMap && message.styleMap.length) {
+              object.styleMap = [];
+              for (var j = 0; j < message.styleMap.length; ++j)
+                object.styleMap[j] = $root.keyhole.dbroot.StyleMapProto.toObject(message.styleMap[j], options);
+            }
+            if (message.endSnippet != null && message.hasOwnProperty("endSnippet"))
+              object.endSnippet = $root.keyhole.dbroot.EndSnippetProto.toObject(message.endSnippet, options);
+            if (message.translationEntry && message.translationEntry.length) {
+              object.translationEntry = [];
+              for (var j = 0; j < message.translationEntry.length; ++j)
+                object.translationEntry[j] = $root.keyhole.dbroot.StringEntryProto.toObject(message.translationEntry[j], options);
+            }
+            if (message.language != null && message.hasOwnProperty("language"))
+              object.language = message.language;
+            if (message.version != null && message.hasOwnProperty("version"))
+              object.version = message.version;
+            if (message.dbrootReference && message.dbrootReference.length) {
+              object.dbrootReference = [];
+              for (var j = 0; j < message.dbrootReference.length; ++j)
+                object.dbrootReference[j] = $root.keyhole.dbroot.DbRootRefProto.toObject(message.dbrootReference[j], options);
+            }
+            if (message.databaseVersion != null && message.hasOwnProperty("databaseVersion"))
+              object.databaseVersion = $root.keyhole.dbroot.DatabaseVersionProto.toObject(message.databaseVersion, options);
+            if (message.protoImagery != null && message.hasOwnProperty("protoImagery"))
+              object.protoImagery = message.protoImagery;
+            if (message.databaseName != null && message.hasOwnProperty("databaseName"))
+              object.databaseName = $root.keyhole.dbroot.StringIdOrValueProto.toObject(message.databaseName, options);
+            if (message.refreshTimeout != null && message.hasOwnProperty("refreshTimeout"))
+              object.refreshTimeout = message.refreshTimeout;
+            return object;
+          };
+          DbRootProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          DbRootProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.DbRootProto";
+          };
+          return DbRootProto;
+        }();
+        dbroot.EncryptedDbRootProto = function() {
+          function EncryptedDbRootProto(properties) {
+            if (properties) {
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                  this[keys[i]] = properties[keys[i]];
+            }
+          }
+          EncryptedDbRootProto.prototype.encryptionType = 0;
+          EncryptedDbRootProto.prototype.encryptionData = $util.newBuffer([]);
+          EncryptedDbRootProto.prototype.dbrootData = $util.newBuffer([]);
+          EncryptedDbRootProto.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+            var end = length === void 0 ? reader.len : reader.pos + length, message = new $root.keyhole.dbroot.EncryptedDbRootProto();
+            while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+                case 1: {
+                  message.encryptionType = reader.int32();
+                  break;
+                }
+                case 2: {
+                  message.encryptionData = reader.bytes();
+                  break;
+                }
+                case 3: {
+                  message.dbrootData = reader.bytes();
+                  break;
+                }
+                default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+            }
+            return message;
+          };
+          EncryptedDbRootProto.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+              return "object expected";
+            if (message.encryptionType != null && message.hasOwnProperty("encryptionType"))
+              switch (message.encryptionType) {
+                default:
+                  return "encryptionType: enum value expected";
+                case 0:
+                  break;
+              }
+            if (message.encryptionData != null && message.hasOwnProperty("encryptionData")) {
+              if (!(message.encryptionData && typeof message.encryptionData.length === "number" || $util.isString(message.encryptionData)))
+                return "encryptionData: buffer expected";
+            }
+            if (message.dbrootData != null && message.hasOwnProperty("dbrootData")) {
+              if (!(message.dbrootData && typeof message.dbrootData.length === "number" || $util.isString(message.dbrootData)))
+                return "dbrootData: buffer expected";
+            }
+            return null;
+          };
+          EncryptedDbRootProto.fromObject = function fromObject(object) {
+            if (object instanceof $root.keyhole.dbroot.EncryptedDbRootProto)
+              return object;
+            var message = new $root.keyhole.dbroot.EncryptedDbRootProto();
+            switch (object.encryptionType) {
+              case "ENCRYPTION_XOR":
+              case 0:
+                message.encryptionType = 0;
+                break;
+            }
+            if (object.encryptionData != null) {
+              if (typeof object.encryptionData === "string")
+                $util.base64.decode(object.encryptionData, message.encryptionData = $util.newBuffer($util.base64.length(object.encryptionData)), 0);
+              else if (object.encryptionData.length >= 0)
+                message.encryptionData = object.encryptionData;
+            }
+            if (object.dbrootData != null) {
+              if (typeof object.dbrootData === "string")
+                $util.base64.decode(object.dbrootData, message.dbrootData = $util.newBuffer($util.base64.length(object.dbrootData)), 0);
+              else if (object.dbrootData.length >= 0)
+                message.dbrootData = object.dbrootData;
+            }
+            return message;
+          };
+          EncryptedDbRootProto.toObject = function toObject(message, options) {
+            if (!options)
+              options = {};
+            var object = {};
+            if (options.defaults) {
+              object.encryptionType = options.enums === String ? "ENCRYPTION_XOR" : 0;
+              if (options.bytes === String)
+                object.encryptionData = "";
+              else {
+                object.encryptionData = [];
+                if (options.bytes !== Array)
+                  object.encryptionData = $util.newBuffer(object.encryptionData);
+              }
+              if (options.bytes === String)
+                object.dbrootData = "";
+              else {
+                object.dbrootData = [];
+                if (options.bytes !== Array)
+                  object.dbrootData = $util.newBuffer(object.dbrootData);
+              }
+            }
+            if (message.encryptionType != null && message.hasOwnProperty("encryptionType"))
+              object.encryptionType = options.enums === String ? $root.keyhole.dbroot.EncryptedDbRootProto.EncryptionType[message.encryptionType] : message.encryptionType;
+            if (message.encryptionData != null && message.hasOwnProperty("encryptionData"))
+              object.encryptionData = options.bytes === String ? $util.base64.encode(message.encryptionData, 0, message.encryptionData.length) : options.bytes === Array ? Array.prototype.slice.call(message.encryptionData) : message.encryptionData;
+            if (message.dbrootData != null && message.hasOwnProperty("dbrootData"))
+              object.dbrootData = options.bytes === String ? $util.base64.encode(message.dbrootData, 0, message.dbrootData.length) : options.bytes === Array ? Array.prototype.slice.call(message.dbrootData) : message.dbrootData;
+            return object;
+          };
+          EncryptedDbRootProto.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+          };
+          EncryptedDbRootProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === void 0) {
+              typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/keyhole.dbroot.EncryptedDbRootProto";
+          };
+          EncryptedDbRootProto.EncryptionType = function() {
+            var valuesById = {}, values = Object.create(valuesById);
+            values[valuesById[0] = "ENCRYPTION_XOR"] = 0;
+            return values;
+          }();
+          return EncryptedDbRootProto;
+        }();
+        return dbroot;
+      }();
+      return keyhole;
+    }();
+    return $root.keyhole.dbroot;
+  };
+})();

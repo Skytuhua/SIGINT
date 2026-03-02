@@ -23,4 +23,44 @@
  * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
  */
 
-import{a as e}from"./chunk-SPMC5TLM.js";import{a as r}from"./chunk-RIW4PILL.js";import"./chunk-NVJ64HSB.js";import"./chunk-GI7IUZK6.js";import"./chunk-OKAWXMC7.js";import"./chunk-AXCXHIZO.js";import"./chunk-WZ52TQTL.js";import"./chunk-5KPQNVA2.js";import"./chunk-DBOVA5XH.js";import"./chunk-RHEGXTJ5.js";import"./chunk-CWBIOT2C.js";import"./chunk-PPN6SLYU.js";import"./chunk-SOWUYSYI.js";import"./chunk-I36V6CKP.js";import"./chunk-WG62ICZK.js";import"./chunk-EEN7GMYN.js";import"./chunk-SXYTVHGU.js";import"./chunk-RAWIUDJR.js";import"./chunk-KGKDCW56.js";import"./chunk-G4IO3CPJ.js";import"./chunk-GBRF7ES3.js";function n(o,t){let m=e.unpackCombineGeometryParameters(o),i=e.combineGeometry(m);return e.packCombineGeometryResults(i,t)}var c=r(n);export{c as default};
+import {
+  PrimitivePipeline_default
+} from "./chunk-VRZ46QZ5.js";
+import {
+  createTaskProcessorWorker_default
+} from "./chunk-MMV6TO3P.js";
+import "./chunk-QYQIVZBU.js";
+import "./chunk-PNFHVBSF.js";
+import "./chunk-J7MQUQJY.js";
+import "./chunk-SAPFXU5X.js";
+import "./chunk-TF776XCO.js";
+import "./chunk-A5CODJ4M.js";
+import "./chunk-EB7PNZTK.js";
+import "./chunk-JYQNWIQQ.js";
+import "./chunk-IUROUBPA.js";
+import "./chunk-ELI4BUOT.js";
+import "./chunk-OXALEQPI.js";
+import "./chunk-FQPSOOPH.js";
+import "./chunk-T6LPN7RI.js";
+import "./chunk-R4OIEIPE.js";
+import "./chunk-RHBWXX7C.js";
+import "./chunk-ZIKGV7EL.js";
+import "./chunk-BAVI3ZS2.js";
+import "./chunk-TGY6H6N6.js";
+import "./chunk-N4QEHO3U.js";
+
+// packages/engine/Source/Workers/combineGeometry.js
+function combineGeometry(packedParameters, transferableObjects) {
+  const parameters = PrimitivePipeline_default.unpackCombineGeometryParameters(
+    packedParameters
+  );
+  const results = PrimitivePipeline_default.combineGeometry(parameters);
+  return PrimitivePipeline_default.packCombineGeometryResults(
+    results,
+    transferableObjects
+  );
+}
+var combineGeometry_default = createTaskProcessorWorker_default(combineGeometry);
+export {
+  combineGeometry_default as default
+};

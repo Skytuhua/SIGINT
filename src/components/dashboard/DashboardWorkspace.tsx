@@ -11,6 +11,7 @@ import PanelFooter from "./panel/PanelFooter";
 import PanelHeader from "./panel/PanelHeader";
 import DataTable from "./table/DataTable";
 import Sparkline from "./charts/Sparkline";
+import LiveCctvPanel from "./LiveCctvPanel";
 import { formatNumber, formatUtc } from "../../lib/dashboard/format";
 import {
   selectFeedItems,
@@ -30,6 +31,7 @@ interface DashboardWorkspaceProps {
 export default function DashboardWorkspace({ embedded = false }: DashboardWorkspaceProps) {
   const liveData = useWorldViewStore((s) => s.liveData);
   const health = useWorldViewStore((s) => s.liveData.health);
+  const sourceHealth = useWorldViewStore((s) => s.liveData.sourceHealth);
   const lastUpdated = useWorldViewStore((s) => s.liveData.lastUpdated);
   const panelVisibility = useWorldViewStore((s) => s.dashboard.panelVisibility);
   const panelLocks = useWorldViewStore((s) => s.dashboard.panelLocks);
@@ -47,6 +49,13 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
   const quakeRows = useMemo(() => selectQuakeRows(liveData), [liveData]);
   const satRows = useMemo(() => selectSatelliteRows(liveData), [liveData]);
   const feedItems = useMemo(() => selectFeedItems(liveData), [liveData]);
+  const spaceWeatherItems = useMemo(
+    () =>
+      [...(liveData.spaceWeather ?? [])]
+        .sort((a, b) => b.issueDatetime - a.issueDatetime)
+        .slice(0, 40),
+    [liveData.spaceWeather]
+  );
 
   const flightColumns = useMemo<ColumnDef<FlightTableRow>[]>(
     () => [
@@ -191,6 +200,17 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
   );
 
   const anyLoading = Object.values(health).some((state) => state === "loading");
+  const sourceHealthValues = Object.values(sourceHealth ?? {});
+  const degradedCount = sourceHealthValues.filter((state) => state.status === "degraded").length;
+  const unavailableCount = sourceHealthValues.filter((state) => state.status === "unavailable").length;
+  const opsFeedHealth: "ok" | "loading" | "stale" | "error" =
+    unavailableCount > 0 ? "error" : degradedCount > 0 ? "stale" : anyLoading ? "loading" : "ok";
+  const opsFeedMessage =
+    unavailableCount > 0
+      ? `${unavailableCount} source${unavailableCount === 1 ? "" : "s"} unavailable.`
+      : degradedCount > 0
+      ? `${degradedCount} source${degradedCount === 1 ? "" : "s"} degraded (stale fallback active).`
+      : "Newest events are shown first.";
 
   const panelCatalog = [
     { id: "kpi", label: "System Snapshot" },
@@ -198,6 +218,8 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
     { id: "quake-table", label: "Seismic Heat Table" },
     { id: "sat-list", label: "Satellite List" },
     { id: "feed", label: "Ops Feed" },
+    { id: "cctv-live", label: "Live Webcams" },
+    { id: "space-weather", label: "Space Weather" },
   ] as const;
 
   const lockHeaderProps = (panelId: string) => ({
@@ -406,8 +428,65 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
           <PanelFooter
             source="Internal event stream"
             updatedAt={Date.now()}
-            health="ok"
-            message="Newest events are shown first."
+            health={opsFeedHealth}
+            message={opsFeedMessage}
+          />
+        </Panel>
+      ),
+    },
+    {
+      id: "cctv-live",
+      node: (
+        <LiveCctvPanel
+          panelId="cctv-live"
+          cameras={liveData.cctv}
+          lockHeaderProps={lockHeaderProps("cctv-live")}
+          onRefresh={bumpRefreshTick}
+          loading={health.cctv === "loading"}
+        />
+      ),
+    },
+    {
+      id: "space-weather",
+      node: (
+        <Panel panelId="space-weather">
+          <PanelHeader
+            title="SPACE WEATHER"
+            subtitle="Latest NOAA SWPC bulletins and operational levels."
+            {...lockHeaderProps("space-weather")}
+            controls={
+              <PanelControls
+                onRefresh={bumpRefreshTick}
+                loading={health.spaceWeather === "loading"}
+                refreshText="REFRESH SWPC"
+                refreshLoadingText="UPDATING"
+              />
+            }
+          />
+          <PanelBody>
+            <div className="wv-feed-list" role="log" aria-label="Space weather feed">
+              {spaceWeatherItems.length ? (
+                spaceWeatherItems.map((item) => (
+                  <div key={item.id} className="wv-feed-item is-info">
+                    <span>{new Date(item.issueDatetime).toISOString().slice(11, 19)}</span>
+                    <strong>{item.level}</strong>
+                    <span title={item.title}>{item.title}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="wv-feed-item is-warn">
+                  <span>--:--:--</span>
+                  <strong>INFO</strong>
+                  <span>No SWPC alerts received yet.</span>
+                </div>
+              )}
+            </div>
+          </PanelBody>
+          <PanelFooter
+            source="NOAA SWPC"
+            updatedAt={lastUpdated.spaceWeather}
+            health={health.spaceWeather}
+            message="Levels: ALERT / WARNING / WATCH / INFO."
           />
         </Panel>
       ),

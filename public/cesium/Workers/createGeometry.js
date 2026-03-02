@@ -23,4 +23,147 @@
  * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
  */
 
-import{a as d}from"./chunk-SPMC5TLM.js";import{a as w}from"./chunk-RIW4PILL.js";import"./chunk-NVJ64HSB.js";import"./chunk-GI7IUZK6.js";import"./chunk-OKAWXMC7.js";import"./chunk-AXCXHIZO.js";import"./chunk-WZ52TQTL.js";import"./chunk-5KPQNVA2.js";import"./chunk-DBOVA5XH.js";import"./chunk-RHEGXTJ5.js";import"./chunk-CWBIOT2C.js";import"./chunk-PPN6SLYU.js";import"./chunk-SOWUYSYI.js";import"./chunk-I36V6CKP.js";import"./chunk-WG62ICZK.js";import"./chunk-EEN7GMYN.js";import"./chunk-SXYTVHGU.js";import"./chunk-RAWIUDJR.js";import{a as k}from"./chunk-KGKDCW56.js";import{a as y}from"./chunk-G4IO3CPJ.js";import{a,b as p,e as r}from"./chunk-GBRF7ES3.js";var b=p({"./combineGeometry.js":()=>import("./combineGeometry.js"),"./createBoxGeometry.js":()=>import("./createBoxGeometry.js"),"./createBoxOutlineGeometry.js":()=>import("./createBoxOutlineGeometry.js"),"./createCircleGeometry.js":()=>import("./createCircleGeometry.js"),"./createCircleOutlineGeometry.js":()=>import("./createCircleOutlineGeometry.js"),"./createCoplanarPolygonGeometry.js":()=>import("./createCoplanarPolygonGeometry.js"),"./createCoplanarPolygonOutlineGeometry.js":()=>import("./createCoplanarPolygonOutlineGeometry.js"),"./createCorridorGeometry.js":()=>import("./createCorridorGeometry.js"),"./createCorridorOutlineGeometry.js":()=>import("./createCorridorOutlineGeometry.js"),"./createCylinderGeometry.js":()=>import("./createCylinderGeometry.js"),"./createCylinderOutlineGeometry.js":()=>import("./createCylinderOutlineGeometry.js"),"./createEllipseGeometry.js":()=>import("./createEllipseGeometry.js"),"./createEllipseOutlineGeometry.js":()=>import("./createEllipseOutlineGeometry.js"),"./createEllipsoidGeometry.js":()=>import("./createEllipsoidGeometry.js"),"./createEllipsoidOutlineGeometry.js":()=>import("./createEllipsoidOutlineGeometry.js"),"./createFrustumGeometry.js":()=>import("./createFrustumGeometry.js"),"./createFrustumOutlineGeometry.js":()=>import("./createFrustumOutlineGeometry.js"),"./createGeometry.js":()=>import("./createGeometry.js"),"./createGroundPolylineGeometry.js":()=>import("./createGroundPolylineGeometry.js"),"./createPlaneGeometry.js":()=>import("./createPlaneGeometry.js"),"./createPlaneOutlineGeometry.js":()=>import("./createPlaneOutlineGeometry.js"),"./createPolygonGeometry.js":()=>import("./createPolygonGeometry.js"),"./createPolygonOutlineGeometry.js":()=>import("./createPolygonOutlineGeometry.js"),"./createPolylineGeometry.js":()=>import("./createPolylineGeometry.js"),"./createPolylineVolumeGeometry.js":()=>import("./createPolylineVolumeGeometry.js"),"./createPolylineVolumeOutlineGeometry.js":()=>import("./createPolylineVolumeOutlineGeometry.js"),"./createRectangleGeometry.js":()=>import("./createRectangleGeometry.js"),"./createRectangleOutlineGeometry.js":()=>import("./createRectangleOutlineGeometry.js"),"./createSimplePolylineGeometry.js":()=>import("./createSimplePolylineGeometry.js"),"./createSphereGeometry.js":()=>import("./createSphereGeometry.js"),"./createSphereOutlineGeometry.js":()=>import("./createSphereOutlineGeometry.js"),"./createTaskProcessorWorker.js":()=>import("./createTaskProcessorWorker.js"),"./createVectorTileClampedPolylines.js":()=>import("./createVectorTileClampedPolylines.js"),"./createVectorTileGeometries.js":()=>import("./createVectorTileGeometries.js"),"./createVectorTilePoints.js":()=>import("./createVectorTilePoints.js"),"./createVectorTilePolygons.js":()=>import("./createVectorTilePolygons.js"),"./createVectorTilePolylines.js":()=>import("./createVectorTilePolylines.js"),"./createVerticesFromGoogleEarthEnterpriseBuffer.js":()=>import("./createVerticesFromGoogleEarthEnterpriseBuffer.js"),"./createVerticesFromHeightmap.js":()=>import("./createVerticesFromHeightmap.js"),"./createVerticesFromQuantizedTerrainMesh.js":()=>import("./createVerticesFromQuantizedTerrainMesh.js"),"./createWallGeometry.js":()=>import("./createWallGeometry.js"),"./createWallOutlineGeometry.js":()=>import("./createWallOutlineGeometry.js"),"./decodeDraco.js":()=>import("./decodeDraco.js"),"./decodeGoogleEarthEnterprisePacket.js":()=>import("./decodeGoogleEarthEnterprisePacket.js"),"./decodeI3S.js":()=>import("./decodeI3S.js"),"./transcodeKTX2.js":()=>import("./transcodeKTX2.js"),"./transferTypedArrayTest.js":()=>import("./transferTypedArrayTest.js"),"./upsampleQuantizedTerrainMesh.js":()=>import("./upsampleQuantizedTerrainMesh.js")});var f={};async function h(s,t){let e=k(f[t],f[s]);return r(e)?e:r(t)?(typeof exports=="object"?e=a(t):e=(await import(t)).default,f[t]=e,e):(typeof exports=="object"?e=a(`Workers/${s}`):e=(r(t)?await import(t):await b(`./${s}.js`)).default,f[s]=e,e)}async function x(s,t){let e=s.subTasks,n=e.length,u=new Array(n);for(let o=0;o<n;o++){let i=e[o],m=i.geometry,l=i.moduleName,c=i.modulePath;if(r(l)&&r(c))throw new y("Must only set moduleName or modulePath");r(l)||r(c)?u[o]=h(l,c).then(g=>g(m,i.offset)):u[o]=m}return Promise.all(u).then(function(o){return d.packCreateGeometryResults(o,t)})}var P=w(x);export{P as default};
+import {
+  PrimitivePipeline_default
+} from "./chunk-VRZ46QZ5.js";
+import {
+  createTaskProcessorWorker_default
+} from "./chunk-MMV6TO3P.js";
+import "./chunk-QYQIVZBU.js";
+import "./chunk-PNFHVBSF.js";
+import "./chunk-J7MQUQJY.js";
+import "./chunk-SAPFXU5X.js";
+import "./chunk-TF776XCO.js";
+import "./chunk-A5CODJ4M.js";
+import "./chunk-EB7PNZTK.js";
+import "./chunk-JYQNWIQQ.js";
+import "./chunk-IUROUBPA.js";
+import "./chunk-ELI4BUOT.js";
+import "./chunk-OXALEQPI.js";
+import "./chunk-FQPSOOPH.js";
+import "./chunk-T6LPN7RI.js";
+import "./chunk-R4OIEIPE.js";
+import "./chunk-RHBWXX7C.js";
+import "./chunk-ZIKGV7EL.js";
+import {
+  defaultValue_default
+} from "./chunk-BAVI3ZS2.js";
+import {
+  DeveloperError_default
+} from "./chunk-TGY6H6N6.js";
+import {
+  __glob,
+  __require,
+  defined_default
+} from "./chunk-N4QEHO3U.js";
+
+// import("./**/*.js") in packages/engine/Source/Workers/createGeometry.js
+var globImport_js = __glob({
+  "./combineGeometry.js": () => import("./combineGeometry.js"),
+  "./createBoxGeometry.js": () => import("./createBoxGeometry.js"),
+  "./createBoxOutlineGeometry.js": () => import("./createBoxOutlineGeometry.js"),
+  "./createCircleGeometry.js": () => import("./createCircleGeometry.js"),
+  "./createCircleOutlineGeometry.js": () => import("./createCircleOutlineGeometry.js"),
+  "./createCoplanarPolygonGeometry.js": () => import("./createCoplanarPolygonGeometry.js"),
+  "./createCoplanarPolygonOutlineGeometry.js": () => import("./createCoplanarPolygonOutlineGeometry.js"),
+  "./createCorridorGeometry.js": () => import("./createCorridorGeometry.js"),
+  "./createCorridorOutlineGeometry.js": () => import("./createCorridorOutlineGeometry.js"),
+  "./createCylinderGeometry.js": () => import("./createCylinderGeometry.js"),
+  "./createCylinderOutlineGeometry.js": () => import("./createCylinderOutlineGeometry.js"),
+  "./createEllipseGeometry.js": () => import("./createEllipseGeometry.js"),
+  "./createEllipseOutlineGeometry.js": () => import("./createEllipseOutlineGeometry.js"),
+  "./createEllipsoidGeometry.js": () => import("./createEllipsoidGeometry.js"),
+  "./createEllipsoidOutlineGeometry.js": () => import("./createEllipsoidOutlineGeometry.js"),
+  "./createFrustumGeometry.js": () => import("./createFrustumGeometry.js"),
+  "./createFrustumOutlineGeometry.js": () => import("./createFrustumOutlineGeometry.js"),
+  "./createGeometry.js": () => import("./createGeometry.js"),
+  "./createGroundPolylineGeometry.js": () => import("./createGroundPolylineGeometry.js"),
+  "./createPlaneGeometry.js": () => import("./createPlaneGeometry.js"),
+  "./createPlaneOutlineGeometry.js": () => import("./createPlaneOutlineGeometry.js"),
+  "./createPolygonGeometry.js": () => import("./createPolygonGeometry.js"),
+  "./createPolygonOutlineGeometry.js": () => import("./createPolygonOutlineGeometry.js"),
+  "./createPolylineGeometry.js": () => import("./createPolylineGeometry.js"),
+  "./createPolylineVolumeGeometry.js": () => import("./createPolylineVolumeGeometry.js"),
+  "./createPolylineVolumeOutlineGeometry.js": () => import("./createPolylineVolumeOutlineGeometry.js"),
+  "./createRectangleGeometry.js": () => import("./createRectangleGeometry.js"),
+  "./createRectangleOutlineGeometry.js": () => import("./createRectangleOutlineGeometry.js"),
+  "./createSimplePolylineGeometry.js": () => import("./createSimplePolylineGeometry.js"),
+  "./createSphereGeometry.js": () => import("./createSphereGeometry.js"),
+  "./createSphereOutlineGeometry.js": () => import("./createSphereOutlineGeometry.js"),
+  "./createTaskProcessorWorker.js": () => import("./createTaskProcessorWorker.js"),
+  "./createVectorTileClampedPolylines.js": () => import("./createVectorTileClampedPolylines.js"),
+  "./createVectorTileGeometries.js": () => import("./createVectorTileGeometries.js"),
+  "./createVectorTilePoints.js": () => import("./createVectorTilePoints.js"),
+  "./createVectorTilePolygons.js": () => import("./createVectorTilePolygons.js"),
+  "./createVectorTilePolylines.js": () => import("./createVectorTilePolylines.js"),
+  "./createVerticesFromGoogleEarthEnterpriseBuffer.js": () => import("./createVerticesFromGoogleEarthEnterpriseBuffer.js"),
+  "./createVerticesFromHeightmap.js": () => import("./createVerticesFromHeightmap.js"),
+  "./createVerticesFromQuantizedTerrainMesh.js": () => import("./createVerticesFromQuantizedTerrainMesh.js"),
+  "./createWallGeometry.js": () => import("./createWallGeometry.js"),
+  "./createWallOutlineGeometry.js": () => import("./createWallOutlineGeometry.js"),
+  "./decodeDraco.js": () => import("./decodeDraco.js"),
+  "./decodeGoogleEarthEnterprisePacket.js": () => import("./decodeGoogleEarthEnterprisePacket.js"),
+  "./decodeI3S.js": () => import("./decodeI3S.js"),
+  "./transcodeKTX2.js": () => import("./transcodeKTX2.js"),
+  "./transferTypedArrayTest.js": () => import("./transferTypedArrayTest.js"),
+  "./upsampleQuantizedTerrainMesh.js": () => import("./upsampleQuantizedTerrainMesh.js")
+});
+
+// packages/engine/Source/Workers/createGeometry.js
+var moduleCache = {};
+async function getModule(moduleName, modulePath) {
+  let module = defaultValue_default(moduleCache[modulePath], moduleCache[moduleName]);
+  if (defined_default(module)) {
+    return module;
+  }
+  if (defined_default(modulePath)) {
+    if (typeof exports === "object") {
+      module = __require(modulePath);
+    } else {
+      const result = await import(modulePath);
+      module = result.default;
+    }
+    moduleCache[modulePath] = module;
+    return module;
+  }
+  if (typeof exports === "object") {
+    module = __require(`Workers/${moduleName}`);
+  } else {
+    const result = defined_default(modulePath) ? await import(modulePath) : await globImport_js(`./${moduleName}.js`);
+    module = result.default;
+  }
+  moduleCache[moduleName] = module;
+  return module;
+}
+async function createGeometry(parameters, transferableObjects) {
+  const subTasks = parameters.subTasks;
+  const length = subTasks.length;
+  const resultsOrPromises = new Array(length);
+  for (let i = 0; i < length; i++) {
+    const task = subTasks[i];
+    const geometry = task.geometry;
+    const moduleName = task.moduleName;
+    const modulePath = task.modulePath;
+    if (defined_default(moduleName) && defined_default(modulePath)) {
+      throw new DeveloperError_default("Must only set moduleName or modulePath");
+    }
+    if (defined_default(moduleName) || defined_default(modulePath)) {
+      resultsOrPromises[i] = getModule(
+        moduleName,
+        modulePath
+      ).then((createFunction) => createFunction(geometry, task.offset));
+    } else {
+      resultsOrPromises[i] = geometry;
+    }
+  }
+  return Promise.all(resultsOrPromises).then(function(results) {
+    return PrimitivePipeline_default.packCreateGeometryResults(
+      results,
+      transferableObjects
+    );
+  });
+}
+var createGeometry_default = createTaskProcessorWorker_default(createGeometry);
+export {
+  createGeometry_default as default
+};
