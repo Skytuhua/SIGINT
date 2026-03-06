@@ -1,80 +1,1237 @@
 {
-    "type":  "FeatureCollection",
-    "features":  [
-                     {
-                         "type":  "Feature",
-                         "id":  "economic-centers-0",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              -77.04,
-                                                              38.9
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "economic-centers site 0",
-                                            "ts":  1772435598915
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "economic-centers-1",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              2.35,
-                                                              48.86
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "economic-centers site 1",
-                                            "ts":  1772435598915
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "economic-centers-2",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              139.76,
-                                                              35.68
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "economic-centers site 2",
-                                            "ts":  1772435598915
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "economic-centers-3",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              55.27,
-                                                              25.2
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "economic-centers site 3",
-                                            "ts":  1772435598915
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "economic-centers-4",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              -46.63,
-                                                              -23.55
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "economic-centers site 4",
-                                            "ts":  1772435598915
-                                        }
-                     }
-                 ]
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "wikidata-Q60",
+      "geometry": { "type": "Point", "coordinates": [-74.006, 40.7128] },
+      "properties": {
+        "id": "wikidata-Q60",
+        "name": "New York City",
+        "country": "United States",
+        "countryIso2": "US",
+        "admin1": "New York",
+        "lat": 40.7128,
+        "lon": -74.006,
+        "population": 8336817,
+        "scoreTotal": 98,
+        "scoreBreakdown": "{\"finance\":100,\"trade\":90,\"urban\":95,\"macro\":100}",
+        "rank": 1,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"New York Stock Exchange\",\"wikidataQid\":\"Q13677\"},{\"name\":\"NASDAQ\",\"wikidataQid\":\"Q82059\"}],\"ports\":[{\"name\":\"Port of New York and New Jersey\",\"wikidataQid\":\"Q1368879\"}],\"airports\":[{\"name\":\"John F. Kennedy International Airport\",\"wikidataQid\":\"Q8685\"},{\"name\":\"LaGuardia Airport\",\"wikidataQid\":\"Q8686\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q60\",\"overpassQuery\":\"node[amenity=bank](around:50000,40.7128,-74.006)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q84",
+      "geometry": { "type": "Point", "coordinates": [-0.1276, 51.5074] },
+      "properties": {
+        "id": "wikidata-Q84",
+        "name": "London",
+        "country": "United Kingdom",
+        "countryIso2": "GB",
+        "admin1": "England",
+        "lat": 51.5074,
+        "lon": -0.1276,
+        "population": 8982000,
+        "scoreTotal": 97,
+        "scoreBreakdown": "{\"finance\":98,\"trade\":92,\"urban\":94,\"macro\":95}",
+        "rank": 2,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"London Stock Exchange\",\"wikidataQid\":\"Q171240\"}],\"ports\":[{\"name\":\"Port of London\",\"wikidataQid\":\"Q1535028\"}],\"airports\":[{\"name\":\"Heathrow Airport\",\"wikidataQid\":\"Q8691\"},{\"name\":\"Gatwick Airport\",\"wikidataQid\":\"Q46895\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q84\",\"overpassQuery\":\"node[amenity=bank](around:50000,51.5074,-0.1276)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1490",
+      "geometry": { "type": "Point", "coordinates": [139.6917, 35.6895] },
+      "properties": {
+        "id": "wikidata-Q1490",
+        "name": "Tokyo",
+        "country": "Japan",
+        "countryIso2": "JP",
+        "admin1": "Tokyo",
+        "lat": 35.6895,
+        "lon": 139.6917,
+        "population": 13960000,
+        "scoreTotal": 96,
+        "scoreBreakdown": "{\"finance\":96,\"trade\":88,\"urban\":98,\"macro\":94}",
+        "rank": 3,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Tokyo Stock Exchange\",\"wikidataQid\":\"Q217475\"}],\"ports\":[{\"name\":\"Port of Tokyo\",\"wikidataQid\":\"Q1133925\"}],\"airports\":[{\"name\":\"Narita International Airport\",\"wikidataQid\":\"Q132826\"},{\"name\":\"Haneda Airport\",\"wikidataQid\":\"Q168584\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1490\",\"overpassQuery\":\"node[amenity=bank](around:50000,35.6895,139.6917)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q8684",
+      "geometry": { "type": "Point", "coordinates": [114.1694, 22.3193] },
+      "properties": {
+        "id": "wikidata-Q8684",
+        "name": "Hong Kong",
+        "country": "China",
+        "countryIso2": "HK",
+        "admin1": null,
+        "lat": 22.3193,
+        "lon": 114.1694,
+        "population": 7500700,
+        "scoreTotal": 94,
+        "scoreBreakdown": "{\"finance\":95,\"trade\":96,\"urban\":88,\"macro\":90}",
+        "rank": 4,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Hong Kong Stock Exchange\",\"wikidataQid\":\"Q496672\"}],\"ports\":[{\"name\":\"Port of Hong Kong\",\"wikidataQid\":\"Q1399835\"}],\"airports\":[{\"name\":\"Hong Kong International Airport\",\"wikidataQid\":\"Q11495\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q8684\",\"overpassQuery\":\"node[amenity=bank](around:50000,22.3193,114.1694)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q334",
+      "geometry": { "type": "Point", "coordinates": [103.8198, 1.3521] },
+      "properties": {
+        "id": "wikidata-Q334",
+        "name": "Singapore",
+        "country": "Singapore",
+        "countryIso2": "SG",
+        "admin1": null,
+        "lat": 1.3521,
+        "lon": 103.8198,
+        "population": 5686000,
+        "scoreTotal": 93,
+        "scoreBreakdown": "{\"finance\":92,\"trade\":98,\"urban\":82,\"macro\":92}",
+        "rank": 5,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Singapore Exchange\",\"wikidataQid\":\"Q1194026\"}],\"ports\":[{\"name\":\"Port of Singapore\",\"wikidataQid\":\"Q1056206\"}],\"airports\":[{\"name\":\"Changi Airport\",\"wikidataQid\":\"Q17400\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q334\",\"overpassQuery\":\"node[amenity=bank](around:50000,1.3521,103.8198)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1218",
+      "geometry": { "type": "Point", "coordinates": [121.4737, 31.2304] },
+      "properties": {
+        "id": "wikidata-Q1218",
+        "name": "Shanghai",
+        "country": "China",
+        "countryIso2": "CN",
+        "admin1": "Shanghai",
+        "lat": 31.2304,
+        "lon": 121.4737,
+        "population": 24870900,
+        "scoreTotal": 92,
+        "scoreBreakdown": "{\"finance\":94,\"trade\":92,\"urban\":96,\"macro\":82}",
+        "rank": 6,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Shanghai Stock Exchange\",\"wikidataQid\":\"Q739514\"}],\"ports\":[{\"name\":\"Port of Shanghai\",\"wikidataQid\":\"Q1439615\"}],\"airports\":[{\"name\":\"Shanghai Pudong International Airport\",\"wikidataQid\":\"Q18679\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1218\",\"overpassQuery\":\"node[amenity=bank](around:50000,31.2304,121.4737)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1794",
+      "geometry": { "type": "Point", "coordinates": [55.2708, 25.2048] },
+      "properties": {
+        "id": "wikidata-Q1794",
+        "name": "Dubai",
+        "country": "United Arab Emirates",
+        "countryIso2": "AE",
+        "admin1": "Dubai",
+        "lat": 25.2048,
+        "lon": 55.2708,
+        "population": 3331000,
+        "scoreTotal": 89,
+        "scoreBreakdown": "{\"finance\":85,\"trade\":95,\"urban\":78,\"macro\":88}",
+        "rank": 7,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Dubai Financial Market\",\"wikidataQid\":\"Q1263526\"},{\"name\":\"NASDAQ Dubai\",\"wikidataQid\":\"Q1265255\"}],\"ports\":[{\"name\":\"Jebel Ali Port\",\"wikidataQid\":\"Q1206505\"}],\"airports\":[{\"name\":\"Dubai International Airport\",\"wikidataQid\":\"Q22880\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1794\",\"overpassQuery\":\"node[amenity=bank](around:50000,25.2048,55.2708)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q90",
+      "geometry": { "type": "Point", "coordinates": [2.3522, 48.8566] },
+      "properties": {
+        "id": "wikidata-Q90",
+        "name": "Paris",
+        "country": "France",
+        "countryIso2": "FR",
+        "admin1": "Île-de-France",
+        "lat": 48.8566,
+        "lon": 2.3522,
+        "population": 2161000,
+        "scoreTotal": 88,
+        "scoreBreakdown": "{\"finance\":86,\"trade\":82,\"urban\":92,\"macro\":90}",
+        "rank": 8,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Euronext Paris\",\"wikidataQid\":\"Q2396977\"}],\"ports\":[],\"airports\":[{\"name\":\"Charles de Gaulle Airport\",\"wikidataQid\":\"Q46491\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q90\",\"overpassQuery\":\"node[amenity=bank](around:50000,48.8566,2.3522)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q64",
+      "geometry": { "type": "Point", "coordinates": [13.405, 52.52] },
+      "properties": {
+        "id": "wikidata-Q64",
+        "name": "Berlin",
+        "country": "Germany",
+        "countryIso2": "DE",
+        "admin1": "Berlin",
+        "lat": 52.52,
+        "lon": 13.405,
+        "population": 3748148,
+        "scoreTotal": 78,
+        "scoreBreakdown": "{\"finance\":72,\"trade\":68,\"urban\":88,\"macro\":92}",
+        "rank": 15,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Börse Berlin\",\"wikidataQid\":\"Q887467\"}],\"ports\":[],\"airports\":[{\"name\":\"Berlin Brandenburg Airport\",\"wikidataQid\":\"Q160556\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q64\",\"overpassQuery\":\"node[amenity=bank](around:50000,52.52,13.405)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1726",
+      "geometry": { "type": "Point", "coordinates": [8.6821, 50.1109] },
+      "properties": {
+        "id": "wikidata-Q1726",
+        "name": "Frankfurt",
+        "country": "Germany",
+        "countryIso2": "DE",
+        "admin1": "Hesse",
+        "lat": 50.1109,
+        "lon": 8.6821,
+        "population": 753056,
+        "scoreTotal": 87,
+        "scoreBreakdown": "{\"finance\":95,\"trade\":78,\"urban\":72,\"macro\":92}",
+        "rank": 9,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Frankfurt Stock Exchange\",\"wikidataQid\":\"Q270499\"},{\"name\":\"Deutsche Börse\",\"wikidataQid\":\"Q157426\"}],\"ports\":[],\"airports\":[{\"name\":\"Frankfurt Airport\",\"wikidataQid\":\"Q46033\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1726\",\"overpassQuery\":\"node[amenity=bank](around:50000,50.1109,8.6821)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q8673",
+      "geometry": { "type": "Point", "coordinates": [-87.6298, 41.8781] },
+      "properties": {
+        "id": "wikidata-Q8673",
+        "name": "Chicago",
+        "country": "United States",
+        "countryIso2": "US",
+        "admin1": "Illinois",
+        "lat": 41.8781,
+        "lon": -87.6298,
+        "population": 2693976,
+        "scoreTotal": 86,
+        "scoreBreakdown": "{\"finance\":90,\"trade\":80,\"urban\":85,\"macro\":100}",
+        "rank": 10,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Chicago Board of Trade\",\"wikidataQid\":\"Q1087027\"},{\"name\":\"Chicago Mercantile Exchange\",\"wikidataQid\":\"Q1057592\"}],\"ports\":[],\"airports\":[{\"name\":\"O'Hare International Airport\",\"wikidataQid\":\"Q8693\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q8673\",\"overpassQuery\":\"node[amenity=bank](around:50000,41.8781,-87.6298)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q8652",
+      "geometry": { "type": "Point", "coordinates": [151.2093, -33.8688] },
+      "properties": {
+        "id": "wikidata-Q8652",
+        "name": "Sydney",
+        "country": "Australia",
+        "countryIso2": "AU",
+        "admin1": "New South Wales",
+        "lat": -33.8688,
+        "lon": 151.2093,
+        "population": 5312000,
+        "scoreTotal": 84,
+        "scoreBreakdown": "{\"finance\":88,\"trade\":82,\"urban\":80,\"macro\":85}",
+        "rank": 11,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Australian Securities Exchange\",\"wikidataQid\":\"Q601807\"}],\"ports\":[{\"name\":\"Port of Sydney\",\"wikidataQid\":\"Q7231728\"}],\"airports\":[{\"name\":\"Sydney Kingsford Smith Airport\",\"wikidataQid\":\"Q29107\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q8652\",\"overpassQuery\":\"node[amenity=bank](around:50000,-33.8688,151.2093)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q956",
+      "geometry": { "type": "Point", "coordinates": [116.4074, 39.9042] },
+      "properties": {
+        "id": "wikidata-Q956",
+        "name": "Beijing",
+        "country": "China",
+        "countryIso2": "CN",
+        "admin1": "Beijing",
+        "lat": 39.9042,
+        "lon": 116.4074,
+        "population": 21540000,
+        "scoreTotal": 91,
+        "scoreBreakdown": "{\"finance\":90,\"trade\":85,\"urban\":97,\"macro\":82}",
+        "rank": 7,
+        "keyAssets": "{\"exchanges\":[],\"ports\":[],\"airports\":[{\"name\":\"Beijing Capital International Airport\",\"wikidataQid\":\"Q21189\"},{\"name\":\"Beijing Daxing International Airport\",\"wikidataQid\":\"Q5765649\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q956\",\"overpassQuery\":\"node[amenity=bank](around:50000,39.9042,116.4074)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1156",
+      "geometry": { "type": "Point", "coordinates": [72.8777, 19.076] },
+      "properties": {
+        "id": "wikidata-Q1156",
+        "name": "Mumbai",
+        "country": "India",
+        "countryIso2": "IN",
+        "admin1": "Maharashtra",
+        "lat": 19.076,
+        "lon": 72.8777,
+        "population": 12478447,
+        "scoreTotal": 85,
+        "scoreBreakdown": "{\"finance\":92,\"trade\":82,\"urban\":90,\"macro\":60}",
+        "rank": 12,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Bombay Stock Exchange\",\"wikidataQid\":\"Q170475\"},{\"name\":\"National Stock Exchange of India\",\"wikidataQid\":\"Q1747860\"}],\"ports\":[{\"name\":\"Nhava Sheva Port\",\"wikidataQid\":\"Q1424467\"}],\"airports\":[{\"name\":\"Chhatrapati Shivaji Maharaj International Airport\",\"wikidataQid\":\"Q331120\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1156\",\"overpassQuery\":\"node[amenity=bank](around:50000,19.076,72.8777)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3630",
+      "geometry": { "type": "Point", "coordinates": [8.5417, 47.3769] },
+      "properties": {
+        "id": "wikidata-Q3630",
+        "name": "Zurich",
+        "country": "Switzerland",
+        "countryIso2": "CH",
+        "admin1": "Zurich",
+        "lat": 47.3769,
+        "lon": 8.5417,
+        "population": 402275,
+        "scoreTotal": 88,
+        "scoreBreakdown": "{\"finance\":98,\"trade\":75,\"urban\":68,\"macro\":95}",
+        "rank": 8,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"SIX Swiss Exchange\",\"wikidataQid\":\"Q680728\"}],\"ports\":[],\"airports\":[{\"name\":\"Zurich Airport\",\"wikidataQid\":\"Q68571\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3630\",\"overpassQuery\":\"node[amenity=bank](around:50000,47.3769,8.5417)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q18426",
+      "geometry": { "type": "Point", "coordinates": [126.978, 37.5665] },
+      "properties": {
+        "id": "wikidata-Q18426",
+        "name": "Seoul",
+        "country": "South Korea",
+        "countryIso2": "KR",
+        "admin1": "Seoul",
+        "lat": 37.5665,
+        "lon": 126.978,
+        "population": 9776000,
+        "scoreTotal": 86,
+        "scoreBreakdown": "{\"finance\":88,\"trade\":84,\"urban\":92,\"macro\":78}",
+        "rank": 10,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Korea Exchange\",\"wikidataQid\":\"Q495473\"}],\"ports\":[{\"name\":\"Port of Incheon\",\"wikidataQid\":\"Q492805\"}],\"airports\":[{\"name\":\"Incheon International Airport\",\"wikidataQid\":\"Q47122\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q18426\",\"overpassQuery\":\"node[amenity=bank](around:50000,37.5665,126.978)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q174",
+      "geometry": { "type": "Point", "coordinates": [-46.6333, -23.5505] },
+      "properties": {
+        "id": "wikidata-Q174",
+        "name": "São Paulo",
+        "country": "Brazil",
+        "countryIso2": "BR",
+        "admin1": "São Paulo",
+        "lat": -23.5505,
+        "lon": -46.6333,
+        "population": 12325232,
+        "scoreTotal": 82,
+        "scoreBreakdown": "{\"finance\":85,\"trade\":78,\"urban\":92,\"macro\":65}",
+        "rank": 13,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"B3 (Brasil Bolsa Balcão)\",\"wikidataQid\":\"Q4833697\"}],\"ports\":[{\"name\":\"Port of Santos\",\"wikidataQid\":\"Q2062706\"}],\"airports\":[{\"name\":\"São Paulo–Guarulhos International Airport\",\"wikidataQid\":\"Q83365\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q174\",\"overpassQuery\":\"node[amenity=bank](around:50000,-23.5505,-46.6333)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q649",
+      "geometry": { "type": "Point", "coordinates": [37.6173, 55.7558] },
+      "properties": {
+        "id": "wikidata-Q649",
+        "name": "Moscow",
+        "country": "Russia",
+        "countryIso2": "RU",
+        "admin1": "Moscow",
+        "lat": 55.7558,
+        "lon": 37.6173,
+        "population": 12655050,
+        "scoreTotal": 76,
+        "scoreBreakdown": "{\"finance\":78,\"trade\":65,\"urban\":94,\"macro\":60}",
+        "rank": 16,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Moscow Exchange\",\"wikidataQid\":\"Q1785864\"}],\"ports\":[],\"airports\":[{\"name\":\"Sheremetyevo International Airport\",\"wikidataQid\":\"Q130901\"},{\"name\":\"Domodedovo International Airport\",\"wikidataQid\":\"Q591786\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q649\",\"overpassQuery\":\"node[amenity=bank](around:50000,55.7558,37.6173)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3616",
+      "geometry": { "type": "Point", "coordinates": [4.9041, 52.3676] },
+      "properties": {
+        "id": "wikidata-Q3616",
+        "name": "Amsterdam",
+        "country": "Netherlands",
+        "countryIso2": "NL",
+        "admin1": "North Holland",
+        "lat": 52.3676,
+        "lon": 4.9041,
+        "population": 872680,
+        "scoreTotal": 83,
+        "scoreBreakdown": "{\"finance\":88,\"trade\":85,\"urban\":72,\"macro\":88}",
+        "rank": 14,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Euronext Amsterdam\",\"wikidataQid\":\"Q2098658\"}],\"ports\":[{\"name\":\"Port of Amsterdam\",\"wikidataQid\":\"Q2046476\"}],\"airports\":[{\"name\":\"Amsterdam Airport Schiphol\",\"wikidataQid\":\"Q35053\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3616\",\"overpassQuery\":\"node[amenity=bank](around:50000,52.3676,4.9041)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q62",
+      "geometry": { "type": "Point", "coordinates": [-122.4194, 37.7749] },
+      "properties": {
+        "id": "wikidata-Q62",
+        "name": "San Francisco",
+        "country": "United States",
+        "countryIso2": "US",
+        "admin1": "California",
+        "lat": 37.7749,
+        "lon": -122.4194,
+        "population": 873965,
+        "scoreTotal": 81,
+        "scoreBreakdown": "{\"finance\":82,\"trade\":72,\"urban\":78,\"macro\":100}",
+        "rank": 14,
+        "keyAssets": "{\"exchanges\":[],\"ports\":[{\"name\":\"Port of San Francisco\",\"wikidataQid\":\"Q7230735\"}],\"airports\":[{\"name\":\"San Francisco International Airport\",\"wikidataQid\":\"Q8688\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q62\",\"overpassQuery\":\"node[amenity=bank](around:50000,37.7749,-122.4194)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q11736",
+      "geometry": { "type": "Point", "coordinates": [100.5018, 13.7563] },
+      "properties": {
+        "id": "wikidata-Q11736",
+        "name": "Bangkok",
+        "country": "Thailand",
+        "countryIso2": "TH",
+        "admin1": "Bangkok",
+        "lat": 13.7563,
+        "lon": 100.5018,
+        "population": 10539000,
+        "scoreTotal": 72,
+        "scoreBreakdown": "{\"finance\":70,\"trade\":78,\"urban\":85,\"macro\":55}",
+        "rank": 18,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Stock Exchange of Thailand\",\"wikidataQid\":\"Q1137115\"}],\"ports\":[{\"name\":\"Port of Laem Chabang\",\"wikidataQid\":\"Q2063133\"}],\"airports\":[{\"name\":\"Suvarnabhumi Airport\",\"wikidataQid\":\"Q169960\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q11736\",\"overpassQuery\":\"node[amenity=bank](around:50000,13.7563,100.5018)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q8646",
+      "geometry": { "type": "Point", "coordinates": [101.6869, 3.139] },
+      "properties": {
+        "id": "wikidata-Q8646",
+        "name": "Kuala Lumpur",
+        "country": "Malaysia",
+        "countryIso2": "MY",
+        "admin1": "Kuala Lumpur",
+        "lat": 3.139,
+        "lon": 101.6869,
+        "population": 1982112,
+        "scoreTotal": 70,
+        "scoreBreakdown": "{\"finance\":72,\"trade\":80,\"urban\":75,\"macro\":52}",
+        "rank": 20,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Bursa Malaysia\",\"wikidataQid\":\"Q878605\"}],\"ports\":[{\"name\":\"Port Klang\",\"wikidataQid\":\"Q614653\"}],\"airports\":[{\"name\":\"Kuala Lumpur International Airport\",\"wikidataQid\":\"Q13694\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q8646\",\"overpassQuery\":\"node[amenity=bank](around:50000,3.139,101.6869)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q406",
+      "geometry": { "type": "Point", "coordinates": [28.9784, 41.0082] },
+      "properties": {
+        "id": "wikidata-Q406",
+        "name": "Istanbul",
+        "country": "Turkey",
+        "countryIso2": "TR",
+        "admin1": "Istanbul",
+        "lat": 41.0082,
+        "lon": 28.9784,
+        "population": 15462452,
+        "scoreTotal": 77,
+        "scoreBreakdown": "{\"finance\":75,\"trade\":82,\"urban\":92,\"macro\":55}",
+        "rank": 15,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Borsa Istanbul\",\"wikidataQid\":\"Q691337\"}],\"ports\":[{\"name\":\"Port of Istanbul\",\"wikidataQid\":\"Q2400523\"}],\"airports\":[{\"name\":\"Istanbul Airport\",\"wikidataQid\":\"Q22214138\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q406\",\"overpassQuery\":\"node[amenity=bank](around:50000,41.0082,28.9784)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1355",
+      "geometry": { "type": "Point", "coordinates": [30.0444, 31.2357] },
+      "properties": {
+        "id": "wikidata-Q1355",
+        "name": "Cairo",
+        "country": "Egypt",
+        "countryIso2": "EG",
+        "admin1": "Cairo Governorate",
+        "lat": 31.2357,
+        "lon": 30.0444,
+        "population": 9540000,
+        "scoreTotal": 58,
+        "scoreBreakdown": "{\"finance\":60,\"trade\":55,\"urban\":82,\"macro\":35}",
+        "rank": 28,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Egyptian Exchange\",\"wikidataQid\":\"Q2994023\"}],\"ports\":[],\"airports\":[{\"name\":\"Cairo International Airport\",\"wikidataQid\":\"Q63810\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1355\",\"overpassQuery\":\"node[amenity=bank](around:50000,31.2357,30.0444)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1530",
+      "geometry": { "type": "Point", "coordinates": [28.0473, -26.2041] },
+      "properties": {
+        "id": "wikidata-Q1530",
+        "name": "Johannesburg",
+        "country": "South Africa",
+        "countryIso2": "ZA",
+        "admin1": "Gauteng",
+        "lat": -26.2041,
+        "lon": 28.0473,
+        "population": 5782747,
+        "scoreTotal": 65,
+        "scoreBreakdown": "{\"finance\":75,\"trade\":58,\"urban\":78,\"macro\":42}",
+        "rank": 22,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Johannesburg Stock Exchange\",\"wikidataQid\":\"Q723042\"}],\"ports\":[],\"airports\":[{\"name\":\"O. R. Tambo International Airport\",\"wikidataQid\":\"Q188041\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1530\",\"overpassQuery\":\"node[amenity=bank](around:50000,-26.2041,28.0473)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3838",
+      "geometry": { "type": "Point", "coordinates": [-99.1332, 19.4326] },
+      "properties": {
+        "id": "wikidata-Q3838",
+        "name": "Mexico City",
+        "country": "Mexico",
+        "countryIso2": "MX",
+        "admin1": "Mexico City",
+        "lat": 19.4326,
+        "lon": -99.1332,
+        "population": 9209944,
+        "scoreTotal": 73,
+        "scoreBreakdown": "{\"finance\":72,\"trade\":70,\"urban\":88,\"macro\":55}",
+        "rank": 17,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Bolsa Mexicana de Valores\",\"wikidataQid\":\"Q806886\"}],\"ports\":[],\"airports\":[{\"name\":\"Mexico City International Airport\",\"wikidataQid\":\"Q154830\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3838\",\"overpassQuery\":\"node[amenity=bank](around:50000,19.4326,-99.1332)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q65",
+      "geometry": { "type": "Point", "coordinates": [-118.2437, 34.0522] },
+      "properties": {
+        "id": "wikidata-Q65",
+        "name": "Los Angeles",
+        "country": "United States",
+        "countryIso2": "US",
+        "admin1": "California",
+        "lat": 34.0522,
+        "lon": -118.2437,
+        "population": 3979576,
+        "scoreTotal": 80,
+        "scoreBreakdown": "{\"finance\":75,\"trade\":85,\"urban\":88,\"macro\":100}",
+        "rank": 14,
+        "keyAssets": "{\"exchanges\":[],\"ports\":[{\"name\":\"Port of Los Angeles\",\"wikidataQid\":\"Q1808472\"},{\"name\":\"Port of Long Beach\",\"wikidataQid\":\"Q1434699\"}],\"airports\":[{\"name\":\"Los Angeles International Airport\",\"wikidataQid\":\"Q8731\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q65\",\"overpassQuery\":\"node[amenity=bank](around:50000,34.0522,-118.2437)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1861",
+      "geometry": { "type": "Point", "coordinates": [46.6753, 24.7136] },
+      "properties": {
+        "id": "wikidata-Q1861",
+        "name": "Riyadh",
+        "country": "Saudi Arabia",
+        "countryIso2": "SA",
+        "admin1": "Riyadh Region",
+        "lat": 24.7136,
+        "lon": 46.6753,
+        "population": 7676654,
+        "scoreTotal": 72,
+        "scoreBreakdown": "{\"finance\":78,\"trade\":68,\"urban\":80,\"macro\":70}",
+        "rank": 18,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Tadawul (Saudi Exchange)\",\"wikidataQid\":\"Q2040606\"}],\"ports\":[],\"airports\":[{\"name\":\"King Khalid International Airport\",\"wikidataQid\":\"Q311321\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1861\",\"overpassQuery\":\"node[amenity=bank](around:50000,24.7136,46.6753)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1748",
+      "geometry": { "type": "Point", "coordinates": [-79.3832, 43.6532] },
+      "properties": {
+        "id": "wikidata-Q1748",
+        "name": "Toronto",
+        "country": "Canada",
+        "countryIso2": "CA",
+        "admin1": "Ontario",
+        "lat": 43.6532,
+        "lon": -79.3832,
+        "population": 2794356,
+        "scoreTotal": 82,
+        "scoreBreakdown": "{\"finance\":88,\"trade\":75,\"urban\":82,\"macro\":80}",
+        "rank": 13,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Toronto Stock Exchange\",\"wikidataQid\":\"Q183399\"}],\"ports\":[{\"name\":\"Port of Toronto\",\"wikidataQid\":\"Q3398422\"}],\"airports\":[{\"name\":\"Toronto Pearson International Airport\",\"wikidataQid\":\"Q174149\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1748\",\"overpassQuery\":\"node[amenity=bank](around:50000,43.6532,-79.3832)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q2887",
+      "geometry": { "type": "Point", "coordinates": [6.1432, 46.2044] },
+      "properties": {
+        "id": "wikidata-Q2887",
+        "name": "Geneva",
+        "country": "Switzerland",
+        "countryIso2": "CH",
+        "admin1": "Geneva",
+        "lat": 46.2044,
+        "lon": 6.1432,
+        "population": 203856,
+        "scoreTotal": 75,
+        "scoreBreakdown": "{\"finance\":85,\"trade\":60,\"urban\":58,\"macro\":95}",
+        "rank": 16,
+        "keyAssets": "{\"exchanges\":[],\"ports\":[],\"airports\":[{\"name\":\"Geneva Airport\",\"wikidataQid\":\"Q100731\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q2887\",\"overpassQuery\":\"node[amenity=bank](around:50000,46.2044,6.1432)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1511",
+      "geometry": { "type": "Point", "coordinates": [106.8456, -6.2088] },
+      "properties": {
+        "id": "wikidata-Q1511",
+        "name": "Jakarta",
+        "country": "Indonesia",
+        "countryIso2": "ID",
+        "admin1": "Jakarta",
+        "lat": -6.2088,
+        "lon": 106.8456,
+        "population": 10562088,
+        "scoreTotal": 68,
+        "scoreBreakdown": "{\"finance\":70,\"trade\":72,\"urban\":85,\"macro\":45}",
+        "rank": 21,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Indonesia Stock Exchange\",\"wikidataQid\":\"Q2598094\"}],\"ports\":[{\"name\":\"Tanjung Priok Port\",\"wikidataQid\":\"Q1474403\"}],\"airports\":[{\"name\":\"Soekarno-Hatta International Airport\",\"wikidataQid\":\"Q188553\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1511\",\"overpassQuery\":\"node[amenity=bank](around:50000,-6.2088,106.8456)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1854",
+      "geometry": { "type": "Point", "coordinates": [-58.3816, -34.6037] },
+      "properties": {
+        "id": "wikidata-Q1854",
+        "name": "Buenos Aires",
+        "country": "Argentina",
+        "countryIso2": "AR",
+        "admin1": "Buenos Aires",
+        "lat": -34.6037,
+        "lon": -58.3816,
+        "population": 3075646,
+        "scoreTotal": 60,
+        "scoreBreakdown": "{\"finance\":62,\"trade\":58,\"urban\":82,\"macro\":35}",
+        "rank": 26,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Buenos Aires Stock Exchange\",\"wikidataQid\":\"Q808610\"}],\"ports\":[{\"name\":\"Port of Buenos Aires\",\"wikidataQid\":\"Q1546002\"}],\"airports\":[{\"name\":\"Ministro Pistarini International Airport\",\"wikidataQid\":\"Q25338\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1854\",\"overpassQuery\":\"node[amenity=bank](around:50000,-34.6037,-58.3816)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1530b",
+      "geometry": { "type": "Point", "coordinates": [113.2644, 23.1291] },
+      "properties": {
+        "id": "wikidata-Q1530b",
+        "name": "Guangzhou",
+        "country": "China",
+        "countryIso2": "CN",
+        "admin1": "Guangdong",
+        "lat": 23.1291,
+        "lon": 113.2644,
+        "population": 18676605,
+        "scoreTotal": 78,
+        "scoreBreakdown": "{\"finance\":70,\"trade\":90,\"urban\":92,\"macro\":82}",
+        "rank": 15,
+        "keyAssets": "{\"exchanges\":[],\"ports\":[{\"name\":\"Port of Guangzhou\",\"wikidataQid\":\"Q1584652\"}],\"airports\":[{\"name\":\"Guangzhou Baiyun International Airport\",\"wikidataQid\":\"Q861258\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q16572\",\"overpassQuery\":\"node[amenity=bank](around:50000,23.1291,113.2644)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1352",
+      "geometry": { "type": "Point", "coordinates": [114.0579, 22.5431] },
+      "properties": {
+        "id": "wikidata-Q1352",
+        "name": "Shenzhen",
+        "country": "China",
+        "countryIso2": "CN",
+        "admin1": "Guangdong",
+        "lat": 22.5431,
+        "lon": 114.0579,
+        "population": 17560000,
+        "scoreTotal": 82,
+        "scoreBreakdown": "{\"finance\":85,\"trade\":88,\"urban\":88,\"macro\":82}",
+        "rank": 13,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Shenzhen Stock Exchange\",\"wikidataQid\":\"Q605862\"}],\"ports\":[{\"name\":\"Port of Shenzhen\",\"wikidataQid\":\"Q2406960\"}],\"airports\":[{\"name\":\"Shenzhen Bao'an International Airport\",\"wikidataQid\":\"Q845652\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1352\",\"overpassQuery\":\"node[amenity=bank](around:50000,22.5431,114.0579)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1563",
+      "geometry": { "type": "Point", "coordinates": [77.209, 28.6139] },
+      "properties": {
+        "id": "wikidata-Q1563",
+        "name": "New Delhi",
+        "country": "India",
+        "countryIso2": "IN",
+        "admin1": "Delhi",
+        "lat": 28.6139,
+        "lon": 77.209,
+        "population": 16787941,
+        "scoreTotal": 68,
+        "scoreBreakdown": "{\"finance\":65,\"trade\":62,\"urban\":90,\"macro\":60}",
+        "rank": 21,
+        "keyAssets": "{\"exchanges\":[],\"ports\":[],\"airports\":[{\"name\":\"Indira Gandhi International Airport\",\"wikidataQid\":\"Q162919\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1563\",\"overpassQuery\":\"node[amenity=bank](around:50000,28.6139,77.209)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q2807",
+      "geometry": { "type": "Point", "coordinates": [-3.7038, 40.4168] },
+      "properties": {
+        "id": "wikidata-Q2807",
+        "name": "Madrid",
+        "country": "Spain",
+        "countryIso2": "ES",
+        "admin1": "Madrid",
+        "lat": 40.4168,
+        "lon": -3.7038,
+        "population": 3223000,
+        "scoreTotal": 74,
+        "scoreBreakdown": "{\"finance\":78,\"trade\":68,\"urban\":82,\"macro\":72}",
+        "rank": 17,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Bolsa de Madrid\",\"wikidataQid\":\"Q816738\"}],\"ports\":[],\"airports\":[{\"name\":\"Adolfo Suárez Madrid–Barajas Airport\",\"wikidataQid\":\"Q160556\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q2807\",\"overpassQuery\":\"node[amenity=bank](around:50000,40.4168,-3.7038)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1773",
+      "geometry": { "type": "Point", "coordinates": [51.3890, 35.6892] },
+      "properties": {
+        "id": "wikidata-Q1773",
+        "name": "Tehran",
+        "country": "Iran",
+        "countryIso2": "IR",
+        "admin1": "Tehran Province",
+        "lat": 35.6892,
+        "lon": 51.389,
+        "population": 8693706,
+        "scoreTotal": 55,
+        "scoreBreakdown": "{\"finance\":58,\"trade\":48,\"urban\":85,\"macro\":30}",
+        "rank": 30,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Tehran Stock Exchange\",\"wikidataQid\":\"Q2619453\"}],\"ports\":[],\"airports\":[{\"name\":\"Imam Khomeini International Airport\",\"wikidataQid\":\"Q229783\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1773\",\"overpassQuery\":\"node[amenity=bank](around:50000,35.6892,51.389)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q2090",
+      "geometry": { "type": "Point", "coordinates": [9.19, 45.4642] },
+      "properties": {
+        "id": "wikidata-Q2090",
+        "name": "Milan",
+        "country": "Italy",
+        "countryIso2": "IT",
+        "admin1": "Lombardy",
+        "lat": 45.4642,
+        "lon": 9.19,
+        "population": 1378689,
+        "scoreTotal": 79,
+        "scoreBreakdown": "{\"finance\":82,\"trade\":75,\"urban\":78,\"macro\":80}",
+        "rank": 15,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Borsa Italiana\",\"wikidataQid\":\"Q540907\"}],\"ports\":[],\"airports\":[{\"name\":\"Milan Malpensa Airport\",\"wikidataQid\":\"Q150806\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q2090\",\"overpassQuery\":\"node[amenity=bank](around:50000,45.4642,9.19)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3183",
+      "geometry": { "type": "Point", "coordinates": [18.0686, 59.3293] },
+      "properties": {
+        "id": "wikidata-Q3183",
+        "name": "Stockholm",
+        "country": "Sweden",
+        "countryIso2": "SE",
+        "admin1": "Stockholm County",
+        "lat": 59.3293,
+        "lon": 18.0686,
+        "population": 975904,
+        "scoreTotal": 74,
+        "scoreBreakdown": "{\"finance\":78,\"trade\":70,\"urban\":72,\"macro\":82}",
+        "rank": 17,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Nasdaq Stockholm\",\"wikidataQid\":\"Q2416673\"}],\"ports\":[{\"name\":\"Port of Stockholm\",\"wikidataQid\":\"Q2355135\"}],\"airports\":[{\"name\":\"Stockholm Arlanda Airport\",\"wikidataQid\":\"Q68595\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3183\",\"overpassQuery\":\"node[amenity=bank](around:50000,59.3293,18.0686)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3229",
+      "geometry": { "type": "Point", "coordinates": [-9.1393, 38.7223] },
+      "properties": {
+        "id": "wikidata-Q3229",
+        "name": "Lisbon",
+        "country": "Portugal",
+        "countryIso2": "PT",
+        "admin1": "Lisbon District",
+        "lat": 38.7223,
+        "lon": -9.1393,
+        "population": 544851,
+        "scoreTotal": 60,
+        "scoreBreakdown": "{\"finance\":62,\"trade\":65,\"urban\":68,\"macro\":52}",
+        "rank": 26,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Euronext Lisbon\",\"wikidataQid\":\"Q1189505\"}],\"ports\":[{\"name\":\"Port of Lisbon\",\"wikidataQid\":\"Q3398376\"}],\"airports\":[{\"name\":\"Humberto Delgado Airport\",\"wikidataQid\":\"Q219641\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3229\",\"overpassQuery\":\"node[amenity=bank](around:50000,38.7223,-9.1393)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3856",
+      "geometry": { "type": "Point", "coordinates": [106.6297, 10.8231] },
+      "properties": {
+        "id": "wikidata-Q3856",
+        "name": "Ho Chi Minh City",
+        "country": "Vietnam",
+        "countryIso2": "VN",
+        "admin1": "Ho Chi Minh City",
+        "lat": 10.8231,
+        "lon": 106.6297,
+        "population": 8993082,
+        "scoreTotal": 55,
+        "scoreBreakdown": "{\"finance\":52,\"trade\":65,\"urban\":82,\"macro\":35}",
+        "rank": 30,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Ho Chi Minh City Stock Exchange\",\"wikidataQid\":\"Q2080062\"}],\"ports\":[{\"name\":\"Cat Lai Port\",\"wikidataQid\":\"Q5050710\"}],\"airports\":[{\"name\":\"Tan Son Nhat International Airport\",\"wikidataQid\":\"Q637640\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3856\",\"overpassQuery\":\"node[amenity=bank](around:50000,10.8231,106.6297)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3870",
+      "geometry": { "type": "Point", "coordinates": [120.9842, 14.5995] },
+      "properties": {
+        "id": "wikidata-Q3870",
+        "name": "Manila",
+        "country": "Philippines",
+        "countryIso2": "PH",
+        "admin1": "Metro Manila",
+        "lat": 14.5995,
+        "lon": 120.9842,
+        "population": 1780148,
+        "scoreTotal": 55,
+        "scoreBreakdown": "{\"finance\":58,\"trade\":60,\"urban\":72,\"macro\":32}",
+        "rank": 30,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Philippine Stock Exchange\",\"wikidataQid\":\"Q2614618\"}],\"ports\":[{\"name\":\"Port of Manila\",\"wikidataQid\":\"Q1543629\"}],\"airports\":[{\"name\":\"Ninoy Aquino International Airport\",\"wikidataQid\":\"Q4879\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3870\",\"overpassQuery\":\"node[amenity=bank](around:50000,14.5995,120.9842)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3894",
+      "geometry": { "type": "Point", "coordinates": [36.8219, -1.2921] },
+      "properties": {
+        "id": "wikidata-Q3894",
+        "name": "Nairobi",
+        "country": "Kenya",
+        "countryIso2": "KE",
+        "admin1": "Nairobi County",
+        "lat": -1.2921,
+        "lon": 36.8219,
+        "population": 4397073,
+        "scoreTotal": 48,
+        "scoreBreakdown": "{\"finance\":52,\"trade\":45,\"urban\":70,\"macro\":28}",
+        "rank": 35,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Nairobi Securities Exchange\",\"wikidataQid\":\"Q1748526\"}],\"ports\":[],\"airports\":[{\"name\":\"Jomo Kenyatta International Airport\",\"wikidataQid\":\"Q790997\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3894\",\"overpassQuery\":\"node[amenity=bank](around:50000,-1.2921,36.8219)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3940",
+      "geometry": { "type": "Point", "coordinates": [3.3792, 6.5244] },
+      "properties": {
+        "id": "wikidata-Q3940",
+        "name": "Lagos",
+        "country": "Nigeria",
+        "countryIso2": "NG",
+        "admin1": "Lagos State",
+        "lat": 6.5244,
+        "lon": 3.3792,
+        "population": 15388000,
+        "scoreTotal": 52,
+        "scoreBreakdown": "{\"finance\":55,\"trade\":55,\"urban\":78,\"macro\":25}",
+        "rank": 32,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Nigerian Exchange\",\"wikidataQid\":\"Q1737573\"}],\"ports\":[{\"name\":\"Port of Lagos\",\"wikidataQid\":\"Q3398457\"}],\"airports\":[{\"name\":\"Murtala Muhammed International Airport\",\"wikidataQid\":\"Q836023\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3940\",\"overpassQuery\":\"node[amenity=bank](around:50000,6.5244,3.3792)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1492",
+      "geometry": { "type": "Point", "coordinates": [135.5023, 34.6937] },
+      "properties": {
+        "id": "wikidata-Q1492",
+        "name": "Osaka",
+        "country": "Japan",
+        "countryIso2": "JP",
+        "admin1": "Osaka",
+        "lat": 34.6937,
+        "lon": 135.5023,
+        "population": 2753862,
+        "scoreTotal": 75,
+        "scoreBreakdown": "{\"finance\":72,\"trade\":82,\"urban\":82,\"macro\":94}",
+        "rank": 16,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Osaka Exchange\",\"wikidataQid\":\"Q2633756\"}],\"ports\":[{\"name\":\"Port of Osaka\",\"wikidataQid\":\"Q1139555\"}],\"airports\":[{\"name\":\"Kansai International Airport\",\"wikidataQid\":\"Q160517\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1492\",\"overpassQuery\":\"node[amenity=bank](around:50000,34.6937,135.5023)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3889",
+      "geometry": { "type": "Point", "coordinates": [32.8597, 39.9334] },
+      "properties": {
+        "id": "wikidata-Q3889",
+        "name": "Ankara",
+        "country": "Turkey",
+        "countryIso2": "TR",
+        "admin1": "Ankara",
+        "lat": 39.9334,
+        "lon": 32.8597,
+        "population": 5663322,
+        "scoreTotal": 52,
+        "scoreBreakdown": "{\"finance\":48,\"trade\":45,\"urban\":78,\"macro\":55}",
+        "rank": 32,
+        "keyAssets": "{\"exchanges\":[],\"ports\":[],\"airports\":[{\"name\":\"Esenboğa International Airport\",\"wikidataQid\":\"Q505193\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3889\",\"overpassQuery\":\"node[amenity=bank](around:50000,39.9334,32.8597)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1022",
+      "geometry": { "type": "Point", "coordinates": [-79.5199, 8.9824] },
+      "properties": {
+        "id": "wikidata-Q1022",
+        "name": "Panama City",
+        "country": "Panama",
+        "countryIso2": "PA",
+        "admin1": "Panamá",
+        "lat": 8.9824,
+        "lon": -79.5199,
+        "population": 880691,
+        "scoreTotal": 58,
+        "scoreBreakdown": "{\"finance\":62,\"trade\":75,\"urban\":62,\"macro\":35}",
+        "rank": 28,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Bolsa de Valores de Panamá\",\"wikidataQid\":\"Q4940398\"}],\"ports\":[{\"name\":\"Port of Balboa\",\"wikidataQid\":\"Q2379024\"},{\"name\":\"Panama Canal\",\"wikidataQid\":\"Q7350\"}],\"airports\":[{\"name\":\"Tocumen International Airport\",\"wikidataQid\":\"Q1436067\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1022\",\"overpassQuery\":\"node[amenity=bank](around:50000,8.9824,-79.5199)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q8660",
+      "geometry": { "type": "Point", "coordinates": [174.7633, -36.8485] },
+      "properties": {
+        "id": "wikidata-Q8660",
+        "name": "Auckland",
+        "country": "New Zealand",
+        "countryIso2": "NZ",
+        "admin1": "Auckland",
+        "lat": -36.8485,
+        "lon": 174.7633,
+        "population": 1657200,
+        "scoreTotal": 55,
+        "scoreBreakdown": "{\"finance\":55,\"trade\":62,\"urban\":68,\"macro\":48}",
+        "rank": 30,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"NZX (New Zealand Exchange)\",\"wikidataQid\":\"Q1409556\"}],\"ports\":[{\"name\":\"Port of Auckland\",\"wikidataQid\":\"Q1135363\"}],\"airports\":[{\"name\":\"Auckland Airport\",\"wikidataQid\":\"Q5765\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q8660\",\"overpassQuery\":\"node[amenity=bank](around:50000,-36.8485,174.7633)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3711",
+      "geometry": { "type": "Point", "coordinates": [12.5683, 55.6761] },
+      "properties": {
+        "id": "wikidata-Q3711",
+        "name": "Copenhagen",
+        "country": "Denmark",
+        "countryIso2": "DK",
+        "admin1": "Capital Region",
+        "lat": 55.6761,
+        "lon": 12.5683,
+        "population": 794128,
+        "scoreTotal": 70,
+        "scoreBreakdown": "{\"finance\":72,\"trade\":72,\"urban\":70,\"macro\":78}",
+        "rank": 20,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Nasdaq Copenhagen\",\"wikidataQid\":\"Q3060952\"}],\"ports\":[{\"name\":\"Port of Copenhagen\",\"wikidataQid\":\"Q2068403\"}],\"airports\":[{\"name\":\"Copenhagen Airport\",\"wikidataQid\":\"Q131243\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3711\",\"overpassQuery\":\"node[amenity=bank](around:50000,55.6761,12.5683)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3624",
+      "geometry": { "type": "Point", "coordinates": [16.3738, 48.2082] },
+      "properties": {
+        "id": "wikidata-Q3624",
+        "name": "Vienna",
+        "country": "Austria",
+        "countryIso2": "AT",
+        "admin1": "Vienna",
+        "lat": 48.2082,
+        "lon": 16.3738,
+        "population": 1897491,
+        "scoreTotal": 68,
+        "scoreBreakdown": "{\"finance\":72,\"trade\":65,\"urban\":75,\"macro\":72}",
+        "rank": 21,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Vienna Stock Exchange\",\"wikidataQid\":\"Q245463\"}],\"ports\":[],\"airports\":[{\"name\":\"Vienna International Airport\",\"wikidataQid\":\"Q213139\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3624\",\"overpassQuery\":\"node[amenity=bank](around:50000,48.2082,16.3738)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3640",
+      "geometry": { "type": "Point", "coordinates": [21.0122, 52.2297] },
+      "properties": {
+        "id": "wikidata-Q3640",
+        "name": "Warsaw",
+        "country": "Poland",
+        "countryIso2": "PL",
+        "admin1": "Masovian Voivodeship",
+        "lat": 52.2297,
+        "lon": 21.0122,
+        "population": 1790658,
+        "scoreTotal": 62,
+        "scoreBreakdown": "{\"finance\":68,\"trade\":58,\"urban\":72,\"macro\":55}",
+        "rank": 24,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Warsaw Stock Exchange\",\"wikidataQid\":\"Q1478491\"}],\"ports\":[],\"airports\":[{\"name\":\"Warsaw Chopin Airport\",\"wikidataQid\":\"Q209574\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3640\",\"overpassQuery\":\"node[amenity=bank](around:50000,52.2297,21.0122)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q50",
+      "geometry": { "type": "Point", "coordinates": [121.5654, 25.033] },
+      "properties": {
+        "id": "wikidata-Q50",
+        "name": "Taipei",
+        "country": "Taiwan",
+        "countryIso2": "TW",
+        "admin1": "Taipei",
+        "lat": 25.033,
+        "lon": 121.5654,
+        "population": 2646204,
+        "scoreTotal": 78,
+        "scoreBreakdown": "{\"finance\":82,\"trade\":78,\"urban\":78,\"macro\":70}",
+        "rank": 15,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Taiwan Stock Exchange\",\"wikidataQid\":\"Q615023\"}],\"ports\":[{\"name\":\"Port of Keelung\",\"wikidataQid\":\"Q1415428\"}],\"airports\":[{\"name\":\"Taiwan Taoyuan International Airport\",\"wikidataQid\":\"Q39336\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q50\",\"overpassQuery\":\"node[amenity=bank](around:50000,25.033,121.5654)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q1085",
+      "geometry": { "type": "Point", "coordinates": [23.7275, 37.9838] },
+      "properties": {
+        "id": "wikidata-Q1085",
+        "name": "Athens",
+        "country": "Greece",
+        "countryIso2": "GR",
+        "admin1": "Attica",
+        "lat": 37.9838,
+        "lon": 23.7275,
+        "population": 664046,
+        "scoreTotal": 52,
+        "scoreBreakdown": "{\"finance\":55,\"trade\":52,\"urban\":68,\"macro\":38}",
+        "rank": 32,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Athens Stock Exchange\",\"wikidataQid\":\"Q1273614\"}],\"ports\":[{\"name\":\"Port of Piraeus\",\"wikidataQid\":\"Q923539\"}],\"airports\":[{\"name\":\"Athens International Airport\",\"wikidataQid\":\"Q164714\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q1085\",\"overpassQuery\":\"node[amenity=bank](around:50000,37.9838,23.7275)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3916",
+      "geometry": { "type": "Point", "coordinates": [-70.6693, -33.4489] },
+      "properties": {
+        "id": "wikidata-Q3916",
+        "name": "Santiago",
+        "country": "Chile",
+        "countryIso2": "CL",
+        "admin1": "Santiago Metropolitan",
+        "lat": -33.4489,
+        "lon": -70.6693,
+        "population": 5614000,
+        "scoreTotal": 62,
+        "scoreBreakdown": "{\"finance\":65,\"trade\":60,\"urban\":75,\"macro\":48}",
+        "rank": 24,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Santiago Exchange\",\"wikidataQid\":\"Q2638529\"}],\"ports\":[{\"name\":\"Port of Valparaíso\",\"wikidataQid\":\"Q2357946\"}],\"airports\":[{\"name\":\"Arturo Merino Benítez International Airport\",\"wikidataQid\":\"Q203120\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3916\",\"overpassQuery\":\"node[amenity=bank](around:50000,-33.4489,-70.6693)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3955",
+      "geometry": { "type": "Point", "coordinates": [-77.0428, -12.0464] },
+      "properties": {
+        "id": "wikidata-Q3955",
+        "name": "Lima",
+        "country": "Peru",
+        "countryIso2": "PE",
+        "admin1": "Lima",
+        "lat": -12.0464,
+        "lon": -77.0428,
+        "population": 9674755,
+        "scoreTotal": 52,
+        "scoreBreakdown": "{\"finance\":55,\"trade\":52,\"urban\":78,\"macro\":28}",
+        "rank": 32,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Lima Stock Exchange\",\"wikidataQid\":\"Q2638537\"}],\"ports\":[{\"name\":\"Port of Callao\",\"wikidataQid\":\"Q1579107\"}],\"airports\":[{\"name\":\"Jorge Chávez International Airport\",\"wikidataQid\":\"Q508209\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3955\",\"overpassQuery\":\"node[amenity=bank](around:50000,-12.0464,-77.0428)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    },
+    {
+      "type": "Feature",
+      "id": "wikidata-Q3761",
+      "geometry": { "type": "Point", "coordinates": [-6.2603, 53.3498] },
+      "properties": {
+        "id": "wikidata-Q3761",
+        "name": "Dublin",
+        "country": "Ireland",
+        "countryIso2": "IE",
+        "admin1": "Leinster",
+        "lat": 53.3498,
+        "lon": -6.2603,
+        "population": 554554,
+        "scoreTotal": 68,
+        "scoreBreakdown": "{\"finance\":72,\"trade\":68,\"urban\":62,\"macro\":72}",
+        "rank": 21,
+        "keyAssets": "{\"exchanges\":[{\"name\":\"Euronext Dublin\",\"wikidataQid\":\"Q1356571\"}],\"ports\":[{\"name\":\"Port of Dublin\",\"wikidataQid\":\"Q3119067\"}],\"airports\":[{\"name\":\"Dublin Airport\",\"wikidataQid\":\"Q191098\"}]}",
+        "sourceTrace": "{\"wikidataQid\":\"Q3761\",\"overpassQuery\":\"node[amenity=bank](around:50000,53.3498,-6.2603)\",\"worldBankIndicators\":[\"NY.GDP.MKTP.CD\",\"NE.TRD.GNFS.ZS\"],\"lastUpdated\":{\"wikidata\":1709424000000,\"overpass\":1709424000000,\"worldbank\":1709424000000}}",
+        "ts": 1709424000000
+      },
+      "ts": 1709424000000
+    }
+  ]
 }

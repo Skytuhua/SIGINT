@@ -12,6 +12,7 @@ import PanelHeader from "./panel/PanelHeader";
 import DataTable from "./table/DataTable";
 import Sparkline from "./charts/Sparkline";
 import LiveCctvPanel from "./LiveCctvPanel";
+import MarketsPanel from "./MarketsPanel";
 import { formatNumber, formatUtc } from "../../lib/dashboard/format";
 import {
   selectFeedItems,
@@ -488,6 +489,14 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
             health={health.spaceWeather}
             message="Levels: ALERT / WARNING / WATCH / INFO."
           />
+        </Panel>
+      ),
+    },
+    {
+      id: "markets",
+      node: (
+        <Panel panelId="markets">
+          <MarketsPanel />
         </Panel>
       ),
     },

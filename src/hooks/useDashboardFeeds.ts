@@ -700,7 +700,13 @@ export function useDashboardFeeds() {
       }
     };
 
-    const unregister = [
+    // Defer OPS feed registration by 10s to let news/RSS fetch first.
+    // On Windows, concurrent HTTPS connections at startup saturate TCP
+    // and cause mass timeouts. Staggering gives news feeds TCP priority.
+    const OPS_STARTUP_DELAY_MS = 10_000;
+    let unregister: Array<() => void> = [];
+    const delayTimer = setTimeout(() => {
+    unregister = [
       globalRefreshRuntime.register({
         pool: "ops",
         task: {
@@ -791,8 +797,10 @@ export function useDashboardFeeds() {
         message: "Dashboard feed subsystem online",
       });
     }
+    }, OPS_STARTUP_DELAY_MS);
 
     return () => {
+      clearTimeout(delayTimer);
       unregister.forEach((dispose) => dispose());
     };
   }, []);

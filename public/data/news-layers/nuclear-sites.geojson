@@ -1,80 +1,513 @@
 {
-    "type":  "FeatureCollection",
-    "features":  [
-                     {
-                         "type":  "Feature",
-                         "id":  "nuclear-sites-0",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              -77.04,
-                                                              38.9
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "nuclear-sites site 0",
-                                            "ts":  1772435598910
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "nuclear-sites-1",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              2.35,
-                                                              48.86
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "nuclear-sites site 1",
-                                            "ts":  1772435598910
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "nuclear-sites-2",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              139.76,
-                                                              35.68
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "nuclear-sites site 2",
-                                            "ts":  1772435598910
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "nuclear-sites-3",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              55.27,
-                                                              25.2
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "nuclear-sites site 3",
-                                            "ts":  1772435598910
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "nuclear-sites-4",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              -46.63,
-                                                              -23.55
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "nuclear-sites site 4",
-                                            "ts":  1772435598910
-                                        }
-                     }
-                 ]
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-0",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-97.8, 32.3]
+      },
+      "properties": {
+        "name": "Comanche Peak",
+        "facilityType": "nuclear",
+        "country": "US",
+        "capacity": "2430 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-101.57, 35.31]
+      },
+      "properties": {
+        "name": "Pantex",
+        "facilityType": "nuclear",
+        "country": "US",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-2",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-112.86, 33.39]
+      },
+      "properties": {
+        "name": "Palo Verde",
+        "facilityType": "nuclear",
+        "country": "US",
+        "capacity": "3937 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-3",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-96.05, 28.8]
+      },
+      "properties": {
+        "name": "South Texas Project",
+        "facilityType": "nuclear",
+        "country": "US",
+        "capacity": "2710 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-4",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-81.76, 33.14]
+      },
+      "properties": {
+        "name": "Vogtle",
+        "facilityType": "nuclear",
+        "country": "US",
+        "capacity": "4600 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-5",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.13, 51.21]
+      },
+      "properties": {
+        "name": "Hinkley Point C",
+        "facilityType": "nuclear",
+        "country": "GB",
+        "capacity": "3260 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-6",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [1.62, 52.21]
+      },
+      "properties": {
+        "name": "Sizewell B",
+        "facilityType": "nuclear",
+        "country": "GB",
+        "capacity": "1198 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-7",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.5, 54.42]
+      },
+      "properties": {
+        "name": "Sellafield",
+        "facilityType": "nuclear",
+        "country": "GB",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-8",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.1, 51.0]
+      },
+      "properties": {
+        "name": "Gravelines",
+        "facilityType": "nuclear",
+        "country": "FR",
+        "capacity": "5460 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-9",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.22, 49.41]
+      },
+      "properties": {
+        "name": "Cattenom",
+        "facilityType": "nuclear",
+        "country": "FR",
+        "capacity": "5448 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-10",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.88, 49.54]
+      },
+      "properties": {
+        "name": "Flamanville",
+        "facilityType": "nuclear",
+        "country": "FR",
+        "capacity": "2660 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-11",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [112.98, 21.91]
+      },
+      "properties": {
+        "name": "Taishan",
+        "facilityType": "nuclear",
+        "country": "CN",
+        "capacity": "3480 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-12",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [112.26, 21.71]
+      },
+      "properties": {
+        "name": "Yangjiang",
+        "facilityType": "nuclear",
+        "country": "CN",
+        "capacity": "6000 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-13",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [114.55, 22.6]
+      },
+      "properties": {
+        "name": "Daya Bay",
+        "facilityType": "nuclear",
+        "country": "CN",
+        "capacity": "1968 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-14",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [138.6, 37.43]
+      },
+      "properties": {
+        "name": "Kashiwazaki-Kariwa",
+        "facilityType": "nuclear",
+        "country": "JP",
+        "capacity": "7965 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-15",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [135.66, 35.54]
+      },
+      "properties": {
+        "name": "Ohi",
+        "facilityType": "nuclear",
+        "country": "JP",
+        "capacity": "4710 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-16",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.71, 8.17]
+      },
+      "properties": {
+        "name": "Kudankulam",
+        "facilityType": "nuclear",
+        "country": "IN",
+        "capacity": "4000 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-17",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [72.63, 19.83]
+      },
+      "properties": {
+        "name": "Tarapur",
+        "facilityType": "nuclear",
+        "country": "IN",
+        "capacity": "1400 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-18",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [29.05, 59.84]
+      },
+      "properties": {
+        "name": "Leningrad Nuclear",
+        "facilityType": "nuclear",
+        "country": "RU",
+        "capacity": "4600 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-19",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [39.22, 51.28]
+      },
+      "properties": {
+        "name": "Novovoronezh",
+        "facilityType": "nuclear",
+        "country": "RU",
+        "capacity": "3720 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-20",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [35.61, 51.67]
+      },
+      "properties": {
+        "name": "Kursk Nuclear",
+        "facilityType": "nuclear",
+        "country": "RU",
+        "capacity": "4800 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-21",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [34.59, 47.51]
+      },
+      "properties": {
+        "name": "Zaporizhzhia",
+        "facilityType": "nuclear",
+        "country": "UA",
+        "capacity": "5700 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-22",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [25.9, 51.33]
+      },
+      "properties": {
+        "name": "Rivne",
+        "facilityType": "nuclear",
+        "country": "UA",
+        "capacity": "2880 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-23",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [31.22, 47.81]
+      },
+      "properties": {
+        "name": "South Ukraine",
+        "facilityType": "nuclear",
+        "country": "UA",
+        "capacity": "3000 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-24",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-44.46, -23.0]
+      },
+      "properties": {
+        "name": "Angra Nuclear",
+        "facilityType": "nuclear",
+        "country": "BR",
+        "capacity": "1990 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-25",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [35.14, 31.0]
+      },
+      "properties": {
+        "name": "Dimona (research)",
+        "facilityType": "nuclear",
+        "country": "IL",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-26",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [129.28, 35.32]
+      },
+      "properties": {
+        "name": "Kori/Shin Kori",
+        "facilityType": "nuclear",
+        "country": "KR",
+        "capacity": "7489 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-27",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [126.42, 35.41]
+      },
+      "properties": {
+        "name": "Hanbit",
+        "facilityType": "nuclear",
+        "country": "KR",
+        "capacity": "5875 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-28",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-81.6, 44.33]
+      },
+      "properties": {
+        "name": "Bruce Nuclear",
+        "facilityType": "nuclear",
+        "country": "CA",
+        "capacity": "6232 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-29",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-78.72, 43.87]
+      },
+      "properties": {
+        "name": "Darlington",
+        "facilityType": "nuclear",
+        "country": "CA",
+        "capacity": "3512 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-30",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [150.98, -34.05]
+      },
+      "properties": {
+        "name": "Lucas Heights (research)",
+        "facilityType": "nuclear",
+        "country": "AU",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nuclear-sites-31",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [120.75, 21.96]
+      },
+      "properties": {
+        "name": "Maanshan",
+        "facilityType": "nuclear",
+        "country": "TW",
+        "capacity": "1930 MW",
+        "source": "WorldView infrastructure snapshot",
+        "ts": 1700000000000
+      }
+    }
+  ]
 }

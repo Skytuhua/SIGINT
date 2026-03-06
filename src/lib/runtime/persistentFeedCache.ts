@@ -28,6 +28,8 @@ const MEMORY_LIMIT = 32;
 let memory = new Map<string, PersistentFeedCacheEntry<unknown>>();
 let memoryOrder: string[] = [];
 let idb: FeedCacheIndexDb | null = null;
+// Deduplicates concurrent getDb() callers so only one indexedDB.open() is issued.
+let idbPending: Promise<IDBDatabase | null> | null = null;
 
 function isBrowser(): boolean {
   return typeof window !== "undefined";
@@ -64,36 +66,31 @@ function createChecksum(value: unknown): string {
 
 async function getDb(): Promise<IDBDatabase | null> {
   if (!isBrowser() || typeof indexedDB === "undefined") return null;
-  if (idb) {
-    await idb.ready;
-    return idb.db;
-  }
+  if (idb) return idb.db;
+  // All concurrent callers share the same open request.
+  if (idbPending) return idbPending;
 
-  let resolveReady: () => void = () => {};
-  const ready = new Promise<void>((resolve) => {
-    resolveReady = resolve;
+  idbPending = new Promise<IDBDatabase | null>((resolve) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: "cacheKey" });
+      }
+    };
+    request.onsuccess = () => {
+      const db = request.result;
+      idb = { db, ready: Promise.resolve() };
+      idbPending = null;
+      resolve(db);
+    };
+    request.onerror = () => {
+      idbPending = null;
+      resolve(null);
+    };
   });
 
-  const request = indexedDB.open(DB_NAME, DB_VERSION);
-  request.onupgradeneeded = () => {
-    const db = request.result;
-    if (!db.objectStoreNames.contains(STORE_NAME)) {
-      db.createObjectStore(STORE_NAME, { keyPath: "cacheKey" });
-    }
-  };
-
-  request.onsuccess = () => {
-    const db = request.result;
-    idb = { db, ready };
-    resolveReady();
-  };
-
-  request.onerror = () => {
-    resolveReady();
-  };
-
-  await ready;
-  return idb?.db ?? null;
+  return idbPending;
 }
 
 function readStore<T>(

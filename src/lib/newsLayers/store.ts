@@ -1,15 +1,17 @@
-import type { LayerFeatureCollection, LayerHealthState } from "./types";
+import type { LayerFeature, LayerFeatureCollection, LayerHealthState } from "./types";
 
 interface LayerStoreState {
   enabled: Record<string, boolean>;
   data: Record<string, LayerFeatureCollection | null>;
   health: Record<string, LayerHealthState>;
+  clickHandlers: Record<string, ((feature: LayerFeature) => void) | undefined>;
 }
 
 const state: LayerStoreState = {
   enabled: {},
   data: {},
   health: {},
+  clickHandlers: {},
 };
 
 export function setLayerEnabled(layerId: string, enabled: boolean): void {
@@ -36,8 +38,26 @@ export function isLayerEnabled(layerId: string): boolean {
   return state.enabled[layerId] === true;
 }
 
+export function setLayerClickHandler(
+  layerId: string,
+  handler: ((feature: LayerFeature) => void) | null
+): void {
+  if (handler) {
+    state.clickHandlers[layerId] = handler;
+  } else {
+    delete state.clickHandlers[layerId];
+  }
+}
+
+export function getLayerClickHandler(
+  layerId: string
+): ((feature: LayerFeature) => void) | undefined {
+  return state.clickHandlers[layerId];
+}
+
 export function resetLayerStore(): void {
   state.enabled = {};
   state.data = {};
   state.health = {};
+  state.clickHandlers = {};
 }

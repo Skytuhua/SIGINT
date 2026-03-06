@@ -295,7 +295,7 @@ export async function renderEarthquakes(
       id: { type: 'earthquake', id: q.id, data: q },
       scaleByDistance: new Cesium.NearFarScalar(5e3, 1.4, 1.2e7, 0.45),
       translucencyByDistance: new Cesium.NearFarScalar(5e3, 1.0, 1.5e7, 0.6),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      disableDepthTestDistance: 3_000_000,
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
       heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
     });
@@ -379,7 +379,7 @@ export async function renderDisasterAlerts(
         mutable.billboard.image = createDotCanvas(6, color);
         mutable.billboard.verticalOrigin = Cesium.VerticalOrigin.BOTTOM;
         mutable.billboard.heightReference = Cesium.HeightReference.RELATIVE_TO_GROUND;
-        mutable.billboard.disableDepthTestDistance = Number.POSITIVE_INFINITY;
+        mutable.billboard.disableDepthTestDistance = 3_000_000;
       }
       if (mutable.label) {
         mutable.label.text = labelText;
@@ -394,7 +394,7 @@ export async function renderDisasterAlerts(
         image: createDotCanvas(6, color),
           verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
           heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
-          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          disableDepthTestDistance: 3_000_000,
         scaleByDistance: new Cesium.NearFarScalar(100_000, 1.4, 18_000_000, 0.36),
       },
       label: {
@@ -1106,4 +1106,55 @@ function hexToRgb(hex: string): [number, number, number] {
 
 function defaultCal(): CameraCalibration {
   return { heading: 0, pitch: -15, fov: 60, range: 200, height: 5, northM: 0, eastM: 0 };
+}
+
+// ── Trade Routes layer ───────────────────────────────────────────────────
+
+import {
+  renderTradeRoutes,
+  identifyTradeRoutePick,
+  type TradeRouteRenderOptions,
+  type TradeRouteLayerHandle,
+} from "./tradeRoutes/render";
+
+export type { TradeRouteLayerHandle, TradeRouteRenderOptions };
+export { identifyTradeRoutePick };
+
+let activeTradeRouteHandle: TradeRouteLayerHandle | null = null;
+
+export async function renderTradeRoutesLayer(
+  viewer: import("cesium").Viewer,
+  options: TradeRouteRenderOptions
+): Promise<TradeRouteLayerHandle | null> {
+  clearTradeRoutesLayer(viewer);
+  if (!isViewerAlive(viewer)) return null;
+  const handle = await renderTradeRoutes(viewer, options);
+  activeTradeRouteHandle = handle;
+
+  const map = getLayerMap(viewer);
+  if (handle) {
+    map.set("trade_routes", {
+      remove: () => {
+        handle.remove();
+        activeTradeRouteHandle = null;
+      },
+    });
+  }
+
+  return handle;
+}
+
+export function clearTradeRoutesLayer(viewer: import("cesium").Viewer): void {
+  clearLayer(viewer, "trade_routes");
+  activeTradeRouteHandle = null;
+}
+
+export function getActiveTradeRouteHandle(): TradeRouteLayerHandle | null {
+  return activeTradeRouteHandle;
+}
+
+export function tickTradeRouteAnimation(frameNumber: number): void {
+  if (activeTradeRouteHandle) {
+    activeTradeRouteHandle.tick(frameNumber);
+  }
 }

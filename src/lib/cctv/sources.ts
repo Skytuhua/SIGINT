@@ -106,8 +106,10 @@ async function fetchStaticCameras(): Promise<CctvCamera[]> {
 }
 
 /**
- * Fetch cameras from OpenTrafficCamMap + local static fallback.
- * Static entries win on ID collision.
+ * Fetch cameras from OpenTrafficCamMap + YouTube Live API + static fallback.
+ * When YouTube API returns results, they are the sole YouTube source (no static
+ * YouTube entries) to avoid duplicates and non-live streams. When API fails or
+ * returns few items, static YouTube entries are used as fallback.
  */
 export async function fetchAllCctvCameras(): Promise<CctvCamera[]> {
   const [staticCams, otcCams, youtubeCams] = await Promise.all([
@@ -118,8 +120,17 @@ export async function fetchAllCctvCameras(): Promise<CctvCamera[]> {
 
   const byId = new Map<string, CctvCamera>();
   for (const cam of otcCams) byId.set(cam.id, cam);
-  for (const cam of staticCams) byId.set(cam.id, cam);
-  for (const cam of youtubeCams) byId.set(cam.id, cam);
+
+  const hasYoutubeFromApi = youtubeCams.length > 0;
+
+  if (hasYoutubeFromApi) {
+    for (const cam of youtubeCams) byId.set(cam.id, cam);
+    for (const cam of staticCams) {
+      if (cam.streamFormat !== "YOUTUBE") byId.set(cam.id, cam);
+    }
+  } else {
+    for (const cam of staticCams) byId.set(cam.id, cam);
+  }
 
   return Array.from(byId.values());
 }

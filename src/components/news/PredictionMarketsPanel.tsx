@@ -41,7 +41,7 @@ export default function PredictionMarketsPanel({ panelId, lockHeaderProps }: Pre
     setLoading(true);
     setError(null);
     try {
-      const resp = await fetch("/api/news/prediction-markets?limit=20");
+      const resp = await fetch("/api/news/prediction-markets?limit=50");
       if (!resp.ok) throw new Error(`Request failed with status ${resp.status}`);
       const json = (await resp.json()) as PredictionMarketsResponse;
       setMarkets(Array.isArray(json.data) ? json.data : []);
@@ -68,7 +68,7 @@ export default function PredictionMarketsPanel({ panelId, lockHeaderProps }: Pre
       />
       <PanelBody>
         <div className="wv-pm-list">
-          {markets.slice(0, 20).map((market) => {
+          {markets.map((market) => {
             const { yesPct, noPct } = normalizeMarketSplit(market.yesPrice, market.noPrice);
             return (
               <article key={market.id} className="wv-pm-card">

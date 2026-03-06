@@ -94,29 +94,5 @@
     "streamUrl": "https://www.youtube.com/embed/7V2wQ6G2Z0s?autoplay=1&mute=1&controls=0&rel=0",
     "streamFormat": "YOUTUBE",
     "region": "asia"
-  },
-  {
-    "id": "yt_sydney_harbour",
-    "city": "Sydney",
-    "name": "Sydney Harbour Live",
-    "lat": -33.8523,
-    "lon": 151.2108,
-    "snapshotUrl": "https://img.youtube.com/vi/VIDEO_ID_SYDNEY/hqdefault.jpg",
-    "refreshSeconds": 60,
-    "streamUrl": "https://www.youtube.com/embed/VIDEO_ID_SYDNEY?autoplay=1&mute=1&controls=0&rel=0",
-    "streamFormat": "YOUTUBE",
-    "region": "asia"
-  },
-  {
-    "id": "yt_hong_kong",
-    "city": "Hong Kong",
-    "name": "Hong Kong Skyline Live",
-    "lat": 22.2783,
-    "lon": 114.1747,
-    "snapshotUrl": "https://img.youtube.com/vi/VIDEO_ID_HONGKONG/hqdefault.jpg",
-    "refreshSeconds": 60,
-    "streamUrl": "https://www.youtube.com/embed/VIDEO_ID_HONGKONG?autoplay=1&mute=1&controls=0&rel=0",
-    "streamFormat": "YOUTUBE",
-    "region": "asia"
   }
 ]

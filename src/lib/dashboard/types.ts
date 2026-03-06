@@ -11,7 +11,7 @@ import type {
 } from "../providers/types";
 import type { ColumnFiltersState, ColumnSizingState, SortingState } from "@tanstack/react-table";
 
-export type DashboardView = "ops" | "news";
+export type DashboardView = "ops" | "news" | "market";
 // Kept for persistence compatibility. Runtime is enforced to "ultra".
 export type DashboardDensity = "comfortable" | "dense" | "ultra";
 export type InspectorTab = "summary" | "history" | "related" | "notes";

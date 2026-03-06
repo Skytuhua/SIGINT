@@ -5,6 +5,21 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const result = await executeNewsSearch(searchParams);
 
+  const cacheControl = "public, max-age=5, s-maxage=15, stale-while-revalidate=30";
+  const serverTiming = Object.entries(result.backendLatency ?? {})
+    .filter(([, dur]) => typeof dur === "number" && Number.isFinite(dur) && dur >= 0)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(0, 12)
+    .map(([name, dur]) => `${name};dur=${Math.round(dur)}`);
+
+  const headers: Record<string, string> = {
+    "Cache-Control": cacheControl,
+  };
+  if (serverTiming.length) {
+    headers["Server-Timing"] = serverTiming.join(", ");
+    headers["Timing-Allow-Origin"] = "*";
+  }
+
   return NextResponse.json(
     {
       items: result.items,
@@ -21,6 +36,6 @@ export async function GET(request: Request) {
       queryEcho: result.queryEcho,
       timeline: result.timeline,
     },
-    { headers: { "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30" } }
+    { headers }
   );
 }

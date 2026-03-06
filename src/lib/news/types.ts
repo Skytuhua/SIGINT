@@ -20,11 +20,16 @@ export type NewsCategory =
   | "local"
   | "filings"
   | "watchlist"
-  | "government";
+  | "government"
+  | "forex"
+  | "commodities"
+  | "fintech"
+  | "regulation"
+  | "institutional";
 
 export type CoordSource = "gdelt" | "gdelt-geo" | "wikidata" | "nominatim" | "none";
 
-export type BackendSource = "gdelt" | "rss" | "sec" | "wikidata" | "youtube" | "derived";
+export type BackendSource = "gdelt" | "rss" | "sec" | "wikidata" | "youtube" | "newsapi" | "derived" | "hn" | "wikimedia";
 
 export interface NewsProvenance {
   headlineSource: BackendSource;
@@ -211,6 +216,7 @@ export interface QueryRoutingPlan {
   useSec: boolean;
   useWikidata: boolean;
   useYoutube: boolean;
+  useNewsApi: boolean;
   reasons: string[];
 }
 

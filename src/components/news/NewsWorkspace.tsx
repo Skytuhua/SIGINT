@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { CATEGORY_LABELS, CATEGORY_PANEL_CONFIGS, LIVE_VIDEO_PANELS, NEWS_VIDEO_CHANNELS, PRESET_QUERIES } from "../../config/newsConfig";
 import CategoryFeedPanel from "./CategoryFeedPanel";
+import NewsTickerBar from "./NewsTickerBar";
 import { makeFingerprint } from "../../lib/news/engine/dedupe";
 import { InMemoryNewsIndex } from "../../lib/news/index/inMemoryIndex";
 import { parseQuery } from "../../lib/news/query/parse";
@@ -28,16 +29,50 @@ import {
   writePersistentFeedCache,
 } from "../../lib/runtime/persistentFeedCache";
 import { useWorldViewStore } from "../../store";
+import { shallow } from "zustand/shallow";
+import { List } from "react-window";
+import { perfMark, perfMeasure, startJankSampler, stopJankSampler } from "../../lib/news/perf";
 import Panel from "../dashboard/panel/Panel";
 import PanelBody from "../dashboard/panel/PanelBody";
 import PanelControls from "../dashboard/panel/PanelControls";
 import PanelFooter from "../dashboard/panel/PanelFooter";
 import PanelHeader from "../dashboard/panel/PanelHeader";
+import dynamic from "next/dynamic";
 import NewsDraggableGrid from "./NewsDraggableGrid";
 import NewsPopupModal from "./NewsPopupModal";
-import MapLibreNewsMap from "./MapLibreNewsMap";
-import LiveVideoPanel from "./LiveVideoPanel";
-import PredictionMarketsPanel from "./PredictionMarketsPanel";
+
+const PanelSkeleton = () => (
+  <div className="wv-panel-state" style={{ padding: 8 }}>
+    <div className="wv-skeleton-block" />
+    <div className="wv-skeleton-row" />
+    <div className="wv-skeleton-row" />
+  </div>
+);
+
+const MapLibreNewsMap = dynamic(() => import("./MapLibreNewsMap"), {
+  ssr: false,
+  loading: PanelSkeleton,
+});
+const NewsWorldMap = dynamic(() => import("./NewsWorldMap"), {
+  ssr: false,
+  loading: PanelSkeleton,
+});
+const TerminalFeedPanel = dynamic(() => import("./TerminalFeedPanel"), {
+  ssr: false,
+  loading: PanelSkeleton,
+});
+const LiveVideoPanel = dynamic(() => import("./LiveVideoPanel"), {
+  ssr: false,
+  loading: PanelSkeleton,
+});
+const PredictionMarketsPanel = dynamic(() => import("./PredictionMarketsPanel"), {
+  ssr: false,
+  loading: PanelSkeleton,
+});
+const CompliancePanel = dynamic(() => import("./CompliancePanel"), {
+  ssr: false,
+  loading: PanelSkeleton,
+});
 
 const NEWS_REFRESH_MS = 6_000;
 const VIDEO_REFRESH_MS = 75_000;
@@ -45,6 +80,7 @@ const NEWS_TERMINAL_TICK_MS = 1_000;
 const NEWS_TAPE_TICK_MS = 2_000;
 const NEWS_RETENTION_MS = 24 * 60 * 60_000;
 const NEWS_RETENTION_MAX_ITEMS = 1200;
+const LIVE_CUTOFF_MS = 15 * 60 * 1000; // items newer than this = "live" (terminal); older = category panels
 
 const QUERY_HINT_ITEMS = [
   { chip: "sym:", hint: "Stock ticker", example: "sym:AAPL" },
@@ -98,6 +134,23 @@ const EMPTY_FACETS: NewsFacetState = {
   coordAvailability: [],
 };
 
+interface NewsMapOverlayProps {
+  ready: boolean;
+}
+
+function NewsMapOverlay({ ready }: NewsMapOverlayProps) {
+  return (
+    <>
+      <div className="wv-news-globe-overlay wv-news-globe-overlay-top">
+        <span>{ready ? "NEWS MAP READY" : "INITIALIZING NEWS MAP..."}</span>
+      </div>
+      <div className="wv-news-globe-overlay wv-news-globe-overlay-bottom">
+        <span>2D world map with news event markers</span>
+      </div>
+    </>
+  );
+}
+
 const VIDEO_CATEGORY_CHANNEL_IDS = new Map<VideoPanelCategory, Set<string>>();
 for (const channel of NEWS_VIDEO_CHANNELS) {
   const categories = channel.categories ?? ["general"];
@@ -110,6 +163,14 @@ for (const channel of NEWS_VIDEO_CHANNELS) {
 function sortYouTubeStreamsLiveFirst(items: YouTubeLive[]): YouTubeLive[] {
   return [...items].sort((a, b) => {
     if (a.status !== b.status) return a.status === "live" ? -1 : 1;
+
+    // For live streams, prefer higher viewer counts when available.
+    if (a.status === "live" && b.status === "live") {
+      const aViewers = a.viewerCount ?? -1;
+      const bViewers = b.viewerCount ?? -1;
+      if (aViewers !== bViewers) return bViewers - aViewers;
+    }
+
     const aTs = Date.parse(a.publishedAt ?? "");
     const bTs = Date.parse(b.publishedAt ?? "");
     if (Number.isFinite(aTs) && Number.isFinite(bTs)) return bTs - aTs;
@@ -209,6 +270,7 @@ async function writeNewsCache(data: PersistedNewsCache): Promise<void> {
 interface FetchJsonOptions {
   key?: string;
   signal?: AbortSignal;
+  cache?: RequestCache;
   timeoutMs?: number;
   retries?: number;
   negativeTtlMs?: number;
@@ -218,6 +280,7 @@ async function fetchJson<T>(url: string, options: FetchJsonOptions = {}): Promis
   return fetchJsonWithPolicy<T>(url, {
     key: options.key ?? url,
     signal: options.signal,
+    cache: options.cache,
     timeoutMs: options.timeoutMs ?? 15_000,
     retries: options.retries ?? 1,
     backoffBaseMs: 400,
@@ -296,7 +359,8 @@ function playAlertTone() {
 }
 
 function formatShortTime(ts: number): string {
-  return new Date(ts).toISOString().slice(11, 19);
+  const d = new Date(ts);
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 }
 
 
@@ -311,7 +375,7 @@ function buildSearchUrl(
 ) {
   const params = new URLSearchParams();
   params.set("q", query);
-  params.set("limit", String(options.limit ?? 180));
+  params.set("limit", String(options.limit ?? 500));
   params.set("mode", options.mode ?? "pointdata");
   if (options.inView && options.bbox) {
     params.set("inView", "true");
@@ -439,9 +503,79 @@ function widenTimespan(query: string): string {
   return stringifyQueryAst(ast);
 }
 
+interface SearchOverlayRowProps {
+  items: NormalizedNewsItem[];
+  selectedItemId: string | null;
+  markersRef: GeoMarker[];
+  onRowClick: (idx: number, item: NormalizedNewsItem, markerId: string | null) => void;
+  onRowContextMenu: (item: NormalizedNewsItem) => void;
+}
+
+function SearchOverlayRow({
+  index,
+  style,
+  items,
+  selectedItemId,
+  markersRef,
+  onRowClick,
+  onRowContextMenu,
+}: { index: number; style: React.CSSProperties } & SearchOverlayRowProps) {
+  const item = items[index];
+  if (!item) return null;
+  return (
+    <div
+      style={style}
+      className={`wv-news-terminal-row ${item.id === selectedItemId ? "is-selected" : ""}`.trim()}
+      onClick={() => {
+        const marker = markersRef.find((m) => m.articleId === item.id);
+        onRowClick(index, item, marker?.id ?? null);
+      }}
+      onContextMenu={(event) => {
+        event.preventDefault();
+        onRowContextMenu(item);
+      }}
+      role="row"
+    >
+      <span className="wv-news-terminal-cell wv-col-time">{formatShortTime(item.publishedAt)}</span>
+      <span className="wv-news-terminal-cell wv-col-source">{item.source}</span>
+      <span className="wv-news-terminal-cell wv-col-entity">{extractEntity(item)}</span>
+      <span className="wv-news-terminal-cell wv-col-region">{extractRegion(item)}</span>
+      <span className="wv-news-terminal-cell wv-col-headline">{item.headline}</span>
+      <span className="wv-news-terminal-cell wv-col-score">{Math.round(item.score)}</span>
+    </div>
+  );
+}
+
 export default function NewsWorkspace({ embedded = false }: { embedded?: boolean }) {
+  perfMark("news:mount:start");
+
   const dashboardView = useWorldViewStore((s) => s.dashboard.activeView);
-  const news = useWorldViewStore((s) => s.news);
+  const news = useWorldViewStore(
+    (s) => ({
+      query: s.news.query,
+      feedItems: s.news.feedItems,
+      selectedStoryId: s.news.selectedStoryId,
+      highlightedMarkerId: s.news.highlightedMarkerId,
+      storyPopupArticle: s.news.storyPopupArticle,
+      savedSearches: s.news.savedSearches,
+      alerts: s.news.alerts,
+      mutedSources: s.news.mutedSources,
+      panelLayouts: s.news.panelLayouts,
+      panelVisibility: s.news.panelVisibility,
+      panelLocks: s.news.panelLocks,
+      categoryPanelHasArticles: s.news.categoryPanelHasArticles,
+      ui: s.news.ui,
+      video: s.news.video,
+      searchInView: s.news.searchInView,
+      cameraBounds: s.news.cameraBounds,
+      headlineTape: s.news.headlineTape,
+      backendHealth: s.news.backendHealth,
+      lastUpdated: s.news.lastUpdated,
+      markers: s.news.markers,
+      queryState: s.news.queryState,
+    }),
+    shallow,
+  );
 
   const setNewsQuery = useWorldViewStore((s) => s.setNewsQuery);
   const setNewsQueryAst = useWorldViewStore((s) => s.setNewsQueryAst);
@@ -511,6 +645,8 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   const terminalItemsRef = useRef<NormalizedNewsItem[]>([]);
   const terminalBodyRef = useRef<HTMLDivElement | null>(null);
   const [terminalVersion, setTerminalVersion] = useState(0);
+  const [liveTick, setLiveTick] = useState(0);
+  const [clockTick, setClockTick] = useState(0);
   const searchContextRef = useRef({
     query: news.query,
     searchInView: news.searchInView,
@@ -533,6 +669,26 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   useEffect(() => {
     alertsRef.current = news.alerts;
   }, [news.alerts]);
+
+  const ttiMeasuredRef = useRef(false);
+  useEffect(() => {
+    if (ttiMeasuredRef.current) return;
+    ttiMeasuredRef.current = true;
+    perfMark("news:tti");
+    perfMeasure("news:tti", "news:mount:start", "news:tti");
+    startJankSampler();
+    return () => stopJankSampler();
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => setLiveTick((t) => t + 1), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => setClockTick((t) => t + 1), 1_000);
+    return () => clearInterval(id);
+  }, []);
 
   const enqueueTerminalIds = useCallback((ids: string[]) => {
     if (!ids.length) return;
@@ -666,12 +822,14 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     return bySource.filter((item) => item.category === activeCategory);
   }, [feedItems, activeCategory, news.mutedSources]);
 
+  const liveCutoff = Date.now() - LIVE_CUTOFF_MS;
   const terminalItems = useMemo(() => {
+    const live = filteredItems.filter((item) => item.publishedAt >= liveCutoff);
     const order = new Map<string, number>();
     terminalOrderRef.current.forEach((id, index) => {
       order.set(id, index);
     });
-    return [...filteredItems].sort((a, b) => {
+    return [...live].sort((a, b) => {
       const ai = order.get(a.id);
       const bi = order.get(b.id);
       if (ai != null && bi != null && ai !== bi) return ai - bi;
@@ -679,11 +837,18 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       if (ai == null && bi != null) return 1;
       return compareNewsItems(a, b);
     });
-  }, [filteredItems, terminalVersion]);
+  }, [filteredItems, terminalVersion, liveTick]);
 
   useEffect(() => {
     terminalItemsRef.current = terminalItems;
   }, [terminalItems]);
+
+  useEffect(() => {
+    if (terminalVersion === 0) return;
+    const el = terminalBodyRef.current;
+    if (!el || el.scrollTop > 50) return;
+    el.scrollTop = 0;
+  }, [terminalVersion]);
 
   const selectedItem = useMemo(() => {
     if (!terminalItems.length) return null;
@@ -724,6 +889,16 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     const anyDegraded = Object.values(newsBackendHealth).some((v) => v === "degraded");
     if (anyDegraded) return "Some sources delayed";
     return undefined;
+  }, [newsBackendHealth]);
+
+  const newsPollSettings = useMemo(() => {
+    const anyDegraded = Object.values(newsBackendHealth).some(
+      (v) => v === "degraded" || v === "error"
+    );
+    return {
+      intervalMs: anyDegraded ? 14_000 : NEWS_REFRESH_MS,
+      hiddenIntervalMultiplier: anyDegraded ? 4 : 3,
+    };
   }, [newsBackendHealth]);
 
   const hasAnyVideoPanelVisible = useMemo(
@@ -957,6 +1132,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
             {
               key: `news:search:${attempt.id}:${attempt.mode}:${attempt.inView ? "inview" : "all"}:${attempt.query}`,
               signal: controller.signal,
+              cache: reason === "poll" ? "default" : "no-store",
               timeoutMs: 18_000,
               retries: 1,
               negativeTtlMs: 1_000,
@@ -1246,10 +1422,10 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       pool: "news",
       task: {
       key: "news:search-poll",
-      intervalMs: NEWS_REFRESH_MS,
-      runOnStart: false,
+      intervalMs: newsPollSettings.intervalMs,
+      runOnStart: true,
       jitterPct: 0.14,
-      hiddenIntervalMultiplier: 3,
+      hiddenIntervalMultiplier: newsPollSettings.hiddenIntervalMultiplier,
       timeoutMs: 20_000,
       run: async () => {
         await runSearch("poll");
@@ -1259,7 +1435,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     return () => {
       disposePoll();
     };
-  }, [dashboardView, runSearch]);
+  }, [dashboardView, runSearch, newsPollSettings.hiddenIntervalMultiplier, newsPollSettings.intervalMs]);
 
   useEffect(() => {
     if (dashboardView !== "news" || !hasAnyVideoPanelVisible) {
@@ -1291,42 +1467,57 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     if (!liveStreams.length) return;
 
     const byPanel = news.video.byPanel ?? {};
-    const visibleVideoPanels = LIVE_VIDEO_PANELS.filter((cfg) => news.panelVisibility[cfg.id] !== false);
-    const usedVideoIds = new Set<string>();
+    const visibleVideoPanels = LIVE_VIDEO_PANELS.filter(
+      (cfg) => news.panelVisibility[cfg.id] !== false
+    );
 
-    for (const cfg of visibleVideoPanels) {
-      const panelState = byPanel[cfg.id] ?? {
-        selectedVideoId: null,
-        selectedChannelFilter: null,
-        manualUrl: "",
-      };
+    // Resolve each panel's candidate list and current selection validity.
+    type PanelInfo = {
+      cfg: (typeof LIVE_VIDEO_PANELS)[number];
+      panelState: { selectedVideoId: string | null; selectedChannelFilter: string | null; manualUrl: string };
+      orderedCandidates: YouTubeLive[];
+      currentValid: boolean;
+      filterNeedsReset: boolean;
+    };
+    const panels: PanelInfo[] = visibleVideoPanels.map((cfg) => {
+      const ps = byPanel[cfg.id] ?? { selectedVideoId: null, selectedChannelFilter: null, manualUrl: "" };
       const channelIds = VIDEO_CATEGORY_CHANNEL_IDS.get(cfg.category) ?? new Set<string>();
-      const baseCandidates = liveStreams.filter((stream) => channelIds.has(stream.channelId));
-      const selectedFilterStillValid =
-        !!panelState.selectedChannelFilter &&
-        baseCandidates.some((stream) => stream.channelId === panelState.selectedChannelFilter);
-      let candidates = baseCandidates;
-      if (selectedFilterStillValid) {
-        candidates = baseCandidates.filter((stream) => stream.channelId === panelState.selectedChannelFilter);
+      const baseCandidates = liveStreams.filter((s) => channelIds.has(s.channelId));
+      const filterValid =
+        !!ps.selectedChannelFilter && baseCandidates.some((s) => s.channelId === ps.selectedChannelFilter);
+      const candidates = filterValid
+        ? baseCandidates.filter((s) => s.channelId === ps.selectedChannelFilter)
+        : baseCandidates;
+      const ordered = uniqueStreamsByVideoId(sortYouTubeStreamsLiveFirst(candidates));
+      const currentValid = Boolean(ps.selectedVideoId && ordered.some((s) => s.videoId === ps.selectedVideoId));
+      return { cfg, panelState: ps, orderedCandidates: ordered, currentValid, filterNeedsReset: !!ps.selectedChannelFilter && !filterValid };
+    });
+
+    // Pass 1: collect videos from panels with valid, unique selections.
+    const usedVideoIds = new Set<string>();
+    const needsAutoPick: PanelInfo[] = [];
+    for (const p of panels) {
+      if (p.currentValid && !usedVideoIds.has(p.panelState.selectedVideoId!)) {
+        usedVideoIds.add(p.panelState.selectedVideoId!);
+      } else {
+        needsAutoPick.push(p);
       }
-      const orderedCandidates = uniqueStreamsByVideoId(sortYouTubeStreamsLiveFirst(candidates));
-      const current = panelState.selectedVideoId;
-      const currentIsUsable = Boolean(
-        current &&
-          orderedCandidates.some((stream) => stream.videoId === current) &&
-          !usedVideoIds.has(current)
-      );
-      const nextVideoId =
-        currentIsUsable
-          ? current
-          : (orderedCandidates.find((stream) => !usedVideoIds.has(stream.videoId))?.videoId ?? null);
+    }
+
+    // Pass 2: auto-pick for panels without a valid unique selection.
+    for (const p of needsAutoPick) {
+      const liveId =
+        p.orderedCandidates.find((s) => s.status === "live" && !usedVideoIds.has(s.videoId))?.videoId ?? null;
+      const anyId =
+        p.orderedCandidates.find((s) => !usedVideoIds.has(s.videoId))?.videoId ?? null;
+      const nextVideoId = liveId ?? anyId;
 
       if (nextVideoId) usedVideoIds.add(nextVideoId);
-      const shouldResetFilter = !!panelState.selectedChannelFilter && !selectedFilterStillValid;
-      if ((current ?? null) !== nextVideoId || shouldResetFilter) {
-        setNewsVideoPanelState(cfg.id, {
+      const changed = (p.panelState.selectedVideoId ?? null) !== nextVideoId || p.filterNeedsReset;
+      if (changed) {
+        setNewsVideoPanelState(p.cfg.id, {
           selectedVideoId: nextVideoId,
-          ...(shouldResetFilter ? { selectedChannelFilter: null } : {}),
+          ...(p.filterNeedsReset ? { selectedChannelFilter: null } : {}),
         });
       }
     }
@@ -1334,8 +1525,8 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     dashboardView,
     hasAnyVideoPanelVisible,
     liveStreams,
-    news.panelVisibility,
     news.video.byPanel,
+    news.panelVisibility,
     setNewsVideoPanelState,
   ]);
 
@@ -1389,6 +1580,15 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     }, NEWS_TERMINAL_TICK_MS);
     return () => clearInterval(id);
   }, [dashboardView]);
+
+  const backendIssueSummary = useMemo(() => {
+    const problematic = Object.entries(newsBackendHealth).filter(
+      ([source, state]) => source !== "search" && state && state !== "ok" && state !== "idle"
+    );
+    if (!problematic.length) return "";
+    const labels = problematic.map(([source]) => source).join(", ");
+    return `Sources delayed: ${labels}`;
+  }, [newsBackendHealth]);
 
   useEffect(() => {
     if (!panelMenuOpen) return;
@@ -1709,6 +1909,11 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     ? terminalItems[((news.headlineTape.cursor % terminalItems.length) + terminalItems.length) % terminalItems.length]
     : null;
 
+  const newsMapEngineEnv = (process.env.NEXT_PUBLIC_NEWS_MAP_ENGINE ?? "").trim().toLowerCase();
+  // Default to Leaflet; set NEXT_PUBLIC_NEWS_MAP_ENGINE=maplibre to use the MapLibre GL engine.
+  const newsMapEngine: "maplibre" | "leaflet" =
+    newsMapEngineEnv === "maplibre" ? "maplibre" : "leaflet";
+
   const lockHeaderProps = (panelId: string) => ({
     locked: news.panelLocks[panelId] === true,
     onToggleLock: () => setNewsPanelLock(panelId, !(news.panelLocks[panelId] === true)),
@@ -1718,104 +1923,23 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     {
       id: "news-terminal",
       node: (
-        <Panel panelId="news-terminal" workspace="news">
-          <PanelHeader
-            title="TERMINAL FEED"
-            subtitle="TIME | SOURCE | ENTITY | REGION | HEADLINE | SCORE"
-            {...lockHeaderProps("news-terminal")}
-            controls={
-              <PanelControls
-                onRefresh={() => void runSearch("manual")}
-                loading={loading}
-                onPin={() => setHeadlineTape({ enabled: !news.headlineTape.enabled })}
-              />
-            }
-          />
-          <PanelBody ref={terminalBodyRef} className="wv-news-terminal-body">
-            <div className="wv-news-category-tabs">
-              <button type="button" className={activeCategory === "all" ? "is-active" : ""} onClick={() => setActiveCategory("all")}>
-                All
-              </button>
-              {CATEGORY_TABS.map((cat) => (
-                <button key={cat} type="button" className={activeCategory === cat ? "is-active" : ""} onClick={() => setActiveCategory(cat)}>
-                  {CATEGORY_LABELS[cat]}
-                </button>
-              ))}
-            </div>
-            {news.headlineTape.enabled ? (
-              <div className="wv-news-tape">
-                <div className="wv-news-tape-stream">
-                  {tapeItem ? `[${formatShortTime(tapeItem.publishedAt)}] ${tapeItem.source} ${tapeItem.headline}` : "No headlines"}
-                </div>
-                <div className="wv-news-tape-actions">
-                  <button type="button" onClick={() => setHeadlineTape({ paused: !news.headlineTape.paused })}>
-                    {news.headlineTape.paused ? "RESUME" : "PAUSE"}
-                  </button>
-                  <button type="button" onClick={() => advanceHeadlineTape(1)}>STEP</button>
-                </div>
-              </div>
-            ) : null}
-            <div className="wv-news-terminal-table-scroll">
-            <table className="wv-news-terminal-table">
-              <thead>
-                <tr>
-                  <th scope="col">TIME</th>
-                  <th scope="col">SOURCE</th>
-                  <th scope="col">ENTITY</th>
-                  <th scope="col">REGION</th>
-                  <th scope="col">HEADLINE</th>
-                  <th scope="col">SCORE</th>
-                </tr>
-              </thead>
-              <tbody>
-                {terminalItems.slice(0, 180).map((item, idx) => (
-                  <tr
-                    key={item.id}
-                    className={item.id === selectedItem?.id ? "is-selected" : ""}
-                    onClick={() => {
-                      setSelectedRow(idx);
-                      setSelectedStory(item.id);
-                      setStoryPopupArticle(item);
-                      const marker = news.markers.find((m) => m.articleId === item.id);
-                      setHighlightMarker(marker?.id ?? null);
-                    }}
-                    onContextMenu={(event) => {
-                      event.preventDefault();
-                      setContextItem(item);
-                    }}
-                  >
-                    <td>{formatShortTime(item.publishedAt)}</td>
-                    <td>{item.source}</td>
-                    <td>{extractEntity(item)}</td>
-                    <td>{extractRegion(item)}</td>
-                    <td>{item.headline}</td>
-                    <td>{Math.round(item.score)}</td>
-                  </tr>
-                ))}
-                {!terminalItems.length ? (
-                  <tr>
-                    <td colSpan={6} className="wv-news-empty">
-                      {news.queryState.lastEmptyReason ?? "No results. Try `news time:24h`."}
-                    </td>
-                  </tr>
-                ) : null}
-              </tbody>
-            </table>
-            </div>
-          </PanelBody>
-          <PanelFooter
-            source="NEWS SEARCH"
-            updatedAt={news.lastUpdated}
-            health={
-              newsBackendHealth.search === "degraded"
-                ? "stale"
-                : newsBackendHealth.search === "idle"
-                  ? "ok"
-                  : newsBackendHealth.search ?? "ok"
-            }
-            message={`${terminalItems.length} rows`}
-          />
-        </Panel>
+        <TerminalFeedPanel lockHeaderProps={lockHeaderProps("news-terminal")} />
+      ),
+    },
+    {
+      id: "news-predictions",
+      node: (
+        <PredictionMarketsPanel
+          key="news-predictions"
+          panelId="news-predictions"
+          lockHeaderProps={lockHeaderProps("news-predictions")}
+        />
+      ),
+    },
+    {
+      id: "news-compliance",
+      node: (
+        <CompliancePanel lockHeaderProps={lockHeaderProps("news-compliance")} />
       ),
     },
     {
@@ -1831,31 +1955,32 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           <PanelBody noPadding className="wv-news-globe-body">
             <div className="wv-news-globe-cube">
               <div style={{ position: "relative", width: "100%", height: "100%" }}>
-                <MapLibreNewsMap onReady={() => setNewsMapReady(true)} />
-                {!newsMapReady && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      background: "rgba(3, 8, 14, 0.72)",
-                      color: "#d7e2ee",
-                      fontSize: 11,
-                      letterSpacing: 1,
-                      textTransform: "uppercase",
-                      pointerEvents: "none",
-                      zIndex: 2,
+                {newsMapEngine === "maplibre" ? (
+                  <MapLibreNewsMap
+                    onReady={() => setNewsMapReady(true)}
+                    onFatalError={(reason) => {
+                      setNewsUiState({ statusLine: reason });
                     }}
-                  >
-                    INITIALIZING NEWS MAP...
-                  </div>
+                  />
+                ) : (
+                  <NewsWorldMap onReady={() => setNewsMapReady(true)} />
                 )}
               </div>
+              <NewsMapOverlay ready={newsMapReady} />
             </div>
           </PanelBody>
-          <PanelFooter source="NEWS MAP" updatedAt={Date.now()} health={newsBackendHealth.search === "loading" ? "loading" : Object.values(newsBackendHealth).some((v) => v === "degraded") ? "stale" : "ok"} message={newsGlobeFooterMessage} />
+          <PanelFooter
+            source="NEWS MAP"
+            updatedAt={Date.now()}
+            health={
+              newsBackendHealth.search === "loading"
+                ? "loading"
+                : Object.values(newsBackendHealth).some((v) => v === "degraded")
+                  ? "stale"
+                  : "ok"
+            }
+            message={newsGlobeFooterMessage}
+          />
         </Panel>
       ),
     },
@@ -1890,23 +2015,13 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
         ),
       };
     }),
-    {
-      id: "news-predictions",
-      node: (
-        <PredictionMarketsPanel
-          key="news-predictions"
-          panelId="news-predictions"
-          lockHeaderProps={lockHeaderProps("news-predictions")}
-        />
-      ),
-    },
     ...CATEGORY_PANEL_CONFIGS.map((cfg) => ({
       id: cfg.id,
       node: (
         <Panel key={cfg.id} panelId={cfg.id} workspace="news">
           <PanelHeader title={cfg.title} {...lockHeaderProps(cfg.id)} />
           <PanelBody noPadding className="wv-catfeed-panel-body">
-            <CategoryFeedPanel config={cfg} />
+            <CategoryFeedPanel config={cfg} liveCutoffMs={LIVE_CUTOFF_MS} />
           </PanelBody>
         </Panel>
       ),
@@ -1926,6 +2041,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
 
   return (
     <div className={`wv-news-workspace ${embedded ? "is-embedded" : ""}`.trim()}>
+      <NewsTickerBar />
       <div className="wv-news-toolbar">
         <div className="wv-toolbar-status">
           {loading ? "SEARCHING..." : `${filteredItems.length} STORIES`}
@@ -2108,52 +2224,45 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
             </div>
             <div className="wv-news-search-overlay-body">
               <div className="wv-news-terminal-table-scroll">
-              <table className="wv-news-terminal-table">
-                <thead>
-                  <tr>
-                    <th scope="col">TIME</th>
-                    <th scope="col">SOURCE</th>
-                    <th scope="col">ENTITY</th>
-                    <th scope="col">REGION</th>
-                    <th scope="col">HEADLINE</th>
-                    <th scope="col">SCORE</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {terminalItems.slice(0, 180).map((item, idx) => (
-                    <tr
-                      key={item.id}
-                      className={item.id === selectedItem?.id ? "is-selected" : ""}
-                      onClick={() => {
-                        setSelectedRow(idx);
-                        setSelectedStory(item.id);
-                        setStoryPopupArticle(item);
-                        const marker = news.markers.find((m) => m.articleId === item.id);
-                        setHighlightMarker(marker?.id ?? null);
-                        setSearchResultsOpen(false);
+                <div className="wv-news-terminal-table">
+                  <div className="wv-news-terminal-row wv-news-terminal-head" role="row">
+                    <span className="wv-news-terminal-cell wv-col-time">TIME</span>
+                    <span className="wv-news-terminal-cell wv-col-source">SOURCE</span>
+                    <span className="wv-news-terminal-cell wv-col-entity">ENTITY</span>
+                    <span className="wv-news-terminal-cell wv-col-region">REGION</span>
+                    <span className="wv-news-terminal-cell wv-col-headline">HEADLINE</span>
+                    <span className="wv-news-terminal-cell wv-col-score">SCORE</span>
+                  </div>
+                  {terminalItems.length > 0 ? (
+                    <List
+                      rowCount={terminalItems.length}
+                      rowHeight={28}
+                      overscanCount={15}
+                      rowComponent={SearchOverlayRow}
+                      rowProps={{
+                        items: terminalItems,
+                        selectedItemId: selectedItem?.id ?? null,
+                        markersRef: news.markers,
+                        onRowClick: (idx: number, item: NormalizedNewsItem, markerId: string | null) => {
+                          setSelectedRow(idx);
+                          setSelectedStory(item.id);
+                          setStoryPopupArticle(item);
+                          setHighlightMarker(markerId);
+                          setSearchResultsOpen(false);
+                        },
+                        onRowContextMenu: (item: NormalizedNewsItem) => {
+                          setContextItem(item);
+                        },
                       }}
-                      onContextMenu={(event) => {
-                        event.preventDefault();
-                        setContextItem(item);
-                      }}
-                    >
-                      <td>{formatShortTime(item.publishedAt)}</td>
-                      <td>{item.source}</td>
-                      <td>{extractEntity(item)}</td>
-                      <td>{extractRegion(item)}</td>
-                      <td>{item.headline}</td>
-                      <td>{Math.round(item.score)}</td>
-                    </tr>
-                  ))}
-                  {!terminalItems.length ? (
-                    <tr>
-                      <td colSpan={6} className="wv-news-empty">
-                        {news.queryState.lastEmptyReason ?? "No results for current filters."}
-                      </td>
-                    </tr>
-                  ) : null}
-                </tbody>
-              </table>
+                      style={{ height: "calc(100% - 28px)", overflow: "auto" }}
+                    />
+                  ) : (
+                    <div className="wv-news-empty">
+                      {news.queryState.lastEmptyReason ?? "No results for current filters."}
+                      {backendIssueSummary ? ` (${backendIssueSummary})` : ""}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

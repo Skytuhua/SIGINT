@@ -18,7 +18,13 @@ import {
   clearLayer,
   clearAllOrbitLayers,
   updateFlightPositions,
+  renderTradeRoutesLayer,
+  clearTradeRoutesLayer,
+  tickTradeRouteAnimation,
+  getActiveTradeRouteHandle,
+  identifyTradeRoutePick,
 } from "../lib/cesium/layers";
+import type { TradeRouteLayerHandle } from "../lib/cesium/layers";
 import { applyStylePreset } from "../lib/cesium/postprocess";
 import type {
   PropagatedSat,
@@ -752,9 +758,26 @@ export default function CesiumGlobe({
             setHoverNewsTip(null);
             releaseOrbitFocus();
             store.getState().clearSelectionContext();
+            store.getState().setTradeRouteSelection({ selectedRouteId: null, selectedNodeId: null });
             return;
           }
-          // Single click on an icon does nothing; selection is on double click
+          // Trade route click: single click selects route/node
+          if (store.getState().layers.tradeRoutes) {
+            const trPick = identifyTradeRoutePick(picked);
+            if (trPick) {
+              if (trPick.type === "route") {
+                store.getState().setTradeRouteSelection({
+                  selectedRouteId: trPick.routeId,
+                  selectedNodeId: null,
+                });
+              } else {
+                store.getState().setTradeRouteSelection({
+                  selectedNodeId: trPick.nodeId,
+                });
+              }
+              return;
+            }
+          }
         },
         Cesium.ScreenSpaceEventType.LEFT_CLICK
       );
@@ -779,6 +802,33 @@ export default function CesiumGlobe({
                 publishedAt: Number.isFinite(publishedAt) ? publishedAt : Date.now(),
               });
               return;
+            }
+          }
+          // Trade route hover
+          if (store.getState().layers.tradeRoutes) {
+            const trPick = identifyTradeRoutePick(picked);
+            if (trPick) {
+              if (trPick.type === "route") {
+                store.getState().setTradeRouteSelection({
+                  hoveredRouteId: trPick.routeId,
+                  hoveredNodeId: null,
+                });
+              } else {
+                store.getState().setTradeRouteSelection({
+                  hoveredNodeId: trPick.nodeId,
+                  hoveredRouteId: null,
+                });
+              }
+              setHoverNewsTip(null);
+              return;
+            } else {
+              const sel = store.getState().tradeRouteSelection;
+              if (sel.hoveredRouteId || sel.hoveredNodeId) {
+                store.getState().setTradeRouteSelection({
+                  hoveredRouteId: null,
+                  hoveredNodeId: null,
+                });
+              }
             }
           }
           setHoverNewsTip(null);
@@ -1221,6 +1271,47 @@ export default function CesiumGlobe({
         )
       );
 
+      // Trade Routes layer toggle
+      subs.push(
+        store.subscribe(
+          (s) => s.layers.tradeRoutes,
+          (enabled) => {
+            if (!enabled) {
+              clearTradeRoutesLayer(viewer);
+            } else {
+              const sel = store.getState().tradeRouteSelection;
+              renderTradeRoutesLayer(viewer, {
+                categoryFilters: sel.categoryFilters,
+                selectedRouteId: sel.selectedRouteId,
+                hoveredRouteId: sel.hoveredRouteId,
+                selectedNodeId: sel.selectedNodeId,
+                hoveredNodeId: sel.hoveredNodeId,
+              });
+            }
+          }
+        )
+      );
+
+      // Trade Routes category filter / selection changes
+      subs.push(
+        store.subscribe(
+          (s) => s.tradeRouteSelection,
+          (sel) => {
+            if (!store.getState().layers.tradeRoutes) return;
+            const handle = getActiveTradeRouteHandle();
+            if (handle) {
+              handle.updateState({
+                categoryFilters: sel.categoryFilters,
+                selectedRouteId: sel.selectedRouteId,
+                hoveredRouteId: sel.hoveredRouteId,
+                selectedNodeId: sel.selectedNodeId,
+                hoveredNodeId: sel.hoveredNodeId,
+              });
+            }
+          }
+        )
+      );
+
       // Detect mode subscription (affects label density)
       subs.push(
         store.subscribe(
@@ -1461,9 +1552,9 @@ export default function CesiumGlobe({
         (seededLiveData.military as Flight[]) ?? []
       );
       currentEarthquakesRef.current = (seededLiveData.earthquakes as Earthquake[]) ?? [];
-      await renderEarthquakesIfEnabled(currentEarthquakesRef.current);
+      try { await renderEarthquakesIfEnabled(currentEarthquakesRef.current); } catch (err) { console.warn("[globe] earthquake render error:", err); }
       currentDisastersRef.current = (seededLiveData.disasters as DisasterAlert[]) ?? [];
-      await renderDisastersIfEnabled(currentDisastersRef.current);
+      try { await renderDisastersIfEnabled(currentDisastersRef.current); } catch (err) { console.warn("[globe] disaster render error:", err); }
 
       // 闁冲厜鍋撻柍鍏夊亾 Load CCTV cameras 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
       try {
@@ -1500,12 +1591,26 @@ export default function CesiumGlobe({
       setupFpsTracking(viewer);
       unsubscribers.push(setupLayerSubscriptions(viewer));
       currentNewsMarkersRef.current = store.getState().news.markers;
-      if (store.getState().layers.news) {
-        await renderNewsIfEnabled(currentNewsMarkersRef.current);
-      }
+      try {
+        if (store.getState().layers.news) {
+          await renderNewsIfEnabled(currentNewsMarkersRef.current);
+        }
+      } catch (err) { console.warn("[globe] news render error:", err); }
+      try {
+        if (store.getState().layers.tradeRoutes) {
+          const sel = store.getState().tradeRouteSelection;
+          await renderTradeRoutesLayer(viewer, {
+            categoryFilters: sel.categoryFilters,
+            selectedRouteId: sel.selectedRouteId,
+            hoveredRouteId: sel.hoveredRouteId,
+            selectedNodeId: sel.selectedNodeId,
+            hoveredNodeId: sel.hoveredNodeId,
+          });
+        }
+      } catch (err) { console.warn("[globe] trade routes render error:", err); }
       unsubscribers.push(setupSceneSubscription(viewer));
       unsubscribers.push(setupPresetSubscription(viewer));
-      await setupClickHandler(viewer);
+      try { await setupClickHandler(viewer); } catch (err) { console.warn("[globe] click handler setup error:", err); }
 
       // 闁冲厜鍋撻柍鍏夊亾 Flight camera tracking (postRender for smooth 60fps follow) 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
       const CesiumMod = await import("cesium");
@@ -1551,12 +1656,16 @@ export default function CesiumGlobe({
       }
 
       // Update flight and highlight positions before each frame (sync in preRender so they are visible)
+      let tradeRouteFrame = 0;
       const onPreRender = () => {
         const CesiumMod = cesiumRef.current;
         if (!CesiumMod) return;
         const { layers } = store.getState();
         if ((layers.flights || layers.military) && flightSnapshotsRef.current.size > 0) {
           updateFlightPositions(viewer, getInterpolatedPosition, CesiumMod);
+        }
+        if (layers.tradeRoutes) {
+          tickTradeRouteAnimation(tradeRouteFrame++);
         }
       };
       viewer.scene.preRender.addEventListener(onPreRender);

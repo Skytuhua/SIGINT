@@ -37,10 +37,35 @@ export async function GET(request: Request) {
     getAcledCountryEvents(countryName, 30),
     getGovernanceIndicators(countryCode),
     getCountryInfo(countryCode),
-    searchPolymarketByCountry(countryName, 5),
+    searchPolymarketByCountry(countryName, 20),
   ]);
 
   const acledScore = computeAcledInstabilityScore(acledResult.data);
+
+  // Build 7-day ACLED daily timeline
+  const now7 = Date.now();
+  const acledDailyMap: Record<string, { protest: number; conflict: number; natural: number; military: number }> = {};
+  for (let d = 6; d >= 0; d--) {
+    const ds = new Date(now7 - d * 86_400_000).toISOString().slice(0, 10);
+    acledDailyMap[ds] = { protest: 0, conflict: 0, natural: 0, military: 0 };
+  }
+  for (const evt of acledResult.data.events ?? []) {
+    // Parse GDELT seendate format: "20240315T120000Z"
+    const raw = evt.eventDate ?? "";
+    const m = raw.match(/^(\d{4})(\d{2})(\d{2})/);
+    if (!m) continue;
+    const ds = `${m[1]}-${m[2]}-${m[3]}`;
+    if (!acledDailyMap[ds]) continue;
+    const t = evt.eventType;
+    if (t === "battles" || t === "explosions" || t === "violenceAgainstCivilians") {
+      acledDailyMap[ds].conflict += 1;
+    } else if (t === "protests" || t === "riots") {
+      acledDailyMap[ds].protest += 1;
+    } else if (t === "strategicDevelopments") {
+      acledDailyMap[ds].military += 1;
+    }
+  }
+  const acledDailyTimeline = Object.entries(acledDailyMap).map(([date, counts]) => ({ date, ...counts }));
 
   const gov = governanceResult.data;
   const govIndicators = [
@@ -82,6 +107,7 @@ export async function GET(request: Request) {
       governance: governanceResult.data,
       countryInfo: countryInfoResult.data,
       predictionMarkets: polymarketResult.data,
+      acledDailyTimeline,
       degraded: acledResult.degraded || governanceResult.degraded || polymarketResult.degraded,
     },
     { headers: { "Cache-Control": "no-store, max-age=0" } },

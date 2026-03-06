@@ -16,10 +16,21 @@ interface LayerRunState {
   unregister: (() => void) | null;
   health: LayerHealthState;
   circuitOpenUntil: number;
+  /** Quick fingerprint of the last emitted data to skip redundant onData calls. */
+  lastDataFingerprint: string;
 }
 
 const CIRCUIT_FAILURES = 3;
 const CIRCUIT_OPEN_MS = 5 * 60_000;
+
+/** Cheap fingerprint: feature count + first/last feature id + first feature ts. */
+function dataFingerprint(data: LayerFeatureCollection): string {
+  const n = data.features.length;
+  if (n === 0) return "0";
+  const first = data.features[0];
+  const last = data.features[n - 1];
+  return `${n}:${first.id ?? ""}:${first.ts ?? 0}:${last.id ?? ""}:${last.ts ?? 0}`;
+}
 
 function initialHealth(): LayerHealthState {
   return {
@@ -45,6 +56,7 @@ export class NewsLayerRuntime {
         unregister: null,
         health: initialHealth(),
         circuitOpenUntil: 0,
+        lastDataFingerprint: "",
       });
     }
     this.callbacks = callbacks;
@@ -62,6 +74,7 @@ export class NewsLayerRuntime {
     const payload = await loadLayerFromCache(layer);
     if (!payload) return;
 
+    const fp = dataFingerprint(payload);
     const nextHealth: LayerHealthState = {
       ...state.health,
       status: "cached",
@@ -69,7 +82,10 @@ export class NewsLayerRuntime {
       nextRetryAt: null,
     };
     state.health = nextHealth;
-    this.callbacks.onData(layerId, payload, nextHealth);
+    if (fp !== state.lastDataFingerprint) {
+      state.lastDataFingerprint = fp;
+      this.callbacks.onData(layerId, payload, nextHealth);
+    }
   }
 
   enable(layerId: string): void {
@@ -139,7 +155,13 @@ export class NewsLayerRuntime {
       }
 
       if (result.data) {
-        this.callbacks.onData(layer.id, result.data, state.health);
+        const fp = dataFingerprint(result.data);
+        if (fp !== state.lastDataFingerprint) {
+          state.lastDataFingerprint = fp;
+          this.callbacks.onData(layer.id, result.data, state.health);
+        } else {
+          this.callbacks.onHealth(layer.id, state.health);
+        }
       } else {
         this.callbacks.onHealth(layer.id, state.health);
       }

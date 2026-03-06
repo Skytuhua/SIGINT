@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, ReactNode, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, ReactNode, useRef, useState, type CSSProperties, memo } from "react";
+import { List } from "react-window";
 import { CATEGORY_COLORS } from "../../config/newsConfig";
 import { INFRASTRUCTURE_DATA } from "../../data/infrastructure";
-import { isCountryMatch, normalizeCountryCode } from "../../lib/news/countryCode";
+import { normalizeCountryCode } from "../../lib/news/countryCode";
 import type {
   CountryInfrastructure,
   CountryProfile,
@@ -11,6 +12,8 @@ import type {
   NewsCategory,
   PredictionMarketItem,
 } from "../../lib/news/types";
+import { perfMark, perfMeasure } from "../../lib/news/perf";
+import { fetchJsonWithPolicy, isAbortError } from "../../lib/runtime/fetchJson";
 import { useWorldViewStore } from "../../store";
 import IconButton from "../dashboard/controls/IconButton";
 import DenseSelect from "../dashboard/controls/DenseSelect";
@@ -181,6 +184,7 @@ interface CountryApiData {
     year: number;
   };
   predictionMarkets?: PredictionMarketItem[];
+  acledDailyTimeline?: Array<{ date: string; protest: number; conflict: number; natural: number; military: number }>;
 }
 
 interface Props {
@@ -246,6 +250,30 @@ function fetchSummaryWithDedup(cacheKey: string, params: URLSearchParams): Promi
   return request;
 }
 
+const COUNTRY_CACHE_FRESH_MS = 3 * 60_000;
+const COUNTRY_CACHE_STALE_MS = 30 * 60_000;
+const COUNTRY_CACHE_MAX = 30;
+
+interface CacheEntry<T> { savedAt: number; data: T }
+
+const countryProfileCache = new Map<string, CacheEntry<CountryApiData>>();
+const countryNewsCache = new Map<string, CacheEntry<NewsArticle[]>>();
+
+function getCache<T>(cache: Map<string, CacheEntry<T>>, key: string): { data: T; age: number; fresh: boolean; usable: boolean } | null {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  const age = Date.now() - entry.savedAt;
+  return { data: entry.data, age, fresh: age <= COUNTRY_CACHE_FRESH_MS, usable: age <= COUNTRY_CACHE_STALE_MS };
+}
+
+function putCache<T>(cache: Map<string, CacheEntry<T>>, key: string, data: T): void {
+  if (cache.size >= COUNTRY_CACHE_MAX) {
+    const oldestKey = cache.keys().next().value;
+    if (oldestKey) cache.delete(oldestKey);
+  }
+  cache.set(key, { savedAt: Date.now(), data });
+}
+
 function setUrlCountryParam(code: string | null): void {
   if (typeof window === "undefined") return;
   const url = new URL(window.location.href);
@@ -266,6 +294,17 @@ function clamp01(value: number): number {
 
 function formatPct(value01: number): string {
   return `${Math.round(clamp01(value01) * 100)}%`;
+}
+
+function sanitizeQueryValue(value: string): string {
+  return value.replace(/"/g, "").replace(/\s+/g, " ").trim();
+}
+
+function articleMentionsCountry(article: Pick<NewsArticle, "headline" | "snippet" | "placeName">, countryName: string): boolean {
+  const needle = countryName.toLowerCase().trim();
+  if (!needle) return false;
+  const hay = `${article.headline ?? ""} ${article.snippet ?? ""} ${article.placeName ?? ""}`.toLowerCase();
+  return hay.includes(needle);
 }
 
 function ArticleDetailAside({
@@ -337,6 +376,106 @@ function ArticleDetailAside({
   );
 }
 
+interface NewsRowProps {
+  articles: NewsArticle[];
+  selectedArticleId: string | null;
+  onSelectArticle: (article: NewsArticle) => void;
+  normalizedCountryCode: string;
+  savedSearches: Array<{ id: string }>;
+  deleteNewsSearch: (id: string) => void;
+  saveNewsSearch: (s: { id: string; name: string; query: string; createdAt: number; alertEnabled: boolean }) => void;
+  setStatusLine: (msg: string) => void;
+}
+
+const CountryNewsRow = memo(function CountryNewsRow({
+  index,
+  style,
+  articles,
+  selectedArticleId,
+  onSelectArticle,
+  normalizedCountryCode,
+  savedSearches,
+  deleteNewsSearch,
+  saveNewsSearch,
+  setStatusLine,
+}: { index: number; style: CSSProperties } & NewsRowProps) {
+  const article = articles[index];
+  if (!article) return null;
+  const selected = selectedArticleId === article.id;
+  const score = article.score ?? 0;
+  return (
+    <div style={style}>
+      <button
+        type="button"
+        className={`wv-country-news-row ${selected ? "is-selected" : ""}`.trim()}
+        onClick={() => onSelectArticle(article)}
+        title={article.headline}
+      >
+        <span className="wv-country-news-src" aria-hidden="true">
+          {article.source.slice(0, 2).toUpperCase()}
+        </span>
+        <span className="wv-country-news-headline">{article.headline}</span>
+        <span className="wv-country-news-age">{relativeTime(article.publishedAt)}</span>
+        <span className="wv-country-news-rel">
+          <span className="wv-country-rel-dot" style={{ background: CATEGORY_COLORS[article.category] }} />
+          <span className="wv-country-rel-tag">{article.category.toUpperCase()}</span>
+          <span className="wv-country-rel-score">{score.toFixed(0)}</span>
+        </span>
+        <span className="wv-country-row-actions" aria-hidden="true">
+          <span
+            role="button"
+            tabIndex={-1}
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open(article.url, "_blank", "noopener,noreferrer");
+            }}
+          >
+            OPEN
+          </span>
+          <span
+            role="button"
+            tabIndex={-1}
+            onClick={async (e) => {
+              e.stopPropagation();
+              try {
+                await navigator.clipboard.writeText(article.url);
+                setStatusLine("Link copied.");
+              } catch {
+                setStatusLine("Copy failed.");
+              }
+            }}
+          >
+            COPY
+          </span>
+          <span
+            role="button"
+            tabIndex={-1}
+            onClick={(e) => {
+              e.stopPropagation();
+              const id = `country-${normalizedCountryCode}`;
+              if (savedSearches.some((s) => s.id === id)) {
+                deleteNewsSearch(id);
+                setStatusLine("Removed from tracked list.");
+              } else {
+                saveNewsSearch({
+                  id,
+                  name: `COUNTRY ${normalizedCountryCode}`,
+                  query: `country:${normalizedCountryCode}`,
+                  createdAt: Date.now(),
+                  alertEnabled: false,
+                });
+                setStatusLine("Saved to tracked list.");
+              }
+            }}
+          >
+            SAVE
+          </span>
+        </span>
+      </button>
+    </div>
+  );
+});
+
 export default function CountryDetailModal({ countryCode, dockSide = "left", onClose }: Props) {
   const normalizedCountryCode = normalizeCountryCode(countryCode) ?? countryCode.toUpperCase();
   const feedItems = useWorldViewStore((s) => s.news.feedItems);
@@ -349,40 +488,80 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
   const ackNewsAlert = useWorldViewStore((s) => s.ackNewsAlert);
   const setNewsQuery = useWorldViewStore((s) => s.setNewsQuery);
   const setNewsUiStateRef = useRef(setNewsUiState);
-  const [apiData, setApiData] = useState<CountryApiData | null>(null);
-  const [countryNews, setCountryNews] = useState<NewsArticle[]>([]);
-  const [apiLoading, setApiLoading] = useState(true);
+  const profileAbortRef = useRef<AbortController | null>(null);
+  const newsAbortRef = useRef<AbortController | null>(null);
+
+  const cachedProfile = getCache(countryProfileCache, normalizedCountryCode);
+  const cachedNews = getCache(countryNewsCache, normalizedCountryCode);
+
+  const [apiData, setApiData] = useState<CountryApiData | null>(() => cachedProfile?.data ?? null);
+  const [countryNews, setCountryNews] = useState<NewsArticle[]>(() => cachedNews?.data ?? []);
+  const [apiLoading, setApiLoading] = useState(!cachedProfile?.fresh);
   const [apiError, setApiError] = useState<string | null>(null);
   const [marketsError, setMarketsError] = useState<string | null>(null);
-  const [hasMarketsData, setHasMarketsData] = useState(false);
-  const [newsLoading, setNewsLoading] = useState(false);
+  const [hasMarketsData, setHasMarketsData] = useState(
+    () => !!(cachedProfile?.data?.predictionMarkets && cachedProfile.data.predictionMarkets.length > 0)
+  );
+  const [newsLoading, setNewsLoading] = useState(!cachedNews?.fresh);
   const [newsError, setNewsError] = useState<string | null>(null);
 
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [detailStatus, setDetailStatus] = useState<DetailStatus>("idle");
   const [detailSummary, setDetailSummary] = useState<ArticleSummaryResponse | null>(null);
 
+  const countryDisplayName = useMemo(() => {
+    const known = ISO2_TO_NAME[normalizedCountryCode];
+    if (known) return known;
+    try {
+      const display = new Intl.DisplayNames(["en"], { type: "region" }).of(normalizedCountryCode);
+      if (display && display !== normalizedCountryCode) return display;
+    } catch {
+      // ignore
+    }
+    return normalizedCountryCode;
+  }, [normalizedCountryCode]);
+
+  const aboutCountryQuery = useMemo(() => {
+    const safeName = sanitizeQueryValue(countryDisplayName);
+    // Use `place:` to mean “about this country” (mentions/location in text), not “publisher/source country”.
+    return safeName ? `place:"${safeName}"` : `place:${normalizedCountryCode}`;
+  }, [countryDisplayName, normalizedCountryCode]);
+
   const fetchCountryProfile = useCallback(async () => {
+    const cached = getCache(countryProfileCache, normalizedCountryCode);
+    if (cached?.fresh) {
+      setApiData(cached.data);
+      setApiLoading(false);
+      if (Array.isArray(cached.data.predictionMarkets) && cached.data.predictionMarkets.length > 0) {
+        setHasMarketsData(true);
+      }
+      return;
+    }
+
+    profileAbortRef.current?.abort();
+    const controller = new AbortController();
+    profileAbortRef.current = controller;
+
     setApiLoading(true);
     setApiError(null);
     setMarketsError(null);
     try {
-      const resp = await fetch(`/api/news/country-profile?country=${normalizedCountryCode}`);
-      if (resp.ok) {
-        const data = (await resp.json()) as CountryApiData;
-        setApiData(data);
-        if (Array.isArray(data.predictionMarkets) && data.predictionMarkets.length > 0) {
-          setHasMarketsData(true);
-        }
-      } else {
-        setApiError("Failed to load country profile.");
-        if (!hasMarketsData) {
-          setMarketsError("Failed to load prediction markets.");
-        } else {
-          setMarketsError("Prediction markets temporarily unavailable; showing last data.");
-        }
+      const data = await fetchJsonWithPolicy<CountryApiData>(
+        `/api/news/country-profile?country=${normalizedCountryCode}`,
+        {
+          key: `news:country-profile:${normalizedCountryCode}`,
+          signal: controller.signal,
+          negativeTtlMs: 5_000,
+        },
+      );
+      if (controller.signal.aborted) return;
+      putCache(countryProfileCache, normalizedCountryCode, data);
+      setApiData(data);
+      if (Array.isArray(data.predictionMarkets) && data.predictionMarkets.length > 0) {
+        setHasMarketsData(true);
       }
-    } catch {
+    } catch (err) {
+      if (isAbortError(err)) return;
       setApiError("Failed to load country profile.");
       if (!hasMarketsData) {
         setMarketsError("Failed to load prediction markets.");
@@ -390,45 +569,90 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
         setMarketsError("Prediction markets temporarily unavailable; showing last data.");
       }
     } finally {
-      setApiLoading(false);
+      if (!controller.signal.aborted) setApiLoading(false);
     }
   }, [hasMarketsData, normalizedCountryCode]);
 
   const fetchCountryNews = useCallback(async () => {
+    const cacheKey = `news:country-news:${normalizedCountryCode}`;
+    const cached = getCache(countryNewsCache, normalizedCountryCode);
+    if (cached?.fresh) {
+      setCountryNews(cached.data);
+      setNewsLoading(false);
+      return;
+    }
+
+    newsAbortRef.current?.abort();
+    const controller = new AbortController();
+    newsAbortRef.current = controller;
+
     setNewsLoading(true);
     setNewsError(null);
     try {
-      const resp = await fetch(`/api/news/search?q=country:${normalizedCountryCode}&cat=&timespan=7d&limit=30`);
-      if (resp.ok) {
-        const data = (await resp.json()) as { items?: NewsArticle[] };
-        if (Array.isArray(data.items)) setCountryNews(data.items);
-      } else {
-        setCountryNews([]);
-        setNewsError("Failed to load country news.");
-      }
-    } catch {
+      const params = new URLSearchParams();
+      params.set("q", aboutCountryQuery);
+      params.set("timespan", "7d");
+      params.set("limit", "80");
+      const data = await fetchJsonWithPolicy<{ items?: NewsArticle[] }>(
+        `/api/news/search?${params.toString()}`,
+        {
+          key: cacheKey,
+          signal: controller.signal,
+          negativeTtlMs: 3_000,
+        },
+      );
+      if (controller.signal.aborted) return;
+      const items = Array.isArray(data.items) ? data.items : [];
+      putCache(countryNewsCache, normalizedCountryCode, items);
+      setCountryNews(items);
+    } catch (err) {
+      if (isAbortError(err)) return;
       setCountryNews([]);
       setNewsError("Failed to load country news.");
     } finally {
-      setNewsLoading(false);
+      if (!controller.signal.aborted) setNewsLoading(false);
     }
-  }, [normalizedCountryCode]);
+  }, [aboutCountryQuery, normalizedCountryCode]);
 
   useEffect(() => {
     void fetchCountryProfile();
     void fetchCountryNews();
+    return () => {
+      profileAbortRef.current?.abort();
+      newsAbortRef.current?.abort();
+    };
   }, [fetchCountryNews, fetchCountryProfile]);
 
   const profile = useMemo(() => {
-    const localMatched = feedItems.filter((article) => isCountryMatch(article.country, normalizedCountryCode));
+    const localMatched = feedItems.filter((article) => articleMentionsCountry(article, countryDisplayName));
     const merged = [...localMatched];
     for (const article of countryNews) {
       if (!merged.some((existing) => existing.id === article.id)) {
         merged.push(article);
       }
     }
-    return buildProfile(normalizedCountryCode, merged);
-  }, [countryNews, feedItems, normalizedCountryCode]);
+    const builtProfile = buildProfile(normalizedCountryCode, merged);
+
+    // Overlay ACLED daily timeline data where available
+    if (apiData?.acledDailyTimeline?.length) {
+      const acledByDate = Object.fromEntries(
+        apiData.acledDailyTimeline.map((d) => [d.date, d])
+      );
+      builtProfile.timeline = builtProfile.timeline.map((day) => {
+        const acled = acledByDate[day.date];
+        if (!acled) return day;
+        return {
+          date: day.date,
+          protest: day.protest + acled.protest,
+          conflict: day.conflict + acled.conflict,
+          natural: day.natural + acled.natural,
+          military: day.military + acled.military,
+        };
+      });
+    }
+
+    return builtProfile;
+  }, [apiData, countryDisplayName, countryNews, feedItems, normalizedCountryCode]);
 
   const hasAcledEvents = !!(apiData?.acledSummary && apiData.acledSummary.totalEvents > 0);
   const hasGovernanceIndicators = !!(
@@ -466,6 +690,15 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
   );
   const topHeadline = sortedArticles[0] ?? null;
 
+  const aboveFoldMeasuredRef = useRef(false);
+  useEffect(() => {
+    if (aboveFoldMeasuredRef.current) return;
+    aboveFoldMeasuredRef.current = true;
+    const code = normalizedCountryCode;
+    perfMark(`country:${code}:aboveFold`);
+    perfMeasure(`country-popup:first-paint:${code}`, `country:${code}:click`, `country:${code}:aboveFold`);
+  }, [normalizedCountryCode]);
+
   const maxTimelineVal = useMemo(() => {
     let max = 1;
     for (const day of profile.timeline) {
@@ -500,18 +733,6 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
   }, [normalizedCountryCode]);
 
   const predictionMarkets = apiData?.predictionMarkets ?? [];
-
-  const countryDisplayName = useMemo(() => {
-    const known = ISO2_TO_NAME[normalizedCountryCode];
-    if (known) return known;
-    try {
-      const display = new Intl.DisplayNames(["en"], { type: "region" }).of(normalizedCountryCode);
-      if (display && display !== normalizedCountryCode) return display;
-    } catch {
-      // ignore
-    }
-    return normalizedCountryCode;
-  }, [normalizedCountryCode]);
 
   useEffect(() => {
     setNewsUiStateRef.current = setNewsUiState;
@@ -806,14 +1027,7 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
             </div>
           </div>
           <PanelBody>
-            {apiLoading ? (
-              <div className="wv-panel-state">
-                <div className="wv-skeleton-block" />
-                <div className="wv-skeleton-row" />
-                <div className="wv-skeleton-row" />
-                <div className="wv-skeleton-row" />
-              </div>
-            ) : apiError && !apiData ? (
+            {apiError && !apiData && !profile.articles.length ? (
               <div className="wv-panel-state">
                 <div className="wv-panel-state-line">{apiError}</div>
                 <button type="button" className="wv-inline-action" onClick={() => void fetchCountryProfile()}>
@@ -821,7 +1035,7 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
                 </button>
               </div>
             ) : (
-              <div className="wv-country-instability-signals">
+              <div className="wv-country-instability-signals" style={{ opacity: apiLoading && !apiData ? 0.7 : 1 }}>
                 <div className="wv-country-instability-block">
                   {noInstabilityData ? (
                     <div className="wv-panel-state wv-country-instability-no-data" style={{ padding: 4 }}>
@@ -868,21 +1082,23 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
                             <span className="wv-country-timeline-label" style={{ color: row.color }}>
                               {row.label}
                             </span>
-                            <div className="wv-country-timeline-bars" role="img" aria-label={`${row.label} 7-day spark`}>
-                              {profile.timeline.map((entry) => (
-                                <span
-                                  key={`${row.key}-${entry.date}`}
-                                  className="wv-country-timeline-bar"
-                                  style={{
-                                    height: `${Math.max(2, (entry[row.key] / maxTimelineVal) * 18)}px`,
-                                    background: entry[row.key] > 0 ? row.color : "var(--wv-line)",
-                                    opacity: entry[row.key] > 0 ? 0.85 : 0.28,
-                                  }}
-                                  title={`${entry.date}: ${entry[row.key]}`}
-                                />
-                              ))}
+                            <div className="wv-country-timeline-main">
+                              <div className="wv-country-timeline-bars" role="img" aria-label={`${row.label} 7-day spark`}>
+                                {profile.timeline.map((entry) => (
+                                  <span
+                                    key={`${row.key}-${entry.date}`}
+                                    className="wv-country-timeline-bar"
+                                    style={{
+                                      height: `${Math.max(2, (entry[row.key] / maxTimelineVal) * 18)}px`,
+                                      background: entry[row.key] > 0 ? row.color : "var(--wv-line)",
+                                      opacity: entry[row.key] > 0 ? 0.85 : 0.28,
+                                    }}
+                                    title={`${entry.date}: ${entry[row.key]}`}
+                                  />
+                                ))}
+                              </div>
+                              {!hasData ? <span className="wv-country-timeline-empty">No events in 7 days</span> : null}
                             </div>
-                            {!hasData ? <span className="wv-country-timeline-empty">No events in 7 days</span> : null}
                           </div>
                         );
                       })}
@@ -993,14 +1209,14 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
                   <span>AGE</span>
                   <span>REL</span>
                 </div>
-                {newsLoading ? (
-                  <div className="wv-country-news-state">
+                {newsLoading && !sortedNews.length ? (
+                  <div className="wv-country-news-state" style={{ minHeight: 120 }}>
                     <div className="wv-skeleton-row" />
                     <div className="wv-skeleton-row" />
                     <div className="wv-skeleton-row" />
                     <div className="wv-skeleton-row" />
                   </div>
-                ) : newsError ? (
+                ) : newsError && !sortedNews.length ? (
                   <div className="wv-panel-state" style={{ padding: 6 }}>
                     <div className="wv-panel-state-line">{newsError}</div>
                     <button type="button" className="wv-inline-action" onClick={() => void fetchCountryNews()}>
@@ -1012,81 +1228,24 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
                     <div className="wv-panel-state-line">No news articles found for this country.</div>
                   </div>
                 ) : (
-                  <div className="wv-country-news-body">
-                    {sortedNews.slice(0, 60).map((article) => {
-                      const selected = selectedArticle?.id === article.id;
-                      const score = article.score ?? 0;
-                      return (
-                        <button
-                          key={article.id}
-                          type="button"
-                          className={`wv-country-news-row ${selected ? "is-selected" : ""}`.trim()}
-                          onClick={() => setSelectedArticle(article)}
-                          title={article.headline}
-                        >
-                          <span className="wv-country-news-src" aria-hidden="true">
-                            {article.source.slice(0, 2).toUpperCase()}
-                          </span>
-                          <span className="wv-country-news-headline">{article.headline}</span>
-                          <span className="wv-country-news-age">{relativeTime(article.publishedAt)}</span>
-                          <span className="wv-country-news-rel">
-                            <span className="wv-country-rel-dot" style={{ background: CATEGORY_COLORS[article.category] }} />
-                            <span className="wv-country-rel-tag">{article.category.toUpperCase()}</span>
-                            <span className="wv-country-rel-score">{score.toFixed(0)}</span>
-                          </span>
-                          <span className="wv-country-row-actions" aria-hidden="true">
-                            <span
-                              role="button"
-                              tabIndex={-1}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.open(article.url, "_blank", "noopener,noreferrer");
-                              }}
-                            >
-                              OPEN
-                            </span>
-                            <span
-                              role="button"
-                              tabIndex={-1}
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                try {
-                                  await navigator.clipboard.writeText(article.url);
-                                  setNewsUiStateRef.current({ statusLine: "Link copied." });
-                                } catch {
-                                  setNewsUiStateRef.current({ statusLine: "Copy failed." });
-                                }
-                              }}
-                            >
-                              COPY
-                            </span>
-                            <span
-                              role="button"
-                              tabIndex={-1}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const id = `country-${normalizedCountryCode}`;
-                                if (savedSearches.some((s) => s.id === id)) {
-                                  deleteNewsSearch(id);
-                                  setNewsUiStateRef.current({ statusLine: "Removed from tracked list." });
-                                } else {
-                                  saveNewsSearch({
-                                    id,
-                                    name: `COUNTRY ${normalizedCountryCode}`,
-                                    query: `country:${normalizedCountryCode}`,
-                                    createdAt: Date.now(),
-                                    alertEnabled: false,
-                                  });
-                                  setNewsUiStateRef.current({ statusLine: "Saved to tracked list." });
-                                }
-                              }}
-                            >
-                              SAVE
-                            </span>
-                          </span>
-                        </button>
-                      );
-                    })}
+                  <div className="wv-country-news-body" style={{ height: Math.min(sortedNews.length * 36, 400) }}>
+                    <List
+                      rowCount={sortedNews.length}
+                      rowHeight={36}
+                      overscanCount={10}
+                      rowComponent={CountryNewsRow}
+                      rowProps={{
+                        articles: sortedNews,
+                        selectedArticleId: selectedArticle?.id ?? null,
+                        onSelectArticle: setSelectedArticle,
+                        normalizedCountryCode,
+                        savedSearches,
+                        deleteNewsSearch,
+                        saveNewsSearch,
+                        setStatusLine: (msg: string) => setNewsUiStateRef.current({ statusLine: msg }),
+                      }}
+                      style={{ height: "100%", overflow: "auto" }}
+                    />
                   </div>
                 )}
               </div>

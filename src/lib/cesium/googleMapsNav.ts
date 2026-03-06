@@ -39,6 +39,10 @@ export const NAV_CONFIG = {
   TILT_SENSITIVITY:   0.005,
   ROTATE_SENSITIVITY: 0.005,
 
+  // Altitude-based sensitivity scaling: when zoomed out, movement is reduced.
+  // At camera height <= this (m), scale is 1; above it, scale = REF / height.
+  PAN_REFERENCE_ALT_M: 800_000,
+
   // Pitch envelope for tilt (Cesium uses negative pitch = looking down)
   MIN_PITCH_DEG: -89,   // near-vertical / straight-down limit
   MAX_PITCH_DEG: -5,    // near-horizontal / horizon-flip limit
@@ -66,6 +70,7 @@ interface SavedControllerState {
   inertiaTranslate:    number;
   inertiaZoom:         number;
   enableTilt:          boolean;
+  maximumMovementRatio: number;
 }
 
 export interface GoogleMapsNavOptions {
@@ -142,6 +147,7 @@ export class GoogleMapsNav {
       inertiaTranslate:    ctrl.inertiaTranslate,
       inertiaZoom:         ctrl.inertiaZoom,
       enableTilt:          ctrl.enableTilt,
+      maximumMovementRatio: ctrl.maximumMovementRatio,
     };
 
     // ── Remap Cesium's built-in controller ───────────────────────────────
@@ -227,6 +233,7 @@ export class GoogleMapsNav {
       ctrl.inertiaTranslate    = s.inertiaTranslate;
       ctrl.inertiaZoom         = s.inertiaZoom;
       ctrl.enableTilt          = s.enableTilt;
+      ctrl.maximumMovementRatio = s.maximumMovementRatio;
       this.savedState = null;
     }
   }
@@ -356,6 +363,12 @@ export class GoogleMapsNav {
     e.preventDefault();
   };
 
+  /** Scale factor in (0, 1]: 1 at low altitude, smaller when zoomed out to reduce sensitivity. */
+  private _getAltitudeScaleFactor(): number {
+    const height = this.C.Cartographic.fromCartesian(this.viewer.camera.positionWC).height;
+    return Math.min(1, NAV_CONFIG.PAN_REFERENCE_ALT_M / Math.max(1, height));
+  }
+
   // ── Right-drag orbit ─────────────────────────────────────────────────────
 
   private _onTiltMove(e: MouseEvent): void {
@@ -379,13 +392,17 @@ export class GoogleMapsNav {
       }
     }
 
+    const factor = this._getAltitudeScaleFactor();
+    const rotSens  = NAV_CONFIG.ROTATE_SENSITIVITY * factor;
+    const tiltSens = NAV_CONFIG.TILT_SENSITIVITY * factor;
+
     if (anchor) {
       // ── Orbit around anchor using HeadingPitchRange ─────────────────
       // heading: clockwise from North — drag right (+dx) → heading increases
-      const newHeading   = camera.heading + dx * NAV_CONFIG.ROTATE_SENSITIVITY;
+      const newHeading   = camera.heading + dx * rotSens;
       // pitch: negative = looking down — drag down (+dy) → more horizontal → pitch increases
       const currentPitch = C.Math.toDegrees(camera.pitch);
-      const rawPitch     = currentPitch + C.Math.toDegrees(dy * NAV_CONFIG.TILT_SENSITIVITY);
+      const rawPitch     = currentPitch + C.Math.toDegrees(dy * tiltSens);
       const clampedPitch = Math.max(NAV_CONFIG.MIN_PITCH_DEG, Math.min(NAV_CONFIG.MAX_PITCH_DEG, rawPitch));
 
       const dist = C.Cartesian3.distance(camera.positionWC, anchor);
@@ -398,9 +415,9 @@ export class GoogleMapsNav {
       );
     } else {
       // Fallback when anchor not available (e.g. clicked on sky)
-      if (dx !== 0) camera.rotateLeft(-(dx * NAV_CONFIG.ROTATE_SENSITIVITY));
+      if (dx !== 0) camera.rotateLeft(-(dx * rotSens));
       if (dy !== 0) {
-        const dPitch     = dy * NAV_CONFIG.TILT_SENSITIVITY;
+        const dPitch     = dy * tiltSens;
         const pitchAfter = C.Math.toDegrees(camera.pitch) + C.Math.toDegrees(dPitch);
         if (pitchAfter >= NAV_CONFIG.MIN_PITCH_DEG && pitchAfter <= NAV_CONFIG.MAX_PITCH_DEG) {
           camera.rotateUp(dPitch);

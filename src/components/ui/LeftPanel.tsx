@@ -1,6 +1,8 @@
 "use client";
 
 import { useWorldViewStore } from "../../store";
+import { ALL_CATEGORIES, CATEGORY_LABELS, CATEGORY_COLORS } from "../../lib/cesium/tradeRoutes/types";
+import type { TradeRouteCategory } from "../../lib/cesium/tradeRoutes/types";
 
 const shell: React.CSSProperties = {
   position: "absolute",
@@ -32,7 +34,8 @@ type LayerName =
   | "earthquakes"
   | "disasters"
   | "traffic"
-  | "cctv";
+  | "cctv"
+  | "tradeRoutes";
 
 const layerRows: {
   id: LayerName | "weather" | "bikeshare";
@@ -48,6 +51,7 @@ const layerRows: {
   { id: "satellites", label: "Satellites", source: "CelesTrak", accent: "#6ad6ff" },
   { id: "traffic", label: "Street Traffic", source: "OpenStreetMap", accent: "#f17855" },
   { id: "weather", label: "Weather Radar", source: "NOAA NEXRAD", accent: "#8da3b8", disabled: true },
+  { id: "tradeRoutes", label: "Trade Routes", source: "Wikidata / IMO", accent: "#4fc3f7" },
   { id: "cctv", label: "CCTV Mesh", source: "Street View fallback", accent: "#bfd7ef" },
   { id: "bikeshare", label: "Bikeshare", source: "GBFS", accent: "#7d95ad", disabled: true },
 ];
@@ -100,6 +104,43 @@ function SectionButton({
         {active ? "-" : "+"}
       </span>
     </button>
+  );
+}
+
+function TradeRouteFilterChips() {
+  const categoryFilters = useWorldViewStore((s) => s.tradeRouteSelection.categoryFilters);
+  const setFilter = useWorldViewStore((s) => s.setTradeRouteCategoryFilter);
+
+  return (
+    <div style={{ gridColumn: "1 / -1", display: "flex", flexWrap: "wrap", gap: 5, marginTop: 4 }}>
+      {ALL_CATEGORIES.map((cat) => {
+        const enabled = categoryFilters[cat];
+        const color = CATEGORY_COLORS[cat];
+        return (
+          <button
+            key={cat}
+            onClick={() => setFilter(cat as TradeRouteCategory, !enabled)}
+            className="wv-trade-chip"
+            style={{
+              padding: "3px 10px",
+              borderRadius: 6,
+              border: enabled
+                ? `1px solid ${color}88`
+                : "1px solid rgba(95,110,129,0.28)",
+              background: enabled ? `${color}18` : "rgba(10, 14, 22, 0.6)",
+              color: enabled ? color : "#4f6175",
+              fontSize: 10,
+              letterSpacing: 1,
+              fontFamily: "inherit",
+              cursor: "pointer",
+              textTransform: "uppercase",
+            }}
+          >
+            {CATEGORY_LABELS[cat]}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -165,6 +206,8 @@ function LayerRows() {
             >
               {enabled ? "ON" : "OFF"}
             </button>
+
+            {row.id === "tradeRoutes" && enabled && <TradeRouteFilterChips />}
           </div>
         );
       })}

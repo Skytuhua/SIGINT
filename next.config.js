@@ -7,6 +7,14 @@ const nextConfig = {
   // Transpile the cesium ESM package so Next.js can process it correctly
   transpilePackages: ['cesium'],
 
+
+  // Exclude undici from webpack bundling — it's a server-only Node.js module
+  // that uses node: scheme imports which webpack cannot process.
+  // Next.js 14.2 uses experimental.serverComponentsExternalPackages (not serverExternalPackages).
+  experimental: {
+    serverComponentsExternalPackages: ['undici'],
+  },
+
   webpack: (config, { webpack, dev, isServer }) => {
     // Work around Next.js 14.2 server chunk path: production emits chunks to
     // .next/server/chunks/ but webpack-runtime.js requires "./<id>.js" (same dir).

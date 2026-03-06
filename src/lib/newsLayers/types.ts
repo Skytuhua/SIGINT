@@ -79,6 +79,7 @@ export interface LayerRenderStyle {
   clusterMinSize?: number;
   rasterAlpha?: number;
   rasterUrlTemplate?: string;
+  badgeProperty?: string;
 }
 
 export interface LayerPerformancePolicy {

@@ -36,6 +36,8 @@ import type {
 } from "../lib/news/types";
 import type { LayerHealthState } from "../lib/newsLayers/types";
 import { NEWS_LAYER_DEFAULT_TOGGLES } from "../lib/newsLayers/registry";
+import type { TradeRouteSelectionState, TradeRouteCategory, DisruptionSignal } from "../lib/cesium/tradeRoutes/types";
+import { defaultTradeRouteSelection } from "../lib/cesium/tradeRoutes/types";
 
 interface LayerState {
   satellites: boolean;
@@ -46,6 +48,7 @@ interface LayerState {
   traffic: boolean;
   cctv: boolean;
   news: boolean;
+  tradeRoutes: boolean;
 }
 
 interface FiltersState {
@@ -101,6 +104,58 @@ interface DebugState {
 
 type NewsBackendHealth = "idle" | "loading" | "ok" | "degraded" | "error";
 
+type NuclearFilters = {
+  types: string[];
+  statuses: string[];
+  searchText: string;
+  inViewportOnly: boolean;
+};
+
+export type ArmsEmbargoFilters = {
+  authorities: string[];
+  statuses: string[];
+  scopes: string[];
+  searchText: string;
+  startYearRange: [number, number] | null;
+  inViewportOnly: boolean;
+};
+
+export type EconomicCenterFilters = {
+  scoreThreshold: number;
+  mode: "finance" | "trade" | "balanced";
+  regionFilter: string[];
+  viewportOnly: boolean;
+  searchText: string;
+};
+
+export type AiDataCenterFilters = {
+  confidenceThreshold: number;
+  importanceThreshold: number;
+  operatorFilter: string[];
+  operatorTypeFilter: string[];
+  viewportOnly: boolean;
+  searchText: string;
+};
+
+export type UcdpFilters = {
+  violenceTypes: string[];
+  minFatalities: number;
+  countries: string[];
+  yearRange: [number, number];
+  inViewportOnly: boolean;
+};
+
+export type ConflictFilters = {
+  inViewportOnly: boolean;
+};
+
+export type DisplacementFlowFilters = {
+  mode: "all" | "refugee" | "idp";
+  minVolume: number;
+  cause: string[];
+  viewportOnly: boolean;
+};
+
 interface NewsState {
   query: string;
   queryAst: QueryAST;
@@ -142,6 +197,13 @@ interface NewsState {
   video: NewsVideoState;
   searchInView: boolean;
   cameraBounds: NewsCameraBounds | null;
+  nuclearFilters: NuclearFilters;
+  armsEmbargoFilters: ArmsEmbargoFilters;
+  ucdpFilters: UcdpFilters;
+  conflictFilters: ConflictFilters;
+  economicCenterFilters: EconomicCenterFilters;
+  aiDataCenterFilters: AiDataCenterFilters;
+  displacementFlowFilters: DisplacementFlowFilters;
   headlineTape: {
     enabled: boolean;
     paused: boolean;
@@ -166,6 +228,7 @@ interface WorldViewStore {
   dashboard: DashboardState;
   liveData: LiveDataState;
   news: NewsState;
+  tradeRouteSelection: TradeRouteSelectionState;
 
   toggleLayer(name: keyof LayerState): void;
   setStylePreset(preset: UiState["stylePreset"]): void;
@@ -256,6 +319,13 @@ interface WorldViewStore {
   setHighlightMarker(id: string | null): void;
   setSearchInView(enabled: boolean): void;
   setNewsCameraBounds(bounds: NewsCameraBounds | null): void;
+  setNuclearFilters(partial: Partial<NuclearFilters>): void;
+  setArmsEmbargoFilters(partial: Partial<ArmsEmbargoFilters>): void;
+  setUcdpFilters(partial: Partial<UcdpFilters>): void;
+  setConflictFilters(partial: Partial<ConflictFilters>): void;
+  setEconomicCenterFilters(partial: Partial<EconomicCenterFilters>): void;
+  setAiDataCenterFilters(partial: Partial<AiDataCenterFilters>): void;
+  setDisplacementFlowFilters(partial: Partial<DisplacementFlowFilters>): void;
   setNewsLayoutPreset(preset: NewsLayoutPreset): void;
   resetNewsLayout(): void;
   setNewsPanelLayouts(layouts: DashboardLayouts): void;
@@ -279,6 +349,11 @@ interface WorldViewStore {
   setNewsLayerHealth(layerId: string, health: LayerHealthState): void;
   setNewsLastUpdated(ts?: number): void;
   clearNewsTransient(): void;
+
+  setTradeRouteSelection(partial: Partial<TradeRouteSelectionState>): void;
+  setTradeRouteCategoryFilter(category: TradeRouteCategory, enabled: boolean): void;
+  setTradeRouteDisruptions(signals: DisruptionSignal[]): void;
+  clearTradeRouteSelection(): void;
 }
 
 const DASHBOARD_DENSITY_DEFAULT: DashboardDensity = "ultra";
@@ -331,6 +406,7 @@ const LIVE_VIDEO_PANEL_ID_SET = new Set<string>(LIVE_VIDEO_PANEL_IDS as readonly
 const DEFAULT_NEWS_PANEL_IDS = [
   "news-terminal",
   "news-globe",
+  "news-compliance",
   ...LIVE_VIDEO_PANEL_IDS,
   "news-cat-tech",
   "news-cat-ai",
@@ -338,21 +414,18 @@ const DEFAULT_NEWS_PANEL_IDS = [
   "news-cat-markets",
   "news-cat-cyber",
   "news-cat-semis",
-  "news-cat-cloud",
-  "news-cat-startups",
-  "news-cat-ipo",
-  "news-cat-funding",
+  "news-cat-other",
   "news-cat-energy",
   "news-cat-defense",
   "news-cat-govt",
   "news-cat-finance",
-  "news-cat-space",
   "news-cat-biotech",
   "news-predictions",
 ] as const;
 const DEFAULT_NEWS_PANEL_VISIBILITY: Record<string, boolean> = {
   "news-terminal": true,
   "news-globe": true,
+  "news-compliance": true,
   "news-video-tech": true,
   "news-video-business": true,
   "news-video-general": true,
@@ -363,21 +436,18 @@ const DEFAULT_NEWS_PANEL_VISIBILITY: Record<string, boolean> = {
   "news-cat-markets": true,
   "news-cat-cyber": true,
   "news-cat-semis": true,
-  "news-cat-cloud": true,
-  "news-cat-startups": true,
-  "news-cat-ipo": true,
-  "news-cat-funding": true,
+  "news-cat-other": true,
   "news-cat-energy": true,
   "news-cat-defense": true,
   "news-cat-govt": true,
   "news-cat-finance": true,
-  "news-cat-space": true,
   "news-cat-biotech": true,
   "news-predictions": true,
 };
 const DEFAULT_NEWS_PANEL_LOCKS: Record<string, boolean> = {
   "news-terminal": false,
   "news-globe": false,
+  "news-compliance": false,
   "news-video-tech": false,
   "news-video-business": false,
   "news-video-general": false,
@@ -388,15 +458,11 @@ const DEFAULT_NEWS_PANEL_LOCKS: Record<string, boolean> = {
   "news-cat-markets": false,
   "news-cat-cyber": false,
   "news-cat-semis": false,
-  "news-cat-cloud": false,
-  "news-cat-startups": false,
-  "news-cat-ipo": false,
-  "news-cat-funding": false,
+  "news-cat-other": false,
   "news-cat-energy": false,
   "news-cat-defense": false,
   "news-cat-govt": false,
   "news-cat-finance": false,
-  "news-cat-space": false,
   "news-cat-biotech": false,
   "news-predictions": false,
 };
@@ -404,10 +470,8 @@ const DEFAULT_NEWS_PANEL_ORDER = [...DEFAULT_NEWS_PANEL_IDS];
 
 const CAT_PANEL_IDS = [
   "news-cat-tech", "news-cat-ai", "news-cat-crypto", "news-cat-markets",
-  "news-cat-cyber", "news-cat-semis", "news-cat-cloud", "news-cat-startups",
-  "news-cat-ipo", "news-cat-funding", "news-cat-energy", "news-cat-defense",
-  "news-cat-govt", "news-cat-finance", "news-cat-space", "news-cat-biotech",
-  "news-predictions",
+  "news-cat-cyber", "news-cat-semis", "news-cat-other", "news-cat-energy",
+  "news-cat-defense", "news-cat-govt", "news-cat-finance", "news-cat-biotech",
 ];
 
 function buildVideoLayouts(startX: number, startY: number, totalW: number, totalH: number) {
@@ -442,11 +506,12 @@ function buildVideoRowLayouts(startX: number, startY: number, totalW: number, to
   });
 }
 
-function buildCatLayouts(cols: number, startY: number, cellW: number, cellH: number) {
-  const perRow = Math.max(1, Math.floor(cols / cellW));
-  return CAT_PANEL_IDS.map((id, idx) => ({
+function buildCatLayouts(cols: number, startY: number, cellW: number, cellH: number, startX = 0, startIdx = 0, count?: number) {
+  const perRow = Math.max(1, Math.floor((cols - startX) / cellW));
+  const ids = count !== undefined ? CAT_PANEL_IDS.slice(startIdx, startIdx + count) : CAT_PANEL_IDS.slice(startIdx);
+  return ids.map((id, idx) => ({
     i: id,
-    x: (idx % perRow) * cellW,
+    x: startX + (idx % perRow) * cellW,
     y: startY + Math.floor(idx / perRow) * cellH,
     w: cellW,
     h: cellH,
@@ -457,46 +522,63 @@ function buildCatLayouts(cols: number, startY: number, cellW: number, cellH: num
 
 const DEFAULT_NEWS_PANEL_LAYOUTS: DashboardLayouts = {
   lg: [
-    // Top row: world news globe map
     { i: "news-globe", x: 0, y: 0, w: 360, h: 170, minW: 180, minH: 80 },
-    // Second row: four live video panels below the map
     ...buildVideoRowLayouts(0, 170, 360, 105),
-    // Third row: terminal feed on the left, category panels below
     { i: "news-terminal", x: 0, y: 275, w: 180, h: 80, minW: 100, minH: 64 },
-    ...buildCatLayouts(360, 355, 90, 80),
+    { i: "news-compliance", x: 180, y: 275, w: 180, h: 80, minW: 100, minH: 64 },
+    { i: "news-predictions", x: 0, y: 355, w: 180, h: 180, minW: 90, minH: 80 },
+    // Fill blank area to the right of predictions (x=180..360, y=355..535) with first 4 cat panels
+    ...buildCatLayouts(360, 355, 90, 90, 180, 0, 4),
+    // Remaining 8 cat panels below
+    ...buildCatLayouts(360, 535, 90, 80, 0, 4),
   ],
   md: [
     { i: "news-globe", x: 0, y: 0, w: 300, h: 140, minW: 150, minH: 70 },
     { i: "news-terminal", x: 0, y: 140, w: 150, h: 72, minW: 80, minH: 56 },
+    { i: "news-compliance", x: 0, y: 212, w: 150, h: 66, minW: 80, minH: 56 },
+    { i: "news-predictions", x: 0, y: 278, w: 150, h: 150, minW: 75, minH: 72 },
     ...buildVideoLayouts(150, 140, 150, 80),
-    ...buildCatLayouts(300, 278, 75, 72),
+    // Fill blank area to the right of predictions (x=150..300, y=278..428)
+    ...buildCatLayouts(300, 278, 75, 75, 150, 0, 4),
+    ...buildCatLayouts(300, 428, 75, 72, 0, 4),
   ],
   sm: [
     { i: "news-globe", x: 0, y: 0, w: 180, h: 120, minW: 90, minH: 60 },
     { i: "news-terminal", x: 0, y: 120, w: 90, h: 80, minH: 64 },
-    ...buildVideoLayouts(90, 120, 90, 90),
-    ...buildCatLayouts(180, 320, 60, 70),
+    { i: "news-compliance", x: 90, y: 120, w: 90, h: 80, minH: 56 },
+    { i: "news-predictions", x: 0, y: 200, w: 90, h: 140, minH: 70 },
+    ...buildVideoLayouts(90, 200, 90, 90),
+    ...buildCatLayouts(180, 440, 60, 70),
   ],
   xs: [
     { i: "news-globe", x: 0, y: 0, w: 60, h: 100, minH: 60 },
     { i: "news-terminal", x: 0, y: 100, w: 60, h: 88, minH: 72 },
-    ...buildVideoLayouts(0, 188, 60, 110),
-    ...buildCatLayouts(60, 462, 60, 70),
+    { i: "news-predictions", x: 0, y: 188, w: 60, h: 160, minH: 80 },
+    { i: "news-compliance", x: 0, y: 348, w: 60, h: 80, minH: 56 },
+    ...buildVideoLayouts(0, 428, 60, 110),
+    ...buildCatLayouts(60, 702, 60, 70),
   ],
 };
 const GLOBE_CENTRIC_NEWS_LAYOUTS: DashboardLayouts = {
   lg: [
     { i: "news-globe", x: 0, y: 0, w: 360, h: 190, minW: 180, minH: 100 },
-    // Four live video panels directly under the globe, full-width row
     ...buildVideoRowLayouts(0, 190, 360, 110),
     { i: "news-terminal", x: 0, y: 300, w: 120, h: 80, minW: 80, minH: 64 },
-    ...buildCatLayouts(360, 380, 90, 80),
+    { i: "news-compliance", x: 120, y: 300, w: 120, h: 80, minW: 80, minH: 64 },
+    { i: "news-predictions", x: 0, y: 380, w: 180, h: 180, minW: 90, minH: 80 },
+    // Fill blank area to the right of predictions (x=180..360, y=380..560)
+    ...buildCatLayouts(360, 380, 90, 90, 180, 0, 4),
+    ...buildCatLayouts(360, 560, 90, 80, 0, 4),
   ],
   md: [
     { i: "news-globe", x: 0, y: 0, w: 300, h: 160, minW: 150, minH: 80 },
     { i: "news-terminal", x: 0, y: 160, w: 100, h: 72, minW: 70, minH: 56 },
+    { i: "news-compliance", x: 0, y: 232, w: 100, h: 66, minW: 70, minH: 56 },
+    { i: "news-predictions", x: 0, y: 298, w: 150, h: 150, minW: 75, minH: 72 },
     ...buildVideoLayouts(100, 160, 200, 80),
-    ...buildCatLayouts(300, 298, 75, 72),
+    // Fill blank area to the right of predictions (x=150..300, y=298..448)
+    ...buildCatLayouts(300, 298, 75, 75, 150, 0, 4),
+    ...buildCatLayouts(300, 448, 75, 72, 0, 4),
   ],
   sm: DEFAULT_NEWS_PANEL_LAYOUTS.sm,
   xs: DEFAULT_NEWS_PANEL_LAYOUTS.xs,
@@ -504,16 +586,23 @@ const GLOBE_CENTRIC_NEWS_LAYOUTS: DashboardLayouts = {
 const SPLIT_NEWS_LAYOUTS: DashboardLayouts = {
   lg: [
     { i: "news-globe", x: 0, y: 0, w: 360, h: 165, minW: 180, minH: 80 },
-    // Split view: globe on top, then a full-width 4-video row
     ...buildVideoRowLayouts(0, 165, 360, 110),
     { i: "news-terminal", x: 0, y: 275, w: 180, h: 80, minW: 90, minH: 64 },
-    ...buildCatLayouts(360, 355, 90, 80),
+    { i: "news-compliance", x: 180, y: 275, w: 180, h: 80, minW: 90, minH: 64 },
+    { i: "news-predictions", x: 0, y: 355, w: 180, h: 180, minW: 90, minH: 80 },
+    // Fill blank area to the right of predictions (x=180..360, y=355..535)
+    ...buildCatLayouts(360, 355, 90, 90, 180, 0, 4),
+    ...buildCatLayouts(360, 535, 90, 80, 0, 4),
   ],
   md: [
     { i: "news-globe", x: 0, y: 0, w: 300, h: 140, minW: 150, minH: 70 },
     { i: "news-terminal", x: 0, y: 140, w: 150, h: 72, minW: 80, minH: 56 },
+    { i: "news-compliance", x: 0, y: 212, w: 150, h: 66, minW: 80, minH: 56 },
+    { i: "news-predictions", x: 0, y: 278, w: 150, h: 150, minW: 75, minH: 72 },
     ...buildVideoLayouts(150, 140, 150, 80),
-    ...buildCatLayouts(300, 278, 75, 72),
+    // Fill blank area to the right of predictions (x=150..300, y=278..428)
+    ...buildCatLayouts(300, 278, 75, 75, 150, 0, 4),
+    ...buildCatLayouts(300, 428, 75, 72, 0, 4),
   ],
   sm: DEFAULT_NEWS_PANEL_LAYOUTS.sm,
   xs: DEFAULT_NEWS_PANEL_LAYOUTS.xs,
@@ -609,6 +698,49 @@ function defaultNewsState(): NewsState {
     },
     searchInView: false,
     cameraBounds: null,
+    nuclearFilters: {
+      types: [],
+      statuses: [],
+      searchText: "",
+      inViewportOnly: false,
+    },
+    armsEmbargoFilters: {
+      authorities: [],
+      statuses: [],
+      scopes: [],
+      searchText: "",
+      startYearRange: null,
+      inViewportOnly: false,
+    },
+    ucdpFilters: {
+      violenceTypes: ["state-based", "non-state", "one-sided"],
+      minFatalities: 1,
+      countries: [],
+      yearRange: [new Date().getFullYear() - 1, new Date().getFullYear() - 1],
+      inViewportOnly: false,
+    },
+    conflictFilters: { inViewportOnly: false },
+    economicCenterFilters: {
+      scoreThreshold: 40,
+      mode: "balanced",
+      regionFilter: [],
+      viewportOnly: false,
+      searchText: "",
+    },
+    aiDataCenterFilters: {
+      confidenceThreshold: 40,
+      importanceThreshold: 0,
+      operatorFilter: [],
+      operatorTypeFilter: [],
+      viewportOnly: false,
+      searchText: "",
+    },
+    displacementFlowFilters: {
+      mode: "all" as const,
+      minVolume: 0,
+      cause: [],
+      viewportOnly: false,
+    },
     headlineTape: {
       enabled: false,
       paused: false,
@@ -1045,6 +1177,7 @@ const baseState = {
     traffic: false,
     cctv: false,
     news: true,
+    tradeRoutes: false,
   },
   filters: {
     minMagnitude: 0,
@@ -1088,6 +1221,7 @@ const baseState = {
   dashboard: defaultDashboardState(),
   liveData: defaultLiveDataState(),
   news: defaultNewsState(),
+  tradeRouteSelection: defaultTradeRouteSelection(),
 };
 
 function withLegacyDefaults<T extends typeof baseState>(state: T): T {
@@ -1650,6 +1784,62 @@ export const useWorldViewStore = create<WorldViewStore>()(
             news: { ...s.news, cameraBounds },
           })),
 
+        setNuclearFilters: (partial) =>
+          set((s) => ({
+            news: {
+              ...s.news,
+              nuclearFilters: { ...s.news.nuclearFilters, ...partial },
+            },
+          })),
+
+        setArmsEmbargoFilters: (partial) =>
+          set((s) => ({
+            news: {
+              ...s.news,
+              armsEmbargoFilters: { ...s.news.armsEmbargoFilters, ...partial },
+            },
+          })),
+
+        setUcdpFilters: (partial) =>
+          set((s) => ({
+            news: {
+              ...s.news,
+              ucdpFilters: { ...s.news.ucdpFilters, ...partial },
+            },
+          })),
+
+        setConflictFilters: (partial) =>
+          set((s) => ({
+            news: {
+              ...s.news,
+              conflictFilters: { ...s.news.conflictFilters, ...partial },
+            },
+          })),
+
+        setEconomicCenterFilters: (partial) =>
+          set((s) => ({
+            news: {
+              ...s.news,
+              economicCenterFilters: { ...s.news.economicCenterFilters, ...partial },
+            },
+          })),
+
+        setAiDataCenterFilters: (partial) =>
+          set((s) => ({
+            news: {
+              ...s.news,
+              aiDataCenterFilters: { ...s.news.aiDataCenterFilters, ...partial },
+            },
+          })),
+
+        setDisplacementFlowFilters: (partial) =>
+          set((s) => ({
+            news: {
+              ...s.news,
+              displacementFlowFilters: { ...s.news.displacementFlowFilters, ...partial },
+            },
+          })),
+
         setNewsLayoutPreset: (layoutPreset) =>
           set((s) => ({
             news: {
@@ -1863,12 +2053,11 @@ export const useWorldViewStore = create<WorldViewStore>()(
           })),
 
         setNewsLayerToggle: (layerId, enabled) =>
-          set((s) => ({
-            news: {
-              ...s.news,
-              layerToggles: { ...s.news.layerToggles, [layerId]: enabled },
-            },
-          })),
+          set((s) => {
+            const next = { ...s.news.layerToggles, [layerId]: enabled };
+            if (layerId === "trade-routes") next["trade-route-nodes"] = enabled;
+            return { news: { ...s.news, layerToggles: next } };
+          }),
 
         setNewsLayerHealth: (layerId, health) =>
           set((s) => ({
@@ -1905,6 +2094,35 @@ export const useWorldViewStore = create<WorldViewStore>()(
               ui: { ...s.news.ui, statusLine: "Ready." },
             },
           })),
+
+        setTradeRouteSelection: (partial) =>
+          set((s) => ({
+            tradeRouteSelection: { ...s.tradeRouteSelection, ...partial },
+          })),
+
+        setTradeRouteCategoryFilter: (category, enabled) =>
+          set((s) => ({
+            tradeRouteSelection: {
+              ...s.tradeRouteSelection,
+              categoryFilters: {
+                ...s.tradeRouteSelection.categoryFilters,
+                [category]: enabled,
+              },
+            },
+          })),
+
+        setTradeRouteDisruptions: (signals) =>
+          set((s) => ({
+            tradeRouteSelection: {
+              ...s.tradeRouteSelection,
+              disruptionSignals: signals,
+            },
+          })),
+
+        clearTradeRouteSelection: () =>
+          set(() => ({
+            tradeRouteSelection: defaultTradeRouteSelection(),
+          })),
       };
     }),
     {
@@ -1920,7 +2138,7 @@ export const useWorldViewStore = create<WorldViewStore>()(
         if (!state) return persistedState;
 
         const dashboardInput = state.dashboard ?? {};
-        const activeView = dashboardInput.activeView === "news" ? "news" : "ops";
+        const activeView = dashboardInput.activeView === "news" ? "news" : dashboardInput.activeView === "market" ? "market" : "ops";
         const panelVisibility = sanitizePanelVisibility(dashboardInput.panelVisibility);
         const panelLocks = sanitizePanelLocks(dashboardInput.panelLocks);
 
@@ -2089,6 +2307,10 @@ export const useWorldViewStore = create<WorldViewStore>()(
           searchInView: s.news.searchInView,
           headlineTape: s.news.headlineTape,
           layerToggles: s.news.layerToggles,
+        },
+        tradeRouteSelection: {
+          ...defaultTradeRouteSelection(),
+          categoryFilters: s.tradeRouteSelection.categoryFilters,
         },
       }),
       onRehydrateStorage: () => (_state, error) => {

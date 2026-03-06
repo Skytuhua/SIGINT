@@ -23,6 +23,40 @@ import { getRssArticles } from "./providers/rss";
 import { fetchSecCompanyFilings, fetchSecTickerMap, searchSecFilings } from "./providers/sec";
 import { fetchWikidataEntity } from "./providers/wikidata";
 import { discoverYouTubeLiveStreams } from "./providers/youtube";
+import { getNewsApiArticles } from "./providers/newsapi";
+
+type UpstreamResult<T> = {
+  data: T;
+  degraded: boolean;
+  latencyMs: number;
+  cacheHit: "fresh" | "stale" | "miss";
+  error?: string;
+};
+
+function readBudgetMs(envKey: string, defaultMs: number, minMs = 500, maxMs = 30000): number {
+  const raw = process.env[envKey];
+  if (!raw) return defaultMs;
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed <= 0) return defaultMs;
+  return Math.max(minMs, Math.min(maxMs, parsed));
+}
+
+function withLatencyBudget<T>(
+  promise: Promise<UpstreamResult<T>>,
+  budgetMs: number,
+  fallback: UpstreamResult<T>
+): Promise<UpstreamResult<T>> {
+  if (!Number.isFinite(budgetMs) || budgetMs <= 0) return promise;
+  let timer: NodeJS.Timeout | null = null;
+  return Promise.race([
+    promise,
+    new Promise<UpstreamResult<T>>((resolve) => {
+      timer = setTimeout(() => resolve(fallback), budgetMs);
+    }),
+  ]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
 
 function parseGdeltDate(value: string): number {
   const m = value.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/);
@@ -206,6 +240,7 @@ function normalizeErrorCode(error: string | undefined): string | null {
   const lower = error.toLowerCase();
   if (lower.includes("circuit-open")) return "circuit_open";
   if (lower.includes("timeout")) return "timeout";
+  if (lower.includes("budget-exceeded")) return "budget_exceeded";
   if (lower.includes("429")) return "rate_limited";
   if (lower.includes("500")) return "server_error";
   if (lower.includes("network")) return "network_error";
@@ -276,7 +311,7 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
   const inView = searchParams.get("inView") === "true";
   const bbox = parseBbox(searchParams.get("bbox"));
   const offset = Math.max(0, Number(searchParams.get("offset") ?? "0") || 0);
-  const limit = Math.min(400, Math.max(1, Number(searchParams.get("limit") ?? "160") || 160));
+  const limit = Math.min(500, Math.max(1, Number(searchParams.get("limit") ?? "160") || 160));
 
   let ast = parseQuery(rawQ);
   ast = applyUrlParamOverrides(ast, searchParams);
@@ -304,6 +339,15 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
   const backendLatency: Record<string, number> = {};
   const degraded: Record<string, boolean> = {};
 
+  const LATENCY_BUDGET_MS = {
+    gdelt: readBudgetMs("NEWS_BUDGET_GDELT_MS", 14_000),
+    rss: readBudgetMs("NEWS_BUDGET_RSS_MS", 12_000),
+    geo: readBudgetMs("NEWS_BUDGET_GEO_MS", 10_000),
+    sec: readBudgetMs("NEWS_BUDGET_SEC_MS", 8_000),
+    wikidata: readBudgetMs("NEWS_BUDGET_WIKIDATA_MS", 6_000),
+    youtube: readBudgetMs("NEWS_BUDGET_YOUTUBE_MS", 10_000),
+  } as const;
+
   const gdeltPromise = plan.useGdeltDoc
     ? getGdeltArticles({
         q: queryTerms,
@@ -321,7 +365,7 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
         q: queryTerms,
         cat: ast.cat,
         domain: domainFilter,
-        maxItems: 260,
+        maxItems: 600,
       })
     : Promise.resolve({
         data: { items: [], feedsChecked: 0, degradedFeeds: [] },
@@ -375,6 +419,16 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
     ? fetchWikidataEntity({ ticker: ast.sym, company: ast.freeText[0] })
     : Promise.resolve({ data: null, degraded: false, latencyMs: 0, cacheHit: "miss" as const });
 
+  const newsApiPromise = plan.useNewsApi
+    ? getNewsApiArticles({
+        q: queryTerms,
+        from: ast.fromDate,
+        to: ast.toDate,
+        language: "en",
+        maxItems: 120,
+      })
+    : Promise.resolve({ data: [], degraded: false, latencyMs: 0, cacheHit: "miss" as const });
+
   const youtubePromise = plan.useYoutube
     ? discoverYouTubeLiveStreams(process.env.YOUTUBE_API_KEY)
     : Promise.resolve({
@@ -392,13 +446,72 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
         cacheHit: "miss" as const,
       });
 
-  const [gdeltResult, rssResult, geoResult, secResult, wikidataResult, youtubeInitialResult] = await Promise.all([
-    gdeltPromise,
-    rssPromise,
-    geoPromise,
-    secPromise,
-    wikidataPromise,
-    youtubePromise,
+  const [
+    gdeltResult,
+    rssResult,
+    geoResult,
+    secResult,
+    wikidataResult,
+    youtubeInitialResult,
+    newsApiResult,
+  ] = await Promise.all([
+    withLatencyBudget(gdeltPromise as Promise<UpstreamResult<GdeltArticle[]>>, LATENCY_BUDGET_MS.gdelt, {
+      data: [],
+      degraded: true,
+      latencyMs: LATENCY_BUDGET_MS.gdelt,
+      cacheHit: "miss",
+      error: "budget-exceeded:gdelt",
+    }),
+    withLatencyBudget(rssPromise as Promise<UpstreamResult<{ items: NewsArticle[]; feedsChecked: number; degradedFeeds: string[] }>>, LATENCY_BUDGET_MS.rss, {
+      data: { items: [], feedsChecked: 0, degradedFeeds: [] },
+      degraded: true,
+      latencyMs: LATENCY_BUDGET_MS.rss,
+      cacheHit: "miss",
+      error: "budget-exceeded:rss",
+    }),
+    withLatencyBudget(geoPromise as Promise<UpstreamResult<{ mode: "pointdata" | "country" | "adm1"; points: any[]; aggregates: any[] }>>, LATENCY_BUDGET_MS.geo, {
+      data: { mode: mapMode, points: [], aggregates: [] },
+      degraded: true,
+      latencyMs: LATENCY_BUDGET_MS.geo,
+      cacheHit: "miss",
+      error: "budget-exceeded:geo",
+    }),
+    withLatencyBudget(secPromise as Promise<UpstreamResult<any[]>>, LATENCY_BUDGET_MS.sec, {
+      data: [],
+      degraded: true,
+      latencyMs: LATENCY_BUDGET_MS.sec,
+      cacheHit: "miss",
+      error: "budget-exceeded:sec",
+    }),
+    withLatencyBudget(wikidataPromise as Promise<UpstreamResult<any>>, LATENCY_BUDGET_MS.wikidata, {
+      data: null,
+      degraded: true,
+      latencyMs: LATENCY_BUDGET_MS.wikidata,
+      cacheHit: "miss",
+      error: "budget-exceeded:wikidata",
+    }),
+    withLatencyBudget(youtubePromise as Promise<UpstreamResult<any>>, LATENCY_BUDGET_MS.youtube, {
+      data: {
+        items: [],
+        channelsChecked: 0,
+        liveCount: 0,
+        degraded: ["budget-exceeded"],
+        keyMissing: !process.env.YOUTUBE_API_KEY,
+        discoverySource: "youtube-data-api" as const,
+        fallbackActive: false,
+      },
+      degraded: true,
+      latencyMs: LATENCY_BUDGET_MS.youtube,
+      cacheHit: "miss",
+      error: "budget-exceeded:youtube",
+    }),
+    withLatencyBudget(newsApiPromise as Promise<UpstreamResult<NewsArticle[]>>, readBudgetMs("NEWS_BUDGET_NEWSAPI_MS", 4_500), {
+      data: [],
+      degraded: true,
+      latencyMs: readBudgetMs("NEWS_BUDGET_NEWSAPI_MS", 4_500),
+      cacheHit: "miss",
+      error: "budget-exceeded:newsapi",
+    }),
   ]);
   const youtubeResult = youtubeInitialResult;
   const rssDegraded = rssResult.degraded || rssResult.data.degradedFeeds.length > 0;
@@ -409,6 +522,7 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
   backendLatency.sec = secResult.latencyMs;
   backendLatency.wikidata = wikidataResult.latencyMs;
   backendLatency.youtube = youtubeResult.latencyMs;
+  backendLatency.newsapi = newsApiResult.latencyMs;
 
   degraded.gdelt = gdeltResult.degraded;
   degraded.rss = rssDegraded;
@@ -416,6 +530,7 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
   degraded.sec = secResult.degraded;
   degraded.wikidata = wikidataResult.degraded;
   degraded.youtube = youtubeResult.degraded;
+  degraded.newsapi = newsApiResult.degraded;
 
   const backendHealth: Record<string, "ok" | "degraded" | "open_circuit"> = {
     gdelt: backendState(gdeltResult),
@@ -424,6 +539,7 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
     sec: backendState(secResult),
     wikidata: backendState(wikidataResult),
     youtube: backendState(youtubeResult),
+    newsapi: backendState(newsApiResult),
   };
   const sourceHealth: Record<
     string,
@@ -470,11 +586,18 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
       cacheHit: youtubeResult.cacheHit,
       hasData: youtubeResult.data.items.length > 0,
     }),
+    newsapi: buildSourceHealth({
+      degraded: newsApiResult.degraded,
+      error: resultError(newsApiResult),
+      cacheHit: newsApiResult.cacheHit,
+      hasData: newsApiResult.data.length > 0,
+    }),
   };
 
   let items: NewsArticle[] = [
     ...rssResult.data.items,
     ...gdeltResult.data.map((article) => toNewsArticle(article)),
+    ...newsApiResult.data,
     ...secResult.data.map((filing) => ({
       id: filing.id,
       headline: filing.headline,
@@ -557,7 +680,17 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
   }
 
   if ((!items.some((item) => Number.isFinite(item.lat) && Number.isFinite(item.lon))) && ast.place) {
-    const nominatim = await geocodeNominatim(ast.place);
+    const nominatim = await withLatencyBudget(
+      geocodeNominatim(ast.place) as Promise<UpstreamResult<any>>,
+      900,
+      {
+        data: null,
+        degraded: true,
+        latencyMs: 900,
+        cacheHit: "miss",
+        error: "budget-exceeded:nominatim",
+      }
+    );
     backendLatency.nominatim = nominatim.latencyMs;
     degraded.nominatim = nominatim.degraded;
     backendHealth.nominatim = backendState(nominatim);
@@ -603,6 +736,7 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
       if (item.backendSource === "sec" && srcSet.has("sec")) return true;
       if (item.backendSource === "gdelt" && srcSet.has("gdelt")) return true;
       if (item.backendSource === "rss" && srcSet.has("rss")) return true;
+      if (item.backendSource === "newsapi" && srcSet.has("newsapi")) return true;
       return Array.from(srcSet).some((src) => domain.includes(src));
     });
   }
@@ -647,14 +781,23 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
     src: ast.src,
   };
   const primaryUnavailable = backendHealth.gdelt !== "ok" && backendHealth.rss !== "ok";
+  const primaryErrorCodes = [
+    sourceHealth.gdelt?.errorCode,
+    sourceHealth.rss?.errorCode,
+  ].filter((code): code is string => Boolean(code));
+  const primaryTimeoutLike = primaryErrorCodes.some((code) =>
+    code === "timeout" || code === "budget_exceeded" || code === "circuit_open" || code === "rate_limited"
+  );
   const hasVideoFallback = plan.useYoutube && youtubeResult.data.items.length > 0;
   const emptyReason = !items.length
     ? primaryUnavailable
-      ? plan.useYoutube
-        ? hasVideoFallback
-          ? "Primary text-news upstream is degraded. Try removing restrictive filters to view video fallback items."
-          : "Primary text-news upstream is degraded and no video fallback items are available. Check connectivity or relax filters."
-        : "Primary text-news upstream is degraded. Check connectivity or relax filters."
+      ? primaryTimeoutLike
+        ? "Primary text-news upstream timed out or hit latency limits. Try again in a moment or relax filters."
+        : plan.useYoutube
+          ? hasVideoFallback
+            ? "Primary text-news upstream is degraded. Try removing restrictive filters to view video fallback items."
+            : "Primary text-news upstream is degraded and no video fallback items are available. Check connectivity or relax filters."
+          : "Primary text-news upstream is degraded. Check connectivity or relax filters."
       : "No stories matched current constraints. Relax filters, disable Search In View, or widen time range."
     : null;
 

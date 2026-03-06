@@ -14,8 +14,63 @@ const POLICY: UpstreamPolicy = {
   rateLimit: { capacity: 4, refillPerSec: 1, minIntervalMs: 1500 },
 };
 const SNAPSHOT_CACHE_KEY = "poly-active-events-snapshot-v1";
-const SNAPSHOT_LIMIT = 250;
-const COUNTRY_SOFT_TIMEOUT_MS = 1_800;
+const SNAPSHOT_LIMIT = 500;
+const COUNTRY_SOFT_TIMEOUT_MS = 3_500;
+
+// Aliases used for local snapshot filtering (substring match on title/description/question)
+const COUNTRY_ALIASES: Record<string, string[]> = {
+  "United States": ["Trump", "tariff", "tariffs", "Federal Reserve", "Congress", "Senate", "White House", "Pentagon", "Republican", "Democrat", "Biden", "Harris", "DOGE", "America", "USA", "American"],
+  "United Kingdom": ["UK", "Britain", "British", "England", "Starmer", "Sunak", "Brexit", "Sterling"],
+  "Russia": ["Putin", "Russian", "Kremlin", "Moscow", "Ruble", "Zelensky", "Soviet"],
+  "China": ["Xi Jinping", "Chinese", "PRC", "Beijing", "CCP", "Yuan", "Renminbi"],
+  "Taiwan": ["ROC", "Taipei", "Taiwanese", "TSMC"],
+  "South Korea": ["Korea", "Korean", "Seoul", "Won", "K-pop"],
+  "Iran": ["Iranian", "Tehran", "Khamenei", "IRGC", "Persian", "Rial"],
+  "Ukraine": ["Zelensky", "Zelenskyy", "Ukrainian", "Kyiv", "Kiev", "Donbas", "Kharkiv", "Odessa"],
+  "Israel": ["Netanyahu", "Israeli", "Tel Aviv", "IDF", "Gaza", "Shekel", "Mossad"],
+  "Saudi Arabia": ["Saudi", "Riyadh", "MBS", "Aramco", "OPEC", "Crown Prince"],
+  "United Arab Emirates": ["UAE", "Dubai", "Abu Dhabi", "Emirati", "Dirham"],
+  "North Korea": ["DPRK", "Kim Jong", "Pyongyang", "Kim Jong-un"],
+  "European Union": ["EU", "Europe", "European", "ECB", "Euro", "Brussels"],
+  "Turkey": ["Erdogan", "Turkish", "Ankara", "Lira", "Türkiye"],
+  "Germany": ["German", "Berlin", "Bundeswehr", "Merz", "Scholz", "DAX"],
+  "France": ["French", "Paris", "Macron", "Eurozone", "CAC"],
+  "Japan": ["Japanese", "Tokyo", "Yen", "Nikkei", "Kishida", "Ishiba", "BOJ"],
+  "India": ["Indian", "Modi", "New Delhi", "Rupee", "BJP", "Sensex"],
+  "Brazil": ["Brazilian", "Lula", "Brasilia", "Real", "Bolsonaro", "Petrobras"],
+  "Venezuela": ["Venezuelan", "Maduro", "Caracas", "Bolivar"],
+  "Mexico": ["Mexican", "Sheinbaum", "Peso", "AMLO", "Cartel"],
+  "Pakistan": ["Pakistani", "Islamabad", "Imran Khan", "ISI"],
+  "Afghanistan": ["Afghan", "Taliban", "Kabul", "Afghani"],
+  "Argentina": ["Argentine", "Milei", "Peso", "Buenos Aires", "Kirchner"],
+  "Cuba": ["Cuban", "Havana", "Castro", "Diaz-Canel"],
+  "Palestine": ["Palestinian", "Gaza", "Hamas", "West Bank", "Rafah", "Ramallah", "PLO", "PA"],
+  "Syria": ["Syrian", "Damascus", "Assad", "HTS", "Idlib"],
+  "Iraq": ["Iraqi", "Baghdad", "Dinar", "Kurdish", "Kurdistan"],
+  "Libya": ["Libyan", "Tripoli", "Benghazi"],
+  "Egypt": ["Egyptian", "Cairo", "Sisi", "Pound"],
+  "Nigeria": ["Nigerian", "Abuja", "Naira", "Tinubu"],
+  "Ethiopia": ["Ethiopian", "Addis", "Tigray", "Amhara"],
+  "Sudan": ["Sudanese", "Khartoum", "RSF", "SAF", "Darfur"],
+  "Canada": ["Canadian", "Trudeau", "Carney", "Ottawa", "CAD"],
+  "Australia": ["Australian", "Albanese", "Sydney", "AUD"],
+  "Poland": ["Polish", "Warsaw", "Zloty", "NATO"],
+};
+
+// Primary search keyword used for Gamma API direct search (more focused than aliases)
+const COUNTRY_SEARCH_TERMS: Record<string, string[]> = {
+  "United States": ["Trump", "United States", "US tariff", "Federal Reserve"],
+  "United Kingdom": ["United Kingdom", "UK"],
+  "Russia": ["Russia", "Putin"],
+  "China": ["China", "Xi Jinping"],
+  "Ukraine": ["Ukraine", "Zelensky"],
+  "Israel": ["Israel", "Gaza"],
+  "Iran": ["Iran"],
+  "Taiwan": ["Taiwan"],
+  "North Korea": ["North Korea"],
+  "Saudi Arabia": ["Saudi Arabia"],
+  "European Union": ["European Union", "EU"],
+};
 
 export interface PolymarketEvent {
   id: string;
@@ -123,6 +178,22 @@ async function getActiveEventsSnapshot(): Promise<CachedFetchResult<GammaEventsR
   });
 }
 
+async function searchGammaByKeyword(keyword: string): Promise<GammaEventsResponse> {
+  return cachedFetch({
+    cacheKey: `poly-search-${keyword.toLowerCase().replace(/\s+/g, "-").slice(0, 40)}-v1`,
+    policy: { ...POLICY, ttlMs: 120_000, staleTtlMs: 15 * 60_000 },
+    fallbackValue: [] as GammaEventsResponse,
+    request: async () => {
+      const url = `${GAMMA_BASE}/events?search=${encodeURIComponent(keyword)}&active=true&closed=false&limit=30&order=volume`;
+      return fetchJsonOrThrow<GammaEventsResponse>(
+        url,
+        { headers: { "User-Agent": "WorldView/0.1" } },
+        8_000,
+      );
+    },
+  }).then((r) => r.data);
+}
+
 function collectActiveMarkets(events: GammaEventsResponse): PredictionMarketItem[] {
   const results: PredictionMarketItem[] = [];
   for (const evt of events) {
@@ -159,30 +230,38 @@ export async function searchPolymarketByCountry(
   countryName: string,
   limit = 5,
 ): Promise<CachedFetchResult<PredictionMarketItem[]>> {
-  const needle = countryName.trim().toLowerCase();
-  if (!needle) {
-    return {
-      data: [],
-      degraded: false,
-      latencyMs: 0,
-      cacheHit: "miss",
-    };
+  const primaryNeedle = countryName.trim().toLowerCase();
+  if (!primaryNeedle) {
+    return { data: [], degraded: false, latencyMs: 0, cacheHit: "miss" };
   }
 
-  const timeoutFallback = new Promise<CachedFetchResult<GammaEventsResponse>>((resolve) => {
-    setTimeout(() => {
-      resolve({
-        data: [],
-        degraded: true,
-        latencyMs: COUNTRY_SOFT_TIMEOUT_MS,
-        cacheHit: "miss",
-        error: "soft-timeout",
-      });
-    }, COUNTRY_SOFT_TIMEOUT_MS);
-  });
+  const aliases = COUNTRY_ALIASES[countryName] ?? [];
+  const needles = [primaryNeedle, ...aliases.map((a) => a.toLowerCase())];
+  const matchesAnyNeedle = (text: string): boolean =>
+    needles.some((n) => n.length > 2 ? text.includes(n) : new RegExp(`\\b${n}\\b`, "i").test(text));
 
-  const snapshot = await Promise.race([getActiveEventsSnapshot(), timeoutFallback]);
-  if (!snapshot.data.length) {
+  // Run snapshot + any direct keyword searches in parallel
+  const directSearchTerms = COUNTRY_SEARCH_TERMS[countryName] ?? [];
+  const [snapshot, ...directResults] = await Promise.all([
+    getActiveEventsSnapshot(),
+    ...directSearchTerms.slice(0, 2).map((term) =>
+      searchGammaByKeyword(term).catch(() => [] as GammaEventsResponse)
+    ),
+  ]);
+
+  // Merge snapshot + direct search events, deduplicate by event id
+  const allEvents: GammaEventsResponse = [...snapshot.data];
+  const seenIds = new Set(snapshot.data.map((e) => e.id));
+  for (const batch of directResults) {
+    for (const evt of batch) {
+      if (!seenIds.has(evt.id)) {
+        allEvents.push(evt);
+        seenIds.add(evt.id);
+      }
+    }
+  }
+
+  if (!allEvents.length) {
     return {
       data: [],
       degraded: snapshot.degraded,
@@ -192,15 +271,21 @@ export async function searchPolymarketByCountry(
     };
   }
 
+  const seenMktIds = new Set<string>();
   const results: PredictionMarketItem[] = [];
-  for (const evt of snapshot.data) {
-    const evtText = `${evt.title} ${evt.description}`.toLowerCase();
-    const evtMatch = evtText.includes(needle);
+
+  for (const evt of allEvents) {
+    const evtText = `${evt.title} ${evt.description ?? ""}`.toLowerCase();
+    // Events from direct search always match; snapshot events need alias check
+    const evtFromDirect = !snapshot.data.some((e) => e.id === evt.id);
+    const evtMatch = evtFromDirect || matchesAnyNeedle(evtText);
 
     for (const mkt of evt.markets ?? []) {
       if (mkt.closed || !mkt.active) continue;
-      const mktMatch = evtMatch || (mkt.question?.toLowerCase().includes(needle) ?? false);
-      if (!mktMatch) continue;
+      if (seenMktIds.has(mkt.id)) continue;
+      const mktText = (mkt.question ?? "").toLowerCase();
+      if (!evtMatch && !matchesAnyNeedle(mktText)) continue;
+      seenMktIds.add(mkt.id);
       results.push(extractMarketItem(evt, mkt));
     }
   }

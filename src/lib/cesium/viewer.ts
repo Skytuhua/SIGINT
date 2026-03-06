@@ -28,7 +28,8 @@ function configureCameraControls(
   controller.inertiaSpin = 0.75;
   controller.inertiaTranslate = 0.75;
   controller.inertiaZoom = 0.55;
-  controller.maximumMovementRatio = 0.18;
+  // Lower ratio = less movement per frame; reduces sensitivity when zoomed out (default 0.1).
+  controller.maximumMovementRatio = 0.08;
   controller.minimumZoomDistance = 120;
   controller.maximumZoomDistance = 45_000_000;
 

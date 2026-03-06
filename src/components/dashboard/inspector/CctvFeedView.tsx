@@ -6,6 +6,8 @@ import type { CctvCamera } from "../../../lib/providers/types";
 interface CctvFeedViewProps {
   camera: CctvCamera;
   compact?: boolean;
+  /** Fill the parent container 100% — for mosaic wall cells */
+  mosaic?: boolean;
   onSnapshotError?: (cameraId: string) => void;
   onStreamError?: (cameraId: string) => void;
 }
@@ -29,13 +31,80 @@ function getYoutubeIdFromUrl(url?: string | null): string | null {
   }
 }
 
+function YoutubePlayer({
+  iframeSrc,
+  compact,
+  mosaic,
+  fallbackSnapshotUrl,
+  onError,
+}: {
+  iframeSrc: string;
+  compact?: boolean;
+  mosaic?: boolean;
+  fallbackSnapshotUrl?: string;
+  onError?: () => void;
+}) {
+  const [error, setError] = useState(false);
+  const height = mosaic ? "100%" : compact ? 220 : 320;
+
+  if (error && fallbackSnapshotUrl) {
+    return (
+      <img
+        src={fallbackSnapshotUrl}
+        alt="Video thumbnail"
+        style={{
+          width: "100%",
+          height,
+          objectFit: "cover",
+          background: "#000",
+          borderRadius: mosaic ? 0 : 4,
+          display: "block",
+        }}
+      />
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="wv-cctv-feed-error" style={{ height }}>
+        <div className="wv-cctv-feed-error-icon" aria-hidden>!</div>
+        <span>This live stream recording is not available.</span>
+      </div>
+    );
+  }
+
+  return (
+    <iframe
+      className="wv-cctv-feed-video"
+      src={iframeSrc}
+      title="YouTube video"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+      style={{
+        width: "100%",
+        height,
+        borderRadius: mosaic ? 0 : 4,
+        border: "none",
+        background: "#000",
+        display: "block",
+      }}
+      onError={() => {
+        setError(true);
+        onError?.();
+      }}
+    />
+  );
+}
+
 function HlsPlayer({
   url,
   compact,
+  mosaic,
   onError,
 }: {
   url: string;
   compact?: boolean;
+  mosaic?: boolean;
   onError?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -104,6 +173,7 @@ function HlsPlayer({
     );
   }
 
+  const height = mosaic ? "100%" : compact ? 220 : 320;
   return (
     <video
       ref={videoRef}
@@ -114,10 +184,10 @@ function HlsPlayer({
       controls
       style={{
         width: "100%",
-        height: compact ? 220 : 320,
+        height,
         objectFit: "contain",
         background: "#000",
-        borderRadius: 4,
+        borderRadius: mosaic ? 0 : 4,
       }}
     />
   );
@@ -184,6 +254,7 @@ function SnapshotViewer({
 export default function CctvFeedView({
   camera,
   compact,
+  mosaic,
   onSnapshotError,
   onStreamError,
 }: CctvFeedViewProps) {
@@ -191,24 +262,20 @@ export default function CctvFeedView({
   const streamUrl = camera.streamUrl ?? camera.snapshotUrl;
 
   if (format === "YOUTUBE" && streamUrl) {
-    const videoId = getYoutubeIdFromUrl(streamUrl);
-    const iframeSrc = videoId
-      ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&rel=0`
-      : streamUrl;
+    // If it's already an embed URL, use it directly; otherwise extract the video ID and construct embed URL
+    let iframeSrc = streamUrl;
+    if (!streamUrl.includes("/embed/")) {
+      const videoId = getYoutubeIdFromUrl(streamUrl);
+      if (videoId) {
+        iframeSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&rel=0`;
+      }
+    }
     return (
-      <iframe
-        className="wv-cctv-feed-video"
-        src={iframeSrc}
-        title={`${camera.city} webcam`}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        style={{
-          width: "100%",
-          height: compact ? 220 : 320,
-          borderRadius: 4,
-          border: "none",
-          background: "#000",
-        }}
+      <YoutubePlayer
+        iframeSrc={iframeSrc}
+        compact={compact}
+        mosaic={mosaic}
+        fallbackSnapshotUrl={camera.snapshotUrl || undefined}
         onError={() => onStreamError?.(camera.id)}
       />
     );
@@ -219,6 +286,7 @@ export default function CctvFeedView({
       <HlsPlayer
         url={streamUrl}
         compact={compact}
+        mosaic={mosaic}
         onError={() => onStreamError?.(camera.id)}
       />
     );

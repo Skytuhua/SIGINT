@@ -18,7 +18,7 @@ const REGIONS = [
   { value: "asia" as const, label: "ASIA" },
 ];
 
-const CYCLE_INTERVAL_MS = 45_000;
+const DISPLAY_COUNT = 4;
 
 function getYoutubeIdFromUrl(url?: string | null): string | null {
   if (!url) return null;
@@ -88,10 +88,14 @@ export default function LiveCctvPanel({
     return regional.length > 0 ? regional : healthyCameras;
   }, [healthyCameras, selectedRegion]);
 
+  useEffect(() => {
+    setCycleIndex(0);
+  }, [selectedRegion]);
+
   const displayedCameras = useMemo(() => {
     if (filteredCameras.length === 0) return [];
     const start = cycleIndex % filteredCameras.length;
-    const count = Math.min(4, filteredCameras.length);
+    const count = Math.min(DISPLAY_COUNT, filteredCameras.length);
     const result: CctvCamera[] = [];
     for (let i = 0; i < count; i++) {
       result.push(filteredCameras[(start + i) % filteredCameras.length]);
@@ -99,17 +103,9 @@ export default function LiveCctvPanel({
     return result;
   }, [filteredCameras, cycleIndex]);
 
-  useEffect(() => {
-    if (filteredCameras.length === 0) return;
-    const timer = setInterval(() => {
-      setCycleIndex((prev) => (prev + 4) % Math.max(1, filteredCameras.length));
-    }, CYCLE_INTERVAL_MS);
-    return () => clearInterval(timer);
-  }, [filteredCameras.length]);
-
   const advanceCycle = useCallback(() => {
     if (filteredCameras.length === 0) return;
-    setCycleIndex((prev) => (prev + 4) % Math.max(1, filteredCameras.length));
+    setCycleIndex((prev) => (prev + DISPLAY_COUNT) % Math.max(1, filteredCameras.length));
   }, [filteredCameras.length]);
 
   const handleNextSet = useCallback(() => {
@@ -168,7 +164,7 @@ export default function LiveCctvPanel({
     <Panel panelId={panelId}>
       <PanelHeader
         title="LIVE WEBCAMS"
-        subtitle="Cycling feeds from YouTube public webcams"
+        subtitle="YouTube Live"
         filters={regionTabs}
         {...lockHeaderProps}
         controls={
@@ -178,7 +174,7 @@ export default function LiveCctvPanel({
               onRefresh={handleNextSet}
               loading={loading}
               refreshText="NEXT SET"
-              refreshLoadingText="UPDATING"
+              refreshLoadingText="LOADING"
             />
           </>
         }
@@ -187,41 +183,63 @@ export default function LiveCctvPanel({
         <div className="wv-cctv-live-body">
           {filteredCameras.length === 0 ? (
             <div className="wv-cctv-live-empty">
-              No cameras available for this region.
+              <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <path d="M10 9l5 3-5 3V9z" fill="currentColor" stroke="none" />
+              </svg>
+              <span>No live streams for this region</span>
             </div>
           ) : viewMode === "grid" ? (
             <div className="wv-cctv-live-grid">
               {displayedCameras.map((cam) => (
                 <div key={cam.id} className="wv-cctv-live-cell">
-                  <div className="wv-cctv-live-cell-label">
-                    <span className="wv-cctv-live-dot" aria-hidden />
-                    {cam.city.toUpperCase()}
-                  </div>
                   <div className="wv-cctv-live-cell-feed">
                     <CctvFeedView
                       camera={cam}
-                      compact
+                      mosaic
                       onSnapshotError={markCctvBroken}
                       onStreamError={markCctvBroken}
                     />
+                  </div>
+                  <div className="wv-cctv-live-cell-overlay">
+                    <div className="wv-cctv-live-badge">
+                      <span className="wv-cctv-live-dot" aria-hidden />
+                      LIVE
+                    </div>
+                    <div className="wv-cctv-live-cell-info">
+                      <span className="wv-cctv-live-cell-city">{cam.city.toUpperCase()}</span>
+                      {cam.name && cam.name !== cam.city && (
+                        <span className="wv-cctv-live-cell-name">{cam.name}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <div className="wv-cctv-live-single">
-              <div className="wv-cctv-live-cell-label">
-                <span className="wv-cctv-live-dot" aria-hidden />
-                {displayedCameras[0]?.city.toUpperCase() ?? "—"}
-              </div>
-              <div className="wv-cctv-live-cell-feed">
+              <div className="wv-cctv-live-single-feed">
                 {displayedCameras[0] ? (
-                  <CctvFeedView
-                    camera={displayedCameras[0]}
-                    compact={false}
-                    onSnapshotError={markCctvBroken}
-                    onStreamError={markCctvBroken}
-                  />
+                  <>
+                    <CctvFeedView
+                      camera={displayedCameras[0]}
+                      compact={false}
+                      onSnapshotError={markCctvBroken}
+                      onStreamError={markCctvBroken}
+                    />
+                    <div className="wv-cctv-live-cell-overlay">
+                      <div className="wv-cctv-live-badge">
+                        <span className="wv-cctv-live-dot" aria-hidden />
+                        LIVE
+                      </div>
+                      <div className="wv-cctv-live-cell-info">
+                        <span className="wv-cctv-live-cell-city">{displayedCameras[0].city.toUpperCase()}</span>
+                        {displayedCameras[0].name && displayedCameras[0].name !== displayedCameras[0].city && (
+                          <span className="wv-cctv-live-cell-name">{displayedCameras[0].name}</span>
+                        )}
+                      </div>
+                    </div>
+                  </>
                 ) : (
                   <div className="wv-cctv-feed-error">No feed available</div>
                 )}
@@ -231,10 +249,10 @@ export default function LiveCctvPanel({
         </div>
       </PanelBody>
       <PanelFooter
-        source="CCTV mesh"
+        source="YouTube Live"
         updatedAt={Date.now()}
         health={loading ? "loading" : "ok"}
-        message={`${filteredCameras.length} cameras · Cycles every ${CYCLE_INTERVAL_MS / 1000}s`}
+        message={`${filteredCameras.length} streams`}
       />
     </Panel>
   );

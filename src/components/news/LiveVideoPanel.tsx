@@ -61,6 +61,7 @@ export default function LiveVideoPanel({
   totalCount,
 }: LiveVideoPanelProps) {
   const channelIds = CATEGORY_CHANNEL_IDS.get(category) ?? new Set<string>();
+
   const filteredStreams = useMemo(() => {
     return liveStreams.filter((s) => channelIds.has(s.channelId));
   }, [liveStreams, channelIds]);
@@ -96,6 +97,9 @@ export default function LiveVideoPanel({
   const tabItems = useMemo(() => {
     const ordered = [...channelFiltered].sort((a, b) => {
       if (a.status !== b.status) return a.status === "live" ? -1 : 1;
+      const aViewers = a.viewerCount ?? -1;
+      const bViewers = b.viewerCount ?? -1;
+      if (a.status === "live" && b.status === "live" && aViewers !== bViewers) return bViewers - aViewers;
       const aTs = Date.parse(a.publishedAt ?? "");
       const bTs = Date.parse(b.publishedAt ?? "");
       if (Number.isFinite(aTs) && Number.isFinite(bTs)) return bTs - aTs;
@@ -109,16 +113,16 @@ export default function LiveVideoPanel({
       seenVideoIds.add(videoKey);
       if (!byCh.has(s.channelId)) byCh.set(s.channelId, s);
     }
-    return Array.from(byCh.values()).slice(0, 8);
+    return Array.from(byCh.values()).slice(0, 12);
   }, [channelFiltered]);
 
   const manualVideoId = parseVideoId(panelState.manualUrl);
-  const selectedVideoStillAvailable =
+  const selectedVideoInCategory =
     !!panelState.selectedVideoId &&
-    tabItems.some((stream) => stream.videoId === panelState.selectedVideoId);
+    filteredStreams.some((stream) => stream.videoId === panelState.selectedVideoId);
   const displayVideoId =
     manualVideoId ??
-    (selectedVideoStillAvailable ? panelState.selectedVideoId : tabItems[0]?.videoId ?? null);
+    (selectedVideoInCategory ? panelState.selectedVideoId : tabItems[0]?.videoId ?? null);
 
   return (
     <Panel panelId={panelId} workspace="news">
@@ -154,7 +158,14 @@ export default function LiveVideoPanel({
             <select
               id={`${panelId}-channel-filter`}
               value={panelState.selectedChannelFilter ?? ""}
-              onChange={(e) => setPanelState({ selectedChannelFilter: e.target.value || null })}
+              onChange={(e) =>
+                setPanelState({
+                  selectedChannelFilter: e.target.value || null,
+                  // When the source changes, clear any previous selection so the panel
+                  // immediately snaps to the top stream for the newly chosen source.
+                  selectedVideoId: null,
+                })
+              }
             >
               <option value="">All sources</option>
               {byChannel.map((ch) => (

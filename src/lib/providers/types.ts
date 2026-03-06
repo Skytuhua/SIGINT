@@ -178,13 +178,17 @@ export const CctvCameraSchema = z.object({
   name: z.string(),
   lat: z.number(),
   lon: z.number(),
-  snapshotUrl: z.string(),
+  snapshotUrl: z.string().optional().default(""),
   refreshSeconds: z.number().optional().default(60),
   streamUrl: z.string().optional(),
   streamFormat: CctvStreamFormat.optional(),
   state: z.string().optional(),
   direction: z.string().optional(),
   region: CctvRegion.optional(),
+  /** Category tags for custom filter tabs (e.g. "iran-attacks") */
+  tags: z.array(z.string()).optional(),
+  /** Section label for grouping within a category (defaults to city) */
+  section: z.string().optional(),
 });
 export type CctvCamera = z.infer<typeof CctvCameraSchema>;
 

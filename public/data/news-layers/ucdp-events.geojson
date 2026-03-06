@@ -1,80 +1,470 @@
 {
-    "type":  "FeatureCollection",
-    "features":  [
-                     {
-                         "type":  "Feature",
-                         "id":  "ucdp-events-0",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              -77.04,
-                                                              38.9
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "ucdp-events site 0",
-                                            "ts":  1772435598921
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "ucdp-events-1",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              2.35,
-                                                              48.86
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "ucdp-events site 1",
-                                            "ts":  1772435598921
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "ucdp-events-2",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              139.76,
-                                                              35.68
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "ucdp-events site 2",
-                                            "ts":  1772435598921
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "ucdp-events-3",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              55.27,
-                                                              25.2
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "ucdp-events site 3",
-                                            "ts":  1772435598921
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "ucdp-events-4",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              -46.63,
-                                                              -23.55
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "ucdp-events site 4",
-                                            "ts":  1772435598921
-                                        }
-                     }
-                 ]
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-1",
+      "geometry": { "type": "Point", "coordinates": [37.80, 48.02] },
+      "properties": {
+        "id": "ucdp-snap-1",
+        "type": "ucdp_event",
+        "violenceType": "state-based",
+        "conflictId": 11456,
+        "conflictName": "Russia — Ukraine",
+        "actor1Name": "Armed Forces of Ukraine",
+        "actor2Name": "Russian Armed Forces",
+        "country": "Ukraine",
+        "admin1": "Donetsk",
+        "locationName": "Donetsk Oblast",
+        "lat": 48.02,
+        "lon": 37.80,
+        "date": "2024-06-15",
+        "year": 2024,
+        "fatalities_best": 12,
+        "fatalities_low": 8,
+        "fatalities_high": 18,
+        "severity": 72,
+        "severityLabel": "High",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-2",
+      "geometry": { "type": "Point", "coordinates": [36.23, 49.98] },
+      "properties": {
+        "id": "ucdp-snap-2",
+        "type": "ucdp_event",
+        "violenceType": "state-based",
+        "conflictId": 11456,
+        "conflictName": "Russia — Ukraine",
+        "actor1Name": "Armed Forces of Ukraine",
+        "actor2Name": "Russian Armed Forces",
+        "country": "Ukraine",
+        "admin1": "Kharkiv",
+        "locationName": "Kharkiv Oblast",
+        "lat": 49.98,
+        "lon": 36.23,
+        "date": "2024-07-02",
+        "year": 2024,
+        "fatalities_best": 5,
+        "fatalities_low": 3,
+        "fatalities_high": 9,
+        "severity": 55,
+        "severityLabel": "High",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-3",
+      "geometry": { "type": "Point", "coordinates": [34.47, 31.50] },
+      "properties": {
+        "id": "ucdp-snap-3",
+        "type": "ucdp_event",
+        "violenceType": "state-based",
+        "conflictId": 15216,
+        "conflictName": "Israel — Palestine",
+        "actor1Name": "Israel Defense Forces",
+        "actor2Name": "Hamas",
+        "country": "Palestine",
+        "admin1": "Gaza Strip",
+        "locationName": "Gaza City",
+        "lat": 31.50,
+        "lon": 34.47,
+        "date": "2024-08-10",
+        "year": 2024,
+        "fatalities_best": 45,
+        "fatalities_low": 30,
+        "fatalities_high": 65,
+        "severity": 92,
+        "severityLabel": "Severe",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-4",
+      "geometry": { "type": "Point", "coordinates": [34.35, 31.35] },
+      "properties": {
+        "id": "ucdp-snap-4",
+        "type": "ucdp_event",
+        "violenceType": "state-based",
+        "conflictId": 15216,
+        "conflictName": "Israel — Palestine",
+        "actor1Name": "Israel Defense Forces",
+        "actor2Name": "Hamas",
+        "country": "Palestine",
+        "admin1": "Gaza Strip",
+        "locationName": "Khan Younis",
+        "lat": 31.35,
+        "lon": 34.35,
+        "date": "2024-09-05",
+        "year": 2024,
+        "fatalities_best": 22,
+        "fatalities_low": 15,
+        "fatalities_high": 30,
+        "severity": 82,
+        "severityLabel": "Severe",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-5",
+      "geometry": { "type": "Point", "coordinates": [32.53, 15.59] },
+      "properties": {
+        "id": "ucdp-snap-5",
+        "type": "ucdp_event",
+        "violenceType": "state-based",
+        "conflictId": 11352,
+        "conflictName": "Sudan government — RSF",
+        "actor1Name": "Sudanese Armed Forces",
+        "actor2Name": "Rapid Support Forces",
+        "country": "Sudan",
+        "admin1": "Khartoum",
+        "locationName": "Khartoum",
+        "lat": 15.59,
+        "lon": 32.53,
+        "date": "2024-05-20",
+        "year": 2024,
+        "fatalities_best": 35,
+        "fatalities_low": 20,
+        "fatalities_high": 50,
+        "severity": 88,
+        "severityLabel": "Severe",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-6",
+      "geometry": { "type": "Point", "coordinates": [25.32, 13.46] },
+      "properties": {
+        "id": "ucdp-snap-6",
+        "type": "ucdp_event",
+        "violenceType": "non-state",
+        "conflictId": 11352,
+        "conflictName": "Sudan government — RSF",
+        "actor1Name": "Rapid Support Forces",
+        "actor2Name": "Sudanese Armed Forces",
+        "country": "Sudan",
+        "admin1": "North Darfur",
+        "locationName": "El Fasher",
+        "lat": 13.46,
+        "lon": 25.32,
+        "date": "2024-06-28",
+        "year": 2024,
+        "fatalities_best": 18,
+        "fatalities_low": 10,
+        "fatalities_high": 28,
+        "severity": 76,
+        "severityLabel": "High",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-7",
+      "geometry": { "type": "Point", "coordinates": [96.17, 21.97] },
+      "properties": {
+        "id": "ucdp-snap-7",
+        "type": "ucdp_event",
+        "violenceType": "state-based",
+        "conflictId": 11687,
+        "conflictName": "Myanmar military — resistance",
+        "actor1Name": "Myanmar Military (Tatmadaw)",
+        "actor2Name": "People's Defence Force",
+        "country": "Myanmar",
+        "admin1": "Sagaing",
+        "locationName": "Sagaing Region",
+        "lat": 21.97,
+        "lon": 96.17,
+        "date": "2024-04-12",
+        "year": 2024,
+        "fatalities_best": 8,
+        "fatalities_low": 5,
+        "fatalities_high": 14,
+        "severity": 62,
+        "severityLabel": "High",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-8",
+      "geometry": { "type": "Point", "coordinates": [29.22, -1.68] },
+      "properties": {
+        "id": "ucdp-snap-8",
+        "type": "ucdp_event",
+        "violenceType": "non-state",
+        "conflictId": 13637,
+        "conflictName": "DRC government — M23",
+        "actor1Name": "M23",
+        "actor2Name": "FARDC",
+        "country": "DR Congo",
+        "admin1": "North Kivu",
+        "locationName": "North Kivu Province",
+        "lat": -1.68,
+        "lon": 29.22,
+        "date": "2024-07-18",
+        "year": 2024,
+        "fatalities_best": 14,
+        "fatalities_low": 8,
+        "fatalities_high": 22,
+        "severity": 70,
+        "severityLabel": "High",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-9",
+      "geometry": { "type": "Point", "coordinates": [45.34, 2.05] },
+      "properties": {
+        "id": "ucdp-snap-9",
+        "type": "ucdp_event",
+        "violenceType": "one-sided",
+        "conflictId": 11387,
+        "conflictName": "Somalia — Al-Shabaab",
+        "actor1Name": "Al-Shabaab",
+        "actor2Name": "Somali National Army",
+        "country": "Somalia",
+        "admin1": "Lower Shabelle",
+        "locationName": "Mogadishu",
+        "lat": 2.05,
+        "lon": 45.34,
+        "date": "2024-03-08",
+        "year": 2024,
+        "fatalities_best": 7,
+        "fatalities_low": 4,
+        "fatalities_high": 12,
+        "severity": 58,
+        "severityLabel": "High",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-10",
+      "geometry": { "type": "Point", "coordinates": [36.82, 36.20] },
+      "properties": {
+        "id": "ucdp-snap-10",
+        "type": "ucdp_event",
+        "violenceType": "state-based",
+        "conflictId": 11218,
+        "conflictName": "Syria — various",
+        "actor1Name": "Syrian Government Forces",
+        "actor2Name": "HTS",
+        "country": "Syria",
+        "admin1": "Aleppo",
+        "locationName": "Aleppo Governorate",
+        "lat": 36.20,
+        "lon": 36.82,
+        "date": "2024-05-03",
+        "year": 2024,
+        "fatalities_best": 6,
+        "fatalities_low": 3,
+        "fatalities_high": 10,
+        "severity": 52,
+        "severityLabel": "High",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-11",
+      "geometry": { "type": "Point", "coordinates": [1.52, 14.50] },
+      "properties": {
+        "id": "ucdp-snap-11",
+        "type": "ucdp_event",
+        "violenceType": "non-state",
+        "conflictId": 14212,
+        "conflictName": "Sahel — JNIM / ISGS",
+        "actor1Name": "JNIM",
+        "actor2Name": "Burkinabè Armed Forces",
+        "country": "Burkina Faso",
+        "admin1": "Sahel",
+        "locationName": "Sahel Region",
+        "lat": 14.50,
+        "lon": 1.52,
+        "date": "2024-08-22",
+        "year": 2024,
+        "fatalities_best": 10,
+        "fatalities_low": 6,
+        "fatalities_high": 16,
+        "severity": 65,
+        "severityLabel": "High",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-12",
+      "geometry": { "type": "Point", "coordinates": [38.75, 47.10] },
+      "properties": {
+        "id": "ucdp-snap-12",
+        "type": "ucdp_event",
+        "violenceType": "state-based",
+        "conflictId": 11456,
+        "conflictName": "Russia — Ukraine",
+        "actor1Name": "Armed Forces of Ukraine",
+        "actor2Name": "Russian Armed Forces",
+        "country": "Ukraine",
+        "admin1": "Zaporizhzhia",
+        "locationName": "Zaporizhzhia Oblast",
+        "lat": 47.10,
+        "lon": 38.75,
+        "date": "2024-06-30",
+        "year": 2024,
+        "fatalities_best": 9,
+        "fatalities_low": 5,
+        "fatalities_high": 15,
+        "severity": 64,
+        "severityLabel": "High",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-13",
+      "geometry": { "type": "Point", "coordinates": [44.21, 15.37] },
+      "properties": {
+        "id": "ucdp-snap-13",
+        "type": "ucdp_event",
+        "violenceType": "state-based",
+        "conflictId": 11535,
+        "conflictName": "Yemen — Houthis",
+        "actor1Name": "Houthis (Ansar Allah)",
+        "actor2Name": "Saudi-led Coalition",
+        "country": "Yemen",
+        "admin1": "Marib",
+        "locationName": "Marib Governorate",
+        "lat": 15.37,
+        "lon": 44.21,
+        "date": "2024-04-28",
+        "year": 2024,
+        "fatalities_best": 4,
+        "fatalities_low": 2,
+        "fatalities_high": 8,
+        "severity": 45,
+        "severityLabel": "Moderate",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-14",
+      "geometry": { "type": "Point", "coordinates": [39.72, 11.60] },
+      "properties": {
+        "id": "ucdp-snap-14",
+        "type": "ucdp_event",
+        "violenceType": "non-state",
+        "conflictId": 13145,
+        "conflictName": "Ethiopia — Fano",
+        "actor1Name": "Ethiopian National Defense Force",
+        "actor2Name": "Fano militia",
+        "country": "Ethiopia",
+        "admin1": "Amhara",
+        "locationName": "Amhara Region",
+        "lat": 11.60,
+        "lon": 39.72,
+        "date": "2024-09-14",
+        "year": 2024,
+        "fatalities_best": 11,
+        "fatalities_low": 6,
+        "fatalities_high": 18,
+        "severity": 68,
+        "severityLabel": "High",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ucdp-snap-15",
+      "geometry": { "type": "Point", "coordinates": [35.50, 33.27] },
+      "properties": {
+        "id": "ucdp-snap-15",
+        "type": "ucdp_event",
+        "violenceType": "state-based",
+        "conflictId": 15300,
+        "conflictName": "Israel — Hezbollah",
+        "actor1Name": "Israel Defense Forces",
+        "actor2Name": "Hezbollah",
+        "country": "Lebanon",
+        "admin1": "South Lebanon",
+        "locationName": "South Lebanon",
+        "lat": 33.27,
+        "lon": 35.50,
+        "date": "2024-10-01",
+        "year": 2024,
+        "fatalities_best": 15,
+        "fatalities_low": 8,
+        "fatalities_high": 24,
+        "severity": 74,
+        "severityLabel": "High",
+        "sourceName": "UCDP GED",
+        "sourceDatasetVersion": "25.1",
+        "sourceUrl": "https://ucdp.uu.se/downloads/index.html",
+        "lastUpdated": 1709424000000,
+        "ts": 1709424000000
+      }
+    }
+  ]
 }

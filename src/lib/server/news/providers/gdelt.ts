@@ -5,6 +5,7 @@ import type {
   GdeltTimelinePoint,
   NewsCategory,
 } from "../../../news/types";
+import type { ConflictEvent } from "../conflictZones/types";
 import { cachedFetch, fetchJsonOrThrow, type CachedFetchResult, type UpstreamPolicy } from "../upstream";
 
 const GDELT_DOC_BASE = "https://api.gdeltproject.org/api/v2/doc/doc";
@@ -13,25 +14,25 @@ const GDELT_CONTEXT_BASE = "https://api.gdeltproject.org/api/v2/context/context"
 
 const DOC_POLICY: UpstreamPolicy = {
   key: "gdelt-doc",
-  ttlMs: 30_000,
-  staleTtlMs: 8 * 60_000,
-  timeoutMs: 12_000,
-  maxRetries: 2,
+  ttlMs: 90_000,
+  staleTtlMs: 15 * 60_000,
+  timeoutMs: 18_000,
+  maxRetries: 0,
   backoffBaseMs: 400,
-  circuitFailureThreshold: 3,
-  circuitOpenMs: 2 * 60_000,
-  rateLimit: { capacity: 10, refillPerSec: 8, minIntervalMs: 80 },
+  circuitFailureThreshold: 8,
+  circuitOpenMs: 15_000,
+  rateLimit: { capacity: 4, refillPerSec: 2, minIntervalMs: 500 },
 };
 
 const GEO_POLICY: UpstreamPolicy = {
   key: "gdelt-geo",
   ttlMs: 90_000,
   staleTtlMs: 12 * 60_000,
-  timeoutMs: 12_000,
-  maxRetries: 2,
+  timeoutMs: 14_000,
+  maxRetries: 0,
   backoffBaseMs: 450,
-  circuitFailureThreshold: 3,
-  circuitOpenMs: 2 * 60_000,
+  circuitFailureThreshold: 5,
+  circuitOpenMs: 20_000,
   rateLimit: { capacity: 6, refillPerSec: 5, minIntervalMs: 120 },
 };
 
@@ -59,6 +60,18 @@ const TIMELINE_POLICY: UpstreamPolicy = {
   rateLimit: { capacity: 4, refillPerSec: 3, minIntervalMs: 250 },
 };
 
+const EVENTS_POLICY: UpstreamPolicy = {
+  key: "gdelt-events",
+  ttlMs: 90_000,
+  staleTtlMs: 12 * 60_000,
+  timeoutMs: 12_000,
+  maxRetries: 2,
+  backoffBaseMs: 450,
+  circuitFailureThreshold: 3,
+  circuitOpenMs: 2 * 60_000,
+  rateLimit: { capacity: 6, refillPerSec: 5, minIntervalMs: 120 },
+};
+
 export interface GdeltDocParams {
   q?: string;
   cat?: NewsCategory;
@@ -78,6 +91,15 @@ export interface GdeltGeoParams {
   to?: string;
   mode?: "pointdata" | "country" | "adm1";
   maxrecords?: number;
+}
+
+export interface GdeltEventsParams {
+  timespan?: string;
+  from?: string;
+  to?: string;
+  mode?: "strict" | "broad";
+  maxrecords?: number;
+  countryCode?: string;
 }
 
 const CAT_QUERY_MAP: Partial<Record<NewsCategory, string>> = {
@@ -108,7 +130,7 @@ function buildQuery(params: GdeltDocParams): string {
   if (params.cat && CAT_QUERY_MAP[params.cat]) parts.push(`(${CAT_QUERY_MAP[params.cat]})`);
   if (params.country) parts.push(`sourcecountry:${params.country.toUpperCase()}`);
   if (params.domain) parts.push(`domain:${params.domain}`);
-  return parts.filter(Boolean).join(" ") || "news";
+  return parts.filter(Boolean).join(" ") || "(sourcelang:english OR sourcelang:spanish)";
 }
 
 function applyTime(url: URL, timespan?: string, from?: string, to?: string): void {
@@ -151,7 +173,9 @@ export async function getGdeltArticles(params: GdeltDocParams): Promise<CachedFe
   url.searchParams.set("mode", "artlist");
   url.searchParams.set("format", "json");
   url.searchParams.set("sort", "DateDesc");
-  url.searchParams.set("maxrecords", String(Math.max(1, Math.min(250, params.maxrecords ?? 75))));
+  // Use smaller maxrecords for broad/default queries to reduce GDELT load
+  const defaultMax = query.includes("sourcelang:") ? 75 : 250;
+  url.searchParams.set("maxrecords", String(Math.max(1, Math.min(250, params.maxrecords ?? defaultMax))));
   if (params.lang) url.searchParams.set("sourcelang", params.lang);
   applyTime(url, params.timespan, params.from, params.to);
 
@@ -174,8 +198,10 @@ export async function getGdeltGeo(params: GdeltGeoParams): Promise<
   CachedFetchResult<{ mode: "pointdata" | "country" | "adm1"; points: GdeltGeoPoint[]; aggregates: GdeltAggregatePoint[] }>
 > {
   const mode = params.mode ?? "pointdata";
+  const GEO_STOPWORDS = new Set(["news", "the", "a", "an", "in", "of", "on"]);
+  const geoQ = (params.q ?? "").split(/\s+/).filter((w) => w && !GEO_STOPWORDS.has(w.toLowerCase())).join(" ");
   const url = new URL(GDELT_GEO_BASE);
-  url.searchParams.set("query", params.q?.trim() || "news");
+  url.searchParams.set("query", geoQ.trim() || "sourcelang:english");
   url.searchParams.set("mode", mode);
   url.searchParams.set("format", "json");
   url.searchParams.set("maxrecords", String(Math.max(1, Math.min(250, params.maxrecords ?? 100))));
@@ -247,7 +273,7 @@ export async function getGdeltTimeline(
   timespan = "7d"
 ): Promise<CachedFetchResult<GdeltTimelinePoint[]>> {
   const url = new URL(GDELT_DOC_BASE);
-  url.searchParams.set("query", query.trim() || "news");
+  url.searchParams.set("query", query.trim() || "sourcelang:english");
   url.searchParams.set("mode", "timelinevol");
   url.searchParams.set("format", "json");
   url.searchParams.set("timespan", timespan);
@@ -268,4 +294,67 @@ export async function getGdeltTimeline(
       }));
     },
   });
+}
+
+const CONFLICT_QUERY_STRICT =
+  'theme:CRISISLEX_C03_ARMED_CONFLICT OR ("armed conflict" OR "military attack" OR airstrike OR shelling OR "armed assault" OR bombing)';
+const CONFLICT_QUERY_BROAD =
+  CONFLICT_QUERY_STRICT +
+  ' OR clashes OR firefight OR insurgent OR militia OR bombardment OR "rocket attack" OR crossfire';
+
+/**
+ * Fetches conflict-related event signals from GDELT Geo API.
+ * Uses conflict-themed queries (material conflict / armed conflict) to approximate
+ * QuadClass=4 (Material Conflict) signals. Returns geographic points as ConflictEvent inputs.
+ */
+export async function getGdeltEvents(
+  params: GdeltEventsParams
+): Promise<CachedFetchResult<ConflictEvent[]>> {
+  const mode = params.mode ?? "strict";
+  const query = mode === "broad" ? CONFLICT_QUERY_BROAD : CONFLICT_QUERY_STRICT;
+  const timespan = params.timespan ?? "24h";
+  const maxrecords = Math.max(1, Math.min(250, params.maxrecords ?? 200));
+
+  const geoResult = await getGdeltGeo({
+    q: query,
+    timespan,
+    from: params.from,
+    to: params.to,
+    mode: "pointdata",
+    maxrecords,
+  });
+
+  let points = geoResult.data.points;
+  if (params.countryCode && params.countryCode.length === 2) {
+    const code = params.countryCode.toUpperCase();
+    points = points.filter((p) => (p.countrycode ?? "").toUpperCase() === code);
+  }
+
+  const now = Date.now();
+  const events: ConflictEvent[] = points.map((p, idx) => {
+    const mentionCount = p.count ?? 1;
+    const severityWeight = Math.min(100, 40 + Math.log10(1 + mentionCount) * 20);
+    return {
+      id: `gdelt-evt-${idx}-${p.lat.toFixed(2)}-${p.lon.toFixed(2)}`,
+      timestamp: now,
+      lat: p.lat,
+      lon: p.lon,
+      source: "gdelt_geo" as const,
+      country: p.countrycode ?? undefined,
+      locationName: p.fullname || p.name,
+      actors: [],
+      articleCount: mentionCount,
+      mentionCount,
+      severityWeight,
+      verified: false,
+      sourceUrl: undefined,
+    };
+  });
+
+  return {
+    data: events,
+    degraded: geoResult.degraded,
+    latencyMs: geoResult.latencyMs,
+    cacheHit: geoResult.cacheHit,
+  };
 }

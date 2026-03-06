@@ -75,13 +75,13 @@ export default function CctvFloatingPanel() {
   return (
     <div
       ref={panelRef}
+      className="wv-cctv-floating-panel"
       style={{
         position: "fixed",
         left: pos.x,
         top: pos.y,
         width: size.w,
         height: minimized ? 36 : size.h,
-        zIndex: 9999,
         background: "rgba(10, 14, 20, 0.95)",
         border: "1px solid rgba(0, 229, 255, 0.3)",
         borderRadius: 6,

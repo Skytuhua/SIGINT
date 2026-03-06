@@ -7,13 +7,13 @@ import { cachedFetch, type CachedFetchResult, type UpstreamPolicy } from "../ups
 
 const POLICY: UpstreamPolicy = {
   key: "rss",
-  ttlMs: 30_000,
-  staleTtlMs: 4 * 60_000,
-  timeoutMs: 9_000,
-  maxRetries: 1,
+  ttlMs: 60_000,
+  staleTtlMs: 10 * 60_000,
+  timeoutMs: 14_000,
+  maxRetries: 0,
   backoffBaseMs: 450,
-  circuitFailureThreshold: 3,
-  circuitOpenMs: 90_000,
+  circuitFailureThreshold: 8,
+  circuitOpenMs: 15_000,
   rateLimit: { capacity: 6, refillPerSec: 5, minIntervalMs: 100 },
 };
 
@@ -188,9 +188,14 @@ function compareItems(a: NewsArticle, b: NewsArticle): number {
   return a.id.localeCompare(b.id);
 }
 
+// Per-feed timeout must be well under the overall budget so that
+// slow/dead feeds don't block concurrency slots for too long.
+// Most healthy feeds respond in <500ms; 4s is generous.
+const PER_FEED_TIMEOUT_MS = 4_000;
+
 async function fetchFeed(feed: RssFeedSource): Promise<NewsArticle[]> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), POLICY.timeoutMs);
+  const timer = setTimeout(() => controller.abort(), PER_FEED_TIMEOUT_MS);
   try {
     const response = await fetch(feed.url, {
       signal: controller.signal,
@@ -225,7 +230,7 @@ export async function getRssArticles(params: RssParams): Promise<CachedFetchResu
   if (rawQ.length > 0 && qTerms.length === 0) {
     qTerms = [rawQ.toLowerCase()];
   }
-  const maxItems = Math.max(30, Math.min(360, params.maxItems ?? 220));
+  const maxItems = Math.max(30, Math.min(600, params.maxItems ?? 220));
   const selectedFeeds = params.cat
     ? NEWS_RSS_FEEDS.filter((feed) => feed.category === params.cat)
     : NEWS_RSS_FEEDS;
@@ -245,18 +250,64 @@ export async function getRssArticles(params: RssParams): Promise<CachedFetchResu
       const degradedFeeds: string[] = [];
       const allItems: NewsArticle[] = [];
 
-      const results = await Promise.all(
-        selectedFeeds.map(async (feed) => {
-          try {
-            return await fetchFeed(feed);
-          } catch {
-            degradedFeeds.push(feed.label);
-            return [];
+      // Time-budgeted concurrency pool: fetch RSS feeds with limited
+      // parallelism and return whatever we have when the budget expires.
+      // This prevents TCP connection saturation on Windows where 100+
+      // simultaneous HTTPS connections cause mass timeouts.
+      const CONCURRENCY = 16;
+      const BUDGET_MS = 10_000;
+      let okCount = 0;
+      let completed = 0;
+
+      await new Promise<void>((resolve) => {
+        let running = 0;
+        let idx = 0;
+        let resolved = false;
+        const budgetTimer = setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            resolve();
           }
-        })
-      );
-      for (const list of results) {
-        allItems.push(...list);
+        }, BUDGET_MS);
+
+        function done() {
+          if (resolved) return;
+          resolved = true;
+          clearTimeout(budgetTimer);
+          resolve();
+        }
+
+        function next() {
+          if (resolved && running === 0) return;
+          while (!resolved && running < CONCURRENCY && idx < selectedFeeds.length) {
+            const feed = selectedFeeds[idx++];
+            running++;
+            fetchFeed(feed)
+              .then((items) => {
+                if (items.length > 0) {
+                  okCount++;
+                  allItems.push(...items);
+                }
+              })
+              .catch(() => {
+                degradedFeeds.push(feed.label);
+              })
+              .finally(() => {
+                running--;
+                completed++;
+                if (idx >= selectedFeeds.length && running === 0) done();
+                else if (!resolved) next();
+              });
+          }
+          if (idx >= selectedFeeds.length && running === 0) done();
+        }
+        next();
+      });
+
+      if (allItems.length === 0) {
+        console.warn(`[rss] 0 articles from ${completed}/${selectedFeeds.length} feeds tried (${degradedFeeds.length} failed)`);
+      } else {
+        console.log(`[rss] ${allItems.length} articles from ${okCount}/${completed} feeds (${selectedFeeds.length} total)`);
       }
 
       const domainNeedle = params.domain?.toLowerCase().trim() || "";

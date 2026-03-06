@@ -13,6 +13,10 @@
                                       },
                          "properties":  {
                                             "name":  "military-bases site 0",
+                                            "aka":  "Joint Task Node / Sentinel Hub",
+                                            "sponsor":  "United States (DoD)",
+                                            "origin":  "38.9°, -77.0°",
+                                            "summary":  "Regional command-and-control nexus for joint operations, integrating air, cyber, and space tasking. Acts as a coordination point for multinational exercises and contingency planning.",
                                             "ts":  1772435598806
                                         }
                      },
@@ -28,6 +32,10 @@
                                       },
                          "properties":  {
                                             "name":  "military-bases site 1",
+                                            "aka":  "Atlas Annex",
+                                            "sponsor":  "NATO (Multinational HQ)",
+                                            "origin":  "48.9°, 2.3°",
+                                            "summary":  "Multinational headquarters node focused on planning, training, and logistics coordination across allied forces. Regularly hosts joint readiness drills and crisis simulations.",
                                             "ts":  1772435598814
                                         }
                      },
@@ -43,6 +51,10 @@
                                       },
                          "properties":  {
                                             "name":  "military-bases site 2",
+                                            "aka":  "Pacific Anchor",
+                                            "sponsor":  "Japan (JSDF)",
+                                            "origin":  "35.7°, 139.8°",
+                                            "summary":  "High-readiness installation supporting air defense, maritime surveillance, and humanitarian assistance missions across the wider Pacific region.",
                                             "ts":  1772435598814
                                         }
                      },
@@ -58,6 +70,10 @@
                                       },
                          "properties":  {
                                             "name":  "military-bases site 3",
+                                            "aka":  "Fancy Bear / Cozy Bear",
+                                            "sponsor":  "Russia (GRU / FSB)",
+                                            "origin":  "55.0°, 40.0°",
+                                            "summary":  "Advanced persistent threat node with state-level capabilities. Associated with sophisticated cyber operations targeting critical infrastructure, government, and defense sectors.",
                                             "ts":  1772435598814
                                         }
                      },
@@ -73,6 +89,10 @@
                                       },
                          "properties":  {
                                             "name":  "military-bases site 4",
+                                            "aka":  "Southern Relay",
+                                            "sponsor":  "Regional Joint Command",
+                                            "origin":  "-23.6°, -46.6°",
+                                            "summary":  "Logistics and mobility hub that supports troop movements, airlift operations, and disaster-response deployments across the southern hemisphere.",
                                             "ts":  1772435598814
                                         }
                      }

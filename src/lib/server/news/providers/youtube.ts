@@ -1,7 +1,14 @@
 import { XMLParser } from "fast-xml-parser";
 import { NEWS_VIDEO_CHANNELS } from "../../../../config/newsConfig";
+import { WEBCAM_VIDEO_CHANNELS } from "../../../../config/webcamConfig";
 import type { YouTubeLive } from "../../../news/types";
 import { cachedFetch, fetchJsonOrThrow, type CachedFetchResult, type UpstreamPolicy } from "../upstream";
+
+/** Resolved channel with channelId (required for API calls). */
+interface ResolvedChannel {
+  channelId: string;
+  label: string;
+}
 
 const YT_CHANNELS_BASE = "https://www.googleapis.com/youtube/v3/channels";
 const YT_PLAYLIST_ITEMS_BASE = "https://www.googleapis.com/youtube/v3/playlistItems";
@@ -91,6 +98,9 @@ interface YtVideosResponse {
       liveBroadcastContent?: string;
       thumbnails?: { medium?: { url?: string } };
     };
+    contentDetails?: {
+      duration?: string;
+    };
     liveStreamingDetails?: {
       actualStartTime?: string;
       actualEndTime?: string;
@@ -109,8 +119,32 @@ interface CandidateVideo {
   thumbnailUrl?: string;
 }
 
+/** Maximum age for a "recent" (non-live) video to be surfaced. */
+const RECENT_MAX_AGE_MS = 48 * 60 * 60 * 1000; // 48 hours
+
+/** Minimum video duration in seconds — anything shorter (Shorts / Reels) is excluded. */
+const MIN_VIDEO_DURATION_SEC = 90;
+
+/** Parse an ISO 8601 duration (e.g. "PT1H2M30S") to total seconds. */
+function parseDurationSec(iso: string | undefined): number | undefined {
+  if (!iso) return undefined;
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return undefined;
+  return (parseInt(m[1] || "0", 10)) * 3600
+       + (parseInt(m[2] || "0", 10)) * 60
+       + (parseInt(m[3] || "0", 10));
+}
+
 function uniqueStrings(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean)));
+}
+
+/** Return true if the item should be included. Live streams always pass; recent items must be within RECENT_MAX_AGE_MS. */
+function isRecent(item: YouTubeLive): boolean {
+  if (item.status === "live") return true;
+  const ts = Date.parse(item.publishedAt ?? "");
+  if (!Number.isFinite(ts)) return false;
+  return Date.now() - ts <= RECENT_MAX_AGE_MS;
 }
 
 function chunk<T>(items: T[], size: number): T[][] {
@@ -205,12 +239,12 @@ function dedupeAndSort(items: YouTubeLive[]): YouTubeLive[] {
 }
 
 function sortedChannels() {
-  return [...NEWS_VIDEO_CHANNELS].sort((a, b) => b.priority - a.priority).slice(0, 14);
+  return [...NEWS_VIDEO_CHANNELS].sort((a, b) => b.priority - a.priority).slice(0, 50);
 }
 
 async function discoverFromDataApi(
   apiKey: string,
-  channels: Array<(typeof NEWS_VIDEO_CHANNELS)[number]>
+  channels: ResolvedChannel[]
 ): Promise<CachedFetchResult<YouTubeDiscoveryData>> {
   const cacheKey = `channels:${channels.map((c) => c.channelId).join(",")}`;
   const channelLabelById = new Map(channels.map((c) => [c.channelId, c.label]));
@@ -256,7 +290,7 @@ async function discoverFromDataApi(
         const playlistUrl = new URL(YT_PLAYLIST_ITEMS_BASE);
         playlistUrl.searchParams.set("part", "snippet,contentDetails");
         playlistUrl.searchParams.set("playlistId", uploadsId);
-        playlistUrl.searchParams.set("maxResults", "3");
+        playlistUrl.searchParams.set("maxResults", "5");
         playlistUrl.searchParams.set("key", apiKey);
 
         try {
@@ -296,7 +330,7 @@ async function discoverFromDataApi(
       for (const batch of chunk(uniqueVideoIds, 50)) {
         if (!batch.length) continue;
         const videosUrl = new URL(YT_VIDEOS_BASE);
-        videosUrl.searchParams.set("part", "snippet,liveStreamingDetails");
+        videosUrl.searchParams.set("part", "snippet,contentDetails,liveStreamingDetails");
         videosUrl.searchParams.set("id", batch.join(","));
         videosUrl.searchParams.set("key", apiKey);
         try {
@@ -315,10 +349,22 @@ async function discoverFromDataApi(
       }
       if (metadataFailed) degradedChannels.push("Video metadata");
 
-      const allItems: YouTubeLive[] = candidates.map((candidate) => {
+      const allItems: YouTubeLive[] = [];
+      for (const candidate of candidates) {
         const meta = videoMetaById.get(candidate.videoId);
         const snippet = meta?.snippet;
         const liveMeta = meta?.liveStreamingDetails;
+        const broadcastStatus = snippet?.liveBroadcastContent?.toLowerCase();
+        const isLive = broadcastStatus === "live" && !liveMeta?.actualEndTime;
+
+        // Skip upcoming broadcasts — not watchable yet
+        if (broadcastStatus === "upcoming") continue;
+        // Skip finished livestream replays (has actualEndTime → it's a VOD replay)
+        if (!isLive && liveMeta?.actualEndTime) continue;
+        // Skip Shorts / Reels (< 90 s) — only for non-live videos
+        const duration = parseDurationSec(meta?.contentDetails?.duration);
+        if (!isLive && duration !== undefined && duration < MIN_VIDEO_DURATION_SEC) continue;
+
         const channelId = snippet?.channelId?.trim() || candidate.channelId;
         const channelName =
           channelLabelById.get(channelId) ||
@@ -326,9 +372,8 @@ async function discoverFromDataApi(
           snippet?.channelTitle?.trim() ||
           channelId;
         const publishedAt = snippet?.publishedAt || candidate.publishedAt;
-        const isLive = snippet?.liveBroadcastContent?.toLowerCase() === "live" && !liveMeta?.actualEndTime;
 
-        return {
+        allItems.push({
           id: `${isLive ? "live" : "recent"}-${candidate.videoId}`,
           videoId: candidate.videoId,
           channelId,
@@ -342,10 +387,10 @@ async function discoverFromDataApi(
           viewerCount: parseViewerCount(liveMeta?.concurrentViewers),
           status: isLive ? "live" : "recent",
           sourceUrl: `https://www.youtube.com/watch?v=${candidate.videoId}`,
-        };
-      });
+        });
+      }
 
-      const items = dedupeAndSort(allItems);
+      const items = dedupeAndSort(allItems).filter(isRecent);
       return {
         items,
         channelsChecked: channels.length,
@@ -356,7 +401,7 @@ async function discoverFromDataApi(
   });
 }
 
-async function fetchRssChannelItems(channel: (typeof NEWS_VIDEO_CHANNELS)[number]): Promise<YouTubeLive[]> {
+async function fetchRssChannelItems(channel: ResolvedChannel): Promise<YouTubeLive[]> {
   const rssUrl = `${YT_RSS_BASE}?channel_id=${encodeURIComponent(channel.channelId)}`;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), RSS_FALLBACK_POLICY.timeoutMs);
@@ -375,7 +420,7 @@ async function fetchRssChannelItems(channel: (typeof NEWS_VIDEO_CHANNELS)[number
     const xmlText = await response.text();
     const parsed = XML.parse(xmlText) as Record<string, unknown>;
     const feed = parsed.feed as Record<string, unknown> | undefined;
-    const entries = toArray(feed?.entry as Record<string, unknown> | Record<string, unknown>[] | undefined).slice(0, 3);
+    const entries = toArray(feed?.entry as Record<string, unknown> | Record<string, unknown>[] | undefined).slice(0, 5);
     const items: YouTubeLive[] = [];
     for (const entry of entries) {
       const videoId = readText(entry["yt:videoId"]);
@@ -402,7 +447,7 @@ async function fetchRssChannelItems(channel: (typeof NEWS_VIDEO_CHANNELS)[number
 }
 
 async function discoverFromRss(
-  channels: Array<(typeof NEWS_VIDEO_CHANNELS)[number]>
+  channels: ResolvedChannel[]
 ): Promise<CachedFetchResult<YouTubeDiscoveryData>> {
   const cacheKey = `channels:${channels.map((c) => c.channelId).join(",")}`;
   return cachedFetch({
@@ -428,7 +473,7 @@ async function discoverFromRss(
         })
       );
       for (const list of results) allItems.push(...list);
-      const items = dedupeAndSort(allItems);
+      const items = dedupeAndSort(allItems).filter(isRecent);
       return {
         items,
         channelsChecked: channels.length,
@@ -437,6 +482,109 @@ async function discoverFromRss(
       };
     },
   });
+}
+
+/** Resolve WebcamChannel[] to ResolvedChannel[]. Resolves forUsername via API when apiKey is set. */
+async function resolveWebcamChannels(apiKey: string | undefined): Promise<ResolvedChannel[]> {
+  const resolved: ResolvedChannel[] = [];
+  for (const ch of WEBCAM_VIDEO_CHANNELS) {
+    if (ch.channelId) {
+      resolved.push({ channelId: ch.channelId, label: ch.label });
+      continue;
+    }
+    if (ch.forUsername && apiKey) {
+      try {
+        const url = `${YT_CHANNELS_BASE}?part=id,snippet&forUsername=${encodeURIComponent(ch.forUsername)}&key=${apiKey}`;
+        const ac = new AbortController();
+        const t = setTimeout(() => ac.abort(), 5_000);
+        const res = await fetch(url, {
+          headers: { "User-Agent": "WorldView/0.1 (webcam-channel-resolve)" },
+          signal: ac.signal,
+        });
+        clearTimeout(t);
+        const data = (await res.json()) as { items?: Array<{ id?: string }> };
+        const id = data.items?.[0]?.id?.trim();
+        if (id) resolved.push({ channelId: id, label: ch.label });
+      } catch {
+        /* skip unresolved */
+      }
+    }
+  }
+  return resolved.sort((a, b) => {
+    const pa = WEBCAM_VIDEO_CHANNELS.find((c) => c.label === a.label)?.priority ?? 0;
+    const pb = WEBCAM_VIDEO_CHANNELS.find((c) => c.label === b.label)?.priority ?? 0;
+    return pb - pa;
+  });
+}
+
+/** Discover live streams from webcam channels (EarthCam, SkylineWebcams, Explore.org, etc.). */
+export async function discoverYouTubeWebcamStreams(
+  apiKey: string | undefined
+): Promise<CachedFetchResult<YouTubeLiveResult>> {
+  const channels = await resolveWebcamChannels(apiKey);
+  if (channels.length === 0) {
+    return {
+      data: {
+        items: [],
+        channelsChecked: 0,
+        liveCount: 0,
+        degraded: ["No webcam channels resolved"],
+        keyMissing: !apiKey,
+        discoverySource: "youtube-rss",
+        fallbackActive: true,
+      },
+      degraded: true,
+      latencyMs: 0,
+      cacheHit: "miss",
+      error: null,
+    };
+  }
+  if (!apiKey) {
+    const rssResult = await discoverFromRss(channels);
+    return {
+      data: {
+        ...rssResult.data,
+        keyMissing: true,
+        discoverySource: "youtube-rss",
+        fallbackActive: true,
+      },
+      degraded: rssResult.degraded,
+      latencyMs: rssResult.latencyMs,
+      cacheHit: rssResult.cacheHit,
+      error: rssResult.error,
+    };
+  }
+  const dataResult = await discoverFromDataApi(apiKey, channels);
+  if (dataResult.degraded || dataResult.error) {
+    const rssResult = await discoverFromRss(channels);
+    if (rssResult.data.items.length > 0 || !dataResult.data.items.length) {
+      return {
+        data: {
+          ...rssResult.data,
+          degraded: uniqueStrings([...dataResult.data.degraded, ...rssResult.data.degraded]),
+          keyMissing: false,
+          discoverySource: "youtube-rss",
+          fallbackActive: true,
+        },
+        degraded: dataResult.degraded || rssResult.degraded,
+        latencyMs: dataResult.latencyMs + rssResult.latencyMs,
+        cacheHit: rssResult.cacheHit,
+        error: rssResult.error ?? dataResult.error,
+      };
+    }
+  }
+  return {
+    data: {
+      ...dataResult.data,
+      keyMissing: false,
+      discoverySource: "youtube-data-api",
+      fallbackActive: false,
+    },
+    degraded: dataResult.degraded,
+    latencyMs: dataResult.latencyMs,
+    cacheHit: dataResult.cacheHit,
+    error: dataResult.error,
+  };
 }
 
 export async function discoverYouTubeLiveStreams(

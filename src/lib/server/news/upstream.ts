@@ -1,5 +1,23 @@
 import { performance } from "perf_hooks";
 
+// ─── Global undici dispatcher with relaxed connect timeout ───────────────────
+// On Windows, Node.js's default connect timeout (10s) is too aggressive when
+// many concurrent HTTPS connections fire at startup. This configures undici
+// with a 30s connect timeout and connection pooling to prevent failures.
+let _dispatcherReady = false;
+if (typeof globalThis !== "undefined" && typeof (globalThis as any).window === "undefined") {
+  import("undici").then(({ Agent, setGlobalDispatcher }) => {
+    setGlobalDispatcher(new Agent({
+      connections: 10,
+      pipelining: 1,
+      connect: { timeout: 30_000 },
+      keepAliveTimeout: 30_000,
+      keepAliveMaxTimeout: 60_000,
+    }));
+    _dispatcherReady = true;
+  }).catch(() => {/* undici not available — use Node defaults */});
+}
+
 export interface UpstreamRateLimit {
   capacity: number;
   refillPerSec: number;
@@ -29,6 +47,15 @@ export interface CachedFetchOptions<T> {
   policy: UpstreamPolicy;
   request: () => Promise<T>;
   fallbackValue?: T;
+  /**
+   * If a stale cache entry exists, return it immediately (default: true).
+   * A background refresh may still be triggered to update the cache.
+   */
+  preferStale?: boolean;
+  /**
+   * When returning stale immediately, kick off a background refresh (default: true).
+   */
+  backgroundRefresh?: boolean;
 }
 
 export interface CachedFetchResult<T> {
@@ -194,7 +221,8 @@ export async function fetchJsonOrThrow<T>(
   init: RequestInit,
   timeoutMs: number
 ): Promise<T> {
-  const response = await withTimeout(fetch(url, init), timeoutMs);
+  const merged: RequestInit = { ...init, cache: "no-store" as RequestCache };
+  const response = await withTimeout(fetch(url, merged), timeoutMs);
   if (!response.ok) {
     throw new UpstreamHttpError(response.status, `${url} returned ${response.status}`);
   }
@@ -213,6 +241,10 @@ export async function cachedFetch<T>(options: CachedFetchOptions<T>): Promise<Ca
       cacheHit: "fresh",
     };
   }
+
+  const preferStale = options.preferStale !== false;
+  const backgroundRefresh = options.backgroundRefresh !== false;
+  const staleTtlMs = Math.max(policy.ttlMs * 2, policy.staleTtlMs ?? policy.ttlMs * 5);
 
   if (circuitOpen(policy)) {
     const stale = getStale<T>(fullKey);
@@ -236,14 +268,11 @@ export async function cachedFetch<T>(options: CachedFetchOptions<T>): Promise<Ca
     }
   }
 
-  const pendingKey = fullKey;
-  const existing = inFlight.get(pendingKey) as Promise<CachedFetchResult<T>> | undefined;
-  if (existing) return existing;
+  const staleNow = getStale<T>(fullKey);
 
-  const runner = (async (): Promise<CachedFetchResult<T>> => {
+  const runNetwork = async (): Promise<CachedFetchResult<T>> => {
     const started = performance.now();
-    const stale = getStale<T>(fullKey);
-    const staleTtlMs = Math.max(policy.ttlMs * 2, policy.staleTtlMs ?? policy.ttlMs * 5);
+    const stale = staleNow ?? getStale<T>(fullKey);
 
     let attempt = 0;
     while (attempt <= policy.maxRetries) {
@@ -261,6 +290,7 @@ export async function cachedFetch<T>(options: CachedFetchOptions<T>): Promise<Ca
       } catch (err) {
         attempt += 1;
         recordFailure(policy);
+        console.error(`[upstream:${policy.key}] attempt ${attempt} failed:`, err instanceof Error ? err.message : String(err));
         const retryable = isRetryableError(err);
         const maxed = attempt > policy.maxRetries;
         if (!retryable || maxed) {
@@ -310,13 +340,46 @@ export async function cachedFetch<T>(options: CachedFetchOptions<T>): Promise<Ca
     }
 
     throw new Error(`retry-exhausted:${policy.key}`);
-  })();
+  };
 
-  inFlight.set(pendingKey, runner as Promise<CachedFetchResult<unknown>>);
+  // Stale-while-revalidate: return stale immediately, refresh in background.
+  if (preferStale && staleNow != null) {
+    if (backgroundRefresh) {
+      const existing = inFlight.get(fullKey) as Promise<CachedFetchResult<T>> | undefined;
+      if (!existing) {
+        const runner = runNetwork()
+          .catch((error) => ({
+            data: staleNow,
+            degraded: true,
+            latencyMs: 0,
+            cacheHit: "stale",
+            error: error instanceof Error ? error.message : String(error),
+          }))
+          .finally(() => {
+            inFlight.delete(fullKey);
+          });
+        inFlight.set(fullKey, runner as Promise<CachedFetchResult<unknown>>);
+      }
+    }
+
+    return {
+      data: staleNow,
+      degraded: true,
+      latencyMs: 0,
+      cacheHit: "stale",
+    };
+  }
+
+  const existing = inFlight.get(fullKey) as Promise<CachedFetchResult<T>> | undefined;
+  if (existing) return existing;
+
+  const runner = runNetwork();
+
+  inFlight.set(fullKey, runner as Promise<CachedFetchResult<unknown>>);
   try {
     return await runner;
   } finally {
-    inFlight.delete(pendingKey);
+    inFlight.delete(fullKey);
   }
 }
 

@@ -9,7 +9,9 @@ import GlobeWorkspace from "./dashboard/GlobeWorkspace";
 import InspectorDrawer from "./dashboard/inspector/InspectorDrawer";
 import Toggle from "./dashboard/controls/Toggle";
 import NewsWorkspace from "./news/NewsWorkspace";
+import MarketWorkspace from "./market/MarketWorkspace";
 import CctvFloatingPanel from "./dashboard/CctvFloatingPanel";
+import TradeRouteCard from "./dashboard/TradeRouteCard";
 import { formatUtc } from "../lib/dashboard/format";
 
 function selectGlobalFreshness(lastUpdated: Record<string, number | null>): number | null {
@@ -261,6 +263,15 @@ export default function WorldViewApp() {
             >
               NEWS
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeView === "market"}
+              className={activeView === "market" ? "is-active" : ""}
+              onClick={() => setActiveView("market")}
+            >
+              MARKET
+            </button>
           </div>
         </div>
 
@@ -268,20 +279,27 @@ export default function WorldViewApp() {
           <div className="wv-header-status">
             <span
               className={`wv-live-dot ${
-                activeView === "news"
-                  ? newsLoading
-                    ? "is-loading"
-                    : newsErrors
-                      ? "is-error"
-                      : "is-ok"
-                  : feedLoading
-                    ? "is-loading"
-                    : feedErrors
-                      ? "is-error"
-                      : "is-ok"
+                activeView === "market"
+                  ? "is-ok"
+                  : activeView === "news"
+                    ? newsLoading
+                      ? "is-loading"
+                      : newsErrors
+                        ? "is-error"
+                        : "is-ok"
+                    : feedLoading
+                      ? "is-loading"
+                      : feedErrors
+                        ? "is-error"
+                        : "is-ok"
               }`}
             />
-            {activeView === "news" ? (
+            {activeView === "market" ? (
+              <>
+                <span>MARKET READY</span>
+                <span>DATA SOURCE PENDING</span>
+              </>
+            ) : activeView === "news" ? (
               <>
                 <span>{newsErrors ? `${newsErrors} NEWS ERR` : "NEWS OK"}</span>
                 <span>{newsState.lastUpdated ? `UPDATED ${formatUtc(newsState.lastUpdated)}` : "NO NEWS TS"}</span>
@@ -310,6 +328,27 @@ export default function WorldViewApp() {
       </header>
 
       <main className="wv-main-frame">
+        {/* Always mount NewsWorkspace so the map initializes immediately.
+            When not the active view, position it absolutely behind the visible
+            view with visibility:hidden — the container still has dimensions
+            so MapLibre/Leaflet can create their WebGL/canvas context. */}
+        <div
+          className="wv-news-main-frame"
+          role="region"
+          aria-label="News workspace"
+          style={activeView !== "news" ? {
+            visibility: "hidden",
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            zIndex: -1,
+          } : undefined}
+        >
+          <section className="wv-unified-dashboard-section wv-news-section">
+            <NewsWorkspace />
+          </section>
+        </div>
+
         {activeView === "ops" ? (
           <div className="wv-unified-scroll" role="region" aria-label="Unified globe and dashboard workspace">
             <section
@@ -343,17 +382,16 @@ export default function WorldViewApp() {
               <DashboardWorkspace embedded />
             </section>
           </div>
-        ) : (
-          <div className="wv-news-main-frame" role="region" aria-label="News workspace">
-            <section className="wv-unified-dashboard-section wv-news-section">
-              <NewsWorkspace />
-            </section>
+        ) : activeView === "market" ? (
+          <div className="wv-market-main-frame" role="region" aria-label="Market workspace">
+            <MarketWorkspace />
           </div>
-        )}
+        ) : null}
       </main>
 
       <InspectorDrawer />
       <CctvFloatingPanel />
+      <TradeRouteCard />
     </div>
   );
 }

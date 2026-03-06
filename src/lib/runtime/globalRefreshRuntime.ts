@@ -26,7 +26,7 @@ class GlobalRefreshRuntime {
         defaultTimeoutMs: 25_000,
       }),
       news: new RefreshScheduler({
-        maxConcurrent: 2,
+        maxConcurrent: 6,
         hiddenIntervalMultiplier: 2.5,
         defaultTimeoutMs: 25_000,
       }),

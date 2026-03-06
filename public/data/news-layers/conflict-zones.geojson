@@ -1,0 +1,221 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "cz-ukraine-east",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[35.5, 46.5], [40.5, 46.5], [40.5, 50.0], [35.5, 50.0], [35.5, 46.5]]]
+      },
+      "properties": {
+        "type": "conflict_zone",
+        "severityLabel": "Severe",
+        "intensity": 95,
+        "eventCount": 500,
+        "topLocations": ["Donetsk", "Luhansk", "Zaporizhzhia", "Kherson"],
+        "topActors": ["Armed Forces of Ukraine", "Russian Armed Forces"],
+        "timeWindow": "7d",
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cz-ukraine-south",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[32.0, 46.0], [35.5, 46.0], [35.5, 48.0], [32.0, 48.0], [32.0, 46.0]]]
+      },
+      "properties": {
+        "type": "conflict_zone",
+        "severityLabel": "High",
+        "intensity": 70,
+        "eventCount": 120,
+        "topLocations": ["Kherson Oblast", "Mykolaiv Oblast"],
+        "topActors": ["Armed Forces of Ukraine", "Russian Armed Forces"],
+        "timeWindow": "7d",
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cz-sudan",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[29.0, 12.0], [34.0, 12.0], [34.0, 16.5], [29.0, 16.5], [29.0, 12.0]]]
+      },
+      "properties": {
+        "type": "conflict_zone",
+        "severityLabel": "Severe",
+        "intensity": 88,
+        "eventCount": 300,
+        "topLocations": ["Khartoum", "El Fasher", "Darfur", "El Gezira"],
+        "topActors": ["Sudanese Armed Forces", "Rapid Support Forces"],
+        "timeWindow": "7d",
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cz-gaza",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[34.15, 31.2], [34.6, 31.2], [34.6, 31.65], [34.15, 31.65], [34.15, 31.2]]]
+      },
+      "properties": {
+        "type": "conflict_zone",
+        "severityLabel": "Severe",
+        "intensity": 98,
+        "eventCount": 600,
+        "topLocations": ["Gaza City", "Khan Younis", "Rafah", "Deir al-Balah"],
+        "topActors": ["Israel Defense Forces", "Hamas"],
+        "timeWindow": "7d",
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cz-myanmar",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[94.0, 16.0], [99.0, 16.0], [99.0, 24.0], [94.0, 24.0], [94.0, 16.0]]]
+      },
+      "properties": {
+        "type": "conflict_zone",
+        "severityLabel": "High",
+        "intensity": 72,
+        "eventCount": 180,
+        "topLocations": ["Sagaing", "Shan", "Rakhine", "Chin"],
+        "topActors": ["Myanmar Military", "People's Defence Force", "Ethnic Armed Organizations"],
+        "timeWindow": "7d",
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cz-ethiopia-amhara",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[36.5, 10.0], [40.5, 10.0], [40.5, 13.5], [36.5, 13.5], [36.5, 10.0]]]
+      },
+      "properties": {
+        "type": "conflict_zone",
+        "severityLabel": "Elevated",
+        "intensity": 55,
+        "eventCount": 80,
+        "topLocations": ["Amhara Region", "Gondar", "Lalibela"],
+        "topActors": ["Ethiopian National Defense Force", "Fano"],
+        "timeWindow": "7d",
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cz-syria",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[36.0, 34.5], [42.0, 34.5], [42.0, 37.5], [36.0, 37.5], [36.0, 34.5]]]
+      },
+      "properties": {
+        "type": "conflict_zone",
+        "severityLabel": "High",
+        "intensity": 65,
+        "eventCount": 90,
+        "topLocations": ["Aleppo", "Idlib", "Deir ez-Zor"],
+        "topActors": ["Syrian Government Forces", "HTS", "SDF"],
+        "timeWindow": "7d",
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cz-drc-east",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[27.5, -4.5], [30.0, -4.5], [30.0, 1.0], [27.5, 1.0], [27.5, -4.5]]]
+      },
+      "properties": {
+        "type": "conflict_zone",
+        "severityLabel": "High",
+        "intensity": 68,
+        "eventCount": 140,
+        "topLocations": ["North Kivu", "South Kivu", "Ituri", "Goma"],
+        "topActors": ["M23", "FARDC", "FDLR", "ADF"],
+        "timeWindow": "7d",
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cz-somalia",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[42.0, 0.0], [48.0, 0.0], [48.0, 6.0], [42.0, 6.0], [42.0, 0.0]]]
+      },
+      "properties": {
+        "type": "conflict_zone",
+        "severityLabel": "Elevated",
+        "intensity": 50,
+        "eventCount": 70,
+        "topLocations": ["Mogadishu", "Lower Shabelle", "Hirshabelle"],
+        "topActors": ["Somali National Army", "Al-Shabaab"],
+        "timeWindow": "7d",
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cz-sahel",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[1.0, 11.0], [5.0, 11.0], [5.0, 17.0], [1.0, 17.0], [1.0, 11.0]]]
+      },
+      "properties": {
+        "type": "conflict_zone",
+        "severityLabel": "Elevated",
+        "intensity": 52,
+        "eventCount": 90,
+        "topLocations": ["Tillabéri", "Liptako-Gourma", "Ménaka"],
+        "topActors": ["JNIM", "ISGS", "Malian Armed Forces", "Burkinabè Armed Forces"],
+        "timeWindow": "7d",
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cz-lebanon",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[35.1, 33.05], [36.0, 33.05], [36.0, 33.9], [35.1, 33.9], [35.1, 33.05]]]
+      },
+      "properties": {
+        "type": "conflict_zone",
+        "severityLabel": "High",
+        "intensity": 62,
+        "eventCount": 75,
+        "topLocations": ["South Lebanon", "Beirut"],
+        "topActors": ["Israel Defense Forces", "Hezbollah"],
+        "timeWindow": "7d",
+        "ts": 1709424000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cz-yemen",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[43.0, 13.0], [46.0, 13.0], [46.0, 16.0], [43.0, 16.0], [43.0, 13.0]]]
+      },
+      "properties": {
+        "type": "conflict_zone",
+        "severityLabel": "Elevated",
+        "intensity": 48,
+        "eventCount": 60,
+        "topLocations": ["Marib", "Hodeidah", "Taiz"],
+        "topActors": ["Houthis", "Saudi-led Coalition", "Yemeni Government"],
+        "timeWindow": "7d",
+        "ts": 1709424000000
+      }
+    }
+  ]
+}

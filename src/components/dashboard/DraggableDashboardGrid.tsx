@@ -95,9 +95,9 @@ export default function DraggableDashboardGrid({ panels }: DraggableDashboardGri
       margin={GRID_MARGIN}
       containerPadding={[0, 0]}
       draggableHandle=".wv-panel-drag-handle"
-      draggableCancel=".react-resizable-handle,button:not(.wv-panel-drag-handle),input,select,textarea,a,[role='tab']"
+      draggableCancel=".react-resizable-handle,button:not(.wv-panel-drag-handle),input,select,textarea,a,[role='tab'],.wv-cctv-live-tab,.wv-panel-filters,.wv-panel-filters *"
       preventCollision={false}
-      allowOverlap
+      allowOverlap={false}
       useCSSTransforms
       resizeHandles={["n", "s", "e", "w", "ne", "nw", "se", "sw"]}
       compactType={null}

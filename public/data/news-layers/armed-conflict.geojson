@@ -1,0 +1,285 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "static-ua-donbas",
+      "geometry": { "type": "Point", "coordinates": [37.80, 48.02] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Donetsk Oblast", "country": "UA",
+        "severity": 90, "severityLabel": "Severe", "confidence": 85,
+        "headline": "Active frontline — Donetsk Oblast, Ukraine",
+        "summary": "Ongoing high-intensity combat along the Donetsk front. Static snapshot.",
+        "numMentions": 500, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-ua-zaporizhzhia",
+      "geometry": { "type": "Point", "coordinates": [35.20, 47.84] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Zaporizhzhia Oblast", "country": "UA",
+        "severity": 82, "severityLabel": "Severe", "confidence": 80,
+        "headline": "Frontline activity — Zaporizhzhia, Ukraine",
+        "summary": "Fighting along the Zaporizhzhia axis. Static snapshot.",
+        "numMentions": 300, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-ua-kherson",
+      "geometry": { "type": "Point", "coordinates": [33.37, 46.64] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Kherson Oblast", "country": "UA",
+        "severity": 75, "severityLabel": "Severe", "confidence": 78,
+        "headline": "Cross-river shelling — Kherson, Ukraine",
+        "summary": "Cross-Dnipro artillery exchanges. Static snapshot.",
+        "numMentions": 200, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-ps-gaza",
+      "geometry": { "type": "Point", "coordinates": [34.44, 31.42] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Gaza Strip", "country": "PS",
+        "severity": 95, "severityLabel": "Severe", "confidence": 90,
+        "headline": "Intense conflict — Gaza Strip",
+        "summary": "Active military operations in Gaza. Static snapshot.",
+        "numMentions": 800, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-lb-south",
+      "geometry": { "type": "Point", "coordinates": [35.50, 33.27] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Southern Lebanon", "country": "LB",
+        "severity": 78, "severityLabel": "Severe", "confidence": 82,
+        "headline": "Cross-border conflict — Southern Lebanon",
+        "summary": "Hezbollah-Israel cross-border exchanges. Static snapshot.",
+        "numMentions": 350, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-sd-khartoum",
+      "geometry": { "type": "Point", "coordinates": [32.53, 15.59] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Khartoum", "country": "SD",
+        "severity": 85, "severityLabel": "Severe", "confidence": 75,
+        "headline": "Civil war — Khartoum, Sudan",
+        "summary": "SAF vs RSF fighting in greater Khartoum. Static snapshot.",
+        "numMentions": 250, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-sd-darfur",
+      "geometry": { "type": "Point", "coordinates": [25.00, 13.50] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Darfur", "country": "SD",
+        "severity": 80, "severityLabel": "Severe", "confidence": 70,
+        "headline": "Conflict in Darfur — Sudan",
+        "summary": "Continued violence in Darfur region. Static snapshot.",
+        "numMentions": 180, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-mm-shan",
+      "geometry": { "type": "Point", "coordinates": [97.00, 21.00] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Shan State", "country": "MM",
+        "severity": 72, "severityLabel": "High", "confidence": 68,
+        "headline": "Armed resistance — Shan State, Myanmar",
+        "summary": "Ethnic armed organizations vs military junta. Static snapshot.",
+        "numMentions": 120, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-mm-chin",
+      "geometry": { "type": "Point", "coordinates": [93.50, 21.50] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Chin State", "country": "MM",
+        "severity": 65, "severityLabel": "High", "confidence": 62,
+        "headline": "Resistance fighting — Chin State, Myanmar",
+        "summary": "Chinland Defence Force operations. Static snapshot.",
+        "numMentions": 80, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-et-amhara",
+      "geometry": { "type": "Point", "coordinates": [38.50, 11.50] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Amhara Region", "country": "ET",
+        "severity": 60, "severityLabel": "High", "confidence": 60,
+        "headline": "Fano militia conflict — Amhara, Ethiopia",
+        "summary": "Fano insurgency in Amhara region. Static snapshot.",
+        "numMentions": 90, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-ml-central",
+      "geometry": { "type": "Point", "coordinates": [-4.00, 14.50] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Central Mali", "country": "ML",
+        "severity": 68, "severityLabel": "High", "confidence": 65,
+        "headline": "Jihadist insurgency — Central Mali",
+        "summary": "JNIM and ISGS operations in the Sahel. Static snapshot.",
+        "numMentions": 100, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-bf-sahel",
+      "geometry": { "type": "Point", "coordinates": [-1.50, 13.00] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Sahel Region", "country": "BF",
+        "severity": 70, "severityLabel": "High", "confidence": 63,
+        "headline": "Armed attacks — Burkina Faso",
+        "summary": "Ongoing insurgent violence. Static snapshot.",
+        "numMentions": 110, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-so-mogadishu",
+      "geometry": { "type": "Point", "coordinates": [45.30, 2.05] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Mogadishu", "country": "SO",
+        "severity": 62, "severityLabel": "High", "confidence": 60,
+        "headline": "Al-Shabaab conflict — Somalia",
+        "summary": "Al-Shabaab attacks and government operations. Static snapshot.",
+        "numMentions": 95, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-cd-kivu",
+      "geometry": { "type": "Point", "coordinates": [29.00, -1.50] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "North Kivu", "country": "CD",
+        "severity": 78, "severityLabel": "Severe", "confidence": 72,
+        "headline": "M23 conflict — North Kivu, DRC",
+        "summary": "M23 rebellion and ADF attacks in eastern DRC. Static snapshot.",
+        "numMentions": 160, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-ye-houthi",
+      "geometry": { "type": "Point", "coordinates": [44.20, 15.35] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Sana'a / Red Sea", "country": "YE",
+        "severity": 72, "severityLabel": "High", "confidence": 70,
+        "headline": "Houthi conflict — Yemen / Red Sea",
+        "summary": "Houthi missile and drone attacks on Red Sea shipping. Static snapshot.",
+        "numMentions": 200, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-sy-idlib",
+      "geometry": { "type": "Point", "coordinates": [36.63, 35.93] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Idlib Province", "country": "SY",
+        "severity": 55, "severityLabel": "High", "confidence": 58,
+        "headline": "Conflict zone — Idlib, Syria",
+        "summary": "Ongoing low-intensity conflict. Static snapshot.",
+        "numMentions": 70, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-ne-tillaberi",
+      "geometry": { "type": "Point", "coordinates": [2.10, 13.50] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Tillabéri Region", "country": "NE",
+        "severity": 58, "severityLabel": "High", "confidence": 55,
+        "headline": "Jihadist attacks — Tillabéri, Niger",
+        "summary": "ISGS and bandit activity in western Niger. Static snapshot.",
+        "numMentions": 60, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-ng-borno",
+      "geometry": { "type": "Point", "coordinates": [13.15, 11.84] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Borno State", "country": "NG",
+        "severity": 60, "severityLabel": "High", "confidence": 58,
+        "headline": "Boko Haram / ISWAP — Borno, Nigeria",
+        "summary": "Insurgent attacks in northeast Nigeria. Static snapshot.",
+        "numMentions": 85, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-ir-tehran",
+      "geometry": { "type": "Point", "coordinates": [51.39, 35.69] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Tehran", "country": "IR",
+        "severity": 70, "severityLabel": "High", "confidence": 72,
+        "headline": "Escalation signal — Iran",
+        "summary": "Regional escalation involving Iran. Static snapshot.",
+        "numMentions": 400, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "static-mz-cabo",
+      "geometry": { "type": "Point", "coordinates": [40.50, -12.25] },
+      "properties": {
+        "type": "armed_conflict", "subtype": "material_conflict",
+        "locationName": "Cabo Delgado", "country": "MZ",
+        "severity": 52, "severityLabel": "High", "confidence": 55,
+        "headline": "Insurgency — Cabo Delgado, Mozambique",
+        "summary": "ASWJ/ISIS-linked insurgency. Static snapshot.",
+        "numMentions": 50, "mergedEventsCount": 1, "sourceName": "Snapshot",
+        "timeWindow": "24h", "ts": 1772400000000
+      }
+    }
+  ]
+}
