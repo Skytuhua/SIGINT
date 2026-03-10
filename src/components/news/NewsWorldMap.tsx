@@ -2172,21 +2172,6 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
                             >
                               {conflictMode === "broad" ? "Signals+" : "Strict"}
                             </button>
-                            <label className="wv-news-conflict-verified" title="UCDP verified overlay">
-                              <input
-                                type="checkbox"
-                                checked={conflictVerifiedOverlay}
-                                onChange={(e) => {
-                                  const next = e.target.checked;
-                                  setConflictVerifiedOverlay(next);
-                                  try {
-                                    window.localStorage.setItem("wv:conflict-zones:verifiedOverlay", next ? "1" : "0");
-                                  } catch { /* no-op */ }
-                                  runtimeRef.current?.refresh("conflict-zones");
-                                }}
-                              />
-                              UCDP
-                            </label>
                           </>
                         ) : null
                       ) : null}

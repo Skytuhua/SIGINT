@@ -143,13 +143,11 @@ export default function LiveVideoPanel({
           />
         ) : (
           <div className="wv-news-empty">
-            {videoKeyMissing
-              ? "YOUTUBE_API_KEY missing. Showing RSS uploads when available, or paste a YouTube URL below."
-              : fallbackActive
-                ? "YouTube Data API unavailable. Showing RSS uploads when available, or paste a URL."
-                : totalCount > 0
-                ? "No streams matched this category. Try a different Source or paste a URL."
-                : "No YouTube streams discovered yet. Check API key or paste a YouTube URL to play manually."}
+            {fallbackActive
+              ? "Video discovery degraded. Showing RSS uploads when available, or paste a URL."
+              : totalCount > 0
+              ? "No streams matched this category. Try a different Source or paste a URL."
+              : "No streams discovered yet. Paste a YouTube URL to play manually."}
           </div>
         )}
         <div className="wv-news-video-controls-row">
@@ -207,13 +205,11 @@ export default function LiveVideoPanel({
       <PanelFooter
         source="YOUTUBE"
         updatedAt={Date.now()}
-        health={videoKeyMissing || fallbackActive || backendHealth === "degraded" ? "stale" : "ok"}
+        health={fallbackActive || backendHealth === "degraded" ? "stale" : "ok"}
         message={
-          videoKeyMissing
-            ? "YOUTUBE_API_KEY missing. Using RSS fallback."
-            : fallbackActive
-              ? `API unavailable. Showing recent uploads from ${discoverySource === "youtube-rss" ? "RSS" : "fallback"}.`
-              : `${liveCount} live / ${totalCount} total (${filteredStreams.length} in category)`
+          fallbackActive
+            ? `Fallback active. Showing recent uploads from ${discoverySource === "youtube-rss" ? "RSS" : discoverySource}.`
+            : `${liveCount} live / ${totalCount} total (${filteredStreams.length} in category)`
         }
       />
     </Panel>

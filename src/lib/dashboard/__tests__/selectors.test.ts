@@ -13,6 +13,8 @@ function buildState(partial: Partial<LiveDataState> = {}): LiveDataState {
     satelliteCatalog: [],
     cctv: [],
     scenes: [],
+    airspaceAnomalies: [],
+    disappearedFlights: [],
     lastUpdated: {
       opensky: null,
       military: null,

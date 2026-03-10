@@ -84,6 +84,8 @@ export interface LiveDataState {
   satelliteCatalog: Satellite[];
   cctv: CctvCamera[];
   scenes: Scene[];
+  airspaceAnomalies: import("../providers/types").AirspaceAnomalyZone[];
+  disappearedFlights: import("../providers/types").DisappearedFlight[];
   lastUpdated: Record<string, number | null>;
   health: Record<string, FeedHealth>;
   sourceHealth: Record<string, SourceHealthState>;
@@ -130,9 +132,9 @@ export const DEFAULT_PANEL_LAYOUTS: DashboardLayouts = {
     // Next row starts immediately below webcams / feed row (24 + 120 = 144).
     { i: "flight-table", x: 0, y: 144, w: 180, h: 108, minW: 90, minH: 72 },
     { i: "quake-table", x: 180, y: 144, w: 180, h: 108, minW: 90, minH: 72 },
-    // Subsequent rows are adjusted so panels do not overlap.
-    { i: "sat-list", x: 0, y: 252, w: 210, h: 96, minW: 90, minH: 60 },
-    { i: "space-weather", x: 0, y: 348, w: 180, h: 96, minW: 120, minH: 72 },
+    // Sat list + space weather share the bottom row side-by-side.
+    { i: "sat-list", x: 0, y: 252, w: 180, h: 96, minW: 90, minH: 60 },
+    { i: "space-weather", x: 180, y: 252, w: 180, h: 96, minW: 120, minH: 72 },
   ],
   md: [
     { i: "kpi", x: 0, y: 0, w: 300, h: 24, maxH: 36 },
@@ -141,8 +143,8 @@ export const DEFAULT_PANEL_LAYOUTS: DashboardLayouts = {
     { i: "feed", x: 0, y: 24, w: 150, h: 120, minH: 96 },
     { i: "flight-table", x: 0, y: 144, w: 150, h: 108, minH: 72 },
     { i: "quake-table", x: 150, y: 144, w: 150, h: 108, minH: 72 },
-    { i: "sat-list", x: 0, y: 252, w: 180, h: 96, minH: 60 },
-    { i: "space-weather", x: 0, y: 348, w: 150, h: 96, minW: 120, minH: 72 },
+    { i: "sat-list", x: 0, y: 252, w: 150, h: 96, minH: 60 },
+    { i: "space-weather", x: 150, y: 252, w: 150, h: 96, minW: 120, minH: 72 },
   ],
   sm: [
     { i: "kpi", x: 0, y: 0, w: 180, h: 24, maxH: 36 },

@@ -42,7 +42,6 @@ export const NEWS_VIDEO_CHANNELS: YouTubeChannel[] = [
   { channelId: "UC7UFcUbAd8oyCBWCogVpJ6g", label: "Bloomberg Live",         priority: 95,  region: "global", categories: ["general", "business", "financial"] },
   { channelId: "UCtn-u5YH-y5R2Cob8vvpKLg", label: "Reuters",               priority: 94,  region: "global", categories: ["general", "tech", "business", "financial"] },
   { channelId: "UCF8HUTbUwPKh2Q-KpGOCVGw", label: "CNBC Intl Live",        priority: 92,  region: "global", categories: ["general", "business", "financial"] },
-  { channelId: "UCvJJ_dzjViJCoLf5uKUTwoA", label: "CNBC TV18",             priority: 86,  region: "asia",   categories: ["general", "business", "financial"] },
 
   // ── US General / Cable ────────────────────────────────────────────
   { channelId: "UCIALMKvObZNtJ6AmdCLP7Lg", label: "AP News",               priority: 96,  region: "global", categories: ["general", "business", "tech", "financial"] },
@@ -70,11 +69,6 @@ export const NEWS_VIDEO_CHANNELS: YouTubeChannel[] = [
   { channelId: "UCvHDpsWKADrDia0c99X37vg", label: "i24NEWS EN",            priority: 80,  region: "mena",   categories: ["general"] },
 
   // ── Asia / Oceania ────────────────────────────────────────────────
-  { channelId: "UC_gUM8rL-Lrg6O3adPW9K1g", label: "WION",                  priority: 82,  region: "asia",   categories: ["general", "tech", "business"] },
-  { channelId: "UCZFMm1mMw0F81Z37aaEzTUA", label: "NDTV",                  priority: 80,  region: "asia",   categories: ["general"] },
-  { channelId: "UCYPvAwZP8pZhSMW8qs7cVCw", label: "India Today",           priority: 79,  region: "asia",   categories: ["general"] },
-  { channelId: "UC6RJ7-PaXg6TIH2BzZfTV7w", label: "Times Now",             priority: 77,  region: "asia",   categories: ["general"] },
-  { channelId: "UCwqusr8YDwM-3mEYTDeJHzw", label: "Republic World",        priority: 76,  region: "asia",   categories: ["general"] },
   { channelId: "UCSPEjw8F2nQDtmUKPFNF7_A", label: "NHK World",             priority: 78,  region: "asia",   categories: ["general"] },
   { channelId: "UC-PHIZjV-oX8H7zD1cCN2NQ", label: "Arirang (Korea)",       priority: 75,  region: "asia",   categories: ["general"] },
   { channelId: "UCO0akufu9MOzyz3nvGIXAAw", label: "Sky News Australia",    priority: 77,  region: "asia",   categories: ["general"] },

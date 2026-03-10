@@ -16,10 +16,10 @@ const nextConfig = {
   },
 
   webpack: (config, { webpack, dev, isServer }) => {
-    // Work around Next.js 14.2 server chunk path: production emits chunks to
-    // .next/server/chunks/ but webpack-runtime.js requires "./<id>.js" (same dir).
-    // Patch the runtime to require "./chunks/<id>.js" after emit.
-    if (isServer && !dev && config.output?.path) {
+    // Work around Next.js 14.2 server chunk path: both dev and production emit
+    // chunks to .next/server/chunks/ but webpack-runtime.js requires "./<id>.js"
+    // (same dir). Patch the runtime to require "./chunks/<id>.js" after emit.
+    if (isServer && config.output?.path) {
       const runtimePath = path.join(config.output.path, '..', 'webpack-runtime.js');
       config.plugins.push({
         apply: (compiler) => {

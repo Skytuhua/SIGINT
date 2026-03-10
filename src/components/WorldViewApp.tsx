@@ -197,12 +197,9 @@ export default function WorldViewApp() {
           ...state.layers,
           flights: false,
           military: false,
-          earthquakes: false,
           disasters: false,
           satellites: false,
-          traffic: false,
           cctv: false,
-          news: true,
         },
       }));
       return;

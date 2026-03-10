@@ -114,6 +114,7 @@ type AdsbxAircraft = {
   route?: string | null;
   db_flags?: string | null;
   src?: string | null;
+  type?: string | null;       // reception source: adsb_icao, mlat, tisb_icao, mode_s, adsc, uat, etc.
   rssi?: number | null;
   messages?: number | null;
   seen_pos?: number | null;
@@ -140,6 +141,21 @@ type OpenSkyResponse = {
 };
 
 class RateLimitError extends Error {}
+
+/** Map readsb/tar1090 `type` field to human-readable reception source label. */
+function mapReceptionSource(ac: AdsbxAircraft): string {
+  const raw = String(ac.type ?? ac.src ?? "").trim().toLowerCase();
+  if (!raw) return "ADS-B";
+  if (raw === "adsb_icao" || raw === "adsb_icao_nt" || raw === "adsb_other") return "ADS-B";
+  if (raw === "adsr_icao" || raw === "adsr_other") return "UAT / ADS-R";
+  if (raw === "uat" || raw === "uat_other") return "UAT / ADS-R";
+  if (raw === "tisb_icao" || raw === "tisb_trackfile" || raw === "tisb_other") return "TIS-B";
+  if (raw === "mlat") return "MLAT";
+  if (raw === "mode_s") return "Mode-S";
+  if (raw === "mode_ac") return "Mode-S";
+  if (raw === "adsc" || raw === "adsb_adsc") return "ADS-C";
+  return "Other";
+}
 
 let cache: { data: Flight[]; expires: number } | null = null;
 const sourceBackoff: Record<string, number> = {};
@@ -418,7 +434,7 @@ function normalizeAdsbx(raw: { ac?: AdsbxAircraft[] }): Flight[] {
           aircraftTypeDescription: ac.desc ? String(ac.desc).trim() : undefined,
           squawk: ac.squawk ?? undefined,
           route: ac.route ? String(ac.route).trim() : undefined,
-          source: ac.src ? String(ac.src).trim() : "ADS-B",
+          source: mapReceptionSource(ac),
           rssi: parseNumber(ac.rssi) ?? undefined,
           messageRate: parseNumber(ac.messages) ?? undefined,
           receivers: undefined,

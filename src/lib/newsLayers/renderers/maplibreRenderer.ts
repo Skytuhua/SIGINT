@@ -32,9 +32,6 @@ function layerIds(layer: LayerRegistryEntry): string[] {
   if (layer.id === "trade-routes") {
     return [`${base}-glow`, `${base}-line`, `${base}-label`];
   }
-  if (layer.id === "displacement-flows") {
-    return [`${base}-glow`, `${base}-line`, `${base}-label`, `${base}-hit`, `${base}-origins`];
-  }
   if (layer.id === "trade-route-nodes") {
     return [`${base}-hub`, `${base}-choke`, `${base}-label`];
   }
@@ -45,6 +42,13 @@ function layerIds(layer: LayerRegistryEntry): string[] {
   }
   if (layer.id === "ai-data-centers") return [`${base}-halo`, `${base}-circle`, `${base}-label`, `${base}-cluster`, `${base}-cluster-count`];
   if (layer.id === "economic-centers") return [`${base}-halo`, `${base}-circle`, `${base}-cluster`, `${base}-cluster-count`];
+  // Security layers with distinct visual treatments
+  if (layer.id === "military-bases") return [`${base}-circle`, `${base}-label`, `${base}-cluster`, `${base}-cluster-count`];
+  if (layer.id === "nuclear-sites") return [`${base}-halo`, `${base}-circle`, `${base}-label`, `${base}-cluster`, `${base}-cluster-count`];
+  if (layer.id === "military-activity") return [`${base}-halo`, `${base}-circle`, `${base}-cluster`, `${base}-cluster-count`];
+  if (layer.id === "armed-conflict") return [`${base}-halo`, `${base}-circle`, `${base}-cluster`, `${base}-cluster-count`];
+  if (layer.id === "refugee-camps") return [`${base}-circle`, `${base}-label`, `${base}-cluster`, `${base}-cluster-count`];
+  if (layer.id === "ucdp-events") return [`${base}-ring`, `${base}-circle`, `${base}-cluster`, `${base}-cluster-count`];
   if (layer.type === "geojsonPoints" || layer.type === "dynamicEntities") return [`${base}-circle`, `${base}-cluster`, `${base}-cluster-count`];
   return [base];
 }
@@ -131,10 +135,13 @@ function ensureGeoJsonLayer(layer: LayerRegistryEntry, map: MapLike): void {
     return;
   }
 
-  if (layer.id === "displacement-flows") {
-    ensureDisplacementFlowLayers(layer, map);
-    return;
-  }
+  // Security layers with distinct visual treatments
+  if (layer.id === "military-bases") { ensureMilitaryBaseLayers(layer, map); return; }
+  if (layer.id === "nuclear-sites") { ensureNuclearSiteLayers(layer, map); return; }
+  if (layer.id === "military-activity") { ensureMilitaryActivityLayers(layer, map); return; }
+  if (layer.id === "armed-conflict") { ensureArmedConflictLayers(layer, map); return; }
+  if (layer.id === "refugee-camps") { ensureRefugeeCampLayers(layer, map); return; }
+  if (layer.id === "ucdp-events") { ensureUcdpEventLayers(layer, map); return; }
 
   if (layer.type === "geojsonLines" && !map.getLayer(ids[0])) {
     map.addLayer({
@@ -207,87 +214,16 @@ function ensureGeoJsonLayer(layer: LayerRegistryEntry, map: MapLike): void {
     return;
   }
 
+  // Generic point layer (non-security layers that don't have dedicated renderers)
   if (!map.getLayer(ids[0])) {
-    const isNuclear = layer.id === "nuclear-sites";
-    const isArmedConflict = layer.id === "armed-conflict";
-    const isUcdp = layer.id === "ucdp-events";
-    const circleColor = isNuclear
-      ? [
-          "match",
-          ["coalesce", ["get", "status"], ""],
-          "Operating",
-          "#8bc34a",
-          "Under Construction",
-          "#ffc107",
-          "Planned",
-          "#90caf9",
-          "Decommissioning",
-          "#ffb74d",
-          "Retired",
-          "#b0bec5",
-          /* default */ "#f4d03f",
-        ]
-      : isArmedConflict || isUcdp
-      ? [
-          "case",
-          [">=", ["coalesce", ["get", "severity"], 0], 75],
-          "#ff5a5f",
-          [">=", ["coalesce", ["get", "severity"], 0], 50],
-          "#ff9800",
-          [">=", ["coalesce", ["get", "severity"], 0], 25],
-          "#f4d03f",
-          /* default */ "#7ddf64",
-        ]
-      : (layer.style.pointColor ?? "#f4d03f");
-    const circleRadius = isNuclear
-      ? [
-          "case",
-          [
-            "any",
-            ["==", ["get", "type"], "Nuclear Power Plant"],
-            ["==", ["get", "type"], "Research Reactor"],
-          ],
-          7,
-          5,
-        ]
-      : isArmedConflict
-      ? [
-          "interpolate",
-          ["linear"],
-          ["coalesce", ["get", "severity"], 0],
-          0,
-          4,
-          25,
-          5,
-          50,
-          7,
-          100,
-          9,
-        ]
-      : isUcdp
-      ? [
-          "interpolate",
-          ["linear"],
-          ["ln", ["+", 1, ["coalesce", ["get", "fatalities_best"], 1]]],
-          0,
-          3,
-          2,
-          5,
-          4,
-          8,
-          6,
-          12,
-        ]
-      : (layer.style.pointPixelSize ?? 5);
-
     map.addLayer({
       id: ids[0],
       type: "circle",
       source: srcId,
       filter: ["!=", ["get", "cluster"], true],
       paint: {
-        "circle-color": circleColor,
-        "circle-radius": circleRadius,
+        "circle-color": layer.style.pointColor ?? "#f4d03f",
+        "circle-radius": layer.style.pointPixelSize ?? 5,
         "circle-stroke-width": layer.style.pointStrokeWidth ?? 1,
         "circle-stroke-color": layer.style.pointStrokeColor ?? "#17202a",
       },
@@ -322,6 +258,503 @@ function ensureGeoJsonLayer(layer: LayerRegistryEntry, map: MapLike): void {
       paint: {
         "text-color": "#000000",
       },
+    });
+  }
+}
+
+/* ── Military Bases: solid institutional markers with labels ──────────── */
+
+function ensureMilitaryBaseLayers(layer: LayerRegistryEntry, map: MapLike): void {
+  const srcId = sourceId(layer.id);
+  const ids = layerIds(layer); // [circle, label, cluster, cluster-count]
+
+  // Main circle — crisp blue square-feel with thick dark stroke
+  if (!map.getLayer(ids[0])) {
+    map.addLayer({
+      id: ids[0],
+      type: "circle",
+      source: srcId,
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": "#4a90d9",
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 1, 5, 4, 7, 8, 9],
+        "circle-opacity": 0.9,
+        "circle-stroke-width": 2.5,
+        "circle-stroke-color": "#1a3a5c",
+      },
+    });
+  }
+
+  // Label (zoom ≥ 5)
+  if (!map.getLayer(ids[1])) {
+    map.addLayer({
+      id: ids[1],
+      type: "symbol",
+      source: srcId,
+      filter: ["!", ["has", "point_count"]],
+      minzoom: 5,
+      layout: {
+        "text-field": ["get", "name"],
+        "text-size": 10,
+        "text-offset": [0, 1.4],
+        "text-anchor": "top",
+        "text-max-width": 10,
+        "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+      },
+      paint: {
+        "text-color": "#a0c4e8",
+        "text-halo-color": "#000000",
+        "text-halo-width": 1,
+      },
+    });
+  }
+
+  // Cluster bubble
+  if (!map.getLayer(ids[2])) {
+    map.addLayer({
+      id: ids[2],
+      type: "circle",
+      source: srcId,
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": "#4a90d9",
+        "circle-radius": ["step", ["get", "point_count"], 8, 10, 11, 25, 15],
+        "circle-opacity": 0.85,
+      },
+    });
+  }
+
+  // Cluster count
+  if (!map.getLayer(ids[3])) {
+    map.addLayer({
+      id: ids[3],
+      type: "symbol",
+      source: srcId,
+      filter: ["has", "point_count"],
+      layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 10 },
+      paint: { "text-color": "#ffffff" },
+    });
+  }
+}
+
+/* ── Nuclear Sites: hazard halo with status-colored core ─────────────── */
+
+const NUCLEAR_STATUS_COLOR = [
+  "match",
+  ["coalesce", ["get", "status"], ""],
+  "Operating",          "#8bc34a",
+  "Under Construction", "#ffc107",
+  "Planned",            "#90caf9",
+  "Decommissioning",    "#ffb74d",
+  "Retired",            "#b0bec5",
+  /* default */         "#f4d03f",
+];
+
+function ensureNuclearSiteLayers(layer: LayerRegistryEntry, map: MapLike): void {
+  const srcId = sourceId(layer.id);
+  const ids = layerIds(layer); // [halo, circle, label, cluster, cluster-count]
+
+  // Hazard halo — pulsing ring, color by status
+  if (!map.getLayer(ids[0])) {
+    map.addLayer({
+      id: ids[0],
+      type: "circle",
+      source: srcId,
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": NUCLEAR_STATUS_COLOR,
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 1, 12, 4, 16, 8, 22],
+        "circle-opacity": 0.15,
+        "circle-blur": 0.8,
+        "circle-stroke-width": 1.5,
+        "circle-stroke-color": NUCLEAR_STATUS_COLOR,
+        "circle-stroke-opacity": 0.3,
+      },
+    });
+  }
+
+  // Core circle — status-colored with gold stroke
+  if (!map.getLayer(ids[1])) {
+    map.addLayer({
+      id: ids[1],
+      type: "circle",
+      source: srcId,
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": NUCLEAR_STATUS_COLOR,
+        "circle-radius": [
+          "case",
+          ["any", ["==", ["get", "type"], "Nuclear Power Plant"], ["==", ["get", "type"], "Research Reactor"]],
+          7, 5,
+        ],
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "#ffd700",
+      },
+    });
+  }
+
+  // Label (zoom ≥ 5)
+  if (!map.getLayer(ids[2])) {
+    map.addLayer({
+      id: ids[2],
+      type: "symbol",
+      source: srcId,
+      filter: ["!", ["has", "point_count"]],
+      minzoom: 5,
+      layout: {
+        "text-field": ["concat", ["get", "name"], "\n", ["coalesce", ["get", "status"], ""]],
+        "text-size": 9,
+        "text-offset": [0, 1.6],
+        "text-anchor": "top",
+        "text-max-width": 10,
+        "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+      },
+      paint: {
+        "text-color": "#fff9c4",
+        "text-halo-color": "#000000",
+        "text-halo-width": 1,
+      },
+    });
+  }
+
+  // Cluster bubble
+  if (!map.getLayer(ids[3])) {
+    map.addLayer({
+      id: ids[3],
+      type: "circle",
+      source: srcId,
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": "#ffd700",
+        "circle-radius": ["step", ["get", "point_count"], 8, 10, 11, 25, 15],
+        "circle-opacity": 0.85,
+      },
+    });
+  }
+
+  // Cluster count
+  if (!map.getLayer(ids[4])) {
+    map.addLayer({
+      id: ids[4],
+      type: "symbol",
+      source: srcId,
+      filter: ["has", "point_count"],
+      layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 10 },
+      paint: { "text-color": "#000000" },
+    });
+  }
+}
+
+/* ── Military Activity: radar blip — soft glow + small bright dot ────── */
+
+function ensureMilitaryActivityLayers(layer: LayerRegistryEntry, map: MapLike): void {
+  const srcId = sourceId(layer.id);
+  const ids = layerIds(layer); // [halo, circle, cluster, cluster-count]
+
+  // Radar glow — wide, soft, orange
+  if (!map.getLayer(ids[0])) {
+    map.addLayer({
+      id: ids[0],
+      type: "circle",
+      source: srcId,
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": "#ff6b35",
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 1, 10, 4, 16, 8, 22],
+        "circle-opacity": 0.12,
+        "circle-blur": 1.0,
+        "circle-stroke-width": 0,
+      },
+    });
+  }
+
+  // Core — small bright dot, no stroke for clean blip look
+  if (!map.getLayer(ids[1])) {
+    map.addLayer({
+      id: ids[1],
+      type: "circle",
+      source: srcId,
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": "#ff6b35",
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 1, 3, 4, 4, 8, 5],
+        "circle-opacity": 0.95,
+        "circle-stroke-width": 0,
+      },
+    });
+  }
+
+  // Cluster bubble
+  if (!map.getLayer(ids[2])) {
+    map.addLayer({
+      id: ids[2],
+      type: "circle",
+      source: srcId,
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": "#ff6b35",
+        "circle-radius": ["step", ["get", "point_count"], 8, 10, 11, 25, 15],
+        "circle-opacity": 0.85,
+      },
+    });
+  }
+
+  // Cluster count
+  if (!map.getLayer(ids[3])) {
+    map.addLayer({
+      id: ids[3],
+      type: "symbol",
+      source: srcId,
+      filter: ["has", "point_count"],
+      layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 10 },
+      paint: { "text-color": "#ffffff" },
+    });
+  }
+}
+
+/* ── Armed Conflict: impact burst — severity halo + colored core ─────── */
+
+const ARMED_CONFLICT_COLOR = [
+  "case",
+  [">=", ["coalesce", ["get", "severity"], 0], 75], "#ff5a5f",
+  [">=", ["coalesce", ["get", "severity"], 0], 50], "#ff9800",
+  [">=", ["coalesce", ["get", "severity"], 0], 25], "#f4d03f",
+  /* default */ "#7ddf64",
+];
+
+const ARMED_CONFLICT_RADIUS = [
+  "interpolate", ["linear"],
+  ["coalesce", ["get", "severity"], 0],
+  0, 4, 25, 5, 50, 7, 100, 9,
+];
+
+function ensureArmedConflictLayers(layer: LayerRegistryEntry, map: MapLike): void {
+  const srcId = sourceId(layer.id);
+  const ids = layerIds(layer); // [halo, circle, cluster, cluster-count]
+
+  // Impact burst halo — severity-scaled, red glow
+  if (!map.getLayer(ids[0])) {
+    map.addLayer({
+      id: ids[0],
+      type: "circle",
+      source: srcId,
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": ARMED_CONFLICT_COLOR,
+        "circle-radius": [
+          "interpolate", ["linear"],
+          ["coalesce", ["get", "severity"], 0],
+          0, 10, 25, 14, 50, 20, 100, 30,
+        ],
+        "circle-opacity": 0.18,
+        "circle-blur": 0.8,
+        "circle-stroke-width": 0,
+      },
+    });
+  }
+
+  // Core circle — severity color + thick red stroke for contrast
+  if (!map.getLayer(ids[1])) {
+    map.addLayer({
+      id: ids[1],
+      type: "circle",
+      source: srcId,
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": ARMED_CONFLICT_COLOR,
+        "circle-radius": ARMED_CONFLICT_RADIUS,
+        "circle-stroke-width": 1.5,
+        "circle-stroke-color": "#c62828",
+      },
+    });
+  }
+
+  // Cluster bubble
+  if (!map.getLayer(ids[2])) {
+    map.addLayer({
+      id: ids[2],
+      type: "circle",
+      source: srcId,
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": "#ff5a5f",
+        "circle-radius": ["step", ["get", "point_count"], 8, 10, 11, 25, 15],
+        "circle-opacity": 0.85,
+      },
+    });
+  }
+
+  // Cluster count
+  if (!map.getLayer(ids[3])) {
+    map.addLayer({
+      id: ids[3],
+      type: "symbol",
+      source: srcId,
+      filter: ["has", "point_count"],
+      layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 10 },
+      paint: { "text-color": "#ffffff" },
+    });
+  }
+}
+
+/* ── Refugee Camps: humanitarian marker — orange with white ring + labels */
+
+function ensureRefugeeCampLayers(layer: LayerRegistryEntry, map: MapLike): void {
+  const srcId = sourceId(layer.id);
+  const ids = layerIds(layer); // [circle, label, cluster, cluster-count]
+
+  // Core circle — larger orange with distinctive white stroke
+  if (!map.getLayer(ids[0])) {
+    map.addLayer({
+      id: ids[0],
+      type: "circle",
+      source: srcId,
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": "#ff7043",
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 1, 6, 4, 8, 8, 10],
+        "circle-opacity": 0.9,
+        "circle-stroke-width": 2.5,
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-opacity": 0.8,
+      },
+    });
+  }
+
+  // Label — camp name + population at zoom ≥ 4
+  if (!map.getLayer(ids[1])) {
+    map.addLayer({
+      id: ids[1],
+      type: "symbol",
+      source: srcId,
+      filter: ["!", ["has", "point_count"]],
+      minzoom: 4,
+      layout: {
+        "text-field": ["concat", ["get", "name"], "\n", ["coalesce", ["to-string", ["get", "population"]], ""]],
+        "text-size": 10,
+        "text-offset": [0, 1.5],
+        "text-anchor": "top",
+        "text-max-width": 10,
+        "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+      },
+      paint: {
+        "text-color": "#ffccbc",
+        "text-halo-color": "#000000",
+        "text-halo-width": 1,
+      },
+    });
+  }
+
+  // Cluster bubble
+  if (!map.getLayer(ids[2])) {
+    map.addLayer({
+      id: ids[2],
+      type: "circle",
+      source: srcId,
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": "#ff7043",
+        "circle-radius": ["step", ["get", "point_count"], 8, 10, 11, 25, 15],
+        "circle-opacity": 0.85,
+      },
+    });
+  }
+
+  // Cluster count
+  if (!map.getLayer(ids[3])) {
+    map.addLayer({
+      id: ids[3],
+      type: "symbol",
+      source: srcId,
+      filter: ["has", "point_count"],
+      layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 10 },
+      paint: { "text-color": "#ffffff" },
+    });
+  }
+}
+
+/* ── UCDP Events: data pin — outer ring + severity-colored core ──────── */
+
+const UCDP_SEVERITY_COLOR = [
+  "case",
+  [">=", ["coalesce", ["get", "severity"], 0], 75], "#9b30ff",
+  [">=", ["coalesce", ["get", "severity"], 0], 50], "#b455e0",
+  [">=", ["coalesce", ["get", "severity"], 0], 25], "#d4a0f0",
+  /* default */ "#e8ccf5",
+];
+
+const UCDP_FATALITY_RADIUS = [
+  "interpolate", ["linear"],
+  ["ln", ["+", 1, ["coalesce", ["get", "fatalities_best"], 1]]],
+  0, 3, 2, 5, 4, 8, 6, 12,
+];
+
+function ensureUcdpEventLayers(layer: LayerRegistryEntry, map: MapLike): void {
+  const srcId = sourceId(layer.id);
+  const ids = layerIds(layer); // [ring, circle, cluster, cluster-count]
+
+  // Outer ring — thin, sharp, at 2x radius, low opacity
+  if (!map.getLayer(ids[0])) {
+    map.addLayer({
+      id: ids[0],
+      type: "circle",
+      source: srcId,
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": "transparent",
+        "circle-radius": [
+          "interpolate", ["linear"],
+          ["ln", ["+", 1, ["coalesce", ["get", "fatalities_best"], 1]]],
+          0, 7, 2, 11, 4, 16, 6, 22,
+        ],
+        "circle-opacity": 0,
+        "circle-stroke-width": 1.5,
+        "circle-stroke-color": UCDP_SEVERITY_COLOR,
+        "circle-stroke-opacity": 0.35,
+      },
+    });
+  }
+
+  // Core circle — severity-colored, fatality-sized
+  if (!map.getLayer(ids[1])) {
+    map.addLayer({
+      id: ids[1],
+      type: "circle",
+      source: srcId,
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": UCDP_SEVERITY_COLOR,
+        "circle-radius": UCDP_FATALITY_RADIUS,
+        "circle-stroke-width": 1,
+        "circle-stroke-color": "#7b2d9e",
+      },
+    });
+  }
+
+  // Cluster bubble
+  if (!map.getLayer(ids[2])) {
+    map.addLayer({
+      id: ids[2],
+      type: "circle",
+      source: srcId,
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": "#b455e0",
+        "circle-radius": ["step", ["get", "point_count"], 8, 10, 11, 25, 15],
+        "circle-opacity": 0.85,
+      },
+    });
+  }
+
+  // Cluster count
+  if (!map.getLayer(ids[3])) {
+    map.addLayer({
+      id: ids[3],
+      type: "symbol",
+      source: srcId,
+      filter: ["has", "point_count"],
+      layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 10 },
+      paint: { "text-color": "#ffffff" },
     });
   }
 }
@@ -561,169 +994,6 @@ const TRADE_GLOW_WIDTH_EXPR = [
   5, 14,
 ];
 
-/* ── Displacement Flows: glow + line + label + hit-target + origin dots ─ */
-
-// Line width stepped by volume threshold — step is universally supported in MapLibre 5.x
-// scale=1 → main line, scale=5 → glow halo
-const DISP_WIDTH_EXPR = (scale: number) => [
-  "step",
-  ["coalesce", ["get", "value"], 0],
-  scale * 1.5,           // < 10 K persons (tiny flows)
-  10_000,   scale * 2.5, // 10 K – 100 K
-  100_000,  scale * 3.5, // 100 K – 500 K
-  500_000,  scale * 5.0, // 500 K – 2 M
-  2_000_000, scale * 7.0, // 2 M – 5 M
-  5_000_000, scale * 9.0, // 5 M+
-];
-
-const DISP_COLOR_EXPR = [
-  "match", ["coalesce", ["get", "flowType"], "refugee"],
-  "refugee", "#4da6ff",
-  /* idp */ "#ffa040",
-];
-
-/** Build a combined GeoJSON collection: LineString flow features + Point origin markers.
- *  Both types share the same source so they are always in sync (no separate source needed).
- */
-function buildDisplacementGeoJson(data: LayerFeatureCollection): GeoJSON.FeatureCollection {
-  const lines: GeoJSON.Feature[] = [];
-  const points: GeoJSON.Feature[] = [];
-
-  for (const f of data.features) {
-    const p = f.properties as Record<string, unknown>;
-    // Line feature (the flow arc)
-    lines.push({
-      type: "Feature",
-      id: f.id,
-      geometry: {
-        type: f.geometry.type,
-        coordinates: f.geometry.coordinates as unknown as number[][],
-      },
-      properties: { ...p, ts: f.ts, _featureKind: "line" },
-    } as unknown as GeoJSON.Feature);
-
-    // Origin dot (Point at flow source location)
-    const lon = Number(p.originLon ?? NaN);
-    const lat = Number(p.originLat ?? NaN);
-    if (Number.isFinite(lon) && Number.isFinite(lat)) {
-      points.push({
-        type: "Feature",
-        id: `${f.id}_origin`,
-        geometry: { type: "Point", coordinates: [lon, lat] },
-        properties: { ...p, ts: f.ts, _featureKind: "origin" },
-      } as unknown as GeoJSON.Feature);
-    }
-  }
-
-  return {
-    type: "FeatureCollection",
-    features: [...lines, ...points],
-  } as GeoJSON.FeatureCollection;
-}
-
-// Geometry-type filters for sub-layers that share the same source
-const DISP_FILTER_LINE   = ["==", ["geometry-type"], "LineString"];
-const DISP_FILTER_POINT  = ["==", ["geometry-type"], "Point"];
-
-function ensureDisplacementFlowLayers(layer: LayerRegistryEntry, map: MapLike): void {
-  const srcId = sourceId(layer.id);
-  const ids = layerIds(layer); // [glow, line, label, hit, origins]
-
-  // Remove the legacy bare layer (created by the generic geojsonLines branch before
-  // displacement-flows got its own special-cased renderer).
-  removeLayerSafe(map, `wv-news-layer-${layer.id}`);
-
-  // Force-replace all sublayer definitions so paint/layout changes apply immediately.
-  for (const id of ids) {
-    removeLayerSafe(map, id);
-  }
-
-  // Outer glow: wide soft halo (lines only)
-  map.addLayer({
-    id: ids[0],
-    type: "line",
-    source: srcId,
-    filter: DISP_FILTER_LINE,
-    paint: {
-      "line-color": DISP_COLOR_EXPR,
-      "line-width": DISP_WIDTH_EXPR(5),
-      "line-opacity": 0.30,
-      "line-blur": 3,
-    },
-  } as unknown as Parameters<MapLike["addLayer"]>[0]);
-
-  // Main visible line — solid, clearly colored
-  map.addLayer({
-    id: ids[1],
-    type: "line",
-    source: srcId,
-    filter: DISP_FILTER_LINE,
-    paint: {
-      "line-color": DISP_COLOR_EXPR,
-      "line-width": DISP_WIDTH_EXPR(1),
-      "line-opacity": 0.95,
-    },
-  } as unknown as Parameters<MapLike["addLayer"]>[0]);
-
-  // Corridor + volume label, visible from zoom 2 (lines only)
-  map.addLayer({
-    id: ids[2],
-    type: "symbol",
-    source: srcId,
-    filter: DISP_FILTER_LINE,
-    minzoom: 2,
-    layout: {
-      "symbol-placement": "line-center",
-      "text-field": ["concat", ["get", "corridorName"], "  ", ["get", "valueFormatted"]],
-      "text-size": 11,
-      "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
-      "text-allow-overlap": false,
-      "text-ignore-placement": false,
-      "text-max-angle": 35,
-      "text-offset": [0, -1.0],
-      "text-padding": 4,
-    },
-    paint: {
-      "text-color": "#ddeeff",
-      "text-halo-color": "#060b14",
-      "text-halo-width": 1.4,
-      "text-opacity": 0.95,
-    },
-  } as unknown as Parameters<MapLike["addLayer"]>[0]);
-
-  // Wide transparent hit-target line (lines only)
-  map.addLayer({
-    id: ids[3],
-    type: "line",
-    source: srcId,
-    filter: DISP_FILTER_LINE,
-    paint: {
-      "line-color": "#ffffff",
-      "line-width": 28,
-      "line-opacity": 0,
-    },
-  } as unknown as Parameters<MapLike["addLayer"]>[0]);
-
-  // Origin dot markers — Point features co-located in the same source
-  map.addLayer({
-    id: ids[4],
-    type: "circle",
-    source: srcId,
-    filter: DISP_FILTER_POINT,
-    paint: {
-      "circle-color": DISP_COLOR_EXPR,
-      "circle-radius": [
-        "interpolate", ["linear"], ["zoom"],
-        1, 5, 3, 7, 5, 9, 7, 12,
-      ],
-      "circle-stroke-width": 2,
-      "circle-stroke-color": "#ffffff",
-      "circle-opacity": 0.95,
-      "circle-stroke-opacity": 0.7,
-    },
-  } as unknown as Parameters<MapLike["addLayer"]>[0]);
-}
-
 function ensureTradeRouteLayers(layer: LayerRegistryEntry, map: MapLike): void {
   const srcId = sourceId(layer.id);
   const ids = layerIds(layer);
@@ -879,33 +1149,12 @@ export const maplibreRenderer: LayerRenderer<MapLike> = {
     if (!isMapLike(map)) return;
     if (layer.type === "rasterTiles") return;
 
-    if (layer.id === "displacement-flows") {
-      // Self-heal: missing -hit (old 3-sublayer mount) OR legacy bare layer present.
-      const hitMissing2 = !map.getLayer(`wv-news-layer-${layer.id}-hit`);
-      const legacyPresent2 = !!map.getLayer(`wv-news-layer-${layer.id}`);
-      if (hitMissing2 || legacyPresent2) {
-        ensureDisplacementFlowLayers(layer, map);
-      }
-      // Single combined source: LineString flow arcs + Point origin markers
-      const src = map.getSource(sourceId(layer.id));
-      if (src?.setData) src.setData(buildDisplacementGeoJson(data));
-      return;
-    }
-
     const src = map.getSource(sourceId(layer.id));
     if (src?.setData) src.setData(toGeoJson(data));
   },
 
   setVisibility(layer, map, visible) {
     if (!isMapLike(map)) return;
-    // Self-heal: missing -hit layer (old 3-sublayer mount) OR legacy bare layer present.
-    if (layer.id === "displacement-flows") {
-      const hitMissing = !map.getLayer(`wv-news-layer-${layer.id}-hit`);
-      const legacyPresent = !!map.getLayer(`wv-news-layer-${layer.id}`);
-      if (hitMissing || legacyPresent) {
-        ensureDisplacementFlowLayers(layer, map);
-      }
-    }
     const mode = visible ? "visible" : "none";
     for (const id of layerIds(layer)) {
       if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", mode);

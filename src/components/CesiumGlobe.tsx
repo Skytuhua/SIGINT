@@ -6,11 +6,8 @@ import { flyToScene, DEFAULT_HOME_VIEW } from "../lib/cesium/viewer";
 import {
   renderSatellites,
   renderFlights,
-  renderEarthquakes,
   renderDisasterAlerts,
-  renderTraffic,
   renderCctv,
-  renderNewsMarkers,
   renderOrbitPath,
   renderFlightHighlight,
   renderFlightPath,
@@ -23,15 +20,26 @@ import {
   tickTradeRouteAnimation,
   getActiveTradeRouteHandle,
   identifyTradeRoutePick,
+  renderGpsJamZones,
+  renderAirspaceAnomalies,
+  renderDisappearedFlights,
+  setFlightVectorsVisible,
 } from "../lib/cesium/layers";
+import {
+  AirspaceBaselineTracker,
+  computeAirspaceAnomalies,
+  detectDisappearedFlights,
+  pruneGhosts,
+  GHOST_MAX_AGE_MS,
+} from "../lib/cesium/airspaceAnomaly";
+import { GpsInterferenceTracker } from "../lib/cesium/gpsInterference";
 import type { TradeRouteLayerHandle } from "../lib/cesium/layers";
 import { applyStylePreset } from "../lib/cesium/postprocess";
 import type {
   PropagatedSat,
   Flight,
-  Earthquake,
   DisasterAlert,
-  Vehicle,
+  DisappearedFlight,
   EntityData,
   Satellite,
   Scene,
@@ -40,7 +48,6 @@ import type {
 import { fetchAllCctvCameras } from "../lib/cctv/sources";
 import { fetchJsonWithPolicy, isAbortError } from "../lib/runtime/fetchJson";
 import { buildRecordKey, dedupeByRecordKey } from "../lib/runtime/normalize";
-import type { GeoMarker } from "../lib/news/types";
 import type { Viewer } from "cesium";
 
 // 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?Types for worker messages 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
@@ -52,11 +59,6 @@ interface SatWorkerOutMessage {
   count?: number;
 }
 
-interface TrafficWorkerOutMessage {
-  type: "VEHICLES" | "READY";
-  vehicles?: Vehicle[];
-  agentCount?: number;
-}
 
 interface OrbitFocusTarget {
   type: "flight" | "satellite";
@@ -95,7 +97,7 @@ function sampleCctvForGlobe(
 }
 
 /** Dead-reckoning: interpolate flight position from last snapshot using speed, heading, vRate. */
-function interpolateFlightPosition(
+function deadReckonPosition(
   flight: Flight,
   receivedAtMs: number
 ): { lon: number; lat: number; altM: number } {
@@ -125,6 +127,36 @@ function interpolateFlightPosition(
     lon: flight.lon + dLon,
     lat: flight.lat + dLat,
     altM,
+  };
+}
+
+interface BlendEntry {
+  fromLon: number; fromLat: number; fromAltM: number;
+  toLon: number; toLat: number; toAltM: number;
+  blendStartMs: number;
+}
+
+const BLEND_DURATION_MS = 2000;
+
+function getBlendedPosition(
+  flight: Flight,
+  receivedAtMs: number,
+  blendEntry: BlendEntry | undefined
+): { lon: number; lat: number; altM: number } {
+  const dr = deadReckonPosition(flight, receivedAtMs);
+  if (!blendEntry) return dr;
+
+  const elapsed = Date.now() - blendEntry.blendStartMs;
+  if (elapsed >= BLEND_DURATION_MS) return dr;
+
+  // ease-out cubic: 1 - (1 - t)^3
+  const t = elapsed / BLEND_DURATION_MS;
+  const eased = 1 - (1 - t) ** 3;
+
+  return {
+    lon: blendEntry.fromLon + (dr.lon - blendEntry.fromLon) * eased,
+    lat: blendEntry.fromLat + (dr.lat - blendEntry.fromLat) * eased,
+    altM: blendEntry.fromAltM + (dr.altM - blendEntry.fromAltM) * eased,
   };
 }
 
@@ -173,7 +205,6 @@ export default function CesiumGlobe({
     pitch: DEFAULT_HOME_VIEW.pitch,
   });
   const satWorkerRef = useRef<Worker | null>(null);
-  const trafficWorkerRef = useRef<Worker | null>(null);
   const trackFetchAbortRef = useRef<AbortController | null>(null);
   const flightRenderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingFlightsRef = useRef<Flight[] | null>(null);
@@ -181,9 +212,13 @@ export default function CesiumGlobe({
   const fpsFrameRef = useRef({ lastTime: 0, frames: 0 });
   const currentSatsRef = useRef<PropagatedSat[]>([]);
   const currentFlightsRef = useRef<Flight[]>([]);
-  const currentEarthquakesRef = useRef<Earthquake[]>([]);
   const currentDisastersRef = useRef<DisasterAlert[]>([]);
-  const currentNewsMarkersRef = useRef<GeoMarker[]>([]);
+  const airspaceTrackerRef = useRef(new AirspaceBaselineTracker());
+  const gpsInterferenceTrackerRef = useRef(new GpsInterferenceTracker());
+  const previousMilitaryMapRef = useRef<Map<string, Flight>>(new Map());
+  const militaryMissCountRef = useRef<Map<string, number>>(new Map());
+  const disappearedFlightsRef = useRef<DisappearedFlight[]>([]);
+  const anomalyRenderInFlightRef = useRef(false);
   const trackedFlightIdRef = useRef<string | null>(null);
   const followTrackedFlightRef = useRef(false);
   const focusTargetRef = useRef<OrbitFocusTarget | null>(null);
@@ -191,8 +226,9 @@ export default function CesiumGlobe({
   const lookAtInitializedRef = useRef(false);
   const lastTrackFetchRef = useRef<number>(0);
   const flightSnapshotsRef = useRef<
-    Map<string, { flight: Flight; receivedAt: number }>
+    Map<string, { flight: Flight; receivedAt: number; lastSeenMs: number }>
   >(new Map());
+  const flightBlendRef = useRef<Map<string, BlendEntry>>(new Map());
   const lastTleSignatureRef = useRef("");
   const cesiumRef = useRef<typeof import("cesium") | null>(null);
   const googleMapsNavRef = useRef<import("../lib/cesium/googleMapsNav").GoogleMapsNav | null>(null);
@@ -429,7 +465,8 @@ export default function CesiumGlobe({
     (icao: string): { lon: number; lat: number; altM: number } | null => {
       const entry = flightSnapshotsRef.current.get(icao);
       if (!entry) return null;
-      return interpolateFlightPosition(entry.flight, entry.receivedAt);
+      const blendEntry = flightBlendRef.current.get(icao);
+      return getBlendedPosition(entry.flight, entry.receivedAt, blendEntry);
     },
     []
   );
@@ -457,23 +494,6 @@ export default function CesiumGlobe({
     [store]
   );
 
-  const renderEarthquakesIfEnabled = useCallback(
-    async (quakes: Earthquake[]) => {
-      const { layers, filters } = store.getState();
-      if (!viewerRef.current) return;
-      if (!layers.earthquakes) {
-        clearLayer(viewerRef.current, "earthquakes");
-        return;
-      }
-      const filtered = quakes.filter(
-        (q) =>
-          q.mag >= filters.minMagnitude && q.mag <= filters.maxMagnitude
-      );
-      await renderEarthquakes(viewerRef.current, filtered);
-    },
-    [store]
-  );
-
   const renderDisastersIfEnabled = useCallback(
     async (alerts: DisasterAlert[]) => {
       const { layers } = store.getState();
@@ -487,18 +507,103 @@ export default function CesiumGlobe({
     [store]
   );
 
-  const renderNewsIfEnabled = useCallback(
-    async (markers: GeoMarker[]) => {
-      const { layers, news } = store.getState();
+  const renderGpsJamIfEnabled = useCallback(
+    async (flights: Flight[], military?: Flight[]) => {
+      const { layers } = store.getState();
       if (!viewerRef.current) return;
-      if (!layers.news) {
-        clearLayer(viewerRef.current, "news");
+      if (!layers.gpsJam) {
+        clearLayer(viewerRef.current, 'gps_jam');
+        for (let i = viewerRef.current.dataSources.length - 1; i >= 0; i--) {
+          const ds = viewerRef.current.dataSources.get(i);
+          if (ds.name === 'gps_jam') {
+            viewerRef.current.dataSources.remove(ds, true);
+          }
+        }
         return;
       }
-      await renderNewsMarkers(viewerRef.current, markers, {
-        highlightedMarkerId: news.highlightedMarkerId,
-        enableClustering: true,
-      });
+      const tracker = gpsInterferenceTrackerRef.current;
+      tracker.pushSnapshot(flights);
+      if (!tracker.hasEnoughData()) return;
+      const zones = tracker.computeZones(military);
+      // Re-check after synchronous computation — user may have toggled off
+      if (!store.getState().layers.gpsJam) return;
+      await renderGpsJamZones(viewerRef.current, zones);
+    },
+    [store]
+  );
+
+  const renderAnomaliesIfEnabled = useCallback(
+    async (civilianFlights: Flight[], militaryFlights: Flight[]) => {
+      // Guard: skip if another render is already in-flight
+      if (anomalyRenderInFlightRef.current) return;
+      anomalyRenderInFlightRef.current = true;
+
+      try {
+        // ALWAYS push snapshot so baseline builds even when layer is off
+        const tracker = airspaceTrackerRef.current;
+        tracker.pushSnapshot(civilianFlights, militaryFlights);
+
+        const { layers } = store.getState();
+        if (!viewerRef.current) return;
+        if (!layers.airspaceAnomaly) {
+          clearLayer(viewerRef.current, 'airspace_anomaly');
+          clearLayer(viewerRef.current, 'disappeared_flights');
+          return;
+        }
+        const ready = tracker.hasEnoughData();
+        console.log(`[airspace-anomaly] civ=${civilianFlights.length} mil=${militaryFlights.length} ready=${ready}`);
+        if (ready) {
+          const baseline = tracker.getBaseline();
+          const zones = computeAirspaceAnomalies(baseline, civilianFlights, militaryFlights);
+          console.log(`[airspace-anomaly] baseline cells=${baseline.size} zones=${zones.length}`);
+        store.getState().setAirspaceAnomalies(zones);
+        await renderAirspaceAnomalies(viewerRef.current, zones);
+        // Re-check — user may have toggled off during async render
+        if (!store.getState().layers.airspaceAnomaly && viewerRef.current) {
+          clearLayer(viewerRef.current, 'airspace_anomaly');
+          clearLayer(viewerRef.current, 'disappeared_flights');
+          return;
+        }
+      }
+      // Detect disappeared military flights (require 3 consecutive misses)
+      const currentMilMap = new Map(militaryFlights.map((f) => [f.icao, f]));
+      const prevMap = previousMilitaryMapRef.current;
+      const missMap = militaryMissCountRef.current;
+      if (prevMap.size > 0) {
+        // Update miss counts
+        prevMap.forEach((_, icao) => {
+          if (!currentMilMap.has(icao)) {
+            missMap.set(icao, (missMap.get(icao) ?? 0) + 1);
+          } else {
+            missMap.delete(icao);
+          }
+        });
+        // Only create ghosts after 3 consecutive misses (~36s absent)
+        const newGhosts = detectDisappearedFlights(prevMap, militaryFlights, Date.now())
+          .filter((g) => (missMap.get(g.icao) ?? 0) >= 3);
+        if (newGhosts.length > 0) {
+          disappearedFlightsRef.current = [
+            ...disappearedFlightsRef.current,
+            ...newGhosts,
+          ];
+          for (const g of newGhosts) missMap.delete(g.icao);
+        }
+      }
+      previousMilitaryMapRef.current = currentMilMap;
+      // Prune and render ghosts
+      const now = Date.now();
+      disappearedFlightsRef.current = pruneGhosts(disappearedFlightsRef.current, now);
+      store.getState().setDisappearedFlights(disappearedFlightsRef.current);
+      if (viewerRef.current) {
+        await renderDisappearedFlights(viewerRef.current, disappearedFlightsRef.current);
+        // Re-check after async render
+        if (!store.getState().layers.airspaceAnomaly && viewerRef.current) {
+          clearLayer(viewerRef.current, 'disappeared_flights');
+        }
+      }
+      } finally {
+        anomalyRenderInFlightRef.current = false;
+      }
     },
     [store]
   );
@@ -1059,24 +1164,28 @@ export default function CesiumGlobe({
     const total =
       currentSatsRef.current.length +
       currentFlightsRef.current.length +
-      currentEarthquakesRef.current.length +
       currentDisastersRef.current.length;
     store.getState().setDebug({ entityCount: total });
   }, [getInterpolatedPosition, refreshTrackedPath, renderFlightsIfEnabled, store]);
 
   const scheduleFlightRender = useCallback(
     (flights: Flight[]) => {
+      const { layers } = store.getState();
+      if (!layers.flights && !layers.military) return;
       pendingFlightsRef.current = flights;
       if (flightRenderTimeoutRef.current) return;
       flightRenderTimeoutRef.current = setTimeout(() => {
         void flushFlightRender();
       }, 90);
     },
-    [flushFlightRender]
+    [flushFlightRender, store]
   );
 
   const applyLiveFlights = useCallback(
     (commercial: Flight[], military: Flight[]) => {
+      const { layers } = store.getState();
+      if (!layers.flights && !layers.military) return;
+
       const merged = dedupeByRecordKey(
         [
           ...(commercial ?? []).map((flight) => ({ ...flight, isMilitary: false })),
@@ -1085,41 +1194,62 @@ export default function CesiumGlobe({
         (flight) => buildRecordKey("flight", flight.icao, flight.callsign, flight.lat, flight.lon)
       ).map((flight) => ({ ...flight, icao: (flight.icao ?? "").trim().toLowerCase() }));
 
+      // Data protection: reject suspiciously small updates
+      const currentCount = currentFlightsRef.current.length;
+      if (currentCount > 50 && merged.length < currentCount * 0.1) {
+        console.warn(`[globe] Rejecting flight update: ${merged.length} vs ${currentCount} current`);
+        return;
+      }
+
       currentFlightsRef.current = merged;
       const receivedAt = Date.now();
       const snapshotMap = flightSnapshotsRef.current;
+      const blendMap = flightBlendRef.current;
       const seen = new Set<string>();
+
+      // Compute blend origins: for flights that already have a snapshot,
+      // capture their current dead-reckoned position as the blend "from"
       for (const flight of merged) {
         if (!flight.icao) continue;
         seen.add(flight.icao);
-        snapshotMap.set(flight.icao, { flight, receivedAt });
+        const existing = snapshotMap.get(flight.icao);
+        if (existing) {
+          const currentPos = deadReckonPosition(existing.flight, existing.receivedAt);
+          blendMap.set(flight.icao, {
+            fromLon: currentPos.lon,
+            fromLat: currentPos.lat,
+            fromAltM: currentPos.altM,
+            toLon: flight.lon,
+            toLat: flight.lat,
+            toAltM: flight.altM ?? 0,
+            blendStartMs: receivedAt,
+          });
+        }
+        snapshotMap.set(flight.icao, { flight, receivedAt, lastSeenMs: receivedAt });
       }
-      for (const icao of Array.from(snapshotMap.keys())) {
-        if (!seen.has(icao)) snapshotMap.delete(icao);
+
+      // Stale-flight aging: keep absent flights for 36s (~3 poll cycles) before removal
+      for (const [icao, entry] of Array.from(snapshotMap.entries())) {
+        if (!seen.has(icao)) {
+          if (receivedAt - entry.lastSeenMs > 36_000) {
+            snapshotMap.delete(icao);
+            blendMap.delete(icao);
+          }
+          // else: keep — will dead-reckon from last known state
+        }
       }
       scheduleFlightRender(merged);
-    },
-    [scheduleFlightRender]
-  );
 
-  const fetchAndSendRoads = useCallback(async () => {
-    if (!trafficWorkerRef.current) return;
-    try {
-      const roads = await fetchJsonWithPolicy<any[]>("/api/overpass", {
-        key: "globe:roads",
-        timeoutMs: 15_000,
-        retries: 1,
-        negativeTtlMs: 5_000,
-      });
-      if (roads.length > 0) {
-        trafficWorkerRef.current.postMessage({ type: "SET_ROADS", roads });
-      }
-    } catch (err) {
-      if (!isAbortError(err)) {
-        console.warn("[globe] overpass fetch error:", err);
-      }
-    }
-  }, []);
+      // Split for military correlation
+      const civilianForAnomaly = merged.filter((f) => !f.isMilitary);
+      const militaryForAnomaly = merged.filter((f) => f.isMilitary);
+      void renderGpsJamIfEnabled(merged, militaryForAnomaly);
+
+      // Airspace anomaly detection + disappeared flight tracking
+      void renderAnomaliesIfEnabled(civilianForAnomaly, militaryForAnomaly);
+    },
+    [scheduleFlightRender, renderGpsJamIfEnabled, renderAnomaliesIfEnabled, store]
+  );
 
   // 闁冲厜鍋撻柍鍏夊亾 Layer toggle subscriptions 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?
 
@@ -1142,7 +1272,22 @@ export default function CesiumGlobe({
       subs.push(
         store.subscribe(
           (s) => ({ flights: s.layers.flights, military: s.layers.military }),
-          () => renderFlightsIfEnabled(currentFlightsRef.current),
+          ({ flights, military }) => {
+            if (!flights && !military) {
+              // Full shutdown: clear all flight state
+              clearLayer(viewer, "flights");
+              flightSnapshotsRef.current.clear();
+              flightBlendRef.current.clear();
+              currentFlightsRef.current = [];
+              pendingFlightsRef.current = null;
+              if (flightRenderTimeoutRef.current) {
+                clearTimeout(flightRenderTimeoutRef.current);
+                flightRenderTimeoutRef.current = null;
+              }
+            } else {
+              renderFlightsIfEnabled(currentFlightsRef.current);
+            }
+          },
           { equalityFn: (a, b) => a.flights === b.flights && a.military === b.military }
         )
       );
@@ -1155,34 +1300,6 @@ export default function CesiumGlobe({
             applyLiveFlights((flights as Flight[]) ?? [], (military as Flight[]) ?? []);
           },
           { equalityFn: (a, b) => a.flights === b.flights && a.military === b.military }
-        )
-      );
-
-      // Earthquakes toggle
-      subs.push(
-        store.subscribe(
-          (s) => s.layers.earthquakes,
-          (enabled) => {
-            if (!enabled) clearLayer(viewer, "earthquakes");
-            else renderEarthquakesIfEnabled(currentEarthquakesRef.current);
-          }
-        )
-      );
-
-      // Live earthquakes from store (dashboard feed) — keep globe in sync when feed updates
-      subs.push(
-        store.subscribe(
-          (s) => s.liveData.earthquakes,
-          (earthquakes) => {
-            currentEarthquakesRef.current = earthquakes ?? [];
-            renderEarthquakesIfEnabled(currentEarthquakesRef.current);
-            const total =
-              currentSatsRef.current.length +
-              currentFlightsRef.current.length +
-              currentEarthquakesRef.current.length +
-              currentDisastersRef.current.length;
-            store.getState().setDebug({ entityCount: total });
-          }
         )
       );
 
@@ -1208,16 +1325,45 @@ export default function CesiumGlobe({
         )
       );
 
-      // Traffic toggle
+      // GPS/GNSS Interference layer toggle
       subs.push(
         store.subscribe(
-          (s) => s.layers.traffic,
+          (s) => s.layers.gpsJam,
           (enabled) => {
             if (!enabled) {
-              clearLayer(viewer, "traffic");
-              trafficWorkerRef.current?.postMessage({ type: "STOP" });
+              clearLayer(viewer, 'gps_jam');
+              // Remove any orphaned data sources from overlapping async renders
+              for (let i = viewer.dataSources.length - 1; i >= 0; i--) {
+                const ds = viewer.dataSources.get(i);
+                if (ds.name === 'gps_jam') {
+                  viewer.dataSources.remove(ds, true);
+                }
+              }
             } else {
-              fetchAndSendRoads();
+              const mil = currentFlightsRef.current.filter((f) => f.isMilitary);
+              void renderGpsJamIfEnabled(currentFlightsRef.current, mil);
+            }
+          }
+        )
+      );
+
+      // Airspace Anomaly layer toggle
+      subs.push(
+        store.subscribe(
+          (s) => s.layers.airspaceAnomaly,
+          (enabled) => {
+            if (!enabled) {
+              clearLayer(viewer, 'airspace_anomaly');
+              clearLayer(viewer, 'disappeared_flights');
+              // Sweep orphaned dataSources from concurrent renders
+              for (let i = viewer.dataSources.length - 1; i >= 0; i--) {
+                const ds = viewer.dataSources.get(i);
+                if (ds.name === 'airspace_anomaly') viewer.dataSources.remove(ds, true);
+              }
+            } else {
+              const civilian = currentFlightsRef.current.filter((f) => !f.isMilitary);
+              const military = currentFlightsRef.current.filter((f) => f.isMilitary);
+              void renderAnomaliesIfEnabled(civilian, military);
             }
           }
         )
@@ -1235,39 +1381,6 @@ export default function CesiumGlobe({
               renderCctv(viewer, camerasForGlobe, cctv.calibrations);
             }
           }
-        )
-      );
-
-      // News layer toggle
-      subs.push(
-        store.subscribe(
-          (s) => s.layers.news,
-          (enabled) => {
-            if (!enabled) {
-              clearLayer(viewer, "news");
-            } else {
-              renderNewsIfEnabled(currentNewsMarkersRef.current);
-            }
-          }
-        )
-      );
-
-      // News markers updates
-      subs.push(
-        store.subscribe(
-          (s) => s.news.markers,
-          (markers) => {
-            currentNewsMarkersRef.current = markers;
-            renderNewsIfEnabled(markers);
-          }
-        )
-      );
-
-      // News highlight updates
-      subs.push(
-        store.subscribe(
-          (s) => s.news.highlightedMarkerId,
-          () => renderNewsIfEnabled(currentNewsMarkersRef.current)
         )
       );
 
@@ -1324,10 +1437,7 @@ export default function CesiumGlobe({
       subs.push(
         store.subscribe(
           (s) => s.filters,
-          () => {
-            renderFlightsIfEnabled(currentFlightsRef.current);
-            renderEarthquakesIfEnabled(currentEarthquakesRef.current);
-          },
+          () => renderFlightsIfEnabled(currentFlightsRef.current),
           { equalityFn: (a, b) => JSON.stringify(a) === JSON.stringify(b) }
         )
       );
@@ -1352,10 +1462,9 @@ export default function CesiumGlobe({
       renderSatsIfEnabled,
       renderFlightsIfEnabled,
       applyLiveFlights,
-      renderEarthquakesIfEnabled,
       renderDisastersIfEnabled,
-      renderNewsIfEnabled,
-      fetchAndSendRoads,
+      renderGpsJamIfEnabled,
+      renderAnomaliesIfEnabled,
     ]
   );
 
@@ -1474,7 +1583,6 @@ export default function CesiumGlobe({
           const total =
             e.data.positions.length +
             currentFlightsRef.current.length +
-            currentEarthquakesRef.current.length +
             currentDisastersRef.current.length;
           store.getState().setDebug({ entityCount: total });
         }
@@ -1525,36 +1633,20 @@ export default function CesiumGlobe({
       );
 
       // 闁冲厜鍋撻柍鍏夊亾 Traffic worker 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?
-      const trafficWorker = new Worker(
-        new URL("../workers/traffic.worker.ts", import.meta.url)
-      );
-      trafficWorkerRef.current = trafficWorker;
-
-      trafficWorker.onmessage = async (
-        e: MessageEvent<TrafficWorkerOutMessage>
-      ) => {
-        if (e.data.type === "VEHICLES" && e.data.vehicles) {
-          if (store.getState().layers.traffic) {
-            await renderTraffic(viewer, e.data.vehicles);
-          }
-        }
-      };
-
-      // Fetch roads if traffic layer is enabled
-      if (store.getState().layers.traffic) {
-        fetchAndSendRoads();
-      }
-
       // 闁冲厜鍋撻柍鍏夊亾 Polling intervals 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
       const seededLiveData = store.getState().liveData;
       applyLiveFlights(
         (seededLiveData.flights as Flight[]) ?? [],
         (seededLiveData.military as Flight[]) ?? []
       );
-      currentEarthquakesRef.current = (seededLiveData.earthquakes as Earthquake[]) ?? [];
-      try { await renderEarthquakesIfEnabled(currentEarthquakesRef.current); } catch (err) { console.warn("[globe] earthquake render error:", err); }
       currentDisastersRef.current = (seededLiveData.disasters as DisasterAlert[]) ?? [];
       try { await renderDisastersIfEnabled(currentDisastersRef.current); } catch (err) { console.warn("[globe] disaster render error:", err); }
+      try { const milSeed = currentFlightsRef.current.filter((f) => f.isMilitary); await renderGpsJamIfEnabled(currentFlightsRef.current, milSeed); } catch (err) { console.warn("[globe] gps jam render error:", err); }
+      try {
+        const civ = currentFlightsRef.current.filter((f) => !f.isMilitary);
+        const mil = currentFlightsRef.current.filter((f) => f.isMilitary);
+        await renderAnomaliesIfEnabled(civ, mil);
+      } catch (err) { console.warn("[globe] airspace anomaly render error:", err); }
 
       // 闁冲厜鍋撻柍鍏夊亾 Load CCTV cameras 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
       try {
@@ -1590,12 +1682,6 @@ export default function CesiumGlobe({
       // 闁冲厜鍋撻柍鍏夊亾 Subscriptions 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
       setupFpsTracking(viewer);
       unsubscribers.push(setupLayerSubscriptions(viewer));
-      currentNewsMarkersRef.current = store.getState().news.markers;
-      try {
-        if (store.getState().layers.news) {
-          await renderNewsIfEnabled(currentNewsMarkersRef.current);
-        }
-      } catch (err) { console.warn("[globe] news render error:", err); }
       try {
         if (store.getState().layers.tradeRoutes) {
           const sel = store.getState().tradeRouteSelection;
@@ -1657,12 +1743,22 @@ export default function CesiumGlobe({
 
       // Update flight and highlight positions before each frame (sync in preRender so they are visible)
       let tradeRouteFrame = 0;
+      let lastFlightUpdateMs = 0;
+      const FLIGHT_UPDATE_INTERVAL_MS = 200; // 5fps throttle for flight position updates
+
       const onPreRender = () => {
         const CesiumMod = cesiumRef.current;
         if (!CesiumMod) return;
         const { layers } = store.getState();
         if ((layers.flights || layers.military) && flightSnapshotsRef.current.size > 0) {
-          updateFlightPositions(viewer, getInterpolatedPosition, CesiumMod);
+          const now = performance.now();
+          if (now - lastFlightUpdateMs >= FLIGHT_UPDATE_INTERVAL_MS) {
+            lastFlightUpdateMs = now;
+            updateFlightPositions(viewer, getInterpolatedPosition, CesiumMod);
+          }
+          // Hide vector lines when zoomed out beyond 6M m (too cluttered at global scale)
+          const cameraAltM = viewer.camera.positionCartographic.height;
+          setFlightVectorsVisible(viewer, cameraAltM < 6_000_000);
         }
         if (layers.tradeRoutes) {
           tickTradeRouteAnimation(tradeRouteFrame++);
@@ -1803,8 +1899,6 @@ export default function CesiumGlobe({
       trackFetchAbortRef.current?.abort();
       trackFetchAbortRef.current = null;
       satWorkerRef.current?.terminate();
-      trafficWorkerRef.current?.postMessage({ type: "STOP" });
-      trafficWorkerRef.current?.terminate();
       googleMapsNavRef.current?.destroy();
       googleMapsNavRef.current = null;
       if (viewerRef.current && !viewerRef.current.isDestroyed()) {

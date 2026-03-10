@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import MarketTickerBar from "./MarketTickerBar";
 import DailyLineupModal from "./DailyLineupModal";
 import MarketOverviewTab from "./tabs/MarketOverviewTab";
@@ -25,20 +25,10 @@ const SCENARIOS = [
 type Scenario = typeof SCENARIOS[number]["id"];
 
 export default function MarketWorkspace() {
-  const [showLineup, setShowLineup] = useState(false);
+  const [showLineup, setShowLineup] = useState(true);
   const [activeTab, setActiveTab] = useState<MarketTab>("OVERVIEW");
   const [scenario, setScenario] = useState<Scenario>("BASELINE");
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
-
-  useEffect(() => {
-    const disabled = localStorage.getItem("wv-daily-lineup-disabled") === "true";
-    const lastShown = localStorage.getItem("wv-daily-lineup-last-shown");
-    const today = new Date().toISOString().slice(0, 10);
-    if (!disabled && lastShown !== today) {
-      localStorage.setItem("wv-daily-lineup-last-shown", today);
-      setShowLineup(true);
-    }
-  }, []);
 
   return (
     <div className="wv-market-workspace">

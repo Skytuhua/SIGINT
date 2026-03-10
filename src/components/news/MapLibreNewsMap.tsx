@@ -2630,9 +2630,9 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
     if (!map || !mapReady || !displacementFlowLayerEnabled) return;
     const layer = sortedLayers.find((e) => e.id === "displacement-flows");
     if (!layer) return;
-    const hitMissing = !map.getLayer("wv-news-layer-displacement-flows-hit");
+    const destMissing = !map.getLayer("wv-news-layer-displacement-flows-destinations");
     const legacyPresent = !!map.getLayer("wv-news-layer-displacement-flows");
-    if (hitMissing || legacyPresent) {
+    if (destMissing || legacyPresent) {
       mountedLayersRef.current.delete("displacement-flows");
       void syncLayerMountedState("displacement-flows", true);
     }
@@ -2664,6 +2664,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
     const candidates = [
       "wv-news-layer-displacement-flows-hit",
       "wv-news-layer-displacement-flows-origins",
+      "wv-news-layer-displacement-flows-destinations",
       "wv-news-layer-displacement-flows-line",
     ];
     const active = candidates.filter((id) => !!map.getLayer(id));
@@ -2930,21 +2931,6 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                           >
                             {conflictMode === "broad" ? "Signals+" : "Strict"}
                           </button>
-                          <label className="wv-news-conflict-verified" title="UCDP verified overlay">
-                            <input
-                              type="checkbox"
-                              checked={conflictVerifiedOverlay}
-                              onChange={(e) => {
-                                const next = e.target.checked;
-                                setConflictVerifiedOverlay(next);
-                                try {
-                                  window.localStorage.setItem("wv:conflict-zones:verifiedOverlay", next ? "1" : "0");
-                                } catch { /* no-op */ }
-                                runtimeRef.current?.refresh("conflict-zones");
-                              }}
-                            />
-                            UCDP
-                          </label>
                         </>
                       ) : null}
                       <span className={`wv-panel-health is-${toLayerHealthUi(status)}`} title={status} />

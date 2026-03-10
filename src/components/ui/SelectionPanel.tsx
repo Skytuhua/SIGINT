@@ -80,26 +80,81 @@ function SatPanel({ data }: { data: PropagatedSat }) {
   );
 }
 
+function CollapsibleSection({
+  title,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div style={{ marginTop: 8, borderTop: "1px solid rgba(79, 195, 247, 0.12)", paddingTop: 6 }}>
+      <div
+        onClick={() => setOpen(!open)}
+        style={{
+          display: "flex", alignItems: "center", gap: 6,
+          cursor: "pointer", userSelect: "none", marginBottom: open ? 5 : 0,
+        }}
+      >
+        <span style={{ color: "#ff7043", fontSize: 10, letterSpacing: 0.8, fontWeight: 700 }}>
+          {title}
+        </span>
+        <span style={{ color: "#5f8aa8", fontSize: 9 }}>{open ? "▼" : "▶"}</span>
+      </div>
+      {open && children}
+    </div>
+  );
+}
+
+function nacpColor(nacp: string | undefined): string {
+  const n = parseInt(nacp ?? "-1", 10);
+  if (isNaN(n) || n < 6) return "#f44336";
+  if (n < 8) return "#ff9800";
+  return "#76ff03";
+}
+
+function rssiColor(rssi: number | undefined): string {
+  if (rssi == null) return "#5f8aa8";
+  if (rssi > -10) return "#76ff03";
+  if (rssi > -20) return "#ff9800";
+  return "#f44336";
+}
+
 function FlightPanel({ data }: { data: Flight }) {
   const msToKts = (ms: number | null) => (ms != null ? `${(ms * 1.944).toFixed(0)} kts` : "--");
   const mToFt = (m: number | null) => (m != null ? `${(m * 3.281).toFixed(0)} ft` : "--");
   const setTrackedFlightId = useWorldViewStore((s) => s.setTrackedFlightId);
   const trackedFlightId = useWorldViewStore((s) => s.selection.trackedFlightId);
   const isTracking = trackedFlightId === data.icao;
+  const isMil = Boolean(data.isMilitary);
 
   return (
     <>
       <div
         style={{
-          color: data.isMilitary ? "#ff7043" : "#4fc3f7",
+          color: isMil ? "#ff7043" : "#4fc3f7",
           fontSize: 13,
           fontWeight: 700,
           marginBottom: 8,
         }}
       >
-        {data.isMilitary ? "MIL / " : "ACFT / "}
+        {isMil ? "MIL / " : "ACFT / "}
         {data.callsign || data.icao}
       </div>
+
+      {/* Aircraft Identity (military only) */}
+      {isMil && (data.aircraftType || data.registration || data.aircraftTypeDescription || data.route) && (
+        <div style={{ marginBottom: 6 }}>
+          <Row l="AIRCRAFT" v={data.aircraftTypeDescription || data.aircraftType} />
+          <Row l="TYPE CODE" v={data.aircraftType} />
+          <Row l="REG" v={data.registration} />
+          <Row l="ROUTE" v={data.route} />
+        </div>
+      )}
+
       <Row l="ICAO" v={data.icao} />
       <Row l="CALLSIGN" v={data.callsign} />
       <Row l="ALT" v={mToFt(data.altM)} />
@@ -108,7 +163,25 @@ function FlightPanel({ data }: { data: Flight }) {
       <Row l="VRATE" v={data.vRate != null ? `${data.vRate.toFixed(1)} m/s` : null} />
       <Row l="COUNTRY" v={data.country} />
       <Row l="ON GROUND" v={data.onGround ? "YES" : "NO"} />
-      {data.isMilitary && (
+
+      {/* Extended flight data (military only) */}
+      {isMil && (
+        <>
+          <Row l="MACH" v={data.mach != null ? data.mach.toFixed(3) : null} />
+          <Row l="TAS" v={data.trueAirspeedKt != null ? `${data.trueAirspeedKt.toFixed(0)} kts` : null} />
+          <Row l="IAS" v={data.indicatedAirspeedKt != null ? `${data.indicatedAirspeedKt.toFixed(0)} kts` : null} />
+          <Row l="TRUE HDG" v={data.trueHeadingDeg != null ? `${data.trueHeadingDeg.toFixed(0)} deg` : null} />
+          <Row l="MAG HDG" v={data.magneticHeadingDeg != null ? `${data.magneticHeadingDeg.toFixed(0)} deg` : null} />
+          {data.windSpeedKt != null && data.windDirectionFromDeg != null && (
+            <Row l="WIND" v={`${data.windSpeedKt.toFixed(0)} kt from ${data.windDirectionFromDeg.toFixed(0)} deg`} />
+          )}
+          <Row l="ROLL" v={data.rollDeg != null ? `${data.rollDeg.toFixed(1)} deg` : null} />
+          <Row l="TRACK RATE" v={data.trackRateDegPerSec != null ? `${data.trackRateDegPerSec.toFixed(2)} deg/s` : null} />
+          <Row l="VERT RATE" v={data.vertRateFpm != null ? `${data.vertRateFpm.toFixed(0)} fpm` : null} />
+        </>
+      )}
+
+      {isMil && (
         <div
           style={{
             marginTop: 6,
@@ -123,6 +196,61 @@ function FlightPanel({ data }: { data: Flight }) {
           {data.isMock ? "MILITARY BROADCAST (MOCK DATA)" : "MILITARY BROADCAST (LIVE ADS-B)"}
         </div>
       )}
+
+      {/* Signal Intelligence (military, collapsible) */}
+      {isMil && (
+        <CollapsibleSection title="SIGNAL INTEL">
+          <Row l="SOURCE" v={data.source} />
+          <div style={{ display: "flex", gap: 8, marginBottom: 3 }}>
+            <span style={label}>RSSI</span>
+            <span style={{ ...value, color: rssiColor(data.rssi) }}>
+              {data.rssi != null ? `${data.rssi.toFixed(1)} dBFS` : "--"}
+            </span>
+          </div>
+          <Row l="MSG RATE" v={data.messageRate != null ? `${data.messageRate}` : null} />
+          <Row l="ADS-B VER" v={data.adsbVersion} />
+          <Row l="LAST POS" v={data.lastPosSec != null ? `${data.lastPosSec.toFixed(0)}s ago` : null} />
+          <Row l="LAST SEEN" v={data.lastSeenSec != null ? `${data.lastSeenSec.toFixed(0)}s ago` : null} />
+          <Row l="SQUAWK" v={data.squawk} />
+          {data.navModes && data.navModes.length > 0 && (
+            <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
+              {data.navModes.map((mode) => (
+                <span
+                  key={mode}
+                  style={{
+                    padding: "1px 5px",
+                    background: "rgba(255, 112, 67, 0.12)",
+                    border: "1px solid rgba(255, 112, 67, 0.25)",
+                    borderRadius: 3,
+                    fontSize: 9,
+                    color: "#ff7043",
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  {mode}
+                </span>
+              ))}
+            </div>
+          )}
+        </CollapsibleSection>
+      )}
+
+      {/* GPS Integrity (military, collapsible) */}
+      {isMil && (
+        <CollapsibleSection title="GPS INTEGRITY">
+          <div style={{ display: "flex", gap: 8, marginBottom: 3 }}>
+            <span style={label}>NACp</span>
+            <span style={{ ...value, color: nacpColor(data.nacp) }}>
+              {data.nacp ?? "--"}
+            </span>
+          </div>
+          <Row l="SIL" v={data.sil} />
+          <Row l="NACv" v={data.nacv} />
+          <Row l="NIC BARO" v={data.nicBaro} />
+          <Row l="RC" v={data.rcMeters != null ? `${data.rcMeters} m` : null} />
+        </CollapsibleSection>
+      )}
+
       <div style={{ marginTop: 8 }}>
         <ActionBtn
           onClick={() => setTrackedFlightId(isTracking ? null : data.icao)}

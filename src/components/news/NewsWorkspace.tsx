@@ -1089,13 +1089,19 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
               mode: context.geoMode,
             });
           }
-          pushAttempt({
-            id: "fallback-news-time-24h",
-            query: "news time:24h",
-            inView: false,
-            bbox: null,
-            mode: "pointdata",
-          });
+          const parsedActive = parseQuery(activeQuery);
+          const hasSpecificTerms = parsedActive.freeText.some(
+            (t) => t.toLowerCase().trim().length >= 2 && t.toLowerCase() !== "news"
+          ) || Boolean(parsedActive.sym);
+          if (!hasSpecificTerms) {
+            pushAttempt({
+              id: "fallback-news-time-24h",
+              query: "news time:24h",
+              inView: false,
+              bbox: null,
+              mode: "pointdata",
+            });
+          }
         }
 
         let lastPayload: SearchRouteResult | null = null;
@@ -1165,8 +1171,8 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
             if (count > 0) {
               if (
                 id === "fallback-news-time-24h" &&
-                primaryEmptyReason != null &&
-                primaryEmptyReason.includes("No stories matched")
+                primaryPayload != null &&
+                activeQuery.toLowerCase().trim() !== "news time:24h"
               ) {
                 lastCount = applyPayload(primaryPayload!, activeQuery, primaryAttemptContext!);
                 usePrimaryEmptyReason = true;
@@ -1213,8 +1219,8 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
             if (count > 0) {
               if (
                 a.id === "fallback-news-time-24h" &&
-                primaryEmptyReason != null &&
-                primaryEmptyReason.includes("No stories matched")
+                primaryPayload != null &&
+                activeQuery.toLowerCase().trim() !== "news time:24h"
               ) {
                 lastCount = applyPayload(primaryPayload!, activeQuery, primaryAttemptContext!);
                 usePrimaryEmptyReason = true;
@@ -1462,24 +1468,21 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     };
   }, [dashboardView, hasAnyVideoPanelVisible, refreshVideo]);
 
+  // Ref for byPanel so the auto-pick effect doesn't re-trigger on every panel state change.
+  const byPanelRef = useRef(news.video.byPanel);
+  byPanelRef.current = news.video.byPanel;
+
   useEffect(() => {
     if (dashboardView !== "news" || !hasAnyVideoPanelVisible) return;
     if (!liveStreams.length) return;
 
-    const byPanel = news.video.byPanel ?? {};
+    const byPanel = byPanelRef.current ?? {};
     const visibleVideoPanels = LIVE_VIDEO_PANELS.filter(
       (cfg) => news.panelVisibility[cfg.id] !== false
     );
 
     // Resolve each panel's candidate list and current selection validity.
-    type PanelInfo = {
-      cfg: (typeof LIVE_VIDEO_PANELS)[number];
-      panelState: { selectedVideoId: string | null; selectedChannelFilter: string | null; manualUrl: string };
-      orderedCandidates: YouTubeLive[];
-      currentValid: boolean;
-      filterNeedsReset: boolean;
-    };
-    const panels: PanelInfo[] = visibleVideoPanels.map((cfg) => {
+    const panels = visibleVideoPanels.map((cfg) => {
       const ps = byPanel[cfg.id] ?? { selectedVideoId: null, selectedChannelFilter: null, manualUrl: "" };
       const channelIds = VIDEO_CATEGORY_CHANNEL_IDS.get(cfg.category) ?? new Set<string>();
       const baseCandidates = liveStreams.filter((s) => channelIds.has(s.channelId));
@@ -1490,42 +1493,37 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
         : baseCandidates;
       const ordered = uniqueStreamsByVideoId(sortYouTubeStreamsLiveFirst(candidates));
       const currentValid = Boolean(ps.selectedVideoId && ordered.some((s) => s.videoId === ps.selectedVideoId));
-      return { cfg, panelState: ps, orderedCandidates: ordered, currentValid, filterNeedsReset: !!ps.selectedChannelFilter && !filterValid };
+      return { cfg, panelState: ps, orderedCandidates: ordered, currentValid };
     });
 
-    // Pass 1: collect videos from panels with valid, unique selections.
-    const usedVideoIds = new Set<string>();
-    const needsAutoPick: PanelInfo[] = [];
+    // Cross-panel deduplication: collect videoIds already held by panels with
+    // valid selections, then skip those when auto-picking for other panels.
+    const claimed = new Set<string>();
     for (const p of panels) {
-      if (p.currentValid && !usedVideoIds.has(p.panelState.selectedVideoId!)) {
-        usedVideoIds.add(p.panelState.selectedVideoId!);
-      } else {
-        needsAutoPick.push(p);
+      if (p.currentValid && p.panelState.selectedVideoId) {
+        claimed.add(p.panelState.selectedVideoId);
       }
     }
 
-    // Pass 2: auto-pick for panels without a valid unique selection.
-    for (const p of needsAutoPick) {
+    for (const p of panels) {
+      if (p.currentValid) continue;
+
       const liveId =
-        p.orderedCandidates.find((s) => s.status === "live" && !usedVideoIds.has(s.videoId))?.videoId ?? null;
+        p.orderedCandidates.find((s) => s.status === "live" && !claimed.has(s.videoId))?.videoId ?? null;
       const anyId =
-        p.orderedCandidates.find((s) => !usedVideoIds.has(s.videoId))?.videoId ?? null;
+        p.orderedCandidates.find((s) => !claimed.has(s.videoId))?.videoId ?? null;
       const nextVideoId = liveId ?? anyId;
 
-      if (nextVideoId) usedVideoIds.add(nextVideoId);
-      const changed = (p.panelState.selectedVideoId ?? null) !== nextVideoId || p.filterNeedsReset;
-      if (changed) {
-        setNewsVideoPanelState(p.cfg.id, {
-          selectedVideoId: nextVideoId,
-          ...(p.filterNeedsReset ? { selectedChannelFilter: null } : {}),
-        });
+      if (nextVideoId) claimed.add(nextVideoId);
+
+      if ((p.panelState.selectedVideoId ?? null) !== nextVideoId) {
+        setNewsVideoPanelState(p.cfg.id, { selectedVideoId: nextVideoId });
       }
     }
   }, [
     dashboardView,
     hasAnyVideoPanelVisible,
     liveStreams,
-    news.video.byPanel,
     news.panelVisibility,
     setNewsVideoPanelState,
   ]);
@@ -2100,7 +2098,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
                   setSuggestOpen(false);
                 }
               }}
-              placeholder="sym:NVDA merger time:7d near:37.77,-122.4,500"
+              placeholder="Search news... e.g. Apple, Tesla, Ukraine"
             />
 
             <button

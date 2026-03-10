@@ -12,7 +12,6 @@ import { getConflictZonesLayer } from "../../../../../lib/server/news/conflictZo
 import { getEconomicCentersLayer } from "../../../../../lib/server/news/economicCenters";
 import { getAiDataCentersLayer } from "../../../../../lib/server/news/aiDataCenters";
 import { getSanctionsData } from "../../../../../lib/server/news/sanctions";
-import { getDisplacementFlowsLayer } from "../../../../../lib/server/news/displacementFlows";
 import {
   ensureUcdpLoaded,
   loadAdditionalYear,
@@ -62,7 +61,8 @@ const LAYER_TTL: Record<string, number> = {
   "ucdp-events":         6 * 3600_000,
   "economic-centers":    4 * 3600_000,
   "ai-data-centers":     4 * 3600_000,
-  "displacement-flows":  24 * 3600_000,
+  "earthquakes":         60_000,
+  "disaster-alerts":     6 * 60_000,
 };
 
 const STALE_MULTIPLIER = 10;
@@ -748,6 +748,34 @@ async function getLayerPayload(layerId: string, origin: string, requestUrl: stri
     } catch {
       return { type: "FeatureCollection", features: [] };
     }
+  }
+
+  if (layerId === "earthquakes") {
+    const quakes = await fetchJson<Earthquake[]>(`${origin}/api/earthquakes`);
+    return fromEarthquakes(quakes ?? []);
+  }
+
+  if (layerId === "disaster-alerts") {
+    const res = await fetchJson<{ items?: Array<{ id: string; lat: number; lon: number; title: string; eventType: string; alertLevel?: string; severity?: string; severityValue?: number | null; country?: string; description?: string; startedAt?: number | null }> }>(`${origin}/api/gdacs`);
+    const items = res?.items ?? [];
+    return toFeatureCollection(
+      items
+        .filter((d) => Number.isFinite(d.lat) && Number.isFinite(d.lon))
+        .slice(0, 200)
+        .map((d) =>
+          featurePoint(`gdacs-${d.id}`, d.lon, d.lat, {
+            name: d.title,
+            eventType: d.eventType,
+            alertLevel: d.alertLevel ?? null,
+            severity: d.severity ?? null,
+            severityValue: d.severityValue ?? null,
+            country: d.country ?? null,
+            description: d.description ?? null,
+            startedAt: d.startedAt ?? null,
+            ts: d.startedAt ?? Date.now(),
+          })
+        )
+    );
   }
 
   return loadSnapshot(layerId);

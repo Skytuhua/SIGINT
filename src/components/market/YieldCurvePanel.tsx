@@ -1,81 +1,99 @@
 "use client";
 
 import React from "react";
+import { useMarketData } from "../../hooks/useMarketData";
+import type { QuotesResponse } from "../../lib/server/news/providers/marketTypes";
 
-interface YieldPoint {
+interface YieldDef {
   maturity: string;
-  current: number;
-  priorMonth: number;
+  yfSym: string;
 }
 
-const CURVE: YieldPoint[] = [
-  { maturity: "3M",  current: 5.31, priorMonth: 5.28 },
-  { maturity: "6M",  current: 5.24, priorMonth: 5.18 },
-  { maturity: "1Y",  current: 5.02, priorMonth: 4.94 },
-  { maturity: "2Y",  current: 4.68, priorMonth: 4.52 },
-  { maturity: "3Y",  current: 4.52, priorMonth: 4.38 },
-  { maturity: "5Y",  current: 4.38, priorMonth: 4.24 },
-  { maturity: "7Y",  current: 4.34, priorMonth: 4.20 },
-  { maturity: "10Y", current: 4.28, priorMonth: 4.16 },
-  { maturity: "20Y", current: 4.48, priorMonth: 4.38 },
-  { maturity: "30Y", current: 4.52, priorMonth: 4.44 },
+const YIELD_DEFS: YieldDef[] = [
+  { maturity: "3M",  yfSym: "^IRX" },
+  { maturity: "2Y",  yfSym: "^IRX" }, // ^IRX is 13-week T-bill; we'll reuse for display
+  { maturity: "5Y",  yfSym: "^FVX" },
+  { maturity: "10Y", yfSym: "^TNX" },
+  { maturity: "30Y", yfSym: "^TYX" },
 ];
 
+const YF_SYMBOLS = ["^IRX", "^FVX", "^TNX", "^TYX"];
+const ENDPOINT = `/api/market/quotes?symbols=${YF_SYMBOLS.join(",")}`;
+
+const EMPTY: QuotesResponse = { quotes: {}, degraded: true, timestamp: "" };
+
+// SVG dimensions
 const W = 520, H = 180;
 const PL = 38, PR = 14, PT = 12, PB = 26;
 const CW = W - PL - PR;
 const CH = H - PT - PB;
-
-const allYields = CURVE.flatMap((p) => [p.current, p.priorMonth]);
-const MIN_Y = Math.min(...allYields) - 0.1;
-const MAX_Y = Math.max(...allYields) + 0.1;
-const RANGE_Y = MAX_Y - MIN_Y;
-
-function toX(i: number) { return PL + (i / (CURVE.length - 1)) * CW; }
-function toY(v: number) { return PT + (1 - (v - MIN_Y) / RANGE_Y) * CH; }
-
-function buildPolyline(key: "current" | "priorMonth") {
-  return CURVE.map((p, i) => `${toX(i).toFixed(1)},${toY(p[key]).toFixed(1)}`).join(" ");
-}
-
-// Y-axis grid levels
-function gridYLevels() {
-  const step = 0.25;
-  const levels: number[] = [];
-  let v = Math.ceil(MIN_Y / step) * step;
-  while (v <= MAX_Y + 0.01) { levels.push(parseFloat(v.toFixed(2))); v += step; }
-  return levels;
-}
-
-const spread2y10y = ((CURVE[3].current - CURVE[7].current) * 100).toFixed(0);
-const idx10Y = 7;
 
 interface Props {
   style?: React.CSSProperties;
 }
 
 export default function YieldCurvePanel({ style }: Props) {
+  const { data, isLive } = useMarketData<QuotesResponse>(ENDPOINT, 15 * 60_000, EMPTY);
+  const quotes = data.quotes ?? {};
+
+  // Build yield curve from available data
+  // Yahoo: ^IRX = 13-week, ^FVX = 5Y, ^TNX = 10Y, ^TYX = 30Y
+  const points = [
+    { maturity: "3M",  yield: quotes["^IRX"]?.price ?? 0 },
+    { maturity: "5Y",  yield: quotes["^FVX"]?.price ?? 0 },
+    { maturity: "10Y", yield: quotes["^TNX"]?.price ?? 0 },
+    { maturity: "30Y", yield: quotes["^TYX"]?.price ?? 0 },
+  ].filter((p) => p.yield > 0);
+
+  const hasData = points.length > 0;
+  const allYields = points.map((p) => p.yield);
+  const MIN_Y = hasData ? Math.min(...allYields) - 0.15 : 3.5;
+  const MAX_Y = hasData ? Math.max(...allYields) + 0.15 : 5.5;
+  const RANGE_Y = MAX_Y - MIN_Y || 1;
+
+  function toX(i: number) { return PL + (i / Math.max(1, points.length - 1)) * CW; }
+  function toY(v: number) { return PT + (1 - (v - MIN_Y) / RANGE_Y) * CH; }
+
+  const polyline = points.map((p, i) => `${toX(i).toFixed(1)},${toY(p.yield).toFixed(1)}`).join(" ");
+
+  // 2s-10s spread (approximate: 3M vs 10Y since we don't have 2Y)
+  const y3M = quotes["^IRX"]?.price;
+  const y10Y = quotes["^TNX"]?.price;
+  const spread = y3M != null && y10Y != null ? ((y10Y - y3M) * 100).toFixed(0) : null;
+
+  // Y-axis grid levels
+  function gridYLevels() {
+    const step = 0.25;
+    const levels: number[] = [];
+    let v = Math.ceil(MIN_Y / step) * step;
+    while (v <= MAX_Y + 0.01) { levels.push(parseFloat(v.toFixed(2))); v += step; }
+    return levels;
+  }
+
   return (
     <div className="wv-market-panel" style={style}>
       <div className="wv-market-panel-header">
         <span className="wv-market-panel-title">Yield Curve</span>
         <div className="wv-market-yield-legend">
           <span><span className="wv-market-yield-legend-dot" style={{ background: "#89e5ff" }} />CURRENT</span>
-          <span><span className="wv-market-yield-legend-dot" style={{ background: "rgba(137,229,255,0.35)", outline: "1px dashed rgba(137,229,255,0.5)" }} />1M AGO</span>
         </div>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+        <span className={`wv-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
+          {isLive ? "LIVE" : "STATIC"}
+        </span>
       </div>
 
       <div className="wv-market-panel-body" style={{ padding: "0 0 4px 0" }}>
         {/* Spread annotation */}
-        <div style={{ padding: "3px 10px", fontSize: 9, color: "#ffab40", letterSpacing: "0.06em", borderBottom: "1px solid var(--wv-line)" }}>
-          2Y–10Y SPREAD:&nbsp;
-          <strong>{Number(spread2y10y) > 0 ? "+" : ""}{spread2y10y}bp</strong>
-          &nbsp;&nbsp;
-          <span style={{ color: "var(--wv-text-muted)" }}>
-            {Number(spread2y10y) < 0 ? "INVERTED" : "NORMAL"}
-          </span>
-        </div>
+        {spread != null && (
+          <div style={{ padding: "3px 10px", fontSize: 9, color: "#ffab40", letterSpacing: "0.06em", borderBottom: "1px solid var(--wv-line)" }}>
+            3M–10Y SPREAD:&nbsp;
+            <strong>{Number(spread) > 0 ? "+" : ""}{spread}bp</strong>
+            &nbsp;&nbsp;
+            <span style={{ color: "var(--wv-text-muted)" }}>
+              {Number(spread) < 0 ? "INVERTED" : "NORMAL"}
+            </span>
+          </div>
+        )}
 
         <div className="wv-market-yield-canvas">
           <svg
@@ -98,58 +116,25 @@ export default function YieldCurvePanel({ style }: Props) {
               );
             })}
 
-            {/* Inversion shading (2Y at index 3 > 10Y at index 7 means inverted 2s10s) */}
-            {CURVE[3].current > CURVE[7].current && (() => {
-              const pts = CURVE.slice(3, 8).map((p, i) =>
-                `${toX(i + 3).toFixed(1)},${toY(p.current).toFixed(1)}`
-              );
-              const baseline = toY(MIN_Y + 0.08);
-              const x3 = toX(3), x7 = toX(7);
-              const polyPts = `${x3},${baseline} ${pts.join(" ")} ${x7},${baseline}`;
-              return (
-                <polygon
-                  points={polyPts}
-                  fill="rgba(255,90,95,0.07)"
-                  stroke="none"
+            {/* Current line */}
+            {hasData && (
+              <>
+                <polyline
+                  points={polyline}
+                  fill="none"
+                  stroke="#89e5ff"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
-              );
-            })()}
-
-            {/* 1M AGO line */}
-            <polyline
-              points={buildPolyline("priorMonth")}
-              fill="none"
-              stroke="rgba(137,229,255,0.35)"
-              strokeWidth="1.5"
-              strokeDasharray="4 3"
-            />
-
-            {/* CURRENT line */}
-            <polyline
-              points={buildPolyline("current")}
-              fill="none"
-              stroke="#89e5ff"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-
-            {/* Dots on current */}
-            {CURVE.map((p, i) => (
-              <circle key={p.maturity} cx={toX(i)} cy={toY(p.current)} r="3" fill="#89e5ff" stroke="#0a0e14" strokeWidth="1.5" />
-            ))}
-
-            {/* Spread annotation at 10Y */}
-            <line
-              x1={toX(idx10Y)} y1={PT}
-              x2={toX(idx10Y)} y2={H - PB}
-              stroke="rgba(255,171,64,0.2)"
-              strokeWidth="1"
-              strokeDasharray="2 3"
-            />
+                {points.map((p, i) => (
+                  <circle key={p.maturity} cx={toX(i)} cy={toY(p.yield)} r="3" fill="#89e5ff" stroke="#0a0e14" strokeWidth="1.5" />
+                ))}
+              </>
+            )}
 
             {/* X-axis labels */}
-            {CURVE.map((p, i) => (
+            {points.map((p, i) => (
               <text key={p.maturity} x={toX(i)} y={H - 6} textAnchor="middle" fontSize="8" fill="rgba(185,205,224,0.6)">
                 {p.maturity}
               </text>
@@ -157,11 +142,20 @@ export default function YieldCurvePanel({ style }: Props) {
 
             {/* Baseline */}
             <line x1={PL} y1={H - PB} x2={W - PR} y2={H - PB} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+
+            {/* No data message */}
+            {!hasData && (
+              <text x={W / 2} y={H / 2} textAnchor="middle" fontSize="11" fill="rgba(185,205,224,0.4)">
+                Waiting for yield data…
+              </text>
+            )}
           </svg>
         </div>
       </div>
 
-      <div className="wv-market-panel-footer">US Treasury · FRED · placeholder data</div>
+      <div className="wv-market-panel-footer">
+        {isLive ? "US Treasury · Yahoo Finance · 15min refresh" : "Waiting for data…"}
+      </div>
     </div>
   );
 }

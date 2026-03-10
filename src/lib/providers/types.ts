@@ -81,6 +81,50 @@ export const FlightSchema = z.object({
 });
 export type Flight = z.infer<typeof FlightSchema>;
 
+export interface GpsJamZone {
+  lat: number;
+  lon: number;
+  degradedRatio: number;
+  count: number;
+  degradedCount: number;
+  /** Weighted multi-indicator degradation score 0-1 */
+  compositeScore?: number;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
+  trend?: 'rising' | 'stable' | 'falling';
+  /** Bitmask: 1=quality-degradation, 2=track-noise, 4=report-thinning */
+  symptomFlags?: number;
+  thinningRatio?: number;
+  trackNoiseCount?: number;
+  /** How long zone has been active (ms) */
+  durationMs?: number;
+  peakScore?: number;
+  nearbyMilitary?: number;
+}
+
+export interface AirspaceAnomalyZone {
+  lat: number;
+  lon: number;
+  baselineAvg: number;
+  currentCount: number;
+  deviationRatio: number;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  nearbyMilitary: number;
+}
+
+export interface DisappearedFlight {
+  icao: string;
+  callsign: string | null;
+  lastLat: number;
+  lastLon: number;
+  lastAltM: number;
+  lastHeading: number;
+  lastSpeedMs: number;
+  isMilitary: boolean;
+  disappearedAt: number;
+  aircraftType?: string;
+  aircraftTypeDescription?: string;
+}
+
 // 閳光偓閳光偓閳光偓 Earthquake 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
 export const EarthquakeSchema = z.object({

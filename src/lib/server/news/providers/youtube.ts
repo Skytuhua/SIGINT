@@ -3,6 +3,14 @@ import { NEWS_VIDEO_CHANNELS } from "../../../../config/newsConfig";
 import { WEBCAM_VIDEO_CHANNELS } from "../../../../config/webcamConfig";
 import type { YouTubeLive } from "../../../news/types";
 import { cachedFetch, fetchJsonOrThrow, type CachedFetchResult, type UpstreamPolicy } from "../upstream";
+import {
+  fetchChannelRss,
+  enrichWithLiveStatus,
+  resolveUsername,
+  youtubeThumbnailUrl,
+  RSS_HYBRID_POLICY,
+  type EnrichedVideo,
+} from "../../invidious/client";
 
 /** Resolved channel with channelId (required for API calls). */
 interface ResolvedChannel {
@@ -401,6 +409,83 @@ async function discoverFromDataApi(
   });
 }
 
+// ─── RSS + minimal API hybrid discovery (~99% quota reduction) ──────────────
+
+function enrichedVideoToYouTubeLive(video: EnrichedVideo): YouTubeLive {
+  const isLive = video.liveNow;
+  return {
+    id: `${isLive ? "live" : "recent"}-${video.videoId}`,
+    videoId: video.videoId,
+    channelId: video.channelId,
+    channelName: video.channelName,
+    title: video.title || "YouTube stream",
+    thumbnailUrl: video.thumbnailUrl || youtubeThumbnailUrl(video.videoId, "mqdefault"),
+    publishedAt: video.publishedAt,
+    startedAt: isLive ? (video.actualStartTime || video.publishedAt) : undefined,
+    viewerCount: isLive ? video.viewerCount : undefined,
+    status: isLive ? "live" : "recent",
+    sourceUrl: `https://www.youtube.com/watch?v=${video.videoId}`,
+  };
+}
+
+async function discoverFromRssHybrid(
+  channels: ResolvedChannel[],
+  apiKey: string | undefined
+): Promise<CachedFetchResult<YouTubeDiscoveryData>> {
+  const cacheKey = `rss-hybrid:${channels.map((c) => c.channelId).join(",")}`;
+
+  return cachedFetch({
+    cacheKey,
+    policy: RSS_HYBRID_POLICY,
+    fallbackValue: {
+      items: [],
+      channelsChecked: channels.length,
+      liveCount: 0,
+      degraded: [],
+    },
+    request: async () => {
+      const degradedChannels: string[] = [];
+
+      // Step 1: Fetch RSS feeds in parallel (free, no quota)
+      const rssResults = await Promise.all(
+        channels.map(async (channel) => {
+          try {
+            return await fetchChannelRss(channel.channelId, channel.label, 5);
+          } catch {
+            degradedChannels.push(channel.label);
+            return [];
+          }
+        })
+      );
+
+      const allRssVideos = rssResults.flat();
+
+      // Step 2: Enrich with live status via videos.list (1 unit per 50 videos)
+      const enriched = await enrichWithLiveStatus(allRssVideos, apiKey);
+
+      // Step 3: Filter and convert
+      const allItems: YouTubeLive[] = enriched
+        .filter((v) => {
+          // Skip Shorts (< 90s) unless live
+          if (!v.liveNow && v.lengthSeconds > 0 && v.lengthSeconds < MIN_VIDEO_DURATION_SEC) return false;
+          // Skip finished livestream replays
+          if (!v.liveNow && v.actualEndTime) return false;
+          return true;
+        })
+        .map(enrichedVideoToYouTubeLive);
+
+      const items = dedupeAndSort(allItems).filter(isRecent);
+
+      return {
+        items,
+        channelsChecked: channels.length,
+        liveCount: items.filter((item) => item.status === "live").length,
+        degraded: uniqueStrings(degradedChannels),
+      };
+    },
+  });
+}
+
 async function fetchRssChannelItems(channel: ResolvedChannel): Promise<YouTubeLive[]> {
   const rssUrl = `${YT_RSS_BASE}?channel_id=${encodeURIComponent(channel.channelId)}`;
   const controller = new AbortController();
@@ -484,7 +569,7 @@ async function discoverFromRss(
   });
 }
 
-/** Resolve WebcamChannel[] to ResolvedChannel[]. Resolves forUsername via API when apiKey is set. */
+/** Resolve WebcamChannel[] to ResolvedChannel[]. Resolves forUsername via YouTube API (1 unit each). */
 async function resolveWebcamChannels(apiKey: string | undefined): Promise<ResolvedChannel[]> {
   const resolved: ResolvedChannel[] = [];
   for (const ch of WEBCAM_VIDEO_CHANNELS) {
@@ -492,18 +577,9 @@ async function resolveWebcamChannels(apiKey: string | undefined): Promise<Resolv
       resolved.push({ channelId: ch.channelId, label: ch.label });
       continue;
     }
-    if (ch.forUsername && apiKey) {
+    if (ch.forUsername) {
       try {
-        const url = `${YT_CHANNELS_BASE}?part=id,snippet&forUsername=${encodeURIComponent(ch.forUsername)}&key=${apiKey}`;
-        const ac = new AbortController();
-        const t = setTimeout(() => ac.abort(), 5_000);
-        const res = await fetch(url, {
-          headers: { "User-Agent": "WorldView/0.1 (webcam-channel-resolve)" },
-          signal: ac.signal,
-        });
-        clearTimeout(t);
-        const data = (await res.json()) as { items?: Array<{ id?: string }> };
-        const id = data.items?.[0]?.id?.trim();
+        const id = await resolveUsername(ch.forUsername, apiKey);
         if (id) resolved.push({ channelId: id, label: ch.label });
       } catch {
         /* skip unresolved */
@@ -539,51 +615,20 @@ export async function discoverYouTubeWebcamStreams(
       error: null,
     };
   }
-  if (!apiKey) {
-    const rssResult = await discoverFromRss(channels);
-    return {
-      data: {
-        ...rssResult.data,
-        keyMissing: true,
-        discoverySource: "youtube-rss",
-        fallbackActive: true,
-      },
-      degraded: rssResult.degraded,
-      latencyMs: rssResult.latencyMs,
-      cacheHit: rssResult.cacheHit,
-      error: rssResult.error,
-    };
-  }
-  const dataResult = await discoverFromDataApi(apiKey, channels);
-  if (dataResult.degraded || dataResult.error) {
-    const rssResult = await discoverFromRss(channels);
-    if (rssResult.data.items.length > 0 || !dataResult.data.items.length) {
-      return {
-        data: {
-          ...rssResult.data,
-          degraded: uniqueStrings([...dataResult.data.degraded, ...rssResult.data.degraded]),
-          keyMissing: false,
-          discoverySource: "youtube-rss",
-          fallbackActive: true,
-        },
-        degraded: dataResult.degraded || rssResult.degraded,
-        latencyMs: dataResult.latencyMs + rssResult.latencyMs,
-        cacheHit: rssResult.cacheHit,
-        error: rssResult.error ?? dataResult.error,
-      };
-    }
-  }
+
+  // Primary: RSS hybrid (RSS feeds + minimal videos.list for live enrichment)
+  const hybridResult = await discoverFromRssHybrid(channels, apiKey);
   return {
     data: {
-      ...dataResult.data,
-      keyMissing: false,
-      discoverySource: "youtube-data-api",
-      fallbackActive: false,
+      ...hybridResult.data,
+      keyMissing: !apiKey,
+      discoverySource: apiKey ? "youtube-data-api" : "youtube-rss",
+      fallbackActive: hybridResult.degraded || false,
     },
-    degraded: dataResult.degraded,
-    latencyMs: dataResult.latencyMs,
-    cacheHit: dataResult.cacheHit,
-    error: dataResult.error,
+    degraded: hybridResult.degraded,
+    latencyMs: hybridResult.latencyMs,
+    cacheHit: hybridResult.cacheHit,
+    error: hybridResult.error,
   };
 }
 
@@ -591,52 +636,38 @@ export async function discoverYouTubeLiveStreams(
   apiKey: string | undefined
 ): Promise<CachedFetchResult<YouTubeLiveResult>> {
   const channels = sortedChannels();
-  if (!apiKey) {
-    const rssResult = await discoverFromRss(channels);
+
+  // Primary: RSS hybrid (RSS feeds for video IDs + minimal videos.list for live status)
+  // Cost: ~5-10 quota units instead of hundreds. RSS is free, videos.list = 1 unit per 50 vids.
+  const hybridResult = await discoverFromRssHybrid(channels, apiKey);
+  if (!hybridResult.degraded && !hybridResult.error) {
     return {
       data: {
-        ...rssResult.data,
-        keyMissing: true,
-        discoverySource: "youtube-rss",
-        fallbackActive: true,
+        ...hybridResult.data,
+        keyMissing: !apiKey,
+        discoverySource: apiKey ? "youtube-data-api" : "youtube-rss",
+        fallbackActive: false,
       },
-      degraded: rssResult.degraded,
-      latencyMs: rssResult.latencyMs,
-      cacheHit: rssResult.cacheHit,
-      error: rssResult.error,
+      degraded: hybridResult.degraded,
+      latencyMs: hybridResult.latencyMs,
+      cacheHit: hybridResult.cacheHit,
+      error: hybridResult.error,
     };
   }
 
-  const dataResult = await discoverFromDataApi(apiKey, channels);
-  if (dataResult.degraded || dataResult.error) {
-    const rssResult = await discoverFromRss(channels);
-    if (rssResult.data.items.length > 0 || !dataResult.data.items.length) {
-      return {
-        data: {
-          ...rssResult.data,
-          degraded: uniqueStrings([...dataResult.data.degraded, ...rssResult.data.degraded]),
-          keyMissing: false,
-          discoverySource: "youtube-rss",
-          fallbackActive: true,
-        },
-        degraded: dataResult.degraded || rssResult.degraded,
-        latencyMs: dataResult.latencyMs + rssResult.latencyMs,
-        cacheHit: rssResult.cacheHit,
-        error: rssResult.error ?? dataResult.error,
-      };
-    }
-  }
-
+  // Fallback: pure RSS (no live detection but still shows recent uploads)
+  const rssResult = await discoverFromRss(channels);
   return {
     data: {
-      ...dataResult.data,
-      keyMissing: false,
-      discoverySource: "youtube-data-api",
-      fallbackActive: false,
+      ...rssResult.data,
+      degraded: uniqueStrings([...hybridResult.data.degraded, ...rssResult.data.degraded]),
+      keyMissing: !apiKey,
+      discoverySource: "youtube-rss",
+      fallbackActive: true,
     },
-    degraded: dataResult.degraded,
-    latencyMs: dataResult.latencyMs,
-    cacheHit: dataResult.cacheHit,
-    error: dataResult.error,
+    degraded: true,
+    latencyMs: hybridResult.latencyMs + rssResult.latencyMs,
+    cacheHit: rssResult.cacheHit,
+    error: rssResult.error ?? hybridResult.error,
   };
 }

@@ -5,6 +5,9 @@
 import type {
   PropagatedSat,
   Flight,
+  GpsJamZone,
+  AirspaceAnomalyZone,
+  DisappearedFlight,
   Earthquake,
   DisasterAlert,
   Vehicle,
@@ -21,6 +24,7 @@ type LayerHandle = {
   remove: () => void;
   billboards?: import('cesium').BillboardCollection;
   labels?: import('cesium').LabelCollection;
+  polylines?: import('cesium').PolylineCollection;
   dataSource?: import("cesium").CustomDataSource;
   entityById?: Map<string, import("cesium").Entity>;
 };
@@ -154,6 +158,7 @@ export async function renderFlights(
 
   const billboards = new Cesium.BillboardCollection({ scene: viewer.scene });
   const labels = new Cesium.LabelCollection();
+  const vectors = new Cesium.PolylineCollection();
 
   const filtered = flights.filter((f) => {
     if (!filters.onGroundVisible && f.onGround) return false;
@@ -163,45 +168,139 @@ export async function renderFlights(
 
   for (const flight of filtered) {
     const isMil = Boolean(flight.isMilitary);
-    const color = isMil ? '#ffffff' : '#ffffff';
     const altM = flight.altM ?? 0;
     const renderAltM = isMil ? Math.max(180, altM) : Math.max(80, altM);
     const heading = flight.heading ?? 0;
-    const iconSize = isMil ? 22 : 22;
     const nearScale = isMil ? 1.2 : 1.2;
     const farScale = isMil ? 0.68 : 0.68;
     const farAlpha = isMil ? 0.5 : 0.72;
 
+    // Emergency squawk color override
+    const squawkStr = String(flight.squawk ?? '');
+    let billboardColor = new Cesium.Color(1.0, 1.0, 1.0, 1.0);
+    let isEmergency = false;
+    if (squawkStr === '7700') {
+      billboardColor = new Cesium.Color(1.0, 0.18, 0.18, 1.0); // red — general emergency
+      isEmergency = true;
+    } else if (squawkStr === '7500') {
+      billboardColor = new Cesium.Color(1.0, 0.6, 0.1, 1.0);  // amber — hijack
+      isEmergency = true;
+    } else if (squawkStr === '7600') {
+      billboardColor = new Cesium.Color(1.0, 1.0, 0.2, 1.0);  // yellow — radio failure
+      isEmergency = true;
+    }
+
     billboards.add({
       position: Cesium.Cartesian3.fromDegrees(flight.lon, flight.lat, renderAltM),
-      image: createPlaneCanvas(color, iconSize, isMil),
+      image: createPlaneCanvas('#ffffff', 22, isMil),
       rotation: Cesium.Math.toRadians(-heading),
       alignedAxis: Cesium.Cartesian3.UNIT_Z,
       id: { type: 'flight', id: flight.icao, data: flight },
       disableDepthTestDistance: 3_000_000,
-      scaleByDistance: new Cesium.NearFarScalar(
-        3e5,
-        nearScale,
-        1.5e7,
-        farScale
-      ),
+      scaleByDistance: new Cesium.NearFarScalar(3e5, nearScale, 1.5e7, farScale),
       translucencyByDistance: new Cesium.NearFarScalar(1.5e6, 1.0, 1.2e7, farAlpha),
-      color: new Cesium.Color(...hexToRgb(color), 1.0),
+      color: billboardColor,
     });
 
     if (isMil) {
+      // Signal freshness color: white → yellow → orange → red
+      const stale = flight.lastSeenSec ?? 0;
+      let milLabelColor: import('cesium').Color;
+      if (stale > 60) milLabelColor = new Cesium.Color(1.0, 0.25, 0.2, 0.96);
+      else if (stale > 30) milLabelColor = new Cesium.Color(1.0, 0.6, 0.1, 0.96);
+      else if (stale > 15) milLabelColor = new Cesium.Color(1.0, 0.92, 0.23, 0.96);
+      else milLabelColor = new Cesium.Color(1.0, 1.0, 1.0, 0.96);
+
       labels.add({
         id: { type: 'flight', id: flight.icao },
         position: Cesium.Cartesian3.fromDegrees(flight.lon, flight.lat, renderAltM),
         text: flight.callsign ?? flight.icao,
         font: '11px monospace',
-        fillColor: new Cesium.Color(1.0, 1.0, 1.0, 0.96),
-        outlineColor: new Cesium.Color(1.0, 1.0, 1.0, 0.9),
+        fillColor: milLabelColor,
+        outlineColor: new Cesium.Color(0.0, 0.0, 0.0, 0.9),
         outlineWidth: 3,
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         pixelOffset: new Cesium.Cartesian2(12, -8),
         scaleByDistance: new Cesium.NearFarScalar(3e5, 0.75, 3e6, 0.0),
         distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 3e6),
+      });
+
+      // Subtitle line: aircraft type + altitude (visible only when zoomed in)
+      const typePart = flight.aircraftType ?? '';
+      const altFt = flight.baroAltFt ?? (flight.altM != null ? Math.round(flight.altM * 3.281) : null);
+      const altPart = altFt != null ? `${altFt}ft` : '';
+      const subtitle = [typePart, altPart].filter(Boolean).join(' ');
+      if (subtitle) {
+        labels.add({
+          id: { type: 'flight_sub', id: flight.icao },
+          position: Cesium.Cartesian3.fromDegrees(flight.lon, flight.lat, renderAltM),
+          text: subtitle,
+          font: '9px monospace',
+          fillColor: new Cesium.Color(0.85, 0.85, 0.85, 0.7),
+          outlineColor: new Cesium.Color(0.0, 0.0, 0.0, 0.7),
+          outlineWidth: 2,
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          pixelOffset: new Cesium.Cartesian2(12, 4),
+          scaleByDistance: new Cesium.NearFarScalar(2e5, 0.7, 1.5e6, 0.0),
+          distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 1_500_000),
+        });
+      }
+    } else if (flight.callsign) {
+      labels.add({
+        id: { type: 'flight', id: flight.icao },
+        position: Cesium.Cartesian3.fromDegrees(flight.lon, flight.lat, renderAltM),
+        text: flight.callsign,
+        font: '10px monospace',
+        fillColor: new Cesium.Color(0.75, 0.88, 1.0, 0.92),
+        outlineColor: new Cesium.Color(0.0, 0.0, 0.0, 0.8),
+        outlineWidth: 2,
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        pixelOffset: new Cesium.Cartesian2(12, -6),
+        scaleByDistance: new Cesium.NearFarScalar(3e5, 0.7, 1.5e6, 0.0),
+        distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 2_500_000),
+      });
+    }
+
+    if (isEmergency) {
+      labels.add({
+        id: { type: 'flight_squawk', id: flight.icao },
+        position: Cesium.Cartesian3.fromDegrees(flight.lon, flight.lat, renderAltM),
+        text: `SQUAWK ${squawkStr}`,
+        font: 'bold 11px monospace',
+        fillColor: billboardColor,
+        outlineColor: new Cesium.Color(0.0, 0.0, 0.0, 0.9),
+        outlineWidth: 3,
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        pixelOffset: new Cesium.Cartesian2(12, 8),
+        scaleByDistance: new Cesium.NearFarScalar(3e5, 1.0, 8e6, 0.4),
+        distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 1e7),
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      });
+    }
+
+    // Speed/heading vector: project 90s ahead at current speed
+    const speedMs = flight.speedMs ?? 0;
+    if (speedMs > 20 && !flight.onGround) {
+      const headingRad = (heading * Math.PI) / 180;
+      const latRad = (flight.lat * Math.PI) / 180;
+      const mPerDegLon = 111_320 * Math.max(0.01, Math.cos(latRad));
+      const dt = 90;
+      const dNorth = speedMs * dt * Math.cos(headingRad);
+      const dEast = speedMs * dt * Math.sin(headingRad);
+      const endLat = flight.lat + dNorth / 111_320;
+      const endLon = flight.lon + dEast / mPerDegLon;
+      const vecAltM = Math.max(80, renderAltM);
+
+      vectors.add({
+        positions: [
+          Cesium.Cartesian3.fromDegrees(flight.lon, flight.lat, vecAltM),
+          Cesium.Cartesian3.fromDegrees(endLon, endLat, vecAltM),
+        ],
+        width: 1.0,
+        material: Cesium.Material.fromType('Color', {
+          color: new Cesium.Color(1.0, 1.0, 1.0, 0.22),
+        }),
+        id: { type: 'flight_vector', id: flight.icao, headingDeg: heading, speedMs },
       });
     }
   }
@@ -212,19 +311,22 @@ export async function renderFlights(
     labels.destroy();
   }
 
+  if (vectors.length > 0) {
+    viewer.scene.primitives.add(vectors);
+  } else {
+    vectors.destroy();
+  }
+
   viewer.scene.primitives.add(billboards);
 
   const remove = () => {
-    if (!billboards.isDestroyed()) {
-      viewer.scene.primitives.remove(billboards);
-    }
-    if (!labels.isDestroyed()) {
-      viewer.scene.primitives.remove(labels);
-    }
+    if (!billboards.isDestroyed()) viewer.scene.primitives.remove(billboards);
+    if (!labels.isDestroyed()) viewer.scene.primitives.remove(labels);
+    if (!vectors.isDestroyed()) viewer.scene.primitives.remove(vectors);
   };
 
   const map = getLayerMap(viewer);
-  map.set('flights', { remove, billboards, labels });
+  map.set('flights', { remove, billboards, labels, polylines: vectors });
 }
 
 export type GetFlightPosition = (
@@ -270,6 +372,427 @@ export function updateFlightPositions(
       label.position = Ces.Cartesian3.fromDegrees(p.lon, p.lat, renderAltM);
     }
   }
+
+  const polylines = handle.polylines;
+  if (polylines && !polylines.isDestroyed()) {
+    for (let i = 0; i < polylines.length; i++) {
+      const v = polylines.get(i);
+      const vid = v.id as { type?: string; id?: string; headingDeg?: number; speedMs?: number } | undefined;
+      if (vid?.type !== 'flight_vector') continue;
+      const icao = vid.id;
+      if (!icao) continue;
+      const p = getPosition(icao);
+      if (!p) continue;
+      const speedMs = vid.speedMs ?? 0;
+      const headingRad = ((vid.headingDeg ?? 0) * Math.PI) / 180;
+      const latRad = (p.lat * Math.PI) / 180;
+      const mPerDegLon = 111_320 * Math.max(0.01, Math.cos(latRad));
+      const dt = 90;
+      const dNorth = speedMs * dt * Math.cos(headingRad);
+      const dEast = speedMs * dt * Math.sin(headingRad);
+      const endLat = p.lat + dNorth / 111_320;
+      const endLon = p.lon + dEast / mPerDegLon;
+      const vecAltM = Math.max(80, p.altM);
+      v.positions = [
+        Ces.Cartesian3.fromDegrees(p.lon, p.lat, vecAltM),
+        Ces.Cartesian3.fromDegrees(endLon, endLat, vecAltM),
+      ];
+    }
+  }
+}
+
+// ── GPS / GNSS Interference layer ───────────────────────────────────────────
+
+const GPS_JAM_CELL_DEG = 2.0; // ~220 km cells (used for render radius)
+
+/** Show or hide flight heading vector lines based on camera altitude. */
+export function setFlightVectorsVisible(
+  viewer: import('cesium').Viewer,
+  show: boolean
+): void {
+  if (!isViewerAlive(viewer)) return;
+  const map = getLayerMap(viewer);
+  const handle = map.get('flights');
+  if (handle?.polylines && !handle.polylines.isDestroyed()) {
+    handle.polylines.show = show;
+  }
+}
+
+/**
+ * Render GPS/GNSS interference zones from the multi-indicator inference engine.
+ * Zones carry compositeScore, severity, trend, and symptom flags computed by
+ * GpsInterferenceTracker in gpsInterference.ts.
+ */
+export async function renderGpsJamZones(
+  viewer: import('cesium').Viewer,
+  zones: GpsJamZone[]
+): Promise<void> {
+  if (!isViewerAlive(viewer)) return;
+  const Cesium = await import('cesium');
+  clearLayer(viewer, 'gps_jam');
+  // Remove ALL gps_jam data sources (including orphans from overlapping async renders)
+  for (let i = viewer.dataSources.length - 1; i >= 0; i--) {
+    const ds = viewer.dataSources.get(i);
+    if (ds.name === 'gps_jam') {
+      viewer.dataSources.remove(ds, true);
+    }
+  }
+  if (!isViewerAlive(viewer)) return;
+  if (zones.length === 0) return;
+
+  const dataSource = new Cesium.CustomDataSource('gps_jam');
+  const cellRadiusM = (GPS_JAM_CELL_DEG / 2) * 111_320;
+
+  for (const zone of zones) {
+    // Use compositeScore when available; fall back to degradedRatio
+    const intensity = zone.compositeScore ?? zone.degradedRatio;
+    const severity = zone.severity ?? 'low';
+
+    // Color gradient: amber → orange → red → deep red
+    let r: number, g: number, b: number;
+    if (intensity < 0.4) {
+      // amber
+      r = 1.0; g = 0.67; b = 0.25;
+    } else if (intensity < 0.6) {
+      // orange
+      const t = (intensity - 0.4) / 0.2;
+      r = 1.0; g = 0.67 - t * 0.24; b = 0.25 - t * 0.25;
+    } else if (intensity < 0.8) {
+      // red
+      const t = (intensity - 0.6) / 0.2;
+      r = 1.0; g = 0.43 - t * 0.33; b = t * 0.05;
+    } else {
+      // deep red
+      r = 0.95; g = 0.08; b = 0.08;
+    }
+    const alpha = 0.22 + intensity * 0.24;
+    const fillColor = new Cesium.Color(r, g, b, alpha);
+    const hasMilProximity = (zone.nearbyMilitary ?? 0) > 0;
+    const outlineColor = hasMilProximity
+      ? new Cesium.Color(1.0, 0.44, 0.26, 0.8)   // military orange accent
+      : new Cesium.Color(r, g, b, 0.7);
+    const labelColor = new Cesium.Color(r, g, b, 1.0);
+
+    // Severity-scaled outline width
+    const outlineWidth = severity === 'critical' ? 4 : severity === 'high' ? 3 : severity === 'medium' ? 2 : 1.5;
+
+    // Glow ring — larger for critical
+    const glowMultiplier = severity === 'critical' ? 2.0 : 1.5;
+    const glowAlpha = severity === 'critical' ? 0.15 : 0.1;
+    dataSource.entities.add({
+      id: `gps_jam_glow_${zone.lat}_${zone.lon}`,
+      position: Cesium.Cartesian3.fromDegrees(zone.lon, zone.lat, 10_000),
+      ellipse: {
+        semiMajorAxis: cellRadiusM * glowMultiplier,
+        semiMinorAxis: cellRadiusM * glowMultiplier,
+        material: new Cesium.ColorMaterialProperty(new Cesium.Color(r, g, b, glowAlpha)),
+        height: 10_000,
+      },
+    });
+
+    // Build label text with detailed information
+    const pct = Math.round(zone.degradedRatio * 100);
+    const degradedCount = zone.degradedCount ?? 0;
+    const score = zone.compositeScore ? Math.round(zone.compositeScore * 100) : 0;
+
+    let labelText = `GPS INTERFERENCE\n`;
+    labelText += `${pct}% Degraded (${degradedCount}/${zone.count} ac)\n`;
+    labelText += `Score: ${score}% | Severity: ${(zone.severity || 'low').toUpperCase()}`;
+
+    // Symptom line
+    if (zone.symptomFlags != null && zone.symptomFlags > 0) {
+      const symptoms: string[] = [];
+      if (zone.symptomFlags & 1) symptoms.push('QUALITY');
+      if (zone.symptomFlags & 2) symptoms.push('NOISE');
+      if (zone.symptomFlags & 4) symptoms.push('THINNING');
+      labelText += `\nSymptoms: ${symptoms.join(' | ')}`;
+    }
+
+    // Military proximity line
+    if (hasMilProximity) {
+      labelText += `\nMil Nearby: ${zone.nearbyMilitary} ac`;
+    }
+
+    // Trend + duration line
+    const trendArrow = zone.trend === 'rising' ? '↑' : zone.trend === 'falling' ? '↓' : '→';
+    const durationMin = zone.durationMs != null ? Math.round(zone.durationMs / 60_000) : 0;
+    if (durationMin > 0) {
+      labelText += `\n${trendArrow} ${durationMin}m active`;
+    }
+
+    // Main zone ellipse
+    dataSource.entities.add({
+      id: `gps_jam_${zone.lat}_${zone.lon}`,
+      position: Cesium.Cartesian3.fromDegrees(zone.lon, zone.lat, 10_000),
+      ellipse: {
+        semiMajorAxis: cellRadiusM,
+        semiMinorAxis: cellRadiusM,
+        material: new Cesium.ColorMaterialProperty(fillColor),
+        outline: true,
+        outlineColor,
+        outlineWidth,
+        height: 10_000,
+      },
+      properties: {
+        type: 'gps_jam',
+        lat: zone.lat,
+        lon: zone.lon,
+        degradedRatio: zone.degradedRatio,
+        compositeScore: zone.compositeScore,
+        severity: zone.severity,
+        trend: zone.trend,
+        count: zone.count,
+      },
+    });
+
+    // Separate label entity positioned above for better readability
+    dataSource.entities.add({
+      id: `gps_jam_label_${zone.lat}_${zone.lon}`,
+      position: Cesium.Cartesian3.fromDegrees(zone.lon, zone.lat, 25_000),
+      label: {
+        text: labelText,
+        font: 'bold 18px monospace',
+        fillColor: labelColor,
+        outlineColor: Cesium.Color.BLACK,
+        outlineWidth: 3.5,
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        pixelOffset: new Cesium.Cartesian2(0, 0),
+        distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 2_500_000),
+        scaleByDistance: new Cesium.NearFarScalar(500_000, 1.0, 2_500_000, 0.0),
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        verticalOrigin: Cesium.VerticalOrigin.CENTER,
+        horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+      },
+    });
+  }
+
+  await viewer.dataSources.add(dataSource);
+
+  const map = getLayerMap(viewer);
+  map.set('gps_jam', {
+    remove: () => {
+      if (!isViewerAlive(viewer)) return;
+      viewer.dataSources.remove(dataSource, true);
+    },
+    dataSource,
+  });
+}
+
+// ── Airspace Anomaly layer ──────────────────────────────────────────────────
+
+const ANOMALY_CELL_RADIUS_M = 80_000;
+
+function anomalyColor(severity: AirspaceAnomalyZone['severity']): { r: number; g: number; b: number; a: number } {
+  switch (severity) {
+    case 'low':      return { r: 1.0, g: 0.92, b: 0.23, a: 0.18 };
+    case 'medium':   return { r: 1.0, g: 0.6,  b: 0.1,  a: 0.25 };
+    case 'high':     return { r: 1.0, g: 0.34, b: 0.13, a: 0.32 };
+    case 'critical': return { r: 0.9, g: 0.1,  b: 0.1,  a: 0.40 };
+  }
+}
+
+export async function renderAirspaceAnomalies(
+  viewer: import('cesium').Viewer,
+  zones: AirspaceAnomalyZone[]
+): Promise<void> {
+  if (!isViewerAlive(viewer)) return;
+  const Cesium = await import('cesium');
+  // Sweep all dataSources named 'airspace_anomaly' — handles concurrent-render orphans
+  clearLayer(viewer, 'airspace_anomaly');
+  for (let i = viewer.dataSources.length - 1; i >= 0; i--) {
+    const ds = viewer.dataSources.get(i);
+    if (ds.name === 'airspace_anomaly') viewer.dataSources.remove(ds, true);
+  }
+  if (!isViewerAlive(viewer)) return;
+  if (zones.length === 0) return;
+
+  const dataSource = new Cesium.CustomDataSource('airspace_anomaly');
+
+  for (const zone of zones) {
+    const c = anomalyColor(zone.severity);
+    const fillColor = new Cesium.Color(c.r, c.g, c.b, c.a);
+    const outlineColor = zone.nearbyMilitary > 0
+      ? new Cesium.Color(1.0, 0.44, 0.26, 0.8)   // military orange accent
+      : new Cesium.Color(c.r, c.g, c.b, 0.6);
+    const labelColor = new Cesium.Color(c.r, c.g, c.b, 1.0);
+
+    const dropPct = Math.round(zone.deviationRatio * 100);
+    const showLabel = true;
+    let labelText = `TRAFFIC VOID\n${dropPct}% drop (${zone.currentCount}/${zone.baselineAvg} ac)`;
+    if (zone.nearbyMilitary > 0) {
+      labelText += `\nMIL PROXIMITY: ${zone.nearbyMilitary}`;
+    }
+
+    // Zone ellipse (no glow ring — single entity per zone)
+    dataSource.entities.add({
+      id: `anomaly_${zone.lat}_${zone.lon}`,
+      position: Cesium.Cartesian3.fromDegrees(zone.lon, zone.lat, 8_000),
+      ellipse: {
+        semiMajorAxis: ANOMALY_CELL_RADIUS_M,
+        semiMinorAxis: ANOMALY_CELL_RADIUS_M,
+        material: new Cesium.ColorMaterialProperty(fillColor),
+        outline: true,
+        outlineColor,
+        outlineWidth: 1.5,
+        height: 8_000,
+      },
+      label: showLabel ? {
+        text: labelText,
+        font: 'bold 16px monospace',
+        fillColor: labelColor,
+        outlineColor: Cesium.Color.BLACK,
+        outlineWidth: 3,
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        pixelOffset: new Cesium.Cartesian2(0, -8),
+        distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 4_000_000),
+        scaleByDistance: new Cesium.NearFarScalar(200_000, 1.4, 3_000_000, 0.7),
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      } : undefined,
+      properties: {
+        type: 'airspace_anomaly',
+        lat: zone.lat,
+        lon: zone.lon,
+        severity: zone.severity,
+        deviationRatio: zone.deviationRatio,
+        nearbyMilitary: zone.nearbyMilitary,
+      },
+    });
+  }
+
+  await viewer.dataSources.add(dataSource);
+
+  const map = getLayerMap(viewer);
+  map.set('airspace_anomaly', {
+    remove: () => {
+      if (!isViewerAlive(viewer)) return;
+      viewer.dataSources.remove(dataSource, true);
+    },
+    dataSource,
+  });
+}
+
+// ── Disappeared Flights (ghost markers) ─────────────────────────────────────
+
+const ghostCanvasCache = new Map<string, HTMLCanvasElement>();
+
+function createGhostPlaneCanvas(size: number): HTMLCanvasElement {
+  const cacheKey = `ghost_${size}`;
+  const cached = ghostCanvasCache.get(cacheKey);
+  if (cached) return cached;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d')!;
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = size * 0.38;
+
+  // Faded red chevron (military style, 40% alpha)
+  ctx.globalAlpha = 0.4;
+  ctx.fillStyle = '#ff3333';
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - r);
+  ctx.lineTo(cx + r * 0.7, cy + r * 0.5);
+  ctx.lineTo(cx, cy + r * 0.15);
+  ctx.lineTo(cx - r * 0.7, cy + r * 0.5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1.0;
+
+  ghostCanvasCache.set(cacheKey, canvas);
+  return canvas;
+}
+
+export async function renderDisappearedFlights(
+  viewer: import('cesium').Viewer,
+  ghosts: DisappearedFlight[]
+): Promise<void> {
+  if (!isViewerAlive(viewer)) return;
+  const Cesium = await import('cesium');
+  clearLayer(viewer, 'disappeared_flights');
+  if (!isViewerAlive(viewer)) return;
+  if (ghosts.length === 0) return;
+
+  const billboards = new Cesium.BillboardCollection({ scene: viewer.scene });
+  const labels = new Cesium.LabelCollection();
+  const vectors = new Cesium.PolylineCollection();
+  const now = Date.now();
+
+  for (const ghost of ghosts) {
+    const elapsedSec = Math.round((now - ghost.disappearedAt) / 1000);
+    const altM = Math.max(180, ghost.lastAltM);
+
+    billboards.add({
+      position: Cesium.Cartesian3.fromDegrees(ghost.lastLon, ghost.lastLat, altM),
+      image: createGhostPlaneCanvas(24),
+      rotation: Cesium.Math.toRadians(-(ghost.lastHeading)),
+      alignedAxis: Cesium.Cartesian3.UNIT_Z,
+      id: { type: 'disappeared_flight', id: ghost.icao, data: ghost },
+      disableDepthTestDistance: 3_000_000,
+      scaleByDistance: new Cesium.NearFarScalar(3e5, 1.2, 1.5e7, 0.5),
+      translucencyByDistance: new Cesium.NearFarScalar(1.5e6, 0.8, 1.2e7, 0.3),
+    });
+
+    const labelId = ghost.callsign || ghost.icao;
+    labels.add({
+      position: Cesium.Cartesian3.fromDegrees(ghost.lastLon, ghost.lastLat, altM),
+      text: `SIGNAL LOST\n${labelId}\n${elapsedSec}s ago`,
+      font: 'bold 10px monospace',
+      fillColor: new Cesium.Color(1.0, 0.2, 0.2, 0.9),
+      outlineColor: new Cesium.Color(0.0, 0.0, 0.0, 0.9),
+      outlineWidth: 3,
+      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+      pixelOffset: new Cesium.Cartesian2(14, -4),
+      scaleByDistance: new Cesium.NearFarScalar(3e5, 0.8, 3e6, 0.0),
+      distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 3e6),
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+    });
+
+    // Projected path polyline (120s ahead from last heading/speed)
+    const speedMs = ghost.lastSpeedMs;
+    if (speedMs > 20) {
+      const headingRad = (ghost.lastHeading * Math.PI) / 180;
+      const latRad = (ghost.lastLat * Math.PI) / 180;
+      const mPerDegLon = 111_320 * Math.max(0.01, Math.cos(latRad));
+      const dt = 120;
+      const dNorth = speedMs * dt * Math.cos(headingRad);
+      const dEast = speedMs * dt * Math.sin(headingRad);
+      const endLat = ghost.lastLat + dNorth / 111_320;
+      const endLon = ghost.lastLon + dEast / mPerDegLon;
+
+      vectors.add({
+        positions: [
+          Cesium.Cartesian3.fromDegrees(ghost.lastLon, ghost.lastLat, altM),
+          Cesium.Cartesian3.fromDegrees(endLon, endLat, altM),
+        ],
+        width: 1.5,
+        material: Cesium.Material.fromType('PolylineDash', {
+          color: new Cesium.Color(1.0, 0.2, 0.2, 0.35),
+          dashLength: 12.0,
+        }),
+        id: { type: 'ghost_vector', id: ghost.icao },
+      });
+    }
+  }
+
+  viewer.scene.primitives.add(billboards);
+  if (labels.length > 0) viewer.scene.primitives.add(labels);
+  else labels.destroy();
+  if (vectors.length > 0) viewer.scene.primitives.add(vectors);
+  else vectors.destroy();
+
+  const map = getLayerMap(viewer);
+  map.set('disappeared_flights', {
+    remove: () => {
+      if (!billboards.isDestroyed()) viewer.scene.primitives.remove(billboards);
+      if (!labels.isDestroyed()) viewer.scene.primitives.remove(labels);
+      if (!vectors.isDestroyed()) viewer.scene.primitives.remove(vectors);
+    },
+    billboards,
+    labels,
+    polylines: vectors,
+  });
 }
 
 // 閳光偓閳光偓閳光偓 Earthquake layer 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓

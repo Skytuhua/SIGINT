@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import InteractiveChart from "./InteractiveChart";
 import FundamentalsPanel from "./FundamentalsPanel";
 import OptionsChainPanel from "./OptionsChainPanel";
 import OrderTicketPanel from "./OrderTicketPanel";
 import { getFundamentals } from "./shared/staticFundamentals";
+import TradingViewWidget from "./shared/TradingViewWidget";
 
-// Reference spot prices (used as base for chart generation + order ticket)
+// Reference spot prices (used as base for options + order ticket)
 export const TICKER_PRICES: Record<string, number> = {
   // Equities
   AAPL: 182.44, MSFT: 378.91, NVDA: 721.28, GOOGL: 140.52, META: 502.33,
@@ -27,6 +27,28 @@ export const TICKER_PRICES: Record<string, number> = {
   // Commodities (per unit)
   GC: 2328.0, WTI: 79.42, NG: 2.18,
 };
+
+/** Map internal symbols to TradingView symbols */
+const TV_SYMBOL_MAP: Record<string, string> = {
+  SPY: "AMEX:SPY", QQQ: "NASDAQ:QQQ", DIA: "AMEX:DIA", IWM: "AMEX:IWM",
+  GLD: "AMEX:GLD", BTC: "BITSTAMP:BTCUSD", ETH: "BITSTAMP:ETHUSD",
+  GC: "COMEX:GC1!", WTI: "NYMEX:CL1!", NG: "NYMEX:NG1!",
+  VIX: "TVC:VIX", DXY: "TVC:DXY", TNX: "TVC:US10Y",
+  ES: "CME_MINI:ES1!", NQ: "CME_MINI:NQ1!", RTY: "CME_MINI:RTY1!",
+  "2Y": "TVC:US02Y", "5Y": "TVC:US05Y", "10Y": "TVC:US10Y", "30Y": "TVC:US30Y",
+  EUR: "FX:EURUSD", USD: "FX:USDJPY", GBP: "FX:GBPUSD",
+  XAU: "COMEX:GC1!", XAG: "COMEX:SI1!", HG: "COMEX:HG1!",
+  BRT: "NYMEX:BB1!", SI: "COMEX:SI1!", PL: "NYMEX:PL1!",
+  ZC: "CBOT:ZC1!", ZW: "CBOT:ZW1!", ZS: "CBOT:ZS1!", KC: "NYMEX:KC1!",
+  RB: "NYMEX:RB1!",
+  "CL=F": "NYMEX:CL1!", "GC=F": "COMEX:GC1!", "SI=F": "COMEX:SI1!",
+};
+
+function getTvSymbol(sym: string): string {
+  if (TV_SYMBOL_MAP[sym]) return TV_SYMBOL_MAP[sym];
+  // Assume NASDAQ for most stocks
+  return `NASDAQ:${sym}`;
+}
 
 type OverlayTab = "CHART" | "FUNDAMENTALS" | "OPTIONS" | "ORDER";
 const OVERLAY_TABS: OverlayTab[] = ["CHART", "FUNDAMENTALS", "OPTIONS", "ORDER"];
@@ -52,9 +74,7 @@ export default function TickerDetailOverlay({ sym, onClose }: Props) {
   const fund = getFundamentals(sym);
   const displayName = fund?.name ?? sym;
 
-  const prevClose = basePrice * 0.9972; // tiny synthetic prev close
-  const chg = basePrice - prevClose;
-  const chgPct = (chg / prevClose) * 100;
+  const tvSymbol = getTvSymbol(sym);
 
   return (
     <div className="wv-ticker-overlay">
@@ -66,15 +86,6 @@ export default function TickerDetailOverlay({ sym, onClose }: Props) {
         <div className="wv-ticker-overlay-sym-block">
           <span className="wv-ticker-overlay-sym">{sym}</span>
           <span className="wv-ticker-overlay-name">{displayName}</span>
-          <span className="wv-ticker-overlay-price">
-            ${basePrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </span>
-          <span
-            className="wv-ticker-overlay-chg"
-            style={{ color: chg >= 0 ? "#36b37e" : "#ff5a5f" }}
-          >
-            {chg >= 0 ? "▲" : "▼"} {Math.abs(chgPct).toFixed(2)}%
-          </span>
         </div>
         <button className="wv-ticker-overlay-close" onClick={onClose} title="Close (Esc)">
           ✕
@@ -96,7 +107,32 @@ export default function TickerDetailOverlay({ sym, onClose }: Props) {
 
       {/* Content */}
       <div className="wv-ticker-overlay-content">
-        {tab === "CHART" && <InteractiveChart sym={sym} basePrice={basePrice} />}
+        {tab === "CHART" && (
+          <TradingViewWidget
+            scriptSrc="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js"
+            config={{
+              symbol: tvSymbol,
+              interval: "D",
+              timezone: "Etc/UTC",
+              style: "1",
+              theme: "dark",
+              backgroundColor: "rgba(10, 14, 20, 1)",
+              gridColor: "rgba(30, 42, 56, 0.5)",
+              withdateranges: true,
+              hide_side_toolbar: false,
+              allow_symbol_change: true,
+              save_image: false,
+              details: true,
+              hotlist: true,
+              calendar: false,
+              studies: ["STD;Supertrend", "STD;RSI", "STD;MACD"],
+              support_host: "https://www.tradingview.com",
+            }}
+            height="100%"
+            width="100%"
+            style={{ minHeight: 500 }}
+          />
+        )}
         {tab === "FUNDAMENTALS" && <FundamentalsPanel sym={sym} />}
         {tab === "OPTIONS" && <OptionsChainPanel sym={sym} spotPrice={basePrice} />}
         {tab === "ORDER" && <OrderTicketPanel sym={sym} spotPrice={basePrice} />}

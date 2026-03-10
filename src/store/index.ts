@@ -43,12 +43,11 @@ interface LayerState {
   satellites: boolean;
   flights: boolean;
   military: boolean;
-  earthquakes: boolean;
   disasters: boolean;
-  traffic: boolean;
   cctv: boolean;
-  news: boolean;
   tradeRoutes: boolean;
+  gpsJam: boolean;
+  airspaceAnomaly: boolean;
 }
 
 interface FiltersState {
@@ -287,6 +286,8 @@ interface WorldViewStore {
   setSatelliteCatalog(satellites: Satellite[]): void;
   setLiveCctv(cctv: CctvCamera[]): void;
   setLiveScenes(scenes: Scene[]): void;
+  setAirspaceAnomalies(zones: import("../lib/providers/types").AirspaceAnomalyZone[]): void;
+  setDisappearedFlights(flights: import("../lib/providers/types").DisappearedFlight[]): void;
   setFeedHealth(source: string, health: LiveDataState["health"][string]): void;
   setOpsSourceHealth(
     source: string,
@@ -773,6 +774,8 @@ function defaultLiveDataState(): LiveDataState {
     satelliteCatalog: [],
     cctv: [],
     scenes: [],
+    airspaceAnomalies: [],
+    disappearedFlights: [],
     lastUpdated: {
       opensky: null,
       military: null,
@@ -1172,12 +1175,11 @@ const baseState = {
     satellites: true,
     flights: true,
     military: false,
-    earthquakes: true,
     disasters: true,
-    traffic: false,
     cctv: false,
-    news: true,
     tradeRoutes: false,
+    gpsJam: false,
+    airspaceAnomaly: true,
   },
   filters: {
     minMagnitude: 0,
@@ -1373,8 +1375,8 @@ export const useWorldViewStore = create<WorldViewStore>()(
         setActiveView: (view) =>
           set((s) => ({ dashboard: { ...s.dashboard, activeView: view } })),
 
-        setDensity: () =>
-          set((s) => ({ dashboard: { ...s.dashboard, density: "ultra" } })),
+        setDensity: (density) =>
+          set((s) => ({ dashboard: { ...s.dashboard, density } })),
 
         setDashboard: (partial) =>
           set((s) => ({ dashboard: { ...s.dashboard, ...partial } })),
@@ -1622,6 +1624,22 @@ export const useWorldViewStore = create<WorldViewStore>()(
             liveData: {
               ...s.liveData,
               scenes,
+            },
+          })),
+
+        setAirspaceAnomalies: (airspaceAnomalies) =>
+          set((s) => ({
+            liveData: {
+              ...s.liveData,
+              airspaceAnomalies,
+            },
+          })),
+
+        setDisappearedFlights: (disappearedFlights) =>
+          set((s) => ({
+            liveData: {
+              ...s.liveData,
+              disappearedFlights,
             },
           })),
 

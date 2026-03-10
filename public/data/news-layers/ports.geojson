@@ -1,80 +1,35 @@
 {
-    "type":  "FeatureCollection",
-    "features":  [
-                     {
-                         "type":  "Feature",
-                         "id":  "ports-0",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              -77.04,
-                                                              38.9
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "ports site 0",
-                                            "ts":  1772435598919
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "ports-1",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              2.35,
-                                                              48.86
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "ports site 1",
-                                            "ts":  1772435598919
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "ports-2",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              139.76,
-                                                              35.68
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "ports site 2",
-                                            "ts":  1772435598919
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "ports-3",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              55.27,
-                                                              25.2
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "ports site 3",
-                                            "ts":  1772435598919
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "ports-4",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              -46.63,
-                                                              -23.55
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "ports site 4",
-                                            "ts":  1772435598919
-                                        }
-                     }
-                 ]
+  "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature", "id": "port-shanghai",   "geometry": { "type": "Point", "coordinates": [121.843, 31.350] },  "properties": { "name": "Port of Shanghai",       "country": "CN", "rank": 1,  "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-singapore",  "geometry": { "type": "Point", "coordinates": [103.833, 1.264] },   "properties": { "name": "Port of Singapore",      "country": "SG", "rank": 2,  "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-ningbo",     "geometry": { "type": "Point", "coordinates": [121.888, 29.867] },  "properties": { "name": "Ningbo-Zhoushan",        "country": "CN", "rank": 3,  "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-shenzhen",   "geometry": { "type": "Point", "coordinates": [113.892, 22.479] },  "properties": { "name": "Port of Shenzhen",       "country": "CN", "rank": 4,  "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-guangzhou",  "geometry": { "type": "Point", "coordinates": [113.523, 22.946] },  "properties": { "name": "Port of Guangzhou",      "country": "CN", "rank": 5,  "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-busan",      "geometry": { "type": "Point", "coordinates": [129.071, 35.095] },  "properties": { "name": "Port of Busan",          "country": "KR", "rank": 6,  "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-qingdao",    "geometry": { "type": "Point", "coordinates": [120.326, 36.068] },  "properties": { "name": "Port of Qingdao",        "country": "CN", "rank": 7,  "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-tianjin",    "geometry": { "type": "Point", "coordinates": [117.746, 38.987] },  "properties": { "name": "Port of Tianjin",        "country": "CN", "rank": 8,  "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-hongkong",   "geometry": { "type": "Point", "coordinates": [114.147, 22.307] },  "properties": { "name": "Port of Hong Kong",      "country": "HK", "rank": 9,  "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-rotterdam",  "geometry": { "type": "Point", "coordinates": [4.125, 51.953] },    "properties": { "name": "Port of Rotterdam",      "country": "NL", "rank": 10, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-dubai",      "geometry": { "type": "Point", "coordinates": [55.270, 25.269] },   "properties": { "name": "Jebel Ali / DP World",  "country": "AE", "rank": 11, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-antwerp",    "geometry": { "type": "Point", "coordinates": [4.400, 51.280] },    "properties": { "name": "Port of Antwerp-Bruges", "country": "BE", "rank": 12, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-losangeles", "geometry": { "type": "Point", "coordinates": [-118.252, 33.737] }, "properties": { "name": "Port of Los Angeles",    "country": "US", "rank": 13, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-longbeach",  "geometry": { "type": "Point", "coordinates": [-118.216, 33.755] }, "properties": { "name": "Port of Long Beach",     "country": "US", "rank": 14, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-hamburg",    "geometry": { "type": "Point", "coordinates": [9.897, 53.533] },    "properties": { "name": "Port of Hamburg",        "country": "DE", "rank": 15, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-klang",      "geometry": { "type": "Point", "coordinates": [101.401, 3.002] },   "properties": { "name": "Port Klang",             "country": "MY", "rank": 16, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-tanjung",    "geometry": { "type": "Point", "coordinates": [103.790, 1.350] },   "properties": { "name": "Tanjung Pelepas",        "country": "MY", "rank": 17, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-laemchabang","geometry": { "type": "Point", "coordinates": [100.884, 13.082] },  "properties": { "name": "Laem Chabang",           "country": "TH", "rank": 18, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-xiamen",     "geometry": { "type": "Point", "coordinates": [118.075, 24.453] },  "properties": { "name": "Port of Xiamen",         "country": "CN", "rank": 19, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-dalian",     "geometry": { "type": "Point", "coordinates": [121.672, 38.931] },  "properties": { "name": "Port of Dalian",         "country": "CN", "rank": 20, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-piraeus",    "geometry": { "type": "Point", "coordinates": [23.633, 37.943] },   "properties": { "name": "Port of Piraeus",        "country": "GR", "rank": 21, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-colombo",    "geometry": { "type": "Point", "coordinates": [79.838, 6.943] },    "properties": { "name": "Port of Colombo",        "country": "LK", "rank": 22, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-valencia",   "geometry": { "type": "Point", "coordinates": [-0.315, 39.439] },   "properties": { "name": "Port of Valencia",       "country": "ES", "rank": 23, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-savannah",   "geometry": { "type": "Point", "coordinates": [-81.101, 32.082] },  "properties": { "name": "Port of Savannah",       "country": "US", "rank": 24, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-santos",     "geometry": { "type": "Point", "coordinates": [-46.307, -23.981] }, "properties": { "name": "Port of Santos",         "country": "BR", "rank": 25, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-felixstowe", "geometry": { "type": "Point", "coordinates": [1.317, 51.960] },    "properties": { "name": "Port of Felixstowe",    "country": "GB", "rank": 26, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-jeddah",     "geometry": { "type": "Point", "coordinates": [39.158, 21.457] },   "properties": { "name": "Jeddah Islamic Port",   "country": "SA", "rank": 27, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-algeciras",  "geometry": { "type": "Point", "coordinates": [-5.445, 36.130] },   "properties": { "name": "Port of Algeciras",     "country": "ES", "rank": 28, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-mundra",     "geometry": { "type": "Point", "coordinates": [69.719, 22.746] },   "properties": { "name": "Mundra Port",            "country": "IN", "rank": 29, "type": "container",  "ts": 1772435598919 } },
+    { "type": "Feature", "id": "port-nhavasheva", "geometry": { "type": "Point", "coordinates": [72.951, 18.951] },   "properties": { "name": "Jawaharlal Nehru Port", "country": "IN", "rank": 30, "type": "container",  "ts": 1772435598919 } }
+  ]
 }

@@ -50,10 +50,17 @@ export async function runLayerPipeline(
       itemCount: capped.features.length,
     });
 
+    const hasFeatures = capped.features.length > 0;
     return {
       data: capped,
       cacheHit: false,
-      health: nowHealth("live", previous, null, null, 0),
+      health: nowHealth(
+        hasFeatures ? "live" : "degraded",
+        previous,
+        hasFeatures ? null : "No features returned",
+        null,
+        0
+      ),
     };
   } catch (error) {
     const isFresh = Boolean(cached.entry && cached.entry.expiresAt > now);

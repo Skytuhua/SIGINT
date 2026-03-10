@@ -468,7 +468,12 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
             <div className="wv-feed-list" role="log" aria-label="Space weather feed">
               {spaceWeatherItems.length ? (
                 spaceWeatherItems.map((item) => (
-                  <div key={item.id} className="wv-feed-item is-info">
+                  <div
+                    key={item.id}
+                    className={`wv-feed-item ${
+                      item.level === "ALERT" ? "is-error" : item.level === "WARNING" ? "is-warn" : "is-info"
+                    }`}
+                  >
                     <span>{new Date(item.issueDatetime).toISOString().slice(11, 19)}</span>
                     <strong>{item.level}</strong>
                     <span title={item.title}>{item.title}</span>

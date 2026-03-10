@@ -1,80 +1,45 @@
 {
-    "type":  "FeatureCollection",
-    "features":  [
-                     {
-                         "type":  "Feature",
-                         "id":  "volcanoes-0",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              -77.04,
-                                                              38.9
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "volcanoes site 0",
-                                            "ts":  1772435598918
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "volcanoes-1",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              2.35,
-                                                              48.86
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "volcanoes site 1",
-                                            "ts":  1772435598918
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "volcanoes-2",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              139.76,
-                                                              35.68
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "volcanoes site 2",
-                                            "ts":  1772435598918
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "volcanoes-3",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              55.27,
-                                                              25.2
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "volcanoes site 3",
-                                            "ts":  1772435598918
-                                        }
-                     },
-                     {
-                         "type":  "Feature",
-                         "id":  "volcanoes-4",
-                         "geometry":  {
-                                          "type":  "Point",
-                                          "coordinates":  [
-                                                              -46.63,
-                                                              -23.55
-                                                          ]
-                                      },
-                         "properties":  {
-                                            "name":  "volcanoes site 4",
-                                            "ts":  1772435598918
-                                        }
-                     }
-                 ]
+  "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature", "id": "vol-etna",       "geometry": { "type": "Point", "coordinates": [14.999, 37.751] },   "properties": { "name": "Mount Etna",        "country": "IT", "elevation": 3357, "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-kilauea",    "geometry": { "type": "Point", "coordinates": [-155.287, 19.421] }, "properties": { "name": "Kilauea",            "country": "US", "elevation": 1247, "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-fuji",       "geometry": { "type": "Point", "coordinates": [138.727, 35.361] },  "properties": { "name": "Mount Fuji",         "country": "JP", "elevation": 3776, "status": "dormant", "lastEruption": "1707", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-vesuvius",   "geometry": { "type": "Point", "coordinates": [14.426, 40.821] },   "properties": { "name": "Mount Vesuvius",     "country": "IT", "elevation": 1281, "status": "dormant", "lastEruption": "1944", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-pinatubo",   "geometry": { "type": "Point", "coordinates": [120.350, 15.143] },  "properties": { "name": "Mount Pinatubo",     "country": "PH", "elevation": 1486, "status": "active",  "lastEruption": "2021", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-krakatau",   "geometry": { "type": "Point", "coordinates": [105.423, -6.102] },  "properties": { "name": "Anak Krakatau",      "country": "ID", "elevation": 155,  "status": "active",  "lastEruption": "2023", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-merapi",     "geometry": { "type": "Point", "coordinates": [110.446, -7.541] },  "properties": { "name": "Mount Merapi",       "country": "ID", "elevation": 2930, "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-semeru",     "geometry": { "type": "Point", "coordinates": [112.922, -8.108] },  "properties": { "name": "Mount Semeru",       "country": "ID", "elevation": 3676, "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-sthelens",   "geometry": { "type": "Point", "coordinates": [-122.180, 46.200] }, "properties": { "name": "Mount St. Helens",   "country": "US", "elevation": 2549, "status": "active",  "lastEruption": "2008", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-rainier",    "geometry": { "type": "Point", "coordinates": [-121.760, 46.853] }, "properties": { "name": "Mount Rainier",      "country": "US", "elevation": 4392, "status": "dormant", "lastEruption": "1894", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-erebus",     "geometry": { "type": "Point", "coordinates": [167.153, -77.531] }, "properties": { "name": "Mount Erebus",       "country": "AQ", "elevation": 3794, "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-popocatepetl","geometry": { "type": "Point", "coordinates": [-98.622, 19.023] }, "properties": { "name": "Popocatepetl",       "country": "MX", "elevation": 5426, "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-sakurajima", "geometry": { "type": "Point", "coordinates": [130.660, 31.593] },  "properties": { "name": "Sakurajima",         "country": "JP", "elevation": 1117, "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-stromboli",  "geometry": { "type": "Point", "coordinates": [15.213, 38.789] },   "properties": { "name": "Stromboli",          "country": "IT", "elevation": 924,  "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-eyjafjallajokull","geometry": { "type": "Point", "coordinates": [-19.613, 63.632] }, "properties": { "name": "Eyjafjallajokull", "country": "IS", "elevation": 1651, "status": "active", "lastEruption": "2010", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-hekla",      "geometry": { "type": "Point", "coordinates": [-19.665, 63.983] },  "properties": { "name": "Hekla",              "country": "IS", "elevation": 1491, "status": "active",  "lastEruption": "2000", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-fagradalsfjall","geometry": { "type": "Point", "coordinates": [-22.266, 63.903] }, "properties": { "name": "Fagradalsfjall",   "country": "IS", "elevation": 385,  "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-taal",       "geometry": { "type": "Point", "coordinates": [120.993, 14.010] },  "properties": { "name": "Taal Volcano",       "country": "PH", "elevation": 311,  "status": "active",  "lastEruption": "2022", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-mayon",      "geometry": { "type": "Point", "coordinates": [123.685, 13.254] },  "properties": { "name": "Mayon Volcano",      "country": "PH", "elevation": 2462, "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-ruang",      "geometry": { "type": "Point", "coordinates": [125.370, 2.300] },   "properties": { "name": "Ruang",              "country": "ID", "elevation": 725,  "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-cotopaxi",   "geometry": { "type": "Point", "coordinates": [-78.437, -0.677] },  "properties": { "name": "Cotopaxi",           "country": "EC", "elevation": 5897, "status": "active",  "lastEruption": "2023", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-villarrica", "geometry": { "type": "Point", "coordinates": [-71.939, -39.422] }, "properties": { "name": "Villarrica",         "country": "CL", "elevation": 2860, "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-nyiragongo", "geometry": { "type": "Point", "coordinates": [29.250, -1.520] },   "properties": { "name": "Nyiragongo",         "country": "CD", "elevation": 3470, "status": "active",  "lastEruption": "2021", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-erta-ale",   "geometry": { "type": "Point", "coordinates": [40.670, 13.600] },   "properties": { "name": "Erta Ale",           "country": "ET", "elevation": 613,  "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-piton",      "geometry": { "type": "Point", "coordinates": [55.714, -21.244] },  "properties": { "name": "Piton de la Fournaise","country": "FR", "elevation": 2632, "status": "active", "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-cameroon",   "geometry": { "type": "Point", "coordinates": [9.170, 4.203] },     "properties": { "name": "Mount Cameroon",     "country": "CM", "elevation": 4095, "status": "active",  "lastEruption": "2012", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-agung",      "geometry": { "type": "Point", "coordinates": [115.508, -8.343] },  "properties": { "name": "Mount Agung",        "country": "ID", "elevation": 3031, "status": "active",  "lastEruption": "2019", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-bromo",      "geometry": { "type": "Point", "coordinates": [112.950, -7.942] },  "properties": { "name": "Mount Bromo",        "country": "ID", "elevation": 2329, "status": "active",  "lastEruption": "2019", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-sinabung",   "geometry": { "type": "Point", "coordinates": [98.392, 3.170] },    "properties": { "name": "Mount Sinabung",     "country": "ID", "elevation": 2460, "status": "active",  "lastEruption": "2021", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-whakaari",   "geometry": { "type": "Point", "coordinates": [176.914, -37.521] }, "properties": { "name": "Whakaari / White Island","country": "NZ", "elevation": 321, "status": "active", "lastEruption": "2019", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-ruapehu",    "geometry": { "type": "Point", "coordinates": [175.564, -39.281] }, "properties": { "name": "Mount Ruapehu",      "country": "NZ", "elevation": 2797, "status": "active",  "lastEruption": "2007", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-grimsvotn",  "geometry": { "type": "Point", "coordinates": [-17.316, 64.416] },  "properties": { "name": "Grimsvotn",          "country": "IS", "elevation": 1725, "status": "active",  "lastEruption": "2011", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-katla",      "geometry": { "type": "Point", "coordinates": [-19.083, 63.633] },  "properties": { "name": "Katla",              "country": "IS", "elevation": 1512, "status": "active",  "lastEruption": "1918", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-tambora",    "geometry": { "type": "Point", "coordinates": [118.000, -8.250] },  "properties": { "name": "Mount Tambora",      "country": "ID", "elevation": 2850, "status": "dormant", "lastEruption": "1967", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-sheveluch",  "geometry": { "type": "Point", "coordinates": [161.360, 56.653] },  "properties": { "name": "Shiveluch",          "country": "RU", "elevation": 3283, "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-klyuchevskoy","geometry": { "type": "Point", "coordinates": [160.641, 56.056] }, "properties": { "name": "Klyuchevskaya Sopka","country": "RU", "elevation": 4750, "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-colima",     "geometry": { "type": "Point", "coordinates": [-103.617, 19.514] }, "properties": { "name": "Volcan de Colima",   "country": "MX", "elevation": 3820, "status": "active",  "lastEruption": "2019", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-sangay",     "geometry": { "type": "Point", "coordinates": [-78.341, -2.002] },  "properties": { "name": "Sangay",             "country": "EC", "elevation": 5230, "status": "active",  "lastEruption": "2024", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-damavand",   "geometry": { "type": "Point", "coordinates": [52.109, 35.951] },   "properties": { "name": "Mount Damavand",     "country": "IR", "elevation": 5610, "status": "dormant", "lastEruption": "5350 BC", "ts": 1772435598918 } },
+    { "type": "Feature", "id": "vol-teide",      "geometry": { "type": "Point", "coordinates": [-16.641, 28.271] },  "properties": { "name": "Teide",              "country": "ES", "elevation": 3715, "status": "dormant", "lastEruption": "1909", "ts": 1772435598918 } }
+  ]
 }

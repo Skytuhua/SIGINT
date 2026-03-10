@@ -340,6 +340,7 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
       items = items.filter((item) => item.importance >= minImportance);
     }
 
+    items.sort((a, b) => b.timestamp - a.timestamp);
     return items.slice(0, 500);
   }, [allItems, activeTab, minImportance, activeWatchlist, searchMode, searchQuery, searchLocal]);
 

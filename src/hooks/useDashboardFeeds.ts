@@ -60,6 +60,19 @@ function normalizeFlights(rows: Flight[], forceMilitary: boolean): Flight[] {
   );
 }
 
+/** Dedupe flights by ICAO hex, keeping the entry with highest messageRate. */
+function dedupeByIcaoKeepBest(flights: Flight[]): Flight[] {
+  const seen = new Map<string, Flight>();
+  for (const f of flights) {
+    const key = f.icao.toLowerCase();
+    const existing = seen.get(key);
+    if (!existing || (f.messageRate ?? 0) > (existing.messageRate ?? 0)) {
+      seen.set(key, f);
+    }
+  }
+  return Array.from(seen.values());
+}
+
 function normalizeEarthquakes(rows: Earthquake[]): Earthquake[] {
   const normalized = rows
     .filter(
@@ -158,7 +171,8 @@ export function useDashboardFeeds() {
         retryCount: attempt,
       });
       try {
-        const [openskyRes, militaryRes] = await Promise.allSettled([
+        // Wave 1: opensky + military dedicated endpoints in parallel (fast ~2-3s)
+        const [openskyRes, milP1Res] = await Promise.allSettled([
           fetchJsonWithPolicy<Flight[]>("/api/opensky", {
             key: "feed:opensky",
             signal,
@@ -166,8 +180,8 @@ export function useDashboardFeeds() {
             retries: 1,
             negativeTtlMs: 1_500,
           }),
-          fetchJsonWithPolicy<Flight[]>("/api/military", {
-            key: "feed:military",
+          fetchJsonWithPolicy<Flight[]>("/api/military?phase=1", {
+            key: "feed:military-p1",
             signal,
             timeoutMs: 15_000,
             retries: 1,
@@ -197,9 +211,15 @@ export function useDashboardFeeds() {
           });
         }
 
-        if (militaryRes.status === "fulfilled") {
-          const military = normalizeFlights(militaryRes.value ?? [], true);
-          s.setLiveMilitary(military);
+        // Show Phase 1 military signals immediately on globe
+        // Merge into existing store data so Phase 2 entries from previous cycle aren't clobbered
+        let phase1Military: Flight[] = [];
+        if (milP1Res.status === "fulfilled") {
+          phase1Military = normalizeFlights(milP1Res.value ?? [], true);
+          const existingMil = (s.liveData.military as Flight[]) ?? [];
+          const p1IcaoSet = new Set(phase1Military.map((f) => f.icao));
+          const keptFromPrev = existingMil.filter((f) => !p1IcaoSet.has(f.icao));
+          s.setLiveMilitary([...phase1Military, ...keptFromPrev]);
           s.markFeedUpdated("military");
           s.setFeedHealth("military", "ok");
           s.setOpsSourceHealth("military", {
@@ -216,6 +236,51 @@ export function useDashboardFeeds() {
             errorCode: "military_fetch_failed",
             nextRetryAt: Date.now() + 30_000,
           });
+        }
+
+        // Wave 2: Type + squawk queries (slower ~5-8s) — merge with Phase 1 results
+        let mergedAfterP2 = phase1Military;
+        try {
+          const milP2Res = await fetchJsonWithPolicy<Flight[]>("/api/military?phase=2", {
+            key: "feed:military-p2",
+            signal,
+            timeoutMs: 35_000,
+            retries: 1,
+            negativeTtlMs: 1_500,
+          });
+          if (milP2Res) {
+            const phase2 = normalizeFlights(milP2Res ?? [], true);
+            if (phase2.length > 0) {
+              const currentMilP2 = useWorldViewStore.getState().liveData.military as Flight[];
+              mergedAfterP2 = dedupeByIcaoKeepBest([...currentMilP2, ...phase2]);
+              useWorldViewStore.getState().setLiveMilitary(mergedAfterP2);
+              console.log(`[feeds] military phase2: +${phase2.length} type signals → ${mergedAfterP2.length} total`);
+            }
+          }
+        } catch {
+          // Phase 2 failure is non-critical — Phase 1 results already showing
+        }
+
+        // Wave 3: Regional geographic scanning (slowest ~10-20s) — merge with P1+P2
+        try {
+          const milP3Res = await fetchJsonWithPolicy<Flight[]>("/api/military?phase=3", {
+            key: "feed:military-p3",
+            signal,
+            timeoutMs: 45_000,
+            retries: 1,
+            negativeTtlMs: 1_500,
+          });
+          if (milP3Res) {
+            const phase3 = normalizeFlights(milP3Res ?? [], true);
+            if (phase3.length > 0) {
+              const currentMil = useWorldViewStore.getState().liveData.military as Flight[];
+              const merged = dedupeByIcaoKeepBest([...currentMil, ...phase3]);
+              useWorldViewStore.getState().setLiveMilitary(merged);
+              console.log(`[feeds] military phase3: +${phase3.length} regional signals → ${merged.length} total`);
+            }
+          }
+        } catch {
+          // Phase 3 failure is non-critical — Phases 1+2 already showing
         }
 
         const totalTracks = s.liveData.flights.length + s.liveData.military.length;
@@ -714,7 +779,7 @@ export function useDashboardFeeds() {
           intervalMs: 12_000,
           jitterPct: 0.12,
           hiddenIntervalMultiplier: 2.4,
-          timeoutMs: 25_000,
+          timeoutMs: 60_000,
           run: async ({ signal, attempt }) => pollFlights(signal, attempt),
         },
       }),

@@ -629,7 +629,7 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
   if (searchTerms.length > 0) {
     items = items.filter((item) => {
       const text = `${item.headline} ${item.snippet ?? ""} ${item.entity ?? ""} ${item.placeName ?? ""}`.toLowerCase();
-      return searchTerms.some((term) => term.length > 0 && text.includes(term));
+      return searchTerms.every((term) => term.length > 0 && text.includes(term));
     });
   }
 

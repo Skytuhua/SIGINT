@@ -200,7 +200,7 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T
 function isRetryableError(err: unknown): boolean {
   if (!err) return false;
   if (err instanceof UpstreamHttpError) {
-    return err.status === 429 || err.status >= 500;
+    return err.status === 403 || err.status === 429 || err.status >= 500;
   }
   const message = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
   return message.includes("timeout") || message.includes("network") || message.includes("fetch");

@@ -1,51 +1,58 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
+import { useMarketData } from "../../hooks/useMarketData";
+import type { NewsResponse, NewsHeadline } from "../../lib/server/news/providers/marketTypes";
 
-interface NewsTapeItem {
-  category: string;
-  categoryColor: string;
-  ticker?: string;
-  headline: string;
-  ts: string;
-}
-
-const HEADLINES: NewsTapeItem[] = [
-  { category: "MACRO",     categoryColor: "#89e5ff", ticker: "DXY",  headline: "Fed's Powell reiterates 'no rush' to cut rates; markets push back first cut to July", ts: "14:32" },
-  { category: "EQUITIES",  categoryColor: "#36b37e", ticker: "NVDA", headline: "NVIDIA data center revenue surges 279% YoY; raises Q1 guidance well above consensus", ts: "14:18" },
-  { category: "ENERGY",    categoryColor: "#ffab40", ticker: "WTI",  headline: "EIA crude inventories +3.5M bbls vs -1.2M expected; WTI drops below $80", ts: "14:05" },
-  { category: "RATES",     categoryColor: "#89e5ff", ticker: "10Y",  headline: "US 10Y Treasury auction demand strong; yield slips 2bp to 4.28%", ts: "13:58" },
-  { category: "FX",        categoryColor: "#b9cde0", ticker: "USD",  headline: "Dollar extends gains vs EM basket on risk-off positioning; DXY at 104.23", ts: "13:45" },
-  { category: "EARNINGS",  categoryColor: "#36b37e", ticker: "AAPL", headline: "Apple Q1 EPS $2.40 vs est $2.21; iPhone revenue beats but China sales below forecast", ts: "13:30" },
-  { category: "GEOPOLITICAL", categoryColor: "#ff5a5f", headline: "Red Sea shipping disruptions persist; Maersk extends Cape of Good Hope routing", ts: "13:12" },
-  { category: "CRYPTO",    categoryColor: "#76ff03", ticker: "BTC",  headline: "Bitcoin ETF net inflows reach $12B cumulative; BTC consolidates above $67K", ts: "13:01" },
-  { category: "CREDIT",    categoryColor: "#ffab40", headline: "IG credit spreads widen 4bp on rate uncertainty; HY market quiet; CDX IG at 58bp", ts: "12:47" },
-  { category: "EQUITIES",  categoryColor: "#36b37e", ticker: "AMD",  headline: "AMD raises AI accelerator shipment forecast; competing directly with Nvidia MI300X", ts: "12:35" },
-  { category: "MACRO",     categoryColor: "#89e5ff", headline: "ISM Services PMI 52.6 vs 53.0 est; prices paid sub-index hottest in 12 months", ts: "12:20" },
-  { category: "FX",        categoryColor: "#b9cde0", ticker: "JPY",  headline: "BOJ board member signals spring wage data may justify rate path review", ts: "12:08" },
-  { category: "ENERGY",    categoryColor: "#ffab40", ticker: "NG",   headline: "Natural gas futures spike 2.1% on cold weather forecast; storage draw ahead of schedule", ts: "11:55" },
-  { category: "RATES",     categoryColor: "#89e5ff", ticker: "2Y",   headline: "2Y Treasury yield falls 3bp; market prices 75bp of cuts in 2025 vs 50bp last week", ts: "11:40" },
-  { category: "EQUITIES",  categoryColor: "#36b37e", ticker: "XLK",  headline: "Tech sector leads broader market higher; semis index up 2.1% on AI spend cycle narrative", ts: "11:28" },
-  { category: "MACRO",     categoryColor: "#89e5ff", ticker: "CPI",  headline: "Cleveland Fed CPI Nowcast: March +0.31% MoM; core +0.29%; on track for annual 3.1%", ts: "11:15" },
-  { category: "COMMODITIES", categoryColor: "#ffab40", ticker: "GC", headline: "Gold steady near $2,330 as real yields fall; central bank demand continues at record pace", ts: "10:52" },
-  { category: "CREDIT",    categoryColor: "#ffab40", ticker: "HYG", headline: "High-yield ETF outflows $240M; spreads widen 8bp; CCC tier underperforms", ts: "10:38" },
-  { category: "EARNINGS",  categoryColor: "#ff5a5f", ticker: "META", headline: "Meta CFO guides capex $35-40B for 2025; AI infra investment timeline extended", ts: "10:20" },
-  { category: "GEOPOLITICAL", categoryColor: "#ff5a5f", ticker: "XLE", headline: "OPEC+ monitoring compliance; Libya supply restoration threatens Q2 production targets", ts: "10:05" },
+const STATIC_HEADLINES: NewsHeadline[] = [
+  { category: "MARKETS", categoryColor: "#89e5ff", ticker: "SPY", headline: "S&P 500 hits fresh record as tech rally extends into second week", ts: "14:32" },
+  { category: "EARNINGS", categoryColor: "#fbbf24", ticker: "NVDA", headline: "Nvidia beats Q4 estimates, data center revenue surges 409% YoY", ts: "14:28" },
+  { category: "MACRO", categoryColor: "#c4b5fd", headline: "Fed holds rates steady, signals potential cut in June meeting", ts: "14:15" },
+  { category: "TECH", categoryColor: "#6ee7b7", ticker: "AAPL", headline: "Apple unveils new AI features for iPhone, shares rally 3%", ts: "14:02" },
+  { category: "CRYPTO", categoryColor: "#f97316", ticker: "BTC", headline: "Bitcoin surpasses $67,000 amid spot ETF inflows topping $1.2B weekly", ts: "13:55" },
+  { category: "COMMODITIES", categoryColor: "#34d399", headline: "Gold climbs to $2,340/oz on safe-haven demand, central bank buying", ts: "13:48" },
+  { category: "EARNINGS", categoryColor: "#fbbf24", ticker: "MSFT", headline: "Microsoft cloud revenue tops $33.7B, Azure growth accelerates to 31%", ts: "13:41" },
+  { category: "FX", categoryColor: "#60a5fa", headline: "Dollar index slips below 104 as ECB signals rate divergence", ts: "13:35" },
+  { category: "MARKETS", categoryColor: "#89e5ff", ticker: "TSLA", headline: "Tesla shares jump 8% on better-than-expected delivery numbers", ts: "13:22" },
+  { category: "ENERGY", categoryColor: "#fb7185", headline: "Crude oil rises to $78/bbl on OPEC+ production cut extension", ts: "13:15" },
+  { category: "MACRO", categoryColor: "#c4b5fd", headline: "US jobs report: 275K added in February, unemployment ticks to 3.9%", ts: "13:08" },
+  { category: "EARNINGS", categoryColor: "#fbbf24", ticker: "META", headline: "Meta platforms beats on revenue, announces $50B buyback program", ts: "12:55" },
+  { category: "MARKETS", categoryColor: "#89e5ff", ticker: "AMD", headline: "AMD gains 5% as AI chip orders exceed $3.5B annual run rate", ts: "12:48" },
+  { category: "CRYPTO", categoryColor: "#f97316", ticker: "ETH", headline: "Ethereum approaches $3,500 ahead of Dencun upgrade activation", ts: "12:40" },
+  { category: "COMMODITIES", categoryColor: "#34d399", headline: "Copper futures hit 14-month high on China stimulus expectations", ts: "12:32" },
+  { category: "TECH", categoryColor: "#6ee7b7", ticker: "GOOGL", headline: "Alphabet shares rise on Gemini AI integration across Google products", ts: "12:25" },
+  { category: "MACRO", categoryColor: "#c4b5fd", headline: "US CPI comes in at 3.2% YoY, core inflation eases for fifth month", ts: "12:18" },
+  { category: "FX", categoryColor: "#60a5fa", headline: "Japanese yen weakens past 150/$ as BOJ maintains ultra-loose policy", ts: "12:10" },
+  { category: "MARKETS", categoryColor: "#89e5ff", ticker: "AMZN", headline: "Amazon added to Dow Jones Industrial Average, replaces Walgreens", ts: "12:02" },
+  { category: "ENERGY", categoryColor: "#fb7185", headline: "Natural gas plunges 8% on warmer weather forecasts, storage surplus", ts: "11:55" },
 ];
+
+const EMPTY: NewsResponse = { headlines: STATIC_HEADLINES, degraded: true };
 
 interface Props {
   style?: React.CSSProperties;
 }
 
 export default function MarketNewsTape({ style }: Props) {
+  const { data, isLive } = useMarketData<NewsResponse>("/api/market/news?limit=20", 120_000, EMPTY);
+  const headlines = useMemo(() => {
+    const h = data.headlines;
+    return (h && h.length > 0) ? h : STATIC_HEADLINES;
+  }, [data.headlines]);
+
   return (
     <div className="wv-market-panel" style={style}>
       <div className="wv-market-panel-header">
         <span className="wv-market-panel-title">Market Tape</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)", letterSpacing: "0.04em" }}>INTRADAY HEADLINES · UTC</span>
+        <span style={{ fontSize: 9, color: "var(--wv-text-muted)", letterSpacing: "0.04em" }}>
+          HEADLINES · UTC
+        </span>
+        <span className={`wv-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
+          {isLive ? "LIVE" : "STATIC"}
+        </span>
       </div>
       <div className="wv-market-panel-body" style={{ padding: 0, overflowY: "auto" }}>
-        {HEADLINES.map((item, i) => (
+        {headlines.map((item: NewsHeadline, i: number) => (
           <div key={i} className="wv-market-tape-item">
             <div className="wv-market-tape-meta">
               <span className="wv-market-tape-category" style={{ color: item.categoryColor }}>
@@ -56,11 +63,26 @@ export default function MarketNewsTape({ style }: Props) {
               )}
               <span className="wv-market-tape-ts">{item.ts}</span>
             </div>
-            <div className="wv-market-tape-headline">{item.headline}</div>
+            <div className="wv-market-tape-headline">
+              {item.url ? (
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "inherit", textDecoration: "none" }}
+                >
+                  {item.headline}
+                </a>
+              ) : (
+                item.headline
+              )}
+            </div>
           </div>
         ))}
       </div>
-      <div className="wv-market-panel-footer">Reuters · Bloomberg · AP · placeholder data</div>
+      <div className="wv-market-panel-footer">
+        {isLive ? "Yahoo Finance RSS · 2min refresh" : "Yahoo Finance RSS · static data"}
+      </div>
     </div>
   );
 }

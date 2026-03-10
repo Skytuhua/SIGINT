@@ -1,34 +1,47 @@
 "use client";
 
 import React from "react";
+import { useMarketData } from "../../hooks/useMarketData";
+import type { QuotesResponse } from "../../lib/server/news/providers/marketTypes";
 
-interface VolRow {
+interface VolDef {
   sym: string;
+  yfSym: string;
   name: string;
-  level: number;
-  chg: number;
-  riskLabel: string;
-  riskColor: string;
+  thresholds: { low: number; elevated: number };
 }
 
-const VOL_DATA: VolRow[] = [
-  { sym: "VIX",   name: "S&P 500 Vol Index",  level: 14.82, chg: -3.11, riskLabel: "LOW",      riskColor: "#36b37e" },
-  { sym: "VVIX",  name: "Vol of VIX",          level: 84.5,  chg:  1.24, riskLabel: "NORMAL",   riskColor: "#89e5ff" },
-  { sym: "MOVE",  name: "Bond Market Vol",     level: 98.4,  chg:  0.84, riskLabel: "ELEVATED", riskColor: "#ffab40" },
-  { sym: "OVX",   name: "Oil Volatility",      level: 24.3,  chg:  5.21, riskLabel: "NORMAL",   riskColor: "#89e5ff" },
-  { sym: "GVX",   name: "Gold Volatility",     level: 11.2,  chg: -0.44, riskLabel: "LOW",      riskColor: "#36b37e" },
-  { sym: "CVIX",  name: "FX Volatility",       level:  7.8,  chg: -0.88, riskLabel: "LOW",      riskColor: "#36b37e" },
+const VOL_DEFS: VolDef[] = [
+  { sym: "VIX",  yfSym: "^VIX",   name: "S&P 500 Vol Index", thresholds: { low: 16, elevated: 25 } },
+  { sym: "VVIX", yfSym: "^VVIX",  name: "Vol of VIX",        thresholds: { low: 85, elevated: 110 } },
+  { sym: "MOVE", yfSym: "^MOVE",  name: "Bond Market Vol",   thresholds: { low: 80, elevated: 120 } },
+  { sym: "OVX",  yfSym: "^OVX",   name: "Oil Volatility",    thresholds: { low: 25, elevated: 40 } },
+  { sym: "GVZ",  yfSym: "^GVZ",   name: "Gold Volatility",   thresholds: { low: 14, elevated: 22 } },
+  { sym: "EVZ",  yfSym: "^EVZ",   name: "FX Volatility",     thresholds: { low: 8, elevated: 12 } },
 ];
 
-const VIX_THRESHOLD = 20;
+const ALL_YF_SYMS = VOL_DEFS.map((d) => d.yfSym);
+const ENDPOINT = `/api/market/quotes?symbols=${ALL_YF_SYMS.join(",")}`;
+
+const EMPTY: QuotesResponse = { quotes: {}, degraded: true, timestamp: "" };
+
+function riskLabel(level: number, t: { low: number; elevated: number }): { label: string; color: string } {
+  if (level <= t.low) return { label: "LOW", color: "#36b37e" };
+  if (level <= t.elevated) return { label: "NORMAL", color: "#89e5ff" };
+  return { label: "ELEVATED", color: "#ffab40" };
+}
 
 interface Props {
   style?: React.CSSProperties;
 }
 
 export default function VolatilityPanel({ style }: Props) {
-  const vix = VOL_DATA[0].level;
-  const regime = vix <= VIX_THRESHOLD ? "RISK-ON" : "RISK-OFF";
+  const { data, isLive } = useMarketData<QuotesResponse>(ENDPOINT, 60_000, EMPTY);
+  const quotes = data.quotes ?? {};
+
+  const vixQ = quotes["^VIX"];
+  const vixLevel = vixQ?.price ?? 0;
+  const regime = vixLevel > 0 && vixLevel <= 20 ? "RISK-ON" : "RISK-OFF";
   const regimeClass = regime === "RISK-ON" ? "is-risk-on" : "is-risk-off";
 
   return (
@@ -36,7 +49,9 @@ export default function VolatilityPanel({ style }: Props) {
       <div className="wv-market-panel-header">
         <span className="wv-market-panel-title">Volatility</span>
         <span style={{ fontSize: 9, color: "var(--wv-text-muted)", letterSpacing: "0.04em" }}>FEAR GAUGES</span>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+        <span className={`wv-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
+          {isLive ? "LIVE" : "STATIC"}
+        </span>
       </div>
       <div className="wv-market-panel-body" style={{ padding: 0 }}>
         <div className="wv-market-vol-col-header">
@@ -46,28 +61,40 @@ export default function VolatilityPanel({ style }: Props) {
           <span style={{ textAlign: "right" }}>CHG%</span>
           <span style={{ textAlign: "right" }}>RISK</span>
         </div>
-        {VOL_DATA.map((row) => {
-          const chgClass = row.chg > 0 ? "is-up" : row.chg < 0 ? "is-down" : "is-flat";
-          const sign = row.chg > 0 ? "+" : "";
+        {VOL_DEFS.map((def) => {
+          const q = quotes[def.yfSym];
+          const level = q?.price ?? 0;
+          const chg = q?.changePercent ?? 0;
+          const risk = riskLabel(level, def.thresholds);
+          const chgClass = chg > 0 ? "is-up" : chg < 0 ? "is-down" : "is-flat";
+          const sign = chg > 0 ? "+" : "";
           return (
-            <div key={row.sym} className="wv-market-vol-row">
-              <span className="wv-market-vol-sym">{row.sym}</span>
-              <span className="wv-market-vol-name" title={row.name}>{row.name}</span>
-              <span className="wv-market-vol-level">{row.level.toFixed(1)}</span>
-              <span className={`wv-market-vol-chg ${chgClass}`}>{sign}{row.chg.toFixed(2)}%</span>
-              <span className="wv-market-vol-risk" style={{ color: row.riskColor }}>{row.riskLabel}</span>
+            <div key={def.sym} className="wv-market-vol-row">
+              <span className="wv-market-vol-sym">{def.sym}</span>
+              <span className="wv-market-vol-name" title={def.name}>{def.name}</span>
+              <span className="wv-market-vol-level">{q ? level.toFixed(1) : "—"}</span>
+              <span className={`wv-market-vol-chg ${chgClass}`}>
+                {q ? `${sign}${chg.toFixed(2)}%` : "—"}
+              </span>
+              <span className="wv-market-vol-risk" style={{ color: risk.color }}>
+                {q ? risk.label : "—"}
+              </span>
             </div>
           );
         })}
-        <div className={`wv-market-vol-regime ${regimeClass}`}>
-          <span>REGIME:</span>
-          <span className="wv-market-vol-regime-label">{regime}</span>
-          <span style={{ marginLeft: "auto", color: "var(--wv-text-muted)" }}>
-            {regime === "RISK-ON" ? "Stocks↑ · Bonds↑ · Gold↓" : "Stocks↓ · Bonds↑ · Gold↑"}
-          </span>
-        </div>
+        {vixQ && (
+          <div className={`wv-market-vol-regime ${regimeClass}`}>
+            <span>REGIME:</span>
+            <span className="wv-market-vol-regime-label">{regime}</span>
+            <span style={{ marginLeft: "auto", color: "var(--wv-text-muted)" }}>
+              {regime === "RISK-ON" ? "Stocks↑ · Bonds↑ · Gold↓" : "Stocks↓ · Bonds↑ · Gold↑"}
+            </span>
+          </div>
+        )}
       </div>
-      <div className="wv-market-panel-footer">CBOE · ICE · placeholder data</div>
+      <div className="wv-market-panel-footer">
+        {isLive ? "CBOE · Yahoo Finance · 60s refresh" : "Waiting for data…"}
+      </div>
     </div>
   );
 }

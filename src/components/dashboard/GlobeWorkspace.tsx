@@ -28,11 +28,10 @@ const detectOptions = [
 const layers = [
   { key: "flights", label: "Flights" },
   { key: "military", label: "Military" },
-  { key: "earthquakes", label: "Earthquakes" },
+  { key: "gpsJam", label: "GPS/GNSS Interference" },
+  { key: "airspaceAnomaly", label: "Airspace Anomaly" },
   { key: "disasters", label: "Disasters" },
   { key: "satellites", label: "Satellites" },
-  { key: "news", label: "News" },
-  { key: "traffic", label: "Traffic" },
   { key: "cctv", label: "CCTV" },
 ] as const;
 
@@ -188,6 +187,15 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
               <button type="button" title="Zoom in" onClick={() => api?.zoomIn()}>
                 ZOOM+
               </button>
+              <span />
+              <button type="button" title="Pan north" onClick={() => api?.nudge("N")}>
+                N
+              </button>
+              <span />
+              <button type="button" title="Zoom out" onClick={() => api?.zoomOut()}>
+                ZOOM-
+              </button>
+              <span />
               <button type="button" title="Pan west" onClick={() => api?.nudge("W")}>
                 W
               </button>
@@ -197,9 +205,7 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
               <button type="button" title="Pan east" onClick={() => api?.nudge("E")}>
                 E
               </button>
-              <button type="button" title="Zoom out" onClick={() => api?.zoomOut()}>
-                ZOOM-
-              </button>
+              <span />
             </div>
             <div className="wv-camera-readout">
               {camera ? (
