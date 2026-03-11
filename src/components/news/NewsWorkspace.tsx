@@ -1912,8 +1912,8 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       }
       if (event.key.toLowerCase() === "v") {
         event.preventDefault();
-        setNewsPanelVisibility("news-video-general", true);
-        useSIGINTStore.getState().setNewsPanelFocus("news-video-general");
+        setNewsPanelVisibility("news-video-1", true);
+        useSIGINTStore.getState().setNewsPanelFocus("news-video-1");
         return;
       }
       if (event.key.toLowerCase() === "a") {

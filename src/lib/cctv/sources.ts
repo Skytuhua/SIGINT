@@ -1,4 +1,4 @@
-import type { CctvCamera, CctvRegion, CctvStreamFormat } from "../providers/types";
+import type { CctvCamera, CctvStreamFormat } from "../providers/types";
 
 const OTC_USA_URL =
   "https://raw.githubusercontent.com/AidanWelch/OpenTrafficCamMap/master/cameras/USA.json";
@@ -80,13 +80,6 @@ async function fetchOtcCameras(): Promise<CctvCamera[]> {
   return flattenOtcData(data);
 }
 
-async function fetchYoutubeCameras(): Promise<CctvCamera[]> {
-  const resp = await fetch("/api/cctv/youtube");
-  if (!resp.ok) return [];
-  const data: CctvCamera[] = await resp.json();
-  return data;
-}
-
 async function fetchInsecamCameras(): Promise<CctvCamera[]> {
   const resp = await fetch("/api/cctv/insecam");
   if (!resp.ok) return [];
@@ -94,54 +87,19 @@ async function fetchInsecamCameras(): Promise<CctvCamera[]> {
   return data;
 }
 
-function inferRegionFromCity(city: string, state?: string): CctvRegion {
-  const lower = `${city} ${state ?? ""}`.toLowerCase();
-  if (lower.includes("jerusalem") || lower.includes("tehran") || lower.includes("dubai") || lower.includes("doha") || lower.includes("riyadh") || lower.includes("baghdad") || lower.includes("beirut") || lower.includes("amman")) return "mideast";
-  if (lower.includes("london") || lower.includes("uk") || lower.includes("paris") || lower.includes("berlin") || lower.includes("amsterdam") || lower.includes("madrid") || lower.includes("rome") || lower.includes("kyiv") || lower.includes("kiev") || lower.includes("france") || lower.includes("germany") || lower.includes("netherlands") || lower.includes("spain") || lower.includes("italy")) return "europe";
-  if (lower.includes("tokyo") || lower.includes("seoul") || lower.includes("singapore") || lower.includes("hong kong") || lower.includes("japan") || lower.includes("korea") || lower.includes("china") || lower.includes("india")) return "asia";
-  if (lower.includes("johannesburg") || lower.includes("cape town") || lower.includes("nairobi") || lower.includes("lagos") || lower.includes("cairo") || lower.includes("south africa") || lower.includes("kenya") || lower.includes("nigeria")) return "africa";
-  if (lower.includes("sydney") || lower.includes("melbourne") || lower.includes("auckland") || lower.includes("australia") || lower.includes("new zealand")) return "oceania";
-  return "americas";
-}
-
-async function fetchStaticCameras(): Promise<CctvCamera[]> {
-  const resp = await fetch("/data/cctv_sources.json");
-  if (!resp.ok) return [];
-  const raw: CctvCamera[] = await resp.json();
-  return raw.map((cam) => ({
-    ...cam,
-    region: cam.region ?? inferRegionFromCity(cam.city, cam.state),
-  }));
-}
-
 /**
- * Fetch cameras from OpenTrafficCamMap + YouTube Live API + static fallback.
- * When YouTube API returns results, they are the sole YouTube source (no static
- * YouTube entries) to avoid duplicates and non-live streams. When API fails or
- * returns few items, static YouTube entries are used as fallback.
+ * Fetch cameras from OpenTrafficCamMap + Insecam.org scraping.
+ * YouTube fallback has been removed — Insecam is the sole live camera source.
  */
 export async function fetchAllCctvCameras(): Promise<CctvCamera[]> {
-  const [staticCams, otcCams, youtubeCams, insecamCams] = await Promise.all([
-    fetchStaticCameras().catch(() => [] as CctvCamera[]),
+  const [otcCams, insecamCams] = await Promise.all([
     fetchOtcCameras().catch(() => [] as CctvCamera[]),
-    fetchYoutubeCameras().catch(() => [] as CctvCamera[]),
     fetchInsecamCameras().catch(() => [] as CctvCamera[]),
   ]);
 
   const byId = new Map<string, CctvCamera>();
   for (const cam of otcCams) byId.set(cam.id, cam);
   for (const cam of insecamCams) byId.set(cam.id, cam);
-
-  const hasYoutubeFromApi = youtubeCams.length > 0;
-
-  if (hasYoutubeFromApi) {
-    for (const cam of youtubeCams) byId.set(cam.id, cam);
-    for (const cam of staticCams) {
-      if (cam.streamFormat !== "YOUTUBE") byId.set(cam.id, cam);
-    }
-  } else {
-    for (const cam of staticCams) byId.set(cam.id, cam);
-  }
 
   return Array.from(byId.values());
 }

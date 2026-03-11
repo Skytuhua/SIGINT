@@ -76,6 +76,28 @@ export const NEWS_VIDEO_CHANNELS: YouTubeChannel[] = [
   // ── Canada ────────────────────────────────────────────────────────
   { channelId: "UChLtXXpo4Ge1ReTEboVvTDg", label: "Global News (CA)",      priority: 76,  region: "global", categories: ["general"] },
 
+  // ── India ────────────────────────────────────────────────────────
+  { channelId: "UCt4t-jeY85JegMlZ-E5UWtA", label: "WION",                  priority: 82,  region: "asia",   categories: ["general"] },
+  { channelId: "UCYPvAwZP8pZhSMW8qs7cVCw", label: "India Today",           priority: 79,  region: "asia",   categories: ["general"] },
+  { channelId: "UC_gUM8rL-Lrg6O3adPW9K1g", label: "NDTV",                  priority: 78,  region: "asia",   categories: ["general"] },
+  { channelId: "UCPMTrBl-bPlxnAULzaxPjPg", label: "Times Now",             priority: 74,  region: "asia",   categories: ["general"] },
+  { channelId: "UCwqusr8YDwM-0gEU1UrYBYQ", label: "Republic World",        priority: 73,  region: "asia",   categories: ["general"] },
+
+  // ── Southeast Asia ──────────────────────────────────────────────
+  { channelId: "UCm1Q9MYyFxCsOgLSiPKBiDg", label: "CNA (Singapore)",       priority: 80,  region: "asia",   categories: ["general", "business"] },
+  { channelId: "UCLVoFwXt1JE-UOE64SAexXA", label: "ABS-CBN News",          priority: 72,  region: "asia",   categories: ["general"] },
+
+  // ── Africa ──────────────────────────────────────────────────────
+  { channelId: "UC3E9rIoLKXgs0SmhQo3tIug", label: "SABC News (SA)",        priority: 74,  region: "mena",   categories: ["general"] },
+  { channelId: "UCd3TBEvIDaAuaQGA-ipmG4A", label: "Channels TV (Nigeria)", priority: 71,  region: "mena",   categories: ["general"] },
+  { channelId: "UCuHSZMGrjlmMZR9nfJkV0Ig", label: "KTN News (Kenya)",      priority: 70,  region: "mena",   categories: ["general"] },
+  { channelId: "UC65DXOO0TOFm7gfkC3WAHLA", label: "Africa News (EN)",      priority: 69,  region: "mena",   categories: ["general"] },
+
+  // ── China / Other Asia ──────────────────────────────────────────
+  { channelId: "UCgrNz-aDmcr2uuto8_DL2jg", label: "CGTN",                  priority: 76,  region: "asia",   categories: ["general"] },
+
+  // ── Europe (additional) ─────────────────────────────────────────
+  { channelId: "UCeEQFJiMYwPCjgmDRoJZ_DQ", label: "RTÉ News (Ireland)",   priority: 73,  region: "eu",     categories: ["general"] },
 ];
 
 /** Live video panel definitions: main category + subcategory (source) choices */
@@ -85,10 +107,10 @@ export const LIVE_VIDEO_PANELS: Array<{
   title: string;
   subtitle: string;
 }> = [
-  { id: "news-video-tech", category: "tech", title: "LIVE TECH", subtitle: "Tech & startup news streams" },
-  { id: "news-video-business", category: "business", title: "LIVE BUSINESS", subtitle: "Business & markets streams" },
-  { id: "news-video-general", category: "general", title: "LIVE NEWS", subtitle: "General news from global sources" },
-  { id: "news-video-financial", category: "financial", title: "LIVE MARKETS", subtitle: "Financial & markets streams" },
+  { id: "news-video-1", category: "general", title: "NEWS VIDEO 1", subtitle: "Live news stream" },
+  { id: "news-video-2", category: "general", title: "NEWS VIDEO 2", subtitle: "Live news stream" },
+  { id: "news-video-3", category: "general", title: "NEWS VIDEO 3", subtitle: "Live news stream" },
+  { id: "news-video-4", category: "general", title: "NEWS VIDEO 4", subtitle: "Live news stream" },
 ];
 
 // Backward-compatible export name for existing imports.

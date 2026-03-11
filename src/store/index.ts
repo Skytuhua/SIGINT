@@ -396,10 +396,10 @@ const DEFAULT_PANEL_LOCKS: Record<string, boolean> = {
 };
 const DEFAULT_PANEL_ORDER = [...DEFAULT_PANEL_IDS];
 const LIVE_VIDEO_PANEL_IDS = [
-  "news-video-tech",
-  "news-video-business",
-  "news-video-general",
-  "news-video-financial",
+  "news-video-1",
+  "news-video-2",
+  "news-video-3",
+  "news-video-4",
 ] as const;
 const LIVE_VIDEO_PANEL_ID_SET = new Set<string>(LIVE_VIDEO_PANEL_IDS as readonly string[]);
 
@@ -426,10 +426,10 @@ const DEFAULT_NEWS_PANEL_VISIBILITY: Record<string, boolean> = {
   "news-terminal": true,
   "news-globe": true,
   "news-compliance": true,
-  "news-video-tech": true,
-  "news-video-business": true,
-  "news-video-general": true,
-  "news-video-financial": true,
+  "news-video-1": true,
+  "news-video-2": true,
+  "news-video-3": true,
+  "news-video-4": true,
   "news-cat-tech": true,
   "news-cat-ai": true,
   "news-cat-crypto": true,
@@ -448,10 +448,10 @@ const DEFAULT_NEWS_PANEL_LOCKS: Record<string, boolean> = {
   "news-terminal": false,
   "news-globe": false,
   "news-compliance": false,
-  "news-video-tech": false,
-  "news-video-business": false,
-  "news-video-general": false,
-  "news-video-financial": false,
+  "news-video-1": false,
+  "news-video-2": false,
+  "news-video-3": false,
+  "news-video-4": false,
   "news-cat-tech": false,
   "news-cat-ai": false,
   "news-cat-crypto": false,

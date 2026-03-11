@@ -22,25 +22,6 @@ const REGIONS = [
 
 const DISPLAY_COUNT = 4;
 
-function getYoutubeIdFromUrl(url?: string | null): string | null {
-  if (!url) return null;
-  try {
-    const u = new URL(url);
-    if (u.pathname.startsWith("/embed/")) {
-      const parts = u.pathname.split("/");
-      return parts[2] || null;
-    }
-    if (u.hostname.includes("youtu.be")) {
-      const id = u.pathname.slice(1).split("/")[0];
-      return id || null;
-    }
-    const v = u.searchParams.get("v");
-    return v || null;
-  } catch {
-    return null;
-  }
-}
-
 interface LiveCctvPanelProps {
   panelId: string;
   cameras: CctvCamera[];
@@ -103,7 +84,7 @@ export default function LiveCctvPanel({
   }, [searchQuery]);
 
   const healthyCameras = useMemo(() => {
-    const ALLOWED_FORMATS = new Set(["YOUTUBE", "JPEG", "IMAGE_STREAM"]);
+    const ALLOWED_FORMATS = new Set(["JPEG", "IMAGE_STREAM"]);
     const seenIds = new Set<string>();
     const result: CctvCamera[] = [];
 
@@ -111,17 +92,12 @@ export default function LiveCctvPanel({
       if (!cam.snapshotUrl) continue;
       if (brokenIds[cam.id]) continue;
       if (!ALLOWED_FORMATS.has(cam.streamFormat ?? "")) continue;
-      // Only allow YouTube streams or proxied cameras (snapshotUrl via /api/)
-      // to avoid raw HTTP URLs that fail due to CORS/mixed-content
-      if (cam.streamFormat !== "YOUTUBE" && !cam.snapshotUrl.startsWith("/api/")) continue;
+      // Only allow proxied cameras (snapshotUrl via /api/) to avoid raw HTTP
+      // URLs that fail due to CORS/mixed-content
+      if (!cam.snapshotUrl.startsWith("/api/")) continue;
 
-      // Dedup: use YouTube video ID for YouTube cams, cam.id for others
-      const dedupKey =
-        cam.streamFormat === "YOUTUBE"
-          ? (getYoutubeIdFromUrl(cam.streamUrl) ?? cam.id)
-          : cam.id;
-      if (seenIds.has(dedupKey)) continue;
-      seenIds.add(dedupKey);
+      if (seenIds.has(cam.id)) continue;
+      seenIds.add(cam.id);
       result.push(cam);
     }
 
@@ -344,7 +320,7 @@ export default function LiveCctvPanel({
         </div>
       </PanelBody>
       <PanelFooter
-        source="YouTube Live / Insecam"
+        source="Insecam"
         updatedAt={Date.now()}
         health={loading || searching ? "loading" : "ok"}
         message={`${filteredCameras.length} streams${searching ? " (searching...)" : ""}`}
