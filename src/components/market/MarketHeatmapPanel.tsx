@@ -225,7 +225,8 @@ export default function MarketHeatmapPanel({ style, onTickerClick }: Props) {
     const map: Record<string, number> = {};
     const quotesArr = Array.isArray(data?.quotes) ? data.quotes : Object.values(data?.quotes ?? {});
     for (const q of quotesArr) {
-      map[q.symbol] = q.changePercent;
+      const quote = q as { symbol: string; changePercent: number };
+      map[quote.symbol] = quote.changePercent;
     }
     return map;
   }, [data]);
@@ -249,7 +250,7 @@ export default function MarketHeatmapPanel({ style, onTickerClick }: Props) {
     }
 
     const sectorItems: { sector: string; weight: number; stocks: TileData[] }[] = [];
-    for (const [sector, stocks] of sectorMap) {
+    for (const [sector, stocks] of Array.from(sectorMap)) {
       sectorItems.push({ sector, weight: stocks.reduce((s, t) => s + t.weight, 0), stocks });
     }
     sectorItems.sort((a, b) => b.weight - a.weight);

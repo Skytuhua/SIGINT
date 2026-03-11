@@ -2360,7 +2360,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
                       rowCount={terminalItems.length}
                       rowHeight={28}
                       overscanCount={15}
-                      rowComponent={SearchOverlayRow}
+                      rowComponent={SearchOverlayRow as any}
                       rowProps={{
                         items: terminalItems,
                         selectedItemId: selectedItem?.id ?? null,

@@ -144,7 +144,7 @@ export function conflictZoneToLayerFeature(zone: ConflictZone): LayerFeature {
     } else {
       geometry = {
         type: "Polygon",
-        coordinates: [first as [number, number][]],
+        coordinates: [first as unknown as [number, number][]],
       };
     }
   }

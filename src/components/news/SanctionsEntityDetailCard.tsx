@@ -106,7 +106,7 @@ export default function SanctionsEntityDetailCard({ detail, onClose }: Sanctions
     fetch(`/api/news/sanctions/entity-profile?${params}`)
       .then((r) => r.json())
       .then((data) => setProfile(data as EntityProfile))
-      .catch(() => setProfile({ aiSummary: null, wikipedia: null, news: [], degraded: true }))
+      .catch(() => setProfile({ aiSummary: null, wikipedia: null, opensanctions: null, news: [], degraded: true }))
       .finally(() => setProfileLoading(false));
   }, [mounted, detail.name]);
 

@@ -515,7 +515,7 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
                 const name = prompt("Watchlist name:");
                 if (!name) return;
                 const id = `wl-${Date.now()}`;
-                setWatchlists((prev) => [...prev, { id, name, filters: { ...filters } }]);
+                setWatchlists((prev) => [...prev, { id, name, filters: { ...serverFilters } }]);
               }}
             >
               + Watchlist
@@ -556,7 +556,7 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
               rowCount={displayItems.length}
               rowHeight={ROW_HEIGHT[density]}
               overscanCount={20}
-              rowComponent={VirtualTerminalRow}
+              rowComponent={VirtualTerminalRow as any}
               rowProps={{
                 items: displayItems,
                 selectedIdx,

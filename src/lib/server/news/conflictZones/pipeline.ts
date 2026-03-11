@@ -137,10 +137,10 @@ export async function runConflictZonesPipeline(
     { dataset: "GDELT Geo", lastRefresh: now },
   ];
   const sourceStatus = {
-    gdeltEvents: "live" as const,
-    gdeltGeo: "live" as const,
-    ucdpGed: "unavailable" as const,
-  };
+    gdeltEvents: "live",
+    gdeltGeo: "live",
+    ucdpGed: "unavailable",
+  } as ConflictZonesPipelineResult["sourceStatus"];
 
   let events: ConflictEvent[] = [];
 

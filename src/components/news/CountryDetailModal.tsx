@@ -1233,7 +1233,7 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
                       rowCount={sortedNews.length}
                       rowHeight={36}
                       overscanCount={10}
-                      rowComponent={CountryNewsRow}
+                      rowComponent={CountryNewsRow as any}
                       rowProps={{
                         articles: sortedNews,
                         selectedArticleId: selectedArticle?.id ?? null,

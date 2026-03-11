@@ -224,6 +224,8 @@ interface SIGINTStore {
   liveData: LiveDataState;
   news: NewsState;
   tradeRouteSelection: TradeRouteSelectionState;
+  activePopup: import("../lib/events/schema").WorldEvent | null;
+  layerFilters: { timeWindow: import("../lib/events/schema").TimeWindow; minSeverity: number; viewportBound: boolean };
 
   toggleLayer(name: keyof LayerState): void;
   setStylePreset(preset: UiState["stylePreset"]): void;
@@ -350,6 +352,8 @@ interface SIGINTStore {
   setTradeRouteCategoryFilter(category: TradeRouteCategory, enabled: boolean): void;
   setTradeRouteDisruptions(signals: DisruptionSignal[]): void;
   clearTradeRouteSelection(): void;
+  setActivePopup(event: import("../lib/events/schema").WorldEvent | null): void;
+  setLayerFilters(partial: Partial<SIGINTStore["layerFilters"]>): void;
 }
 
 const DASHBOARD_DENSITY_DEFAULT: DashboardDensity = "ultra";
@@ -1217,6 +1221,8 @@ const baseState = {
   liveData: defaultLiveDataState(),
   news: defaultNewsState(),
   tradeRouteSelection: defaultTradeRouteSelection(),
+  activePopup: null,
+  layerFilters: { timeWindow: "24h" as const, minSeverity: 0, viewportBound: false },
 };
 
 function withLegacyDefaults<T extends typeof baseState>(state: T): T {
@@ -2126,6 +2132,9 @@ export const useSIGINTStore = create<SIGINTStore>()(
           set(() => ({
             tradeRouteSelection: defaultTradeRouteSelection(),
           })),
+
+        setActivePopup: (event) => set(() => ({ activePopup: event })),
+        setLayerFilters: (partial) => set((s) => ({ layerFilters: { ...s.layerFilters, ...partial } })),
       };
     }),
     {
