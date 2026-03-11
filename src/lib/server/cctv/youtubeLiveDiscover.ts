@@ -1,3 +1,4 @@
+import { featureFlags } from "../../../config/featureFlags";
 import type { CctvCamera, CctvRegion } from "../../providers/types";
 import {
   cachedFetch,
@@ -109,7 +110,9 @@ export async function discoverYouTubeLiveWebcams(
       const allRssVideos = rssResults.flat();
 
       // Step 2: Enrich with live status (1 unit per 50 videos)
-      const enriched = await enrichWithLiveStatus(allRssVideos, apiKey);
+      // When YouTube API is disabled, pass undefined to skip API calls
+      const effectiveKey = featureFlags.disableYouTubeApi ? undefined : apiKey;
+      const enriched = await enrichWithLiveStatus(allRssVideos, effectiveKey);
 
       // Step 3: Filter to live-only and convert to CctvCamera
       const seen = new Set<string>();
