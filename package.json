@@ -2,6 +2,12 @@
   "name": "sigint",
   "version": "0.1.0",
   "private": true,
+  "description": "Real-time geospatial intelligence platform — OPS, NEWS, and MARKET workspaces in a unified console",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Skytuhua/nextjs-boilerplate.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
