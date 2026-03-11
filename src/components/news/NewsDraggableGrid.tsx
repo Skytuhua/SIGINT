@@ -15,7 +15,7 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 const GRID_BREAKPOINTS = { lg: 1680, md: 1320, sm: 980, xs: 0 } as const;
 const GRID_COLS = { lg: 360, md: 300, sm: 180, xs: 60 } as const;
 const GRID_ROW_HEIGHT = 2;
-const GRID_MARGIN: [number, number] = [2, 2];
+const GRID_MARGIN: [number, number] = [1, 1];
 
 interface GridPanel {
   id: string;

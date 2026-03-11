@@ -132,7 +132,7 @@ export default function LiveVideoPanel({
         {...lockHeaderProps}
         controls={<PanelControls onRefresh={onRefresh} loading={loading} refreshText="LIVE" />}
       />
-      <PanelBody className="si-news-video-body">
+      <PanelBody noPadding className="si-news-video-body">
         {displayVideoId ? (
           <iframe
             className="si-news-video-frame"

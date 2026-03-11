@@ -519,62 +519,62 @@ function buildCatLayouts(cols: number, startY: number, cellW: number, cellH: num
 const DEFAULT_NEWS_PANEL_LAYOUTS: DashboardLayouts = {
   lg: [
     { i: "news-globe", x: 0, y: 0, w: 360, h: 170, minW: 180, minH: 80 },
-    ...buildVideoRowLayouts(0, 170, 360, 105),
-    { i: "news-terminal", x: 0, y: 275, w: 180, h: 80, minW: 100, minH: 64 },
-    { i: "news-compliance", x: 180, y: 275, w: 180, h: 80, minW: 100, minH: 64 },
-    { i: "news-predictions", x: 0, y: 355, w: 180, h: 180, minW: 90, minH: 80 },
-    // Fill blank area to the right of predictions (x=180..360, y=355..535) with first 4 cat panels
-    ...buildCatLayouts(360, 355, 90, 90, 180, 0, 4),
+    ...buildVideoRowLayouts(0, 170, 360, 120),
+    { i: "news-terminal", x: 0, y: 290, w: 180, h: 80, minW: 100, minH: 64 },
+    { i: "news-compliance", x: 180, y: 290, w: 180, h: 80, minW: 100, minH: 64 },
+    { i: "news-predictions", x: 0, y: 370, w: 180, h: 180, minW: 90, minH: 80 },
+    // Fill blank area to the right of predictions (x=180..360, y=370..550) with first 4 cat panels
+    ...buildCatLayouts(360, 370, 90, 90, 180, 0, 4),
     // Remaining 8 cat panels below
-    ...buildCatLayouts(360, 535, 90, 80, 0, 4),
+    ...buildCatLayouts(360, 550, 90, 80, 0, 4),
   ],
   md: [
     { i: "news-globe", x: 0, y: 0, w: 300, h: 140, minW: 150, minH: 70 },
     { i: "news-terminal", x: 0, y: 140, w: 150, h: 72, minW: 80, minH: 56 },
     { i: "news-compliance", x: 0, y: 212, w: 150, h: 66, minW: 80, minH: 56 },
     { i: "news-predictions", x: 0, y: 278, w: 150, h: 150, minW: 75, minH: 72 },
-    ...buildVideoLayouts(150, 140, 150, 80),
-    // Fill blank area to the right of predictions (x=150..300, y=278..428)
-    ...buildCatLayouts(300, 278, 75, 75, 150, 0, 4),
-    ...buildCatLayouts(300, 428, 75, 72, 0, 4),
+    ...buildVideoLayouts(150, 140, 150, 110),
+    // Fill blank area to the right of predictions (x=150..300, y=358..508)
+    ...buildCatLayouts(300, 358, 75, 75, 150, 0, 4),
+    ...buildCatLayouts(300, 508, 75, 72, 0, 4),
   ],
   sm: [
     { i: "news-globe", x: 0, y: 0, w: 180, h: 120, minW: 90, minH: 60 },
     { i: "news-terminal", x: 0, y: 120, w: 90, h: 80, minH: 64 },
     { i: "news-compliance", x: 90, y: 120, w: 90, h: 80, minH: 56 },
     { i: "news-predictions", x: 0, y: 200, w: 90, h: 140, minH: 70 },
-    ...buildVideoLayouts(90, 200, 90, 90),
-    ...buildCatLayouts(180, 440, 60, 70),
+    ...buildVideoLayouts(90, 200, 90, 180),
+    ...buildCatLayouts(180, 530, 60, 70),
   ],
   xs: [
     { i: "news-globe", x: 0, y: 0, w: 60, h: 100, minH: 60 },
     { i: "news-terminal", x: 0, y: 100, w: 60, h: 88, minH: 72 },
     { i: "news-predictions", x: 0, y: 188, w: 60, h: 160, minH: 80 },
     { i: "news-compliance", x: 0, y: 348, w: 60, h: 80, minH: 56 },
-    ...buildVideoLayouts(0, 428, 60, 110),
-    ...buildCatLayouts(60, 702, 60, 70),
+    ...buildVideoLayouts(0, 428, 60, 220),
+    ...buildCatLayouts(60, 812, 60, 70),
   ],
 };
 const GLOBE_CENTRIC_NEWS_LAYOUTS: DashboardLayouts = {
   lg: [
     { i: "news-globe", x: 0, y: 0, w: 360, h: 190, minW: 180, minH: 100 },
-    ...buildVideoRowLayouts(0, 190, 360, 110),
-    { i: "news-terminal", x: 0, y: 300, w: 120, h: 80, minW: 80, minH: 64 },
-    { i: "news-compliance", x: 120, y: 300, w: 120, h: 80, minW: 80, minH: 64 },
-    { i: "news-predictions", x: 0, y: 380, w: 180, h: 180, minW: 90, minH: 80 },
-    // Fill blank area to the right of predictions (x=180..360, y=380..560)
-    ...buildCatLayouts(360, 380, 90, 90, 180, 0, 4),
-    ...buildCatLayouts(360, 560, 90, 80, 0, 4),
+    ...buildVideoRowLayouts(0, 190, 360, 120),
+    { i: "news-terminal", x: 0, y: 310, w: 120, h: 80, minW: 80, minH: 64 },
+    { i: "news-compliance", x: 120, y: 310, w: 120, h: 80, minW: 80, minH: 64 },
+    { i: "news-predictions", x: 0, y: 390, w: 180, h: 180, minW: 90, minH: 80 },
+    // Fill blank area to the right of predictions (x=180..360, y=390..570)
+    ...buildCatLayouts(360, 390, 90, 90, 180, 0, 4),
+    ...buildCatLayouts(360, 570, 90, 80, 0, 4),
   ],
   md: [
     { i: "news-globe", x: 0, y: 0, w: 300, h: 160, minW: 150, minH: 80 },
     { i: "news-terminal", x: 0, y: 160, w: 100, h: 72, minW: 70, minH: 56 },
     { i: "news-compliance", x: 0, y: 232, w: 100, h: 66, minW: 70, minH: 56 },
-    { i: "news-predictions", x: 0, y: 298, w: 150, h: 150, minW: 75, minH: 72 },
-    ...buildVideoLayouts(100, 160, 200, 80),
-    // Fill blank area to the right of predictions (x=150..300, y=298..448)
-    ...buildCatLayouts(300, 298, 75, 75, 150, 0, 4),
-    ...buildCatLayouts(300, 448, 75, 72, 0, 4),
+    { i: "news-predictions", x: 0, y: 320, w: 150, h: 150, minW: 75, minH: 72 },
+    ...buildVideoLayouts(100, 160, 200, 110),
+    // Fill blank area to the right of predictions (x=150..300, y=378..528)
+    ...buildCatLayouts(300, 378, 75, 75, 150, 0, 4),
+    ...buildCatLayouts(300, 528, 75, 72, 0, 4),
   ],
   sm: DEFAULT_NEWS_PANEL_LAYOUTS.sm,
   xs: DEFAULT_NEWS_PANEL_LAYOUTS.xs,
@@ -582,23 +582,23 @@ const GLOBE_CENTRIC_NEWS_LAYOUTS: DashboardLayouts = {
 const SPLIT_NEWS_LAYOUTS: DashboardLayouts = {
   lg: [
     { i: "news-globe", x: 0, y: 0, w: 360, h: 165, minW: 180, minH: 80 },
-    ...buildVideoRowLayouts(0, 165, 360, 110),
-    { i: "news-terminal", x: 0, y: 275, w: 180, h: 80, minW: 90, minH: 64 },
-    { i: "news-compliance", x: 180, y: 275, w: 180, h: 80, minW: 90, minH: 64 },
-    { i: "news-predictions", x: 0, y: 355, w: 180, h: 180, minW: 90, minH: 80 },
-    // Fill blank area to the right of predictions (x=180..360, y=355..535)
-    ...buildCatLayouts(360, 355, 90, 90, 180, 0, 4),
-    ...buildCatLayouts(360, 535, 90, 80, 0, 4),
+    ...buildVideoRowLayouts(0, 165, 360, 120),
+    { i: "news-terminal", x: 0, y: 285, w: 180, h: 80, minW: 90, minH: 64 },
+    { i: "news-compliance", x: 180, y: 285, w: 180, h: 80, minW: 90, minH: 64 },
+    { i: "news-predictions", x: 0, y: 365, w: 180, h: 180, minW: 90, minH: 80 },
+    // Fill blank area to the right of predictions (x=180..360, y=365..545)
+    ...buildCatLayouts(360, 365, 90, 90, 180, 0, 4),
+    ...buildCatLayouts(360, 545, 90, 80, 0, 4),
   ],
   md: [
     { i: "news-globe", x: 0, y: 0, w: 300, h: 140, minW: 150, minH: 70 },
     { i: "news-terminal", x: 0, y: 140, w: 150, h: 72, minW: 80, minH: 56 },
     { i: "news-compliance", x: 0, y: 212, w: 150, h: 66, minW: 80, minH: 56 },
     { i: "news-predictions", x: 0, y: 278, w: 150, h: 150, minW: 75, minH: 72 },
-    ...buildVideoLayouts(150, 140, 150, 80),
-    // Fill blank area to the right of predictions (x=150..300, y=278..428)
-    ...buildCatLayouts(300, 278, 75, 75, 150, 0, 4),
-    ...buildCatLayouts(300, 428, 75, 72, 0, 4),
+    ...buildVideoLayouts(150, 140, 150, 110),
+    // Fill blank area to the right of predictions (x=150..300, y=358..508)
+    ...buildCatLayouts(300, 358, 75, 75, 150, 0, 4),
+    ...buildCatLayouts(300, 508, 75, 72, 0, 4),
   ],
   sm: DEFAULT_NEWS_PANEL_LAYOUTS.sm,
   xs: DEFAULT_NEWS_PANEL_LAYOUTS.xs,
@@ -2130,7 +2130,7 @@ export const useSIGINTStore = create<SIGINTStore>()(
     }),
     {
       name: "sigint-store-v2",
-      version: 14,
+      version: 15,
       migrate: (persistedState) => {
         const state = persistedState as
           | {

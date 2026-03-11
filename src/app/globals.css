@@ -1826,7 +1826,7 @@ body.si-resizing-globe {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 1px;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
@@ -1837,7 +1837,7 @@ body.si-resizing-globe {
 
 .si-news-main-frame {
   height: 100%;
-  padding: 4px 8px;
+  padding: 0 2px;
   overflow: hidden;
 }
 
@@ -1913,8 +1913,10 @@ body.si-resizing-globe {
 }
 
 .si-news-video-body {
-  overflow-y: hidden;
-  flex: 1;
+  height: 100%;
+  overflow: hidden !important;
+  padding: 2px;
+  scrollbar-gutter: auto;
 }
 
 .si-news-terminal-table-scroll {
@@ -4632,6 +4634,7 @@ body.si-resizing-globe {
 }
 
 .si-news-video-tabs {
+  flex: 0 0 auto;
   display: flex;
   align-items: stretch;
   gap: 3px;
@@ -4708,12 +4711,13 @@ body.si-resizing-globe {
 .si-news-video-frame {
   flex: 1 1 0;
   width: 100%;
-  min-height: 120px;
-  border: var(--si-border) solid var(--si-line);
+  min-height: 0;
+  border: none;
   background: #000;
 }
 
 .si-news-video-controls-row {
+  flex: 0 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
   gap: 4px;
