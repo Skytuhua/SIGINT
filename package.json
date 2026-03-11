@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Skytuhua/nextjs-boilerplate.git"
+    "url": "https://github.com/Skytuhua/SIGINT.git"
   },
   "scripts": {
     "dev": "next dev",
