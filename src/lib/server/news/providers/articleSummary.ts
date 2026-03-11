@@ -1,6 +1,5 @@
-import { lookup } from "node:dns/promises";
-import net from "node:net";
 import { canonicalizeUrl } from "../../../news/engine/dedupe";
+import { isBlockedHost } from "../../ssrf";
 import { cachedFetch, type UpstreamPolicy } from "../upstream";
 
 export type ArticleSummaryEngine = "openai" | "extractive" | "none";
@@ -72,14 +71,6 @@ const UNSUPPORTED_DOMAINS = [
   "vimeo.com",
   "twitch.tv",
 ];
-
-const LOCAL_HOSTS = new Set([
-  "localhost",
-  "0.0.0.0",
-  "127.0.0.1",
-  "::1",
-  "ip6-localhost",
-]);
 
 const ENTITY_MAP: Record<string, string> = {
   amp: "&",
@@ -176,62 +167,8 @@ function clipWords(value: string, maxWords: number): string {
   return /[.!?]$/.test(clipped) ? clipped : `${clipped}.`;
 }
 
-function isIpV4Private(address: string): boolean {
-  const octets = address.split(".").map((part) => Number(part));
-  if (octets.length !== 4 || octets.some((num) => !Number.isInteger(num) || num < 0 || num > 255)) {
-    return false;
-  }
-  const [a, b] = octets;
-  if (a === 10) return true;
-  if (a === 127) return true;
-  if (a === 0) return true;
-  if (a === 169 && b === 254) return true;
-  if (a === 172 && b >= 16 && b <= 31) return true;
-  if (a === 192 && b === 168) return true;
-  return false;
-}
-
-function isIpV6Private(address: string): boolean {
-  const normalized = address.toLowerCase();
-  if (normalized === "::1" || normalized === "0:0:0:0:0:0:0:1") return true;
-  if (normalized === "::") return true;
-  if (normalized.startsWith("fc") || normalized.startsWith("fd")) return true;
-  if (
-    normalized.startsWith("fe8") ||
-    normalized.startsWith("fe9") ||
-    normalized.startsWith("fea") ||
-    normalized.startsWith("feb")
-  ) {
-    return true;
-  }
-  return false;
-}
-
-function isPrivateIp(address: string): boolean {
-  const version = net.isIP(address);
-  if (version === 4) return isIpV4Private(address);
-  if (version === 6) return isIpV6Private(address);
-  return false;
-}
-
 function domainMatches(hostname: string, domain: string): boolean {
   return hostname === domain || hostname.endsWith(`.${domain}`);
-}
-
-async function isBlockedTarget(hostname: string): Promise<boolean> {
-  const lower = hostname.toLowerCase().replace(/\.$/, "");
-  if (LOCAL_HOSTS.has(lower) || lower.endsWith(".localhost")) return true;
-  if (isPrivateIp(lower)) return true;
-
-  try {
-    const resolved = await lookup(lower, { all: true, verbatim: true });
-    if (resolved.some((item) => isPrivateIp(item.address))) {
-      return true;
-    }
-  } catch {
-    // Keep going; fetch will fail naturally if host cannot resolve.
-  }
-  return false;
 }
 
 function decodeEntities(value: string): string {
@@ -564,7 +501,7 @@ async function fetchArticleHtml(url: string): Promise<string> {
       redirect: "follow",
       cache: "no-store",
       headers: {
-        "User-Agent": "WorldView/0.1 (article-summary)",
+        "User-Agent": "SIGINT/0.1 (article-summary)",
         Accept: "text/html, application/xhtml+xml;q=0.9, */*;q=0.5",
       },
     },
@@ -705,7 +642,7 @@ export async function getArticleSummary(params: GetArticleSummaryParams): Promis
     );
   }
 
-  if (await isBlockedTarget(hostname)) {
+  if (await isBlockedHost(hostname)) {
     return toResult(
       toUnavailable(parsedInput.canonicalUrl, "unsupported_url"),
       { degraded: false, cacheHit: "miss", latencyMs: 0 }

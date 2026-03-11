@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useWorldViewStore } from "../store";
+import { useSIGINTStore } from "../store";
 import type {
   DisasterAlert,
   Earthquake,
@@ -114,7 +114,7 @@ function normalizeSatellites(rows: Satellite[]): Satellite[] {
 }
 
 function updateSourceHealth(source: string, state: SourceHealthState): void {
-  const store = useWorldViewStore.getState();
+  const store = useSIGINTStore.getState();
   store.setOpsSourceHealth(source, state);
   if (state.status === "live" || state.status === "cached") {
     store.setFeedHealth(source, "ok");
@@ -153,11 +153,11 @@ function logTaskSuccess(
 }
 
 export function useDashboardFeeds() {
-  const refreshTick = useWorldViewStore((s) => s.liveData.refreshTick);
+  const refreshTick = useSIGINTStore((s) => s.liveData.refreshTick);
 
   useEffect(() => {
     const applyStatus = (source: string, health: "loading" | "ok" | "stale" | "error") => {
-      useWorldViewStore.getState().setFeedHealth(source, health);
+      useSIGINTStore.getState().setFeedHealth(source, health);
     };
 
     const pollFlights = async (signal: AbortSignal, attempt: number) => {
@@ -188,7 +188,7 @@ export function useDashboardFeeds() {
             negativeTtlMs: 1_500,
           }),
         ]);
-        const s = useWorldViewStore.getState();
+        const s = useSIGINTStore.getState();
 
         if (openskyRes.status === "fulfilled") {
           const opensky = normalizeFlights(openskyRes.value ?? [], false);
@@ -251,9 +251,9 @@ export function useDashboardFeeds() {
           if (milP2Res) {
             const phase2 = normalizeFlights(milP2Res ?? [], true);
             if (phase2.length > 0) {
-              const currentMilP2 = useWorldViewStore.getState().liveData.military as Flight[];
+              const currentMilP2 = useSIGINTStore.getState().liveData.military as Flight[];
               mergedAfterP2 = dedupeByIcaoKeepBest([...currentMilP2, ...phase2]);
-              useWorldViewStore.getState().setLiveMilitary(mergedAfterP2);
+              useSIGINTStore.getState().setLiveMilitary(mergedAfterP2);
               console.log(`[feeds] military phase2: +${phase2.length} type signals → ${mergedAfterP2.length} total`);
             }
           }
@@ -273,9 +273,9 @@ export function useDashboardFeeds() {
           if (milP3Res) {
             const phase3 = normalizeFlights(milP3Res ?? [], true);
             if (phase3.length > 0) {
-              const currentMil = useWorldViewStore.getState().liveData.military as Flight[];
+              const currentMil = useSIGINTStore.getState().liveData.military as Flight[];
               const merged = dedupeByIcaoKeepBest([...currentMil, ...phase3]);
-              useWorldViewStore.getState().setLiveMilitary(merged);
+              useSIGINTStore.getState().setLiveMilitary(merged);
               console.log(`[feeds] military phase3: +${phase3.length} regional signals → ${merged.length} total`);
             }
           }
@@ -292,7 +292,7 @@ export function useDashboardFeeds() {
         logTaskSuccess("flight", "ops:dashboard-flights", startedAt, totalTracks, false, "live", attempt);
       } catch (error) {
         if (isAbortError(error)) return;
-        const s = useWorldViewStore.getState();
+        const s = useSIGINTStore.getState();
         s.setFeedHealth("opensky", s.liveData.flights.length ? "stale" : "error");
         s.setFeedHealth("military", s.liveData.military.length ? "stale" : "error");
         s.pushFeedLog({
@@ -329,7 +329,7 @@ export function useDashboardFeeds() {
           backoffBaseMs: 450,
           negativeTtlMs: 1_500,
         });
-        const s = useWorldViewStore.getState();
+        const s = useSIGINTStore.getState();
         const normalized = normalizeEarthquakes(earthquakes ?? []);
         s.setLiveEarthquakes(normalized);
         s.markFeedUpdated("earthquakes");
@@ -351,7 +351,7 @@ export function useDashboardFeeds() {
         );
       } catch (error) {
         if (isAbortError(error)) return;
-        const s = useWorldViewStore.getState();
+        const s = useSIGINTStore.getState();
         s.setFeedHealth("earthquakes", s.liveData.earthquakes.length ? "stale" : "error");
         s.setOpsSourceHealth("earthquakes", {
           status: s.liveData.earthquakes.length ? "degraded" : "unavailable",
@@ -393,7 +393,7 @@ export function useDashboardFeeds() {
           backoffBaseMs: 750,
           negativeTtlMs: 2_500,
         });
-        const s = useWorldViewStore.getState();
+        const s = useSIGINTStore.getState();
         const normalized = normalizeSatellites(satellites ?? []);
         s.setSatelliteCatalog(normalized);
         s.markFeedUpdated("satellites");
@@ -415,7 +415,7 @@ export function useDashboardFeeds() {
         );
       } catch (error) {
         if (isAbortError(error)) return;
-        const s = useWorldViewStore.getState();
+        const s = useSIGINTStore.getState();
         s.setFeedHealth("satellites", s.liveData.satelliteCatalog.length ? "stale" : "error");
         s.setOpsSourceHealth("satellites", {
           status: s.liveData.satelliteCatalog.length ? "degraded" : "unavailable",
@@ -460,7 +460,7 @@ export function useDashboardFeeds() {
             negativeTtlMs: 5_000,
           }),
         ]);
-        const s = useWorldViewStore.getState();
+        const s = useSIGINTStore.getState();
         s.setLiveCctv(cctv ?? []);
         s.setLiveScenes(scenes ?? []);
         s.markFeedUpdated("cctv");
@@ -490,7 +490,7 @@ export function useDashboardFeeds() {
         );
       } catch (error) {
         if (isAbortError(error)) return;
-        const s = useWorldViewStore.getState();
+        const s = useSIGINTStore.getState();
         s.setFeedHealth("cctv", s.liveData.cctv.length ? "stale" : "error");
         s.setFeedHealth("scenes", s.liveData.scenes.length ? "stale" : "error");
         s.setOpsSourceHealth("cctv", {
@@ -534,7 +534,7 @@ export function useDashboardFeeds() {
       const cached = await readPersistentFeedCache<DisasterAlert[]>(GDACS_CACHE_KEY);
       const now = Date.now();
       if (cached.entry && cached.entry.expiresAt > now) {
-        const s = useWorldViewStore.getState();
+        const s = useSIGINTStore.getState();
         if (s.liveData.disasters.length === 0) {
           s.setLiveDisasters(cached.entry.payload);
           updateSourceHealth("gdacs", {
@@ -556,7 +556,7 @@ export function useDashboardFeeds() {
           negativeTtlMs: 3_000,
         });
 
-        const s = useWorldViewStore.getState();
+        const s = useSIGINTStore.getState();
         const nextItems = adaptGdacsResponse(payload, s.liveData.disasters);
         s.setLiveDisasters(nextItems);
 
@@ -598,7 +598,7 @@ export function useDashboardFeeds() {
         );
       } catch (error) {
         if (isAbortError(error)) return;
-        const s = useWorldViewStore.getState();
+        const s = useSIGINTStore.getState();
         const stale = cached.entry && cached.entry.staleUntil > Date.now() ? cached.entry : null;
 
         if (stale) {
@@ -656,7 +656,7 @@ export function useDashboardFeeds() {
       const cached = await readPersistentFeedCache<SpaceWeatherAlert[]>(SWPC_CACHE_KEY);
       const now = Date.now();
       if (cached.entry && cached.entry.expiresAt > now) {
-        const s = useWorldViewStore.getState();
+        const s = useSIGINTStore.getState();
         if (s.liveData.spaceWeather.length === 0) {
           s.setLiveSpaceWeather(cached.entry.payload);
           updateSourceHealth("spaceWeather", {
@@ -677,7 +677,7 @@ export function useDashboardFeeds() {
           backoffBaseMs: 500,
           negativeTtlMs: 2_000,
         });
-        const s = useWorldViewStore.getState();
+        const s = useSIGINTStore.getState();
         const nextItems = adaptSpaceWeatherResponse(payload, s.liveData.spaceWeather);
         s.setLiveSpaceWeather(nextItems);
 
@@ -720,7 +720,7 @@ export function useDashboardFeeds() {
         );
       } catch (error) {
         if (isAbortError(error)) return;
-        const s = useWorldViewStore.getState();
+        const s = useSIGINTStore.getState();
         const stale = cached.entry && cached.entry.staleUntil > Date.now() ? cached.entry : null;
 
         if (stale) {
@@ -848,13 +848,13 @@ export function useDashboardFeeds() {
           hiddenIntervalMultiplier: 1.2,
           timeoutMs: 5_000,
           run: () => {
-            useWorldViewStore.getState().appendTrendSnapshot();
+            useSIGINTStore.getState().appendTrendSnapshot();
           },
         },
       }),
     ];
 
-    const store = useWorldViewStore.getState();
+    const store = useSIGINTStore.getState();
     if (store.liveData.feedLog.length === 0) {
       store.pushFeedLog({
         source: "SYSTEM",

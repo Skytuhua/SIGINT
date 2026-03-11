@@ -85,7 +85,7 @@ function toResponse(payload: GdacsRouteResponse): NextResponse<GdacsRouteRespons
   return NextResponse.json(payload, {
     headers: {
       "Cache-Control": "no-store, max-age=0",
-      "X-WorldView-Feed-Status": payload.status,
+      "X-SIGINT-Feed-Status": payload.status,
     },
   });
 }
@@ -105,7 +105,7 @@ export async function GET(): Promise<NextResponse<GdacsRouteResponse>> {
   }
 
   const headers: HeadersInit = {
-    "User-Agent": "WorldView/0.1 (ops-ingestion)",
+    "User-Agent": "SIGINT/0.1 (ops-ingestion)",
   };
   if (cache?.etag) headers["If-None-Match"] = cache.etag;
   if (cache?.lastModified) headers["If-Modified-Since"] = cache.lastModified;

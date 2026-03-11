@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Term from "./shared/Term";
 
 interface YieldRow {
   tenor: string;
@@ -32,31 +33,31 @@ function fmt(v: number, dp = 2) {
 }
 
 function bpColor(v: number) {
-  return v > 0 ? "#ff8c8c" : v < 0 ? "#6ee7b7" : "var(--wv-text-muted)";
+  return v > 0 ? "#ff8c8c" : v < 0 ? "#6ee7b7" : "var(--si-text-muted)";
 }
 
 interface Props { style?: React.CSSProperties; }
 
 export default function BreakevenInflationPanel({ style }: Props) {
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Breakeven Inflation & Real Yields</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)", letterSpacing: "0.04em" }}>
-          TIPS · Nominal vs Real · 10Y BEI: 2.39%
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Breakeven Inflation & Real Yields</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)", letterSpacing: "0.04em" }}>
+          <Term id="TIPS">TIPS</Term> · Nominal vs <Term id="REAL_YIELD">Real</Term> · 10Y <Term id="BREAKEVEN">BEI</Term>: 2.39%
         </span>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+        <span className="si-market-panel-badge is-reference">REFERENCE</span>
       </div>
-      <div className="wv-market-panel-body-auto" style={{ padding: 0 }}>
+      <div className="si-market-panel-body-auto" style={{ padding: 0 }}>
 
         {/* Section: Breakeven Table */}
         <div style={{
           padding: "3px 10px",
           fontSize: 8.5, fontWeight: 700,
-          color: "var(--wv-text-muted)",
+          color: "var(--si-text-muted)",
           letterSpacing: "0.08em",
           background: "rgba(0,0,0,0.2)",
-          borderBottom: "1px solid var(--wv-line)",
+          borderBottom: "1px solid var(--si-line)",
         }}>
           BREAKEVEN INFLATION RATES
         </div>
@@ -64,13 +65,13 @@ export default function BreakevenInflationPanel({ style }: Props) {
           display: "grid",
           gridTemplateColumns: "44px 60px 60px 72px 52px 52px",
           padding: "4px 10px",
-          borderBottom: "1px solid var(--wv-line)",
-          fontSize: 8.5, color: "var(--wv-text-muted)", fontWeight: 600, letterSpacing: "0.06em",
+          borderBottom: "1px solid var(--si-line)",
+          fontSize: 8.5, color: "var(--si-text-muted)", fontWeight: 600, letterSpacing: "0.06em",
         }}>
           <span>TENOR</span>
-          <span style={{ textAlign: "right" }}>NOMINAL</span>
-          <span style={{ textAlign: "right" }}>REAL</span>
-          <span style={{ textAlign: "right" }}>BREAKEVEN</span>
+          <span style={{ textAlign: "right" }}><Term id="YIELD">NOMINAL</Term></span>
+          <span style={{ textAlign: "right" }}><Term id="REAL_YIELD">REAL</Term></span>
+          <span style={{ textAlign: "right" }}><Term id="BREAKEVEN">BREAKEVEN</Term></span>
           <span style={{ textAlign: "right" }}>1D bp</span>
           <span style={{ textAlign: "right" }}>1W bp</span>
         </div>
@@ -84,7 +85,7 @@ export default function BreakevenInflationPanel({ style }: Props) {
             fontSize: 10, alignItems: "center",
           }}>
             <span style={{ fontWeight: 700, color: "#89e5ff", fontFamily: "monospace" }}>{r.tenor}</span>
-            <span style={{ textAlign: "right", fontFamily: "monospace", color: "var(--wv-text-muted)" }}>{r.nominal.toFixed(2)}%</span>
+            <span style={{ textAlign: "right", fontFamily: "monospace", color: "var(--si-text-muted)" }}>{r.nominal.toFixed(2)}%</span>
             <span style={{ textAlign: "right", fontFamily: "monospace", color: "#6ee7b7" }}>{r.real.toFixed(2)}%</span>
             <span style={{ textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#ffab40" }}>{r.breakeven.toFixed(2)}%</span>
             <span style={{ textAlign: "right", fontFamily: "monospace", color: bpColor(r.chg1d) }}>{fmt(r.chg1d * 100, 0)}bp</span>
@@ -96,11 +97,11 @@ export default function BreakevenInflationPanel({ style }: Props) {
         <div style={{
           padding: "3px 10px",
           fontSize: 8.5, fontWeight: 700,
-          color: "var(--wv-text-muted)",
+          color: "var(--si-text-muted)",
           letterSpacing: "0.08em",
           background: "rgba(0,0,0,0.2)",
-          borderBottom: "1px solid var(--wv-line)",
-          borderTop: "1px solid var(--wv-line)",
+          borderBottom: "1px solid var(--si-line)",
+          borderTop: "1px solid var(--si-line)",
           marginTop: 2,
         }}>
           TIPS ETFs
@@ -109,8 +110,8 @@ export default function BreakevenInflationPanel({ style }: Props) {
           display: "grid",
           gridTemplateColumns: "44px 1fr 60px 50px 56px",
           padding: "4px 10px",
-          borderBottom: "1px solid var(--wv-line)",
-          fontSize: 8.5, color: "var(--wv-text-muted)", fontWeight: 600, letterSpacing: "0.06em",
+          borderBottom: "1px solid var(--si-line)",
+          fontSize: 8.5, color: "var(--si-text-muted)", fontWeight: 600, letterSpacing: "0.06em",
         }}>
           <span>ETF</span>
           <span>NAME</span>
@@ -127,8 +128,8 @@ export default function BreakevenInflationPanel({ style }: Props) {
             fontSize: 10, alignItems: "center",
           }}>
             <span style={{ fontWeight: 700, color: "#89e5ff", fontFamily: "monospace" }}>{e.sym}</span>
-            <span style={{ color: "var(--wv-text-muted)", fontSize: 9, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</span>
-            <span style={{ textAlign: "right", fontFamily: "monospace", color: "var(--wv-text-bright)" }}>{e.price}</span>
+            <span style={{ color: "var(--si-text-muted)", fontSize: 9, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</span>
+            <span style={{ textAlign: "right", fontFamily: "monospace", color: "var(--si-text-bright)" }}>{e.price}</span>
             <span style={{ textAlign: "right", fontFamily: "monospace", color: e.chg >= 0 ? "#36b37e" : "#ff5a5f" }}>
               {e.chg >= 0 ? "+" : ""}{e.chg.toFixed(2)}%
             </span>
@@ -136,7 +137,7 @@ export default function BreakevenInflationPanel({ style }: Props) {
           </div>
         ))}
       </div>
-      <div className="wv-market-panel-footer">US Treasury · FRED · placeholder data</div>
+      <div className="si-market-panel-footer">US Treasury · FRED · Curated reference data</div>
     </div>
   );
 }

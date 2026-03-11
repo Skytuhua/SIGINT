@@ -20,7 +20,7 @@ interface FeedCacheIndexDb {
   ready: Promise<void>;
 }
 
-const DB_NAME = "worldview-feed-cache";
+const DB_NAME = "sigint-feed-cache";
 const DB_VERSION = 1;
 const STORE_NAME = "feeds";
 const MEMORY_LIMIT = 32;

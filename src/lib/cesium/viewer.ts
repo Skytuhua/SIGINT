@@ -25,18 +25,19 @@ function configureCameraControls(
   controller.enableLook = true;
 
   // Keep movement responsive at low FPS and reduce abrupt camera jumps.
-  controller.inertiaSpin = 0.75;
-  controller.inertiaTranslate = 0.75;
-  controller.inertiaZoom = 0.55;
-  // Lower ratio = less movement per frame; reduces sensitivity when zoomed out (default 0.1).
-  controller.maximumMovementRatio = 0.08;
+  controller.inertiaSpin = 0.6;
+  controller.inertiaTranslate = 0.6;
+  controller.inertiaZoom = 0.45;
+  // Lower ratio = less movement per frame; reduces sensitivity (default 0.1).
+  // Very low value keeps zoomed-out rotation from being too fast.
+  controller.maximumMovementRatio = 0.015;
   controller.minimumZoomDistance = 120;
   controller.maximumZoomDistance = 45_000_000;
 
   // More discoverable defaults:
   // - Left drag: rotate
   // - Right drag or Shift+Left drag: tilt
-  // - Pinch / middle drag / wheel: zoom (wheel over globe is captured by WorldViewApp so page does not scroll)
+  // - Pinch / middle drag / wheel: zoom (wheel over globe is captured by SIGINTApp so page does not scroll)
   // - Alt+Left drag: free look
   controller.rotateEventTypes = [Cesium.CameraEventType.LEFT_DRAG];
   controller.tiltEventTypes = [

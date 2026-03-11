@@ -31,7 +31,7 @@ import {
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useWorldViewStore } from "../../../store";
+import { useSIGINTStore } from "../../../store";
 import { featureFlags } from "../../../config/featureFlags";
 import InlineFilter from "../controls/InlineFilter";
 import Sparkline from "../charts/Sparkline";
@@ -80,7 +80,7 @@ function SortableHeaderCell({
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="wv-col-drag-wrap">
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="si-col-drag-wrap">
       {children}
     </div>
   );
@@ -118,8 +118,8 @@ export default function DataTable<TData extends RowData>({
   onRowOpenDetail,
   emptyMessage = "No rows",
 }: DataTableProps<TData>) {
-  const tablePrefs = useWorldViewStore((s) => s.dashboard.tablePrefs[tableId]);
-  const setTablePreference = useWorldViewStore((s) => s.setTablePreference);
+  const tablePrefs = useSIGINTStore((s) => s.dashboard.tablePrefs[tableId]);
+  const setTablePreference = useSIGINTStore((s) => s.setTablePreference);
 
   const defaultOrder = useMemo(
     () =>
@@ -231,9 +231,9 @@ export default function DataTable<TData extends RowData>({
   const visibleColumns = table.getVisibleLeafColumns();
 
   return (
-    <div className="wv-data-table" role="table" aria-label={tableId}>
-      <div className="wv-data-search-row">
-        <div className="wv-data-search-main">
+    <div className="si-data-table" role="table" aria-label={tableId}>
+      <div className="si-data-search-row">
+        <div className="si-data-search-main">
           <InlineFilter
             value={globalFilter}
             placeholder={searchPlaceholder}
@@ -242,7 +242,7 @@ export default function DataTable<TData extends RowData>({
           {globalFilter ? (
             <button
               type="button"
-              className="wv-data-search-clear"
+              className="si-data-search-clear"
               onClick={() => setGlobalFilter("")}
               title="Clear table search"
             >
@@ -250,7 +250,7 @@ export default function DataTable<TData extends RowData>({
             </button>
           ) : null}
         </div>
-        {searchHelpText ? <div className="wv-data-search-help">{searchHelpText}</div> : null}
+        {searchHelpText ? <div className="si-data-search-help">{searchHelpText}</div> : null}
       </div>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -258,8 +258,8 @@ export default function DataTable<TData extends RowData>({
           items={visibleColumns.map((column) => column.id)}
           strategy={horizontalListSortingStrategy}
         >
-          <div className="wv-data-head" role="rowgroup">
-            <div className="wv-data-row wv-data-row-head" role="row">
+          <div className="si-data-head" role="rowgroup">
+            <div className="si-data-row si-data-row-head" role="row">
               {table.getHeaderGroups().map((headerGroup) =>
                 headerGroup.headers.map((header, index) => {
                   const canSort = header.column.getCanSort();
@@ -270,21 +270,21 @@ export default function DataTable<TData extends RowData>({
                   return (
                     <SortableHeaderCell key={header.id} id={header.id}>
                       <div
-                        className={`wv-data-cell wv-data-head-cell ${first ? "is-sticky-col" : ""}`}
+                        className={`si-data-cell si-data-head-cell ${first ? "is-sticky-col" : ""}`}
                         style={{ width: colWidth, minWidth: colWidth, maxWidth: colWidth }}
                         role="columnheader"
                       >
                         <button
                           type="button"
-                          className="wv-data-head-label"
+                          className="si-data-head-label"
                           onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
                           title={String(header.column.columnDef.header ?? "")}
                         >
-                          <span className="wv-data-head-text">
+                          <span className="si-data-head-text">
                             {flexRender(header.column.columnDef.header, header.getContext())}
                           </span>
                           {sort ? (
-                            <span className="wv-data-head-sort">{sort === "desc" ? "v" : "^"}</span>
+                            <span className="si-data-head-sort">{sort === "desc" ? "v" : "^"}</span>
                           ) : null}
                         </button>
 
@@ -298,7 +298,7 @@ export default function DataTable<TData extends RowData>({
 
                         {header.column.getCanResize() ? (
                           <span
-                            className="wv-col-resizer"
+                            className="si-col-resizer"
                             onDoubleClick={() => header.column.resetSize()}
                             onMouseDown={header.getResizeHandler()}
                             onTouchStart={header.getResizeHandler()}
@@ -315,13 +315,13 @@ export default function DataTable<TData extends RowData>({
       </DndContext>
 
       <div
-        className="wv-data-body"
+        className="si-data-body"
         ref={bodyRef}
         style={{ height: bodyHeight }}
         role="rowgroup"
       >
         {!rows.length ? (
-          <div className="wv-table-empty">{emptyMessage}</div>
+          <div className="si-table-empty">{emptyMessage}</div>
         ) : (
           <div style={{ height: rowVirtualizer.getTotalSize(), position: "relative" }}>
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
@@ -330,7 +330,7 @@ export default function DataTable<TData extends RowData>({
             return (
               <div
                 key={row.id}
-                className="wv-data-row"
+                className="si-data-row"
                 role="row"
                 style={{
                   position: "absolute",
@@ -359,7 +359,7 @@ export default function DataTable<TData extends RowData>({
                   return (
                     <div
                       key={cell.id}
-                      className={`wv-data-cell ${numeric ? "is-numeric" : ""} ${first ? "is-sticky-col" : ""} ${isActionColumn ? "wv-data-cell-action" : ""}`}
+                      className={`si-data-cell ${numeric ? "is-numeric" : ""} ${first ? "is-sticky-col" : ""} ${isActionColumn ? "si-data-cell-action" : ""}`}
                       role="cell"
                       title={typeof cell.getValue() === "string" ? String(cell.getValue()) : undefined}
                       style={{
@@ -399,17 +399,17 @@ export default function DataTable<TData extends RowData>({
                         }
                       }}
                     >
-                      <span className="wv-data-text">
+                      <span className="si-data-text">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </span>
-                      {showDelta ? <span className="wv-data-delta">{deltaLabel(delta)}</span> : null}
+                      {showDelta ? <span className="si-data-delta">{deltaLabel(delta)}</span> : null}
                       {showSpark ? <Sparkline values={sparkValues ?? []} width={sparkWidth} height={14} /> : null}
                     </div>
                   );
                 })}
 
                 {(onRowPin || onRowOpenDetail) ? (
-                  <div className="wv-row-actions">
+                  <div className="si-row-actions">
                     {onRowPin ? (
                       <button
                         type="button"

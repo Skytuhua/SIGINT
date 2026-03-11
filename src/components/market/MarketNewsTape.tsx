@@ -41,29 +41,29 @@ export default function MarketNewsTape({ style }: Props) {
   }, [data.headlines]);
 
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Market Tape</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)", letterSpacing: "0.04em" }}>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Market Tape</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)", letterSpacing: "0.04em" }}>
           HEADLINES · UTC
         </span>
-        <span className={`wv-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
+        <span className={`si-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
           {isLive ? "LIVE" : "STATIC"}
         </span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0, overflowY: "auto" }}>
+      <div className="si-market-panel-body" style={{ padding: 0, overflowY: "auto" }}>
         {headlines.map((item: NewsHeadline, i: number) => (
-          <div key={i} className="wv-market-tape-item">
-            <div className="wv-market-tape-meta">
-              <span className="wv-market-tape-category" style={{ color: item.categoryColor }}>
+          <div key={i} className="si-market-tape-item">
+            <div className="si-market-tape-meta">
+              <span className="si-market-tape-category" style={{ color: item.categoryColor }}>
                 [{item.category}]
               </span>
               {item.ticker && (
-                <span className="wv-market-tape-ticker">{item.ticker}</span>
+                <span className="si-market-tape-ticker">{item.ticker}</span>
               )}
-              <span className="wv-market-tape-ts">{item.ts}</span>
+              <span className="si-market-tape-ts">{item.ts}</span>
             </div>
-            <div className="wv-market-tape-headline">
+            <div className="si-market-tape-headline">
               {item.url ? (
                 <a
                   href={item.url}
@@ -80,7 +80,7 @@ export default function MarketNewsTape({ style }: Props) {
           </div>
         ))}
       </div>
-      <div className="wv-market-panel-footer">
+      <div className="si-market-panel-footer">
         {isLive ? "Yahoo Finance RSS · 2min refresh" : "Yahoo Finance RSS · static data"}
       </div>
     </div>

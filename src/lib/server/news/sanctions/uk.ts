@@ -56,7 +56,7 @@ export async function fetchUkEntities(): Promise<{
   try {
     const res = await fetch(UK_CSV_URL, {
       signal: controller.signal,
-      headers: { "User-Agent": "WorldView/1.0 (sanctions-layer)" },
+      headers: { "User-Agent": "SIGINT/1.0 (sanctions-layer)" },
       cache: "no-store",
     });
 

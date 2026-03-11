@@ -4,10 +4,10 @@ import type { ReactNode } from "react";
 
 export function PanelLoadingState({ rows = 6 }: { rows?: number }) {
   return (
-    <div className="wv-panel-state">
-      <div className="wv-skeleton-block" />
+    <div className="si-panel-state">
+      <div className="si-skeleton-block" />
       {Array.from({ length: rows }).map((_, index) => (
-        <div key={index} className="wv-skeleton-row" />
+        <div key={index} className="si-skeleton-row" />
       ))}
     </div>
   );
@@ -23,10 +23,10 @@ export function PanelEmptyState({
   onAction?: () => void;
 }) {
   return (
-    <div className="wv-panel-state">
-      <div className="wv-panel-state-line">{message}</div>
+    <div className="si-panel-state">
+      <div className="si-panel-state-line">{message}</div>
       {actionLabel ? (
-        <button type="button" className="wv-inline-action" onClick={onAction}>
+        <button type="button" className="si-inline-action" onClick={onAction}>
           {actionLabel}
         </button>
       ) : null}
@@ -44,13 +44,13 @@ export function PanelErrorState({
   onRetry?: () => void;
 }) {
   return (
-    <details className="wv-panel-state wv-panel-error" open>
+    <details className="si-panel-state si-panel-error" open>
       <summary>
         <span>{message}</span>
         {onRetry ? (
           <button
             type="button"
-            className="wv-inline-action"
+            className="si-inline-action"
             onClick={(event) => {
               event.preventDefault();
               onRetry();
@@ -60,7 +60,7 @@ export function PanelErrorState({
           </button>
         ) : null}
       </summary>
-      {details ? <div className="wv-panel-error-details">{details}</div> : null}
+      {details ? <div className="si-panel-error-details">{details}</div> : null}
     </details>
   );
 }

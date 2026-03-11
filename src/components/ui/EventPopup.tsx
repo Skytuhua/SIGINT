@@ -1,6 +1,6 @@
 "use client";
 
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import type { WorldEvent } from "../../lib/events/schema";
 
 function whyThisIsHere(e: WorldEvent): string {
@@ -69,8 +69,8 @@ const popupShell: React.CSSProperties = {
 };
 
 export default function EventPopup() {
-  const event = useWorldViewStore((s) => s.activePopup);
-  const dismiss = useWorldViewStore((s) => s.setActivePopup);
+  const event = useSIGINTStore((s) => s.activePopup);
+  const dismiss = useSIGINTStore((s) => s.setActivePopup);
 
   if (!event) return null;
 

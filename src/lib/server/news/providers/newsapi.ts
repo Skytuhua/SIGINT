@@ -136,7 +136,7 @@ export async function getNewsApiArticles(
         url.toString(),
         {
           headers: {
-            "User-Agent": "WorldView/0.1 (newsapi-ingestion)",
+            "User-Agent": "SIGINT/0.1 (newsapi-ingestion)",
             Accept: "application/json",
           },
         },

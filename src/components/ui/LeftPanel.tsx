@@ -1,6 +1,6 @@
 "use client";
 
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import { ALL_CATEGORIES, CATEGORY_LABELS, CATEGORY_COLORS } from "../../lib/cesium/tradeRoutes/types";
 import type { TradeRouteCategory } from "../../lib/cesium/tradeRoutes/types";
 
@@ -108,8 +108,8 @@ function SectionButton({
 }
 
 function TradeRouteFilterChips() {
-  const categoryFilters = useWorldViewStore((s) => s.tradeRouteSelection.categoryFilters);
-  const setFilter = useWorldViewStore((s) => s.setTradeRouteCategoryFilter);
+  const categoryFilters = useSIGINTStore((s) => s.tradeRouteSelection.categoryFilters);
+  const setFilter = useSIGINTStore((s) => s.setTradeRouteCategoryFilter);
 
   return (
     <div style={{ gridColumn: "1 / -1", display: "flex", flexWrap: "wrap", gap: 5, marginTop: 4 }}>
@@ -120,7 +120,7 @@ function TradeRouteFilterChips() {
           <button
             key={cat}
             onClick={() => setFilter(cat as TradeRouteCategory, !enabled)}
-            className="wv-trade-chip"
+            className="si-trade-chip"
             style={{
               padding: "3px 10px",
               borderRadius: 6,
@@ -145,8 +145,8 @@ function TradeRouteFilterChips() {
 }
 
 function LayerRows() {
-  const layers = useWorldViewStore((s) => s.layers);
-  const toggleLayer = useWorldViewStore((s) => s.toggleLayer);
+  const layers = useSIGINTStore((s) => s.layers);
+  const toggleLayer = useSIGINTStore((s) => s.toggleLayer);
 
   return (
     <div style={{ ...card, padding: "12px 12px 10px", maxHeight: 520, overflowY: "auto" }}>
@@ -216,10 +216,10 @@ function LayerRows() {
 }
 
 function SceneRows() {
-  const scenes = useWorldViewStore((s) => s.scenes);
-  const savedScenes = useWorldViewStore((s) => s.savedScenes);
-  const gotoScene = useWorldViewStore((s) => s.gotoScene);
-  const currentIdx = useWorldViewStore((s) => s.currentSceneIdx);
+  const scenes = useSIGINTStore((s) => s.scenes);
+  const savedScenes = useSIGINTStore((s) => s.savedScenes);
+  const gotoScene = useSIGINTStore((s) => s.gotoScene);
+  const currentIdx = useSIGINTStore((s) => s.currentSceneIdx);
 
   const allScenes = [...scenes, ...savedScenes];
 
@@ -263,9 +263,9 @@ function SceneRows() {
 }
 
 function CctvRows() {
-  const cameras = useWorldViewStore((s) => s.cctv.cameras);
-  const selectedCameraId = useWorldViewStore((s) => s.cctv.selectedCameraId);
-  const selectCamera = useWorldViewStore((s) => s.selectCamera);
+  const cameras = useSIGINTStore((s) => s.cctv.cameras);
+  const selectedCameraId = useSIGINTStore((s) => s.cctv.selectedCameraId);
+  const selectCamera = useSIGINTStore((s) => s.selectCamera);
 
   return (
     <div style={{ ...card, padding: "12px", maxHeight: 430, overflowY: "auto" }}>
@@ -307,9 +307,9 @@ function CctvRows() {
 }
 
 export default function LeftPanel() {
-  const leftTab = useWorldViewStore((s) => s.ui.leftTab);
-  const setUi = useWorldViewStore((s) => s.setUi);
-  const stylePreset = useWorldViewStore((s) => s.ui.stylePreset);
+  const leftTab = useSIGINTStore((s) => s.ui.leftTab);
+  const setUi = useSIGINTStore((s) => s.setUi);
+  const stylePreset = useSIGINTStore((s) => s.ui.stylePreset);
 
   return (
     <div style={shell}>

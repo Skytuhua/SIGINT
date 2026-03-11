@@ -1,7 +1,7 @@
 "use client";
 
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
-import { useWorldViewStore } from "../store";
+import { useSIGINTStore } from "../store";
 import { useDashboardFeeds } from "../hooks/useDashboardFeeds";
 import { featureFlags } from "../config/featureFlags";
 import DashboardWorkspace from "./dashboard/DashboardWorkspace";
@@ -20,28 +20,36 @@ function selectGlobalFreshness(lastUpdated: Record<string, number | null>): numb
   return Math.max(...values);
 }
 
-const GLOBE_HEIGHT_KEY = "wv-globe-height-v2";
-const DEFAULT_GLOBE_HEIGHT_VH = 56;
+const GLOBE_HEIGHT_KEY = "si-globe-height-v2";
+const DEFAULT_GLOBE_HEIGHT_VH = 68;
 const MIN_GLOBE_HEIGHT_VH = 28;
 const MAX_GLOBE_HEIGHT_VH = 72;
 
-export default function WorldViewApp() {
+export default function SIGINTApp() {
   useDashboardFeeds();
 
-  const setDensity = useWorldViewStore((s) => s.setDensity);
-  const activeView = useWorldViewStore((s) => s.dashboard.activeView);
-  const setActiveView = useWorldViewStore((s) => s.setActiveView);
-  const hotkeysEnabled = useWorldViewStore((s) => s.dashboard.hotkeysEnabled);
-  const setHotkeysEnabled = useWorldViewStore((s) => s.setHotkeysEnabled);
-  const panelFocusId = useWorldViewStore((s) => s.dashboard.panelFocusId);
-  const liveData = useWorldViewStore((s) => s.liveData);
-  const newsState = useWorldViewStore((s) => s.news);
-  const inspector = useWorldViewStore((s) => s.dashboard.inspector);
-  const openInspector = useWorldViewStore((s) => s.openInspector);
-  const clearSelectionContext = useWorldViewStore((s) => s.clearSelectionContext);
+  const setDensity = useSIGINTStore((s) => s.setDensity);
+  const activeView = useSIGINTStore((s) => s.dashboard.activeView);
+  const setActiveView = useSIGINTStore((s) => s.setActiveView);
+  const hotkeysEnabled = useSIGINTStore((s) => s.dashboard.hotkeysEnabled);
+  const setHotkeysEnabled = useSIGINTStore((s) => s.setHotkeysEnabled);
+  const panelFocusId = useSIGINTStore((s) => s.dashboard.panelFocusId);
+  const liveData = useSIGINTStore((s) => s.liveData);
+  const newsState = useSIGINTStore((s) => s.news);
+  const inspector = useSIGINTStore((s) => s.dashboard.inspector);
+  const openInspector = useSIGINTStore((s) => s.openInspector);
+  const clearSelectionContext = useSIGINTStore((s) => s.clearSelectionContext);
   const globeSectionRef = useRef<HTMLElement | null>(null);
   const opsLayerSnapshotRef = useRef<Record<string, boolean> | null>(null);
-  const [globeHeightVh, setGlobeHeightVh] = useState(DEFAULT_GLOBE_HEIGHT_VH);
+  const [globeHeightVh, setGlobeHeightVh] = useState(() => {
+    if (typeof window === "undefined") return DEFAULT_GLOBE_HEIGHT_VH;
+    const raw = window.localStorage.getItem(GLOBE_HEIGHT_KEY);
+    if (!raw) return DEFAULT_GLOBE_HEIGHT_VH;
+    const parsed = Number.parseFloat(raw);
+    if (!Number.isFinite(parsed)) return DEFAULT_GLOBE_HEIGHT_VH;
+    return Math.max(MIN_GLOBE_HEIGHT_VH, Math.min(MAX_GLOBE_HEIGHT_VH, parsed));
+  });
+  const globeHeightInitRef = useRef(false);
 
   const freshness = useMemo(
     () => selectGlobalFreshness(liveData.lastUpdated),
@@ -55,15 +63,8 @@ export default function WorldViewApp() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const raw = window.localStorage.getItem(GLOBE_HEIGHT_KEY);
-    if (!raw) return;
-    const parsed = Number.parseFloat(raw);
-    if (!Number.isFinite(parsed)) return;
-    setGlobeHeightVh(Math.max(MIN_GLOBE_HEIGHT_VH, Math.min(MAX_GLOBE_HEIGHT_VH, parsed)));
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+    // Skip the first render to avoid overwriting the stored value with the initial state
+    if (!globeHeightInitRef.current) { globeHeightInitRef.current = true; return; }
     window.localStorage.setItem(GLOBE_HEIGHT_KEY, globeHeightVh.toFixed(2));
   }, [globeHeightVh]);
 
@@ -73,7 +74,7 @@ export default function WorldViewApp() {
     const onWheel = (e: WheelEvent) => {
       // Shift + wheel: scroll the page. Plain wheel: let event reach Cesium for zoom.
       if (!e.shiftKey) return;
-      const scrollContainer = el.parentElement?.closest?.(".wv-unified-scroll");
+      const scrollContainer = el.parentElement?.closest?.(".si-unified-scroll");
       if (!scrollContainer) return;
       scrollContainer.scrollTop += e.deltaY;
       e.preventDefault();
@@ -84,13 +85,13 @@ export default function WorldViewApp() {
   }, [activeView]);
 
   useEffect(() => {
-    const unsubscribe = useWorldViewStore.subscribe(
+    const unsubscribe = useSIGINTStore.subscribe(
       (s) => s.selection.selectedEntity,
       (entity) => {
         if (entity) {
-          useWorldViewStore.getState().openInspector(entity);
+          useSIGINTStore.getState().openInspector(entity);
         } else {
-          useWorldViewStore.getState().closeInspector(true);
+          useSIGINTStore.getState().closeInspector(true);
         }
       }
     );
@@ -110,7 +111,7 @@ export default function WorldViewApp() {
         if (inspector.open) {
           clearSelectionContext();
         } else {
-          const selected = useWorldViewStore.getState().selection.selectedEntity;
+          const selected = useSIGINTStore.getState().selection.selectedEntity;
           if (selected) {
             openInspector(selected, true);
           }
@@ -120,7 +121,7 @@ export default function WorldViewApp() {
 
       if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "r") {
         event.preventDefault();
-        useWorldViewStore.getState().bumpRefreshTick();
+        useSIGINTStore.getState().bumpRefreshTick();
         return;
       }
 
@@ -171,7 +172,7 @@ export default function WorldViewApp() {
     };
 
     const cleanup = () => {
-      document.body.classList.remove("wv-resizing-globe");
+      document.body.classList.remove("si-resizing-globe");
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", cleanup);
       window.removeEventListener("touchmove", onTouchMove);
@@ -179,7 +180,7 @@ export default function WorldViewApp() {
       window.removeEventListener("touchcancel", cleanup);
     };
 
-    document.body.classList.add("wv-resizing-globe");
+    document.body.classList.add("si-resizing-globe");
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", cleanup);
     window.addEventListener("touchmove", onTouchMove, { passive: true });
@@ -189,9 +190,9 @@ export default function WorldViewApp() {
 
   useEffect(() => {
     if (activeView === "news") {
-      const current = useWorldViewStore.getState().layers;
+      const current = useSIGINTStore.getState().layers;
       opsLayerSnapshotRef.current = { ...current };
-      useWorldViewStore.setState((state) => ({
+      useSIGINTStore.setState((state) => ({
         ...state,
         layers: {
           ...state.layers,
@@ -207,7 +208,7 @@ export default function WorldViewApp() {
 
     if (opsLayerSnapshotRef.current) {
       const snapshot = opsLayerSnapshotRef.current;
-      useWorldViewStore.setState((state) => ({
+      useSIGINTStore.setState((state) => ({
         ...state,
         layers: {
           ...state.layers,
@@ -220,14 +221,14 @@ export default function WorldViewApp() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const main = document.querySelector<HTMLElement>(".wv-main-frame");
-    const scroll = document.querySelector<HTMLElement>(".wv-unified-scroll");
+    const main = document.querySelector<HTMLElement>(".si-main-frame");
+    const scroll = document.querySelector<HTMLElement>(".si-unified-scroll");
     if (!main || !scroll || !globeSectionRef.current) return;
   }, [globeHeightVh]);
 
   return (
     <div
-      className="wv-app"
+      className="si-app"
       data-theme="workstation"
       data-density="ultra"
       data-inspector-open={inspector.open ? "true" : "false"}
@@ -238,10 +239,10 @@ export default function WorldViewApp() {
         overflow: "hidden",
       }}
     >
-      <header className="wv-global-header">
-        <div className="wv-header-left">
-          <div className="wv-app-wordmark">WORLDVIEW CONSOLE</div>
-          <div className="wv-header-view-toggle" role="tablist" aria-label="Workspace view mode">
+      <header className="si-global-header">
+        <div className="si-header-left">
+          <div className="si-app-wordmark">SIGINT CONSOLE</div>
+          <div className="si-header-view-toggle" role="tablist" aria-label="Workspace view mode">
             <button
               type="button"
               role="tab"
@@ -272,10 +273,10 @@ export default function WorldViewApp() {
           </div>
         </div>
 
-        <div className="wv-header-center">
-          <div className="wv-header-status">
+        <div className="si-header-center">
+          <div className="si-header-status">
             <span
-              className={`wv-live-dot ${
+              className={`si-live-dot ${
                 activeView === "market"
                   ? "is-ok"
                   : activeView === "news"
@@ -310,27 +311,27 @@ export default function WorldViewApp() {
           </div>
         </div>
 
-        <div className="wv-header-right">
+        <div className="si-header-right">
           {featureFlags.enablePanelHotkeys ? (
             <Toggle checked={hotkeysEnabled} onChange={setHotkeysEnabled} label="Hotkeys" />
           ) : null}
           <button
             type="button"
-            className="wv-inline-action"
-            onClick={() => useWorldViewStore.getState().bumpRefreshTick()}
+            className="si-inline-action"
+            onClick={() => useSIGINTStore.getState().bumpRefreshTick()}
           >
             REFRESH
           </button>
         </div>
       </header>
 
-      <main className="wv-main-frame">
+      <main className="si-main-frame">
         {/* Always mount NewsWorkspace so the map initializes immediately.
             When not the active view, position it absolutely behind the visible
             view with visibility:hidden — the container still has dimensions
             so MapLibre/Leaflet can create their WebGL/canvas context. */}
         <div
-          className="wv-news-main-frame"
+          className="si-news-main-frame"
           role="region"
           aria-label="News workspace"
           style={activeView !== "news" ? {
@@ -341,26 +342,26 @@ export default function WorldViewApp() {
             zIndex: -1,
           } : undefined}
         >
-          <section className="wv-unified-dashboard-section wv-news-section">
+          <section className="si-unified-dashboard-section si-news-section">
             <NewsWorkspace />
           </section>
         </div>
 
         {activeView === "ops" ? (
-          <div className="wv-unified-scroll" role="region" aria-label="Unified globe and dashboard workspace">
+          <div className="si-unified-scroll" role="region" aria-label="Unified globe and dashboard workspace">
             <section
               ref={globeSectionRef}
-              className="wv-unified-globe-section"
+              className="si-unified-globe-section"
               style={
                 {
-                  "--wv-globe-height": `${globeHeightVh}vh`,
+                  "--si-globe-height": `${globeHeightVh}vh`,
                 } as CSSProperties
               }
             >
               <GlobeWorkspace embedded compact />
             </section>
             <div
-              className="wv-globe-height-resizer"
+              className="si-globe-height-resizer"
               role="separator"
               aria-orientation="horizontal"
               aria-label="Resize globe height"
@@ -375,12 +376,12 @@ export default function WorldViewApp() {
                 startGlobeResize(event.touches[0].clientY);
               }}
             />
-            <section className="wv-unified-dashboard-section">
+            <section className="si-unified-dashboard-section">
               <DashboardWorkspace embedded />
             </section>
           </div>
         ) : activeView === "market" ? (
-          <div className="wv-market-main-frame" role="region" aria-label="Market workspace">
+          <div className="si-market-main-frame" role="region" aria-label="Market workspace">
             <MarketWorkspace />
           </div>
         ) : null}

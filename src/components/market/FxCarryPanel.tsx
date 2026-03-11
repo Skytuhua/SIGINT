@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Term from "./shared/Term";
 
 interface CarryRow {
   pair: string;
@@ -38,30 +39,30 @@ interface Props {
 
 export default function FxCarryPanel({ style }: Props) {
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">FX Carry Trades</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)" }}>Rate diff · Roll yield</span>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">FX <Term id="CARRY_TRADE">Carry Trades</Term></span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)" }}>Rate diff · Roll yield</span>
+        <span className="si-market-panel-badge is-reference">REFERENCE</span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
-        <div className="wv-carry-header">
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
+        <div className="si-carry-header">
           <span>PAIR</span><span>LONG</span><span>SHORT</span>
           <span style={{ textAlign: "right" }}>RATE Δ</span>
           <span style={{ textAlign: "right" }}>SPOT</span>
           <span style={{ textAlign: "right" }}>ROLL%</span>
-          <span style={{ textAlign: "right" }}>SHARPE</span>
+          <span style={{ textAlign: "right" }}><Term id="CARRY_SHARPE">SHARPE</Term></span>
           <span>REGIME</span>
         </div>
         {CARRY_TRADES.map((r) => {
           const diff = r.longRate - r.shortRate;
           return (
-            <div key={r.pair} className="wv-carry-row">
+            <div key={r.pair} className="si-carry-row">
               <span style={{ color: "#89e5ff", fontWeight: 700 }}>{r.pair}</span>
               <span style={{ color: "#36b37e", fontSize: 9 }}>{r.longCcy} {r.longRate}%</span>
               <span style={{ color: "#ff5a5f", fontSize: 9 }}>{r.shortCcy} {r.shortRate}%</span>
               <span style={{ textAlign: "right", color: "#36b37e", fontWeight: 600 }}>+{diff.toFixed(2)}%</span>
-              <span style={{ textAlign: "right", color: "var(--wv-text)" }}>{r.spot}</span>
+              <span style={{ textAlign: "right", color: "var(--si-text)" }}>{r.spot}</span>
               <span style={{ textAlign: "right", color: r.rollYield > 1 ? "#36b37e" : "#ffab40" }}>{r.rollYield.toFixed(2)}%</span>
               <span style={{ textAlign: "right", color: r.sharpe > 1 ? "#36b37e" : r.sharpe > 0.5 ? "#ffab40" : "#ff5a5f" }}>{r.sharpe.toFixed(2)}</span>
               <span style={{ color: REGIME_COLOR[r.regime], fontSize: 9, fontWeight: 600 }}>{r.regime}</span>
@@ -69,7 +70,7 @@ export default function FxCarryPanel({ style }: Props) {
           );
         })}
       </div>
-      <div className="wv-market-panel-footer">CFTC · broker roll data · placeholder data</div>
+      <div className="si-market-panel-footer">CFTC · broker roll data · Curated reference data</div>
     </div>
   );
 }

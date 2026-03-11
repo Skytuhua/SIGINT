@@ -2,6 +2,7 @@
 
 import React from "react";
 import { MiniSparkline } from "./shared/MiniSparkline";
+import Term from "./shared/Term";
 
 interface FomcRow {
   meeting: string;
@@ -33,32 +34,32 @@ interface Props {
 
 export default function FedFuturesPanel({ style }: Props) {
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Fed Funds Futures</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)" }}>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Fed Funds Futures</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)" }}>
           Current: <span style={{ color: "#ffab40", fontWeight: 700 }}>{currentRate.toFixed(2)}%</span>
         </span>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+        <span className="si-market-panel-badge is-reference">REFERENCE</span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
-        <div className="wv-fed-header">
-          <span>MEETING</span><span style={{ textAlign: "right" }}>IMPLIED</span>
-          <span style={{ textAlign: "right" }}>CUT%</span>
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
+        <div className="si-fed-header">
+          <span><Term id="FOMC">MEETING</Term></span><span style={{ textAlign: "right" }}><Term id="FED_FUNDS">IMPLIED</Term></span>
+          <span style={{ textAlign: "right" }}><Term id="CUT_HIKE">CUT%</Term></span>
           <span style={{ textAlign: "right" }}>HOLD%</span>
-          <span style={{ textAlign: "right" }}>ΣCuts</span>
+          <span style={{ textAlign: "right" }}><Term id="SIGMA_CUTS">{"\u03a3Cuts"}</Term></span>
           <span>TREND</span>
         </div>
         {FOMC.map((r) => {
           const delta = r.implied - currentRate;
           const isCurrent = r.meeting === "Mar 20";
           return (
-            <div key={r.meeting} className={`wv-fed-row${isCurrent ? " is-current" : ""}`}>
-              <span style={{ color: isCurrent ? "#89e5ff" : "var(--wv-text)", fontWeight: isCurrent ? 700 : 400 }}>{r.meeting}</span>
-              <span style={{ textAlign: "right", color: "var(--wv-text)", fontWeight: 600 }}>{r.implied.toFixed(2)}%</span>
-              <span style={{ textAlign: "right", color: r.cutProb > 50 ? "#36b37e" : "var(--wv-text-muted)" }}>{r.cutProb}%</span>
-              <span style={{ textAlign: "right", color: "var(--wv-text-muted)" }}>{r.holdProb}%</span>
-              <span style={{ textAlign: "right", color: r.cumCuts > 0 ? "#36b37e" : "var(--wv-text-muted)" }}>
+            <div key={r.meeting} className={`si-fed-row${isCurrent ? " is-current" : ""}`}>
+              <span style={{ color: isCurrent ? "#89e5ff" : "var(--si-text)", fontWeight: isCurrent ? 700 : 400 }}>{r.meeting}</span>
+              <span style={{ textAlign: "right", color: "var(--si-text)", fontWeight: 600 }}>{r.implied.toFixed(2)}%</span>
+              <span style={{ textAlign: "right", color: r.cutProb > 50 ? "#36b37e" : "var(--si-text-muted)" }}>{r.cutProb}%</span>
+              <span style={{ textAlign: "right", color: "var(--si-text-muted)" }}>{r.holdProb}%</span>
+              <span style={{ textAlign: "right", color: r.cumCuts > 0 ? "#36b37e" : "var(--si-text-muted)" }}>
                 {r.cumCuts === 0 ? "—" : `-${r.cumCuts.toFixed(2)}%`}
               </span>
               <span>
@@ -68,7 +69,7 @@ export default function FedFuturesPanel({ style }: Props) {
           );
         })}
       </div>
-      <div className="wv-market-panel-footer">CME FedWatch · SOFR futures · placeholder data</div>
+      <div className="si-market-panel-footer"><Term id="FEDWATCH">CME FedWatch</Term> · <Term id="SOFR">SOFR</Term> futures · Curated reference data</div>
     </div>
   );
 }

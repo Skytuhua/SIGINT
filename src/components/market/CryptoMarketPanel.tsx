@@ -3,6 +3,7 @@
 import React from "react";
 import { MiniSparkline } from "./shared/MiniSparkline";
 import { useMarketData } from "../../hooks/useMarketData";
+import Term from "./shared/Term";
 
 interface CoinGeckoMarket {
   id: string;
@@ -245,7 +246,7 @@ const CAT_LOOKUP: Record<string, string> = {
 const CAT_COLOR: Record<string, string> = {
   L1: "#89e5ff", L2: "#6ee7b7", L0: "#c4b5fd", DeFi: "#fbbf24",
   Exchange: "#f97316", Oracle: "#34d399", Payment: "#60a5fa",
-  Stablecoin: "var(--wv-text-muted)", Meme: "#fb7185",
+  Stablecoin: "var(--si-text-muted)", Meme: "#fb7185",
   AI: "#a78bfa", Storage: "#38bdf8",
 };
 
@@ -338,19 +339,19 @@ export default function CryptoMarketPanel({ style, onTickerClick }: Props) {
 
   // 16 columns: #  SYM  NAME  TAG  PRICE  1H%  1D%  7D%  30D%  MCAP  FDV  DOM  VOL24H  V/MC  ATH%  7D CHART
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Crypto Market</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)" }}>
-          Total: <span style={{ color: "var(--wv-text)" }}>${totalMcap >= 1000 ? `${(totalMcap / 1000).toFixed(2)}T` : `${totalMcap.toFixed(0)}B`}</span>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Crypto Market</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)" }}>
+          Total: <span style={{ color: "var(--si-text)" }}>${totalMcap >= 1000 ? `${(totalMcap / 1000).toFixed(2)}T` : `${totalMcap.toFixed(0)}B`}</span>
           &nbsp;· BTC Dom: <span style={{ color: "#ffab40" }}>{btcDom}%</span>
         </span>
-        <span className={`wv-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
+        <span className={`si-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
           {isLive ? "LIVE" : "STATIC"}
         </span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
-        <div className="wv-crypto-header">
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
+        <div className="si-crypto-header">
           <span>#</span>
           <span>SYM</span>
           <span style={{ paddingLeft: 8 }}>NAME</span>
@@ -360,12 +361,12 @@ export default function CryptoMarketPanel({ style, onTickerClick }: Props) {
           <span style={{ textAlign: "right" }}>1D%</span>
           <span style={{ textAlign: "right" }}>7D%</span>
           <span style={{ textAlign: "right" }}>30D%</span>
-          <span style={{ textAlign: "right" }}>MCAP</span>
-          <span style={{ textAlign: "right" }}>FDV</span>
-          <span style={{ textAlign: "right" }}>DOM</span>
-          <span style={{ textAlign: "right" }}>VOL 24H</span>
+          <span style={{ textAlign: "right" }}><Term id="MKTCAP">MCAP</Term></span>
+          <span style={{ textAlign: "right" }}><Term id="FDV">FDV</Term></span>
+          <span style={{ textAlign: "right" }}><Term id="DOMINANCE">DOM</Term></span>
+          <span style={{ textAlign: "right" }}><Term id="VOL">VOL 24H</Term></span>
           <span style={{ textAlign: "right" }}>V/MC</span>
-          <span style={{ textAlign: "right" }}>ATH%</span>
+          <span style={{ textAlign: "right" }}><Term id="ATH">ATH%</Term></span>
           <span style={{ textAlign: "center" }}>7D</span>
           <span style={{ textAlign: "center" }}>1M</span>
           <span style={{ textAlign: "center" }}>1Y</span>
@@ -376,20 +377,20 @@ export default function CryptoMarketPanel({ style, onTickerClick }: Props) {
           return (
             <div
               key={c.sym}
-              className="wv-crypto-row"
+              className="si-crypto-row"
               onClick={() => onTickerClick?.(c.sym)}
               style={{ cursor: onTickerClick ? "pointer" : "default" }}
             >
-              <span style={{ color: "var(--wv-text-muted)", fontSize: 9 }}>{c.rank}</span>
+              <span style={{ color: "var(--si-text-muted)", fontSize: 9 }}>{c.rank}</span>
               <span style={{ color: CAT_COLOR[c.category] ?? "#89e5ff", fontWeight: 700 }}>{c.sym}</span>
-              <span style={{ color: "var(--wv-text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 9.5, paddingLeft: 8 }}>{c.name}</span>
+              <span style={{ color: "var(--si-text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 9.5, paddingLeft: 8 }}>{c.name}</span>
               <span style={{
                 textAlign: "center", fontSize: 8, fontWeight: 600, letterSpacing: "0.03em",
                 color: CAT_COLOR[c.category] ?? "#89e5ff",
                 background: "rgba(185,205,224,0.07)",
                 padding: "1px 4px", borderRadius: 2, whiteSpace: "nowrap",
               }}>{c.category}</span>
-              <span style={{ textAlign: "right", fontWeight: 600, color: "var(--wv-text)" }}>{c.price}</span>
+              <span style={{ textAlign: "right", fontWeight: 600, color: "var(--si-text)" }}>{c.price}</span>
               <span style={{ textAlign: "right", fontSize: 9, color: pctColor(c.chg1h) }}>
                 {fmtPct(c.chg1h)}
               </span>
@@ -402,15 +403,15 @@ export default function CryptoMarketPanel({ style, onTickerClick }: Props) {
               <span style={{ textAlign: "right", color: pctColor(c.chg30d) }}>
                 {fmtPct(c.chg30d, 1)}
               </span>
-              <span style={{ textAlign: "right", color: "var(--wv-text)" }}>
+              <span style={{ textAlign: "right", color: "var(--si-text)" }}>
                 {fmtB(c.mcapB)}
               </span>
-              <span style={{ textAlign: "right", color: "var(--wv-text-muted)", fontSize: 9 }}>
+              <span style={{ textAlign: "right", color: "var(--si-text-muted)", fontSize: 9 }}>
                 {fmtB(c.fdvB)}
               </span>
-              <span style={{ textAlign: "right", color: "var(--wv-text-muted)", fontSize: 9 }}>{c.dominance.toFixed(1)}%</span>
-              <span style={{ textAlign: "right", color: "var(--wv-text-muted)", fontSize: 9 }}>${c.vol24hB.toFixed(1)}B</span>
-              <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: vmcRatio > 0.1 ? "#ffab40" : "var(--wv-text-muted)" }}>
+              <span style={{ textAlign: "right", color: "var(--si-text-muted)", fontSize: 9 }}>{c.dominance.toFixed(1)}%</span>
+              <span style={{ textAlign: "right", color: "var(--si-text-muted)", fontSize: 9 }}>${c.vol24hB.toFixed(1)}B</span>
+              <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: vmcRatio > 0.1 ? "#ffab40" : "var(--si-text-muted)" }}>
                 {c.mcapB > 0 ? `${(vmcRatio * 100).toFixed(1)}%` : "—"}
               </span>
               <span style={{ textAlign: "right", fontSize: 9, color: c.athPct > -10 ? "#36b37e" : c.athPct > -50 ? "#ffab40" : "#ff5a5f" }}>
@@ -432,7 +433,7 @@ export default function CryptoMarketPanel({ style, onTickerClick }: Props) {
           );
         })}
       </div>
-      <div className="wv-market-panel-footer">
+      <div className="si-market-panel-footer">
         {isLive ? "CoinGecko · live data · 2min refresh" : "CoinGecko · static data"}
       </div>
     </div>

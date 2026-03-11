@@ -14,12 +14,12 @@ export default function SegmentedControl<T extends string>({
   ariaLabel,
 }: SegmentedControlProps<T>) {
   return (
-    <div className="wv-segmented" role="group" aria-label={ariaLabel}>
+    <div className="si-segmented" role="group" aria-label={ariaLabel}>
       {options.map((option) => (
         <button
           key={option.value}
           type="button"
-          className={`wv-segment ${option.value === value ? "is-active" : ""}`}
+          className={`si-segment ${option.value === value ? "is-active" : ""}`}
           onClick={() => onChange(option.value)}
         >
           {option.label}

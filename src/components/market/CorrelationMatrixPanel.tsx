@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useMarketData } from "../../hooks/useMarketData";
+import Term from "./shared/Term";
 import type { HistoricalResponse } from "../../lib/server/news/providers/marketTypes";
 
 const LABELS = ["S&P 500", "20Y Bond", "Gold", "Crude Oil", "Bitcoin", "USD Idx"];
@@ -37,9 +38,9 @@ function corrColor(v: number): string {
 }
 
 function corrTextColor(v: number): string {
-  if (v === 1) return "var(--wv-text-muted)";
+  if (v === 1) return "var(--si-text-muted)";
   if (Math.abs(v) > 0.3) return v > 0 ? "#36b37e" : "#ff5a5f";
-  return "var(--wv-text)";
+  return "var(--si-text)";
 }
 
 interface Props {
@@ -58,15 +59,15 @@ export default function CorrelationMatrixPanel({ style }: Props) {
   const n = assets.length;
 
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Cross-Asset Correlation</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)" }}>30D Rolling · Pearson</span>
-        <span className={`wv-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Cross-Asset <Term id="CORRELATION">Correlation</Term></span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)" }}>30D Rolling · <Term id="CORRELATION">Pearson</Term></span>
+        <span className={`si-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
           {isLive ? "LIVE" : "STATIC"}
         </span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: "8px 10px", overflow: "auto" }}>
+      <div className="si-market-panel-body" style={{ padding: "8px 10px", overflow: "auto" }}>
         <div
           style={{
             display: "grid",
@@ -78,7 +79,7 @@ export default function CorrelationMatrixPanel({ style }: Props) {
           {/* Header row */}
           <div style={{ height: 20 }} />
           {assets.map((a) => (
-            <div key={a} style={{ textAlign: "center", fontSize: 9, color: "var(--wv-text-muted)", fontWeight: 700, paddingBottom: 2 }}>
+            <div key={a} style={{ textAlign: "center", fontSize: 9, color: "var(--si-text-muted)", fontWeight: 700, paddingBottom: 2 }}>
               {a}
             </div>
           ))}
@@ -86,7 +87,7 @@ export default function CorrelationMatrixPanel({ style }: Props) {
           {/* Data rows */}
           {assets.map((rowAsset, i) => (
             <React.Fragment key={rowAsset}>
-              <div style={{ fontSize: 9, color: "var(--wv-text-muted)", alignSelf: "center", paddingRight: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <div style={{ fontSize: 9, color: "var(--si-text-muted)", alignSelf: "center", paddingRight: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                 {LABELS[i] ?? rowAsset}
               </div>
               {Array.from({ length: n }, (_, j) => {
@@ -116,7 +117,7 @@ export default function CorrelationMatrixPanel({ style }: Props) {
         </div>
 
         {/* Legend */}
-        <div style={{ display: "flex", gap: 8, marginTop: 8, fontSize: 8.5, color: "var(--wv-text-muted)", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 8, marginTop: 8, fontSize: 8.5, color: "var(--si-text-muted)", flexWrap: "wrap" }}>
           {[
             { color: "rgba(54,179,126,0.5)", label: "Strong +" },
             { color: "rgba(54,179,126,0.2)", label: "Weak +" },
@@ -131,7 +132,7 @@ export default function CorrelationMatrixPanel({ style }: Props) {
           ))}
         </div>
       </div>
-      <div className="wv-market-panel-footer">
+      <div className="si-market-panel-footer">
         {isLive ? "Yahoo Finance · 30D Pearson · 30min refresh" : "Static approximation"}
       </div>
     </div>

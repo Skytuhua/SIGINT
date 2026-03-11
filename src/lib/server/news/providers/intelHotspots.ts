@@ -55,7 +55,7 @@ export async function getIntelHotspots(): Promise<CachedFetchResult<IntelHotspot
     request: async () => {
       const json = await fetchJsonOrThrow<Record<string, unknown>>(
         url,
-        { headers: { "User-Agent": "WorldView/0.1 (intel-hotspots)" } },
+        { headers: { "User-Agent": "SIGINT/0.1 (intel-hotspots)" } },
         INTEL_HOTSPOTS_POLICY.timeoutMs
       );
 

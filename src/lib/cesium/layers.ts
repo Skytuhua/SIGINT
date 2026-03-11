@@ -988,15 +988,18 @@ export async function renderTraffic(
 
 // 閳光偓閳光偓閳光偓 CCTV layer 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
+let cctvRenderSeq = 0;
+
 export async function renderCctv(
   viewer: import('cesium').Viewer,
   cameras: CctvCamera[],
   _calibrations: Record<string, CameraCalibration>
 ): Promise<void> {
+  const seq = ++cctvRenderSeq;
   if (!isViewerAlive(viewer)) return;
   const Cesium = await import('cesium');
   clearLayer(viewer, 'cctv');
-  if (!isViewerAlive(viewer)) return;
+  if (!isViewerAlive(viewer) || seq !== cctvRenderSeq) return;
 
   const billboards = new Cesium.BillboardCollection({ scene: viewer.scene });
   const labels = new Cesium.LabelCollection();
@@ -1464,6 +1467,44 @@ function createDotCanvas(radius: number, color: string): HTMLCanvasElement {
   return canvas;
 }
 
+function createGlowDotCanvas(radius: number, color: string): HTMLCanvasElement {
+  const key = `glowdot_${radius}_${color}`;
+  if (canvasCache.has(key)) return canvasCache.get(key)!;
+
+  const glowRadius = radius * 3;
+  const size = glowRadius * 2 + 4;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d')!;
+  const cx = size / 2;
+  const cy = size / 2;
+
+  // Outer glow halo via radial gradient
+  const grad = ctx.createRadialGradient(cx, cy, radius * 0.5, cx, cy, glowRadius);
+  grad.addColorStop(0, color + 'aa');
+  grad.addColorStop(0.4, color + '55');
+  grad.addColorStop(1, color + '00');
+  ctx.beginPath();
+  ctx.arc(cx, cy, glowRadius, 0, Math.PI * 2);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Solid core dot
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+
+  // Bright white outline
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  canvasCache.set(key, canvas);
+  return canvas;
+}
+
 function createQuakeCanvas(size: number, color: string, mag: number): HTMLCanvasElement {
   const key = `quake_${size}_${color}_${mag.toFixed(1)}`;
   if (canvasCache.has(key)) return canvasCache.get(key)!;
@@ -1680,4 +1721,198 @@ export function tickTradeRouteAnimation(frameNumber: number): void {
   if (activeTradeRouteHandle) {
     activeTradeRouteHandle.tick(frameNumber);
   }
+}
+
+// ── Static GeoJSON point layers (volcanoes, nuclear sites, military bases) ──
+
+interface GeoJsonPointFeature {
+  id?: string;
+  geometry: { type: string; coordinates: [number, number] };
+  properties: Record<string, unknown>;
+}
+
+async function renderStaticGeoJsonLayer(
+  viewer: import('cesium').Viewer,
+  layerName: string,
+  features: GeoJsonPointFeature[],
+  options: {
+    entityType: string;
+    dotRadius: number;
+    colorFn: (props: Record<string, unknown>) => string;
+    labelFn: (props: Record<string, unknown>) => string;
+  }
+): Promise<void> {
+  if (!isViewerAlive(viewer)) return;
+  const Cesium = await import('cesium');
+  clearLayer(viewer, layerName);
+  if (!isViewerAlive(viewer)) return;
+
+  const billboards = new Cesium.BillboardCollection({ scene: viewer.scene });
+  const labels = new Cesium.LabelCollection();
+
+  for (const feature of features) {
+    if (!isViewerAlive(viewer)) break;
+    const [lon, lat] = feature.geometry.coordinates;
+    const color = options.colorFn(feature.properties);
+    const [r, g, b] = hexToRgb(color);
+    const pos = Cesium.Cartesian3.fromDegrees(lon, lat, 500);
+
+    billboards.add({
+      position: pos,
+      image: createGlowDotCanvas(options.dotRadius, color),
+      color: new Cesium.Color(r, g, b, 1.0),
+      id: { type: options.entityType, id: feature.id ?? `${layerName}-${lon}-${lat}`, data: feature.properties },
+      scaleByDistance: new Cesium.NearFarScalar(5e4, 1.8, 1.8e7, 0.45),
+      translucencyByDistance: new Cesium.NearFarScalar(5e5, 1.0, 1.5e7, 0.4),
+    });
+
+    const labelText = options.labelFn(feature.properties);
+    if (labelText) {
+      labels.add({
+        position: pos,
+        text: labelText,
+        font: '11px monospace',
+        fillColor: new Cesium.Color(r, g, b, 0.95),
+        outlineColor: new Cesium.Color(0.0, 0.0, 0.0, 0.9),
+        outlineWidth: 3,
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        pixelOffset: new Cesium.Cartesian2(10, 0),
+        scaleByDistance: new Cesium.NearFarScalar(5e4, 1.0, 5e6, 0.0),
+        distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 8e5),
+      });
+    }
+  }
+
+  viewer.scene.primitives.add(billboards);
+  viewer.scene.primitives.add(labels);
+
+  const map = getLayerMap(viewer);
+  map.set(layerName, {
+    remove: () => {
+      if (!billboards.isDestroyed()) viewer.scene.primitives.remove(billboards);
+      if (!labels.isDestroyed()) viewer.scene.primitives.remove(labels);
+    },
+  });
+}
+
+// ── Country borders (polygon outlines from GeoJSON) ─────────────────────────
+
+interface CountryBorderFeature {
+  id?: string;
+  properties: Record<string, unknown>;
+  geometry: {
+    type: string;
+    coordinates: number[][][] | number[][][][];
+  };
+}
+
+export async function renderCountryBorders(
+  viewer: import('cesium').Viewer,
+  features: CountryBorderFeature[]
+): Promise<void> {
+  if (!isViewerAlive(viewer)) return;
+  const Cesium = await import('cesium');
+  clearLayer(viewer, 'country_borders');
+  if (!isViewerAlive(viewer)) return;
+  if (features.length === 0) return;
+
+  const dataSource = new Cesium.CustomDataSource('country_borders');
+  const borderColor = new Cesium.Color(0.75, 0.85, 1.0, 0.7);
+
+  for (let fi = 0; fi < features.length; fi++) {
+    const feature = features[fi];
+    const { geometry } = feature;
+    if (!geometry) continue;
+
+    // Collect exterior rings depending on Polygon vs MultiPolygon
+    const rings: number[][][] =
+      geometry.type === 'MultiPolygon'
+        ? (geometry.coordinates as number[][][][]).map(poly => poly[0])
+        : geometry.type === 'Polygon'
+          ? [geometry.coordinates[0] as number[][]]
+          : [];
+
+    for (let ri = 0; ri < rings.length; ri++) {
+      const ring = rings[ri];
+      if (!ring || ring.length < 3) continue;
+
+      // Flatten [lon,lat] pairs into a flat array for fromDegreesArray
+      const flat: number[] = [];
+      for (const coord of ring) {
+        flat.push(coord[0], coord[1]);
+      }
+
+      dataSource.entities.add({
+        id: `border_${fi}_${ri}`,
+        polyline: {
+          positions: Cesium.Cartesian3.fromDegreesArray(flat),
+          width: 2.0,
+          material: borderColor,
+          clampToGround: true,
+        },
+      });
+    }
+  }
+
+  if (!isViewerAlive(viewer)) return;
+  await viewer.dataSources.add(dataSource);
+
+  const map = getLayerMap(viewer);
+  map.set('country_borders', {
+    remove: () => {
+      if (!isViewerAlive(viewer)) return;
+      try { viewer.dataSources.remove(dataSource, true); } catch { /* */ }
+    },
+    dataSource,
+  });
+}
+
+export async function renderVolcanoes(
+  viewer: import('cesium').Viewer,
+  features: GeoJsonPointFeature[]
+): Promise<void> {
+  return renderStaticGeoJsonLayer(viewer, 'volcanoes', features, {
+    entityType: 'volcano',
+    dotRadius: 6,
+    colorFn: (props) => (props.status === 'active' ? '#ff6d00' : '#ffa726'),
+    labelFn: (props) => {
+      const name = (props.name as string) || '';
+      const status = (props.status as string) || '';
+      return `${name} [${status.toUpperCase()}]`;
+    },
+  });
+}
+
+export async function renderNuclearSites(
+  viewer: import('cesium').Viewer,
+  features: GeoJsonPointFeature[]
+): Promise<void> {
+  return renderStaticGeoJsonLayer(viewer, 'nuclear_sites', features, {
+    entityType: 'nuclear-site',
+    dotRadius: 5,
+    colorFn: () => '#fdd835',
+    labelFn: (props) => {
+      const name = (props.name as string) || '';
+      const capacity = (props.capacity as string) || '';
+      return capacity ? `${name} (${capacity})` : name;
+    },
+  });
+}
+
+export async function renderMilitaryBases(
+  viewer: import('cesium').Viewer,
+  features: GeoJsonPointFeature[]
+): Promise<void> {
+  return renderStaticGeoJsonLayer(viewer, 'military_bases', features, {
+    entityType: 'military-base',
+    dotRadius: 5,
+    colorFn: () => '#69f0ae',
+    labelFn: (props) => {
+      const aka = (props.aka as string) || '';
+      const name = (props.name as string) || '';
+      const sponsor = (props.sponsor as string) || '';
+      const label = aka || name;
+      return sponsor ? `${label} (${sponsor})` : label;
+    },
+  });
 }

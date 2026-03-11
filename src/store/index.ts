@@ -48,6 +48,10 @@ interface LayerState {
   tradeRoutes: boolean;
   gpsJam: boolean;
   airspaceAnomaly: boolean;
+  volcanoes: boolean;
+  nuclearSites: boolean;
+  militaryBases: boolean;
+  countryBorders: boolean;
 }
 
 interface FiltersState {
@@ -148,13 +152,6 @@ export type ConflictFilters = {
   inViewportOnly: boolean;
 };
 
-export type DisplacementFlowFilters = {
-  mode: "all" | "refugee" | "idp";
-  minVolume: number;
-  cause: string[];
-  viewportOnly: boolean;
-};
-
 interface NewsState {
   query: string;
   queryAst: QueryAST;
@@ -202,7 +199,6 @@ interface NewsState {
   conflictFilters: ConflictFilters;
   economicCenterFilters: EconomicCenterFilters;
   aiDataCenterFilters: AiDataCenterFilters;
-  displacementFlowFilters: DisplacementFlowFilters;
   headlineTape: {
     enabled: boolean;
     paused: boolean;
@@ -214,7 +210,7 @@ interface NewsState {
   lastUpdated: number | null;
 }
 
-interface WorldViewStore {
+interface SIGINTStore {
   layers: LayerState;
   filters: FiltersState;
   ui: UiState;
@@ -326,7 +322,6 @@ interface WorldViewStore {
   setConflictFilters(partial: Partial<ConflictFilters>): void;
   setEconomicCenterFilters(partial: Partial<EconomicCenterFilters>): void;
   setAiDataCenterFilters(partial: Partial<AiDataCenterFilters>): void;
-  setDisplacementFlowFilters(partial: Partial<DisplacementFlowFilters>): void;
   setNewsLayoutPreset(preset: NewsLayoutPreset): void;
   resetNewsLayout(): void;
   setNewsPanelLayouts(layouts: DashboardLayouts): void;
@@ -736,12 +731,6 @@ function defaultNewsState(): NewsState {
       viewportOnly: false,
       searchText: "",
     },
-    displacementFlowFilters: {
-      mode: "all" as const,
-      minVolume: 0,
-      cause: [],
-      viewportOnly: false,
-    },
     headlineTape: {
       enabled: false,
       paused: false,
@@ -1140,14 +1129,14 @@ function migrateVideoPanelsBelowMap(layouts: DashboardLayouts): DashboardLayouts
   return normalizeTopOffset(next);
 }
 
-function readLegacyState(): Partial<WorldViewStore> | null {
+function readLegacyState(): Partial<SIGINTStore> | null {
   if (typeof window === "undefined") return null;
 
   try {
-    const raw = window.localStorage.getItem("worldview-store-v1");
+    const raw = window.localStorage.getItem("sigint-store-v1");
     if (!raw) return null;
     const parsed = JSON.parse(raw) as {
-      state?: Partial<WorldViewStore>;
+      state?: Partial<SIGINTStore>;
     };
     if (!parsed || typeof parsed !== "object") return null;
     const s = parsed.state ?? {};
@@ -1180,6 +1169,10 @@ const baseState = {
     tradeRoutes: false,
     gpsJam: false,
     airspaceAnomaly: true,
+    volcanoes: false,
+    nuclearSites: false,
+    militaryBases: false,
+    countryBorders: true,
   },
   filters: {
     minMagnitude: 0,
@@ -1252,7 +1245,7 @@ function withLegacyDefaults<T extends typeof baseState>(state: T): T {
   };
 }
 
-export const useWorldViewStore = create<WorldViewStore>()(
+export const useSIGINTStore = create<SIGINTStore>()(
   persist(
     subscribeWithSelector((set) => {
       const initial = withLegacyDefaults(baseState);
@@ -1850,14 +1843,6 @@ export const useWorldViewStore = create<WorldViewStore>()(
             },
           })),
 
-        setDisplacementFlowFilters: (partial) =>
-          set((s) => ({
-            news: {
-              ...s.news,
-              displacementFlowFilters: { ...s.news.displacementFlowFilters, ...partial },
-            },
-          })),
-
         setNewsLayoutPreset: (layoutPreset) =>
           set((s) => ({
             news: {
@@ -2144,7 +2129,7 @@ export const useWorldViewStore = create<WorldViewStore>()(
       };
     }),
     {
-      name: "worldview-store-v2",
+      name: "sigint-store-v2",
       version: 14,
       migrate: (persistedState) => {
         const state = persistedState as
@@ -2180,8 +2165,8 @@ export const useWorldViewStore = create<WorldViewStore>()(
         };
       },
       merge: (persistedState, currentState) => {
-        const persisted = (persistedState ?? {}) as Partial<WorldViewStore>;
-        const current = currentState as WorldViewStore;
+        const persisted = (persistedState ?? {}) as Partial<SIGINTStore>;
+        const current = currentState as SIGINTStore;
 
         const persistedDashboard = (persisted.dashboard ?? {}) as Partial<DashboardState>;
         const nextDashboardVisibility = sanitizePanelVisibility(persistedDashboard.panelVisibility);

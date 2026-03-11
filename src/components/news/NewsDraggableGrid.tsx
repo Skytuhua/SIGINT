@@ -8,7 +8,7 @@ import {
   type ResponsiveLayouts,
 } from "react-grid-layout/legacy";
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import type { DashboardLayouts } from "../../lib/dashboard/types";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -124,10 +124,10 @@ function reflowLayoutWithEmptyAtBottom(
 
 export default function NewsDraggableGrid({ panels, emptyCategoryPanelIds = [] }: NewsDraggableGridProps) {
   const [isInteracting, setIsInteracting] = useState(false);
-  const layouts = useWorldViewStore((s) => s.news.panelLayouts);
-  const panelLocks = useWorldViewStore((s) => s.news.panelLocks);
-  const panelZOrder = useWorldViewStore((s) => s.news.panelZOrder);
-  const setPanelLayouts = useWorldViewStore((s) => s.setNewsPanelLayouts);
+  const layouts = useSIGINTStore((s) => s.news.panelLayouts);
+  const panelLocks = useSIGINTStore((s) => s.news.panelLocks);
+  const panelZOrder = useSIGINTStore((s) => s.news.panelZOrder);
+  const setPanelLayouts = useSIGINTStore((s) => s.setNewsPanelLayouts);
   const isInteractingRef = useRef(false);
   const pendingLayoutRef = useRef<DashboardLayouts | null>(null);
 
@@ -139,7 +139,7 @@ export default function NewsDraggableGrid({ panels, emptyCategoryPanelIds = [] }
     if (reflowDoneRef.current || emptySet.size === 0) return;
     const timer = setTimeout(() => {
       if (reflowDoneRef.current) return;
-      const store = useWorldViewStore.getState();
+      const store = useSIGINTStore.getState();
       const currentLayouts = store.news.panelLayouts;
       const locks = store.news.panelLocks;
 
@@ -227,15 +227,15 @@ export default function NewsDraggableGrid({ panels, emptyCategoryPanelIds = [] }
 
   return (
     <ResponsiveGridLayout
-      className={`wv-grid-drag ${isInteracting ? "is-interacting" : ""}`.trim()}
+      className={`si-grid-drag ${isInteracting ? "is-interacting" : ""}`.trim()}
       layouts={safeLayouts}
       breakpoints={GRID_BREAKPOINTS}
       cols={GRID_COLS}
       rowHeight={GRID_ROW_HEIGHT}
       margin={GRID_MARGIN}
       containerPadding={[0, 0]}
-      draggableHandle=".wv-panel-drag-handle"
-      draggableCancel=".react-resizable-handle,button:not(.wv-panel-drag-handle),input,select,textarea,a,[role='tab']"
+      draggableHandle=".si-panel-drag-handle"
+      draggableCancel=".react-resizable-handle,button:not(.si-panel-drag-handle),input,select,textarea,a,[role='tab']"
       preventCollision={false}
       allowOverlap
       useCSSTransforms
@@ -274,12 +274,12 @@ export default function NewsDraggableGrid({ panels, emptyCategoryPanelIds = [] }
       {panels.map((panel) => (
         <div
           key={panel.id}
-          className={`wv-grid-item ${panelLocks[panel.id] ? "is-locked" : ""}`.trim()}
+          className={`si-grid-item ${panelLocks[panel.id] ? "is-locked" : ""}`.trim()}
           data-grid-id={panel.id}
           data-panel-locked={panelLocks[panel.id] ? "true" : "false"}
           style={
             {
-              "--wv-item-z": zIndexByPanelId.get(panel.id) ?? 1,
+              "--si-item-z": zIndexByPanelId.get(panel.id) ?? 1,
             } as CSSProperties
           }
         >

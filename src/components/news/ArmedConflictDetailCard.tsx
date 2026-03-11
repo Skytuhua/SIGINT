@@ -131,17 +131,17 @@ export default function ArmedConflictDetailCard({
       : null;
 
   return createPortal(
-    <div className="wv-hotspot-card" role="dialog" aria-label="Armed conflict event detail">
-      <div className="wv-hotspot-card-hdr">
-        <div className="wv-hotspot-card-headline">
-          <div className="wv-hotspot-name">{titleLine}</div>
-          <span className={`wv-hotspot-tier ${severityClass(sevLabel)}`}>
+    <div className="si-hotspot-card" role="dialog" aria-label="Armed conflict event detail">
+      <div className="si-hotspot-card-hdr">
+        <div className="si-hotspot-card-headline">
+          <div className="si-hotspot-name">{titleLine}</div>
+          <span className={`si-hotspot-tier ${severityClass(sevLabel)}`}>
             {sevLabel.toUpperCase()}
           </span>
         </div>
         <button
           type="button"
-          className="wv-hotspot-close"
+          className="si-hotspot-close"
           onClick={onClose}
           aria-label="Close armed conflict details"
         >
@@ -149,9 +149,9 @@ export default function ArmedConflictDetailCard({
         </button>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">SEVERITY</div>
-        <div className="wv-hotspot-subscores">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">SEVERITY</div>
+        <div className="si-hotspot-subscores">
           <div>
             Level {sevLabel} ({sevScore})
           </div>
@@ -162,27 +162,27 @@ export default function ArmedConflictDetailCard({
         </div>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">WHEN</div>
-        <div className="wv-hotspot-summary">{whenLabel}</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">WHEN</div>
+        <div className="si-hotspot-summary">{whenLabel}</div>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">WHERE</div>
-        <div className="wv-hotspot-subscores">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">WHERE</div>
+        <div className="si-hotspot-subscores">
           <div>{locationTitle}</div>
           <div>Coordinates {coordLabel}</div>
         </div>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">WHAT</div>
-        <div className="wv-hotspot-summary">{detail.summary || detail.headline}</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">WHAT</div>
+        <div className="si-hotspot-summary">{detail.summary || detail.headline}</div>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">SIGNALS</div>
-        <div className="wv-hotspot-subscores">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">SIGNALS</div>
+        <div className="si-hotspot-subscores">
           <div>Sources {numSources != null ? numSources : "n/a"}</div>
           <div>Articles {numArticles != null ? numArticles : "n/a"}</div>
           <div>Mentions {numMentions != null ? numMentions : "n/a"}</div>
@@ -191,16 +191,16 @@ export default function ArmedConflictDetailCard({
         </div>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">ACTORS</div>
-        <div className="wv-hotspot-summary">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">ACTORS</div>
+        <div className="si-hotspot-summary">
           {actorsLines.length ? actorsLines.join("  ") : "Not available from upstream."}
         </div>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">SOURCE TRACE</div>
-        <ul className="wv-hotspot-trace">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">SOURCE TRACE</div>
+        <ul className="si-hotspot-trace">
           <li>GDELT events record (topic-filtered conflict signals)</li>
           {detail.sourceUrl ? (
             <li>

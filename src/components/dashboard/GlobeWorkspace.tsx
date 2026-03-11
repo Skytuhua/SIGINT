@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import CesiumGlobe, { type GlobeControlApi, type CameraSnapshot } from "../CesiumGlobe";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import Panel from "./panel/Panel";
 import PanelBody from "./panel/PanelBody";
 import PanelControls from "./panel/PanelControls";
@@ -33,6 +33,10 @@ const layers = [
   { key: "disasters", label: "Disasters" },
   { key: "satellites", label: "Satellites" },
   { key: "cctv", label: "CCTV" },
+  { key: "volcanoes", label: "Volcanoes" },
+  { key: "nuclearSites", label: "Nuclear Sites" },
+  { key: "militaryBases", label: "Military Bases" },
+  { key: "countryBorders", label: "Country Borders" },
 ] as const;
 
 interface GlobeWorkspaceProps {
@@ -45,30 +49,30 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
   const [api, setApi] = useState<GlobeControlApi | null>(null);
   const [globeReady, setGlobeReady] = useState(false);
 
-  const layerState = useWorldViewStore((s) => s.layers);
-  const toggleLayer = useWorldViewStore((s) => s.toggleLayer);
-  const filters = useWorldViewStore((s) => s.filters);
-  const setFilters = useWorldViewStore((s) => s.setFilters);
-  const ui = useWorldViewStore((s) => s.ui);
-  const setUi = useWorldViewStore((s) => s.setUi);
-  const setStylePreset = useWorldViewStore((s) => s.setStylePreset);
-  const setDetectMode = useWorldViewStore((s) => s.setDetectMode);
-  const scenes = useWorldViewStore((s) => s.scenes);
-  const gotoScene = useWorldViewStore((s) => s.gotoScene);
+  const layerState = useSIGINTStore((s) => s.layers);
+  const toggleLayer = useSIGINTStore((s) => s.toggleLayer);
+  const filters = useSIGINTStore((s) => s.filters);
+  const setFilters = useSIGINTStore((s) => s.setFilters);
+  const ui = useSIGINTStore((s) => s.ui);
+  const setUi = useSIGINTStore((s) => s.setUi);
+  const setStylePreset = useSIGINTStore((s) => s.setStylePreset);
+  const setDetectMode = useSIGINTStore((s) => s.setDetectMode);
+  const scenes = useSIGINTStore((s) => s.scenes);
+  const gotoScene = useSIGINTStore((s) => s.gotoScene);
 
   const sceneButtons = useMemo(() => scenes.slice(0, 8), [scenes]);
 
   return (
     <div
-      className={`wv-globe-workspace ${embedded ? "is-embedded" : ""} ${compact ? "is-compact" : ""}`.trim()}
+      className={`si-globe-workspace ${embedded ? "is-embedded" : ""} ${compact ? "is-compact" : ""}`.trim()}
     >
-      <Panel panelId="globe-main" className="wv-globe-main">
+      <Panel panelId="globe-main" className="si-globe-main">
         <PanelHeader
           title="GLOBE VIEW"
           subtitle="Interactive 3D world map for global activity."
           controls={<PanelControls onRefresh={api?.gotoHome} refreshText="HOME" />}
         />
-        <PanelBody noPadding className="wv-globe-canvas-wrap">
+        <PanelBody noPadding className="si-globe-canvas-wrap">
           <div style={{ position: "relative", width: "100%", height: "100%" }}>
             <CesiumGlobe
               onControlApi={setApi}
@@ -110,16 +114,16 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
       </Panel>
 
       <div
-        className="wv-globe-side-stack"
+        className="si-globe-side-stack"
       >
-        <Panel panelId="globe-layers" className="wv-globe-side-panel">
+        <Panel panelId="globe-layers" className="si-globe-side-panel">
           <PanelHeader
             title="LAYER SWITCHBOARD"
             subtitle="Turn each data layer on or off for the globe."
             controls={<PanelControls />}
           />
           <PanelBody>
-            <div className="wv-layer-grid">
+            <div className="si-layer-grid">
               {layers.map((layer) => (
                 <Toggle
                   key={layer.key}
@@ -133,7 +137,7 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
           <PanelFooter source="LOCAL" updatedAt={Date.now()} health="ok" />
         </Panel>
 
-        <Panel panelId="globe-style" className="wv-globe-side-panel">
+        <Panel panelId="globe-style" className="si-globe-side-panel">
           <PanelHeader
             title="STYLE / DETECT"
             subtitle="Visual style and display density settings."
@@ -152,7 +156,7 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
               onChange={(value) => setDetectMode(value)}
               ariaLabel="Detect mode"
             />
-            <div className="wv-inline-controls">
+            <div className="si-inline-controls">
               <Toggle checked={ui.showBloom} onChange={(checked) => setUi({ showBloom: checked })} label="Bloom" />
               <Toggle checked={ui.sharpen} onChange={(checked) => setUi({ sharpen: checked })} label="Sharpen" />
               <Toggle checked={ui.showDebug} onChange={(checked) => setUi({ showDebug: checked })} label="Debug" />
@@ -161,14 +165,14 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
           <PanelFooter source="VIS" updatedAt={Date.now()} health="ok" />
         </Panel>
 
-        <Panel panelId="globe-nav" className="wv-globe-side-panel">
+        <Panel panelId="globe-nav" className="si-globe-side-panel">
           <PanelHeader
             title="NAV CLUSTER"
             subtitle="Camera movement, zoom, and orientation controls."
             controls={<PanelControls />}
           />
           <PanelBody>
-            <div className="wv-nav-grid">
+            <div className="si-nav-grid">
               <button type="button" title="Go to saved home view" onClick={() => api?.gotoHome()}>
                 HOME
               </button>
@@ -207,7 +211,7 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
               </button>
               <span />
             </div>
-            <div className="wv-camera-readout">
+            <div className="si-camera-readout">
               {camera ? (
                 <>
                   <div>LAT {camera.lat.toFixed(3)} / LON {camera.lon.toFixed(3)}</div>
@@ -221,14 +225,14 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
           <PanelFooter source="CAMERA" updatedAt={Date.now()} health="ok" />
         </Panel>
 
-        <Panel panelId="globe-filters" className="wv-globe-side-panel">
+        <Panel panelId="globe-filters" className="si-globe-side-panel">
           <PanelHeader
             title="FILTERS"
             subtitle="Filter earthquakes and altitude ranges."
             controls={<PanelControls />}
           />
           <PanelBody>
-            <label className="wv-range-label">
+            <label className="si-range-label">
               <span>Min Magnitude</span>
               <input
                 type="range"
@@ -239,7 +243,7 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
                 onChange={(event) => setFilters({ minMagnitude: Number(event.target.value) })}
               />
             </label>
-            <label className="wv-range-label">
+            <label className="si-range-label">
               <span>Max Altitude</span>
               <input
                 type="range"
@@ -259,16 +263,16 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
           <PanelFooter source="FILTERS" updatedAt={Date.now()} health="ok" />
         </Panel>
 
-        <Panel panelId="globe-scenes" className="wv-globe-side-panel">
+        <Panel panelId="globe-scenes" className="si-globe-side-panel">
           <PanelHeader
             title="SCENE QUICKLOAD"
             subtitle="Jump the camera to preset city views."
             controls={<PanelControls />}
           />
           <PanelBody
-            className="wv-globe-scenes-body"
+            className="si-globe-scenes-body"
           >
-            <div className="wv-scene-grid">
+            <div className="si-scene-grid">
               {sceneButtons.map((scene, index) => (
                 <button key={`${scene.name}-${index}`} type="button" onClick={() => gotoScene(index)}>
                   {scene.city || scene.name}

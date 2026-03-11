@@ -97,7 +97,7 @@ LIMIT 1`.trim();
         };
       }>(url.toString(), {
         headers: {
-          "User-Agent": "WorldView/0.1 (research; trade-route-nodes enrichment)",
+          "User-Agent": "SIGINT/0.1 (research; trade-route-nodes enrichment)",
           Accept: "application/sparql-results+json",
         },
       }, WIKIDATA_POLICY.timeoutMs);
@@ -158,7 +158,7 @@ async function fetchWikipediaSummary(title: string) {
         thumbnail?: { source?: string };
       }>(url, {
         headers: {
-          "User-Agent": "WorldView/0.1 (research; trade-route-nodes enrichment)",
+          "User-Agent": "SIGINT/0.1 (research; trade-route-nodes enrichment)",
           Accept: "application/json",
         },
       }, WIKIPEDIA_POLICY.timeoutMs);

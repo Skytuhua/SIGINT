@@ -545,7 +545,7 @@ async function fetchOpenSky(): Promise<Flight[]> {
   const password = process.env.OPENSKY_PASSWORD;
 
   const headers: Record<string, string> = {
-    "User-Agent": "WorldView/0.1 (educational/research use)",
+    "User-Agent": "SIGINT/0.1 (educational/research use)",
   };
 
   if (username && password) {
@@ -566,7 +566,7 @@ async function fetchOpenSky(): Promise<Flight[]> {
 
 async function fetchAdsbxGlobal(baseUrl: string, label: string): Promise<Flight[]> {
   const res = await fetchWithTimeout(globalUrl(baseUrl), {
-    headers: { "User-Agent": "WorldView/0.1 (educational/research use)" },
+    headers: { "User-Agent": "SIGINT/0.1 (educational/research use)" },
     cache: "no-store",
   });
 
@@ -609,7 +609,7 @@ async function fetchAdsbxMultiPoint(
   delayMs: number,
   minRegionSuccess: number
 ): Promise<Flight[]> {
-  const headers = { "User-Agent": "WorldView/0.1 (educational/research use)" as const };
+  const headers = { "User-Agent": "SIGINT/0.1 (educational/research use)" as const };
   const regionBatches: Flight[][] = [];
   const failures: string[] = [];
   let rateLimitHits = 0;
@@ -670,7 +670,7 @@ async function fetchAdsbxMultiPoint(
 
 async function fetchFr24(): Promise<Flight[]> {
   const res = await fetchWithTimeout(FR24_URL, {
-    headers: { "User-Agent": "WorldView/0.1 (educational/research use)" },
+    headers: { "User-Agent": "SIGINT/0.1 (educational/research use)" },
     cache: "no-store",
   });
   if (res.status === 429) throw new RateLimitError("flightradar24 rate limited (429)");

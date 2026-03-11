@@ -8,7 +8,7 @@ import {
   type ResponsiveLayouts,
 } from "react-grid-layout/legacy";
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const GRID_BREAKPOINTS = { lg: 1680, md: 1320, sm: 980, xs: 0 } as const;
@@ -31,10 +31,10 @@ interface DraggableDashboardGridProps {
 
 export default function DraggableDashboardGrid({ panels }: DraggableDashboardGridProps) {
   const [isInteracting, setIsInteracting] = useState(false);
-  const layouts = useWorldViewStore((s) => s.dashboard.panelLayouts);
-  const panelLocks = useWorldViewStore((s) => s.dashboard.panelLocks);
-  const panelZOrder = useWorldViewStore((s) => s.dashboard.panelZOrder);
-  const setPanelLayouts = useWorldViewStore((s) => s.setPanelLayouts);
+  const layouts = useSIGINTStore((s) => s.dashboard.panelLayouts);
+  const panelLocks = useSIGINTStore((s) => s.dashboard.panelLocks);
+  const panelZOrder = useSIGINTStore((s) => s.dashboard.panelZOrder);
+  const setPanelLayouts = useSIGINTStore((s) => s.setPanelLayouts);
   const isInteractingRef = useRef(false);
   const pendingLayoutRef = useRef<Parameters<typeof setPanelLayouts>[0] | null>(null);
 
@@ -87,15 +87,15 @@ export default function DraggableDashboardGrid({ panels }: DraggableDashboardGri
   return (
     <div ref={containerRef} style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
     <ResponsiveGridLayout
-      className={`wv-grid-drag ${isInteracting ? "is-interacting" : ""}`.trim()}
+      className={`si-grid-drag ${isInteracting ? "is-interacting" : ""}`.trim()}
       layouts={safeLayouts}
       breakpoints={GRID_BREAKPOINTS}
       cols={GRID_COLS}
       rowHeight={GRID_ROW_HEIGHT}
       margin={GRID_MARGIN}
       containerPadding={[0, 0]}
-      draggableHandle=".wv-panel-drag-handle"
-      draggableCancel=".react-resizable-handle,button:not(.wv-panel-drag-handle),input,select,textarea,a,[role='tab'],.wv-cctv-live-tab,.wv-panel-filters,.wv-panel-filters *"
+      draggableHandle=".si-panel-drag-handle"
+      draggableCancel=".react-resizable-handle,button:not(.si-panel-drag-handle),input,select,textarea,a,[role='tab'],.si-cctv-live-tab,.si-panel-filters,.si-panel-filters *"
       preventCollision={false}
       allowOverlap={false}
       useCSSTransforms
@@ -134,12 +134,12 @@ export default function DraggableDashboardGrid({ panels }: DraggableDashboardGri
       {panels.map((panel) => (
         <div
           key={panel.id}
-          className={`wv-grid-item ${panelLocks[panel.id] ? "is-locked" : ""}`.trim()}
+          className={`si-grid-item ${panelLocks[panel.id] ? "is-locked" : ""}`.trim()}
           data-grid-id={panel.id}
           data-panel-locked={panelLocks[panel.id] ? "true" : "false"}
           style={
             {
-              "--wv-item-z": zIndexByPanelId.get(panel.id) ?? 1,
+              "--si-item-z": zIndexByPanelId.get(panel.id) ?? 1,
             } as CSSProperties
           }
         >

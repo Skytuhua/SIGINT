@@ -182,17 +182,17 @@ export default function CriticalMineralDetailCard({ detail, onClose }: CriticalM
       : "Unknown";
 
   return createPortal(
-    <div className="wv-hotspot-card" role="dialog" aria-label="Critical mineral deposit detail">
-      <div className="wv-hotspot-card-hdr">
-        <div className="wv-hotspot-card-headline">
-          <div className="wv-hotspot-name">{detail.name.toUpperCase()}</div>
-          <span className={`wv-hotspot-tier ${supplyRiskClass(detail.supplyRisk)}`}>
+    <div className="si-hotspot-card" role="dialog" aria-label="Critical mineral deposit detail">
+      <div className="si-hotspot-card-hdr">
+        <div className="si-hotspot-card-headline">
+          <div className="si-hotspot-name">{detail.name.toUpperCase()}</div>
+          <span className={`si-hotspot-tier ${supplyRiskClass(detail.supplyRisk)}`}>
             {detail.supplyRisk} RISK
           </span>
         </div>
         <button
           type="button"
-          className="wv-hotspot-close"
+          className="si-hotspot-close"
           onClick={onClose}
           aria-label="Close critical mineral details"
         >
@@ -200,13 +200,13 @@ export default function CriticalMineralDetailCard({ detail, onClose }: CriticalM
         </button>
       </div>
 
-      <div className="wv-hotspot-tags">
+      <div className="si-hotspot-tags">
         {detail.mineralType}{detail.depositType ? ` — ${detail.depositType}` : ""}
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">METADATA</div>
-        <div className="wv-hotspot-subscores">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">METADATA</div>
+        <div className="si-hotspot-subscores">
           <div>Location {locationParts.join(" / ")}</div>
           <div>Operator {detail.operator ?? "Unknown"}</div>
           <div>Status {detail.status}</div>
@@ -214,9 +214,9 @@ export default function CriticalMineralDetailCard({ detail, onClose }: CriticalM
         </div>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">STRATEGIC ASSESSMENT</div>
-        <div className="wv-hotspot-subscores">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">STRATEGIC ASSESSMENT</div>
+        <div className="si-hotspot-subscores">
           <div>Supply Risk {detail.supplyRisk}</div>
           <div>Annual Output {detail.annualOutputTonnes != null ? `${formatTonnes(detail.annualOutputTonnes)}/yr` : "N/A"}</div>
           <div>Reserves {formatTonnes(detail.reservesTonnes)}</div>
@@ -224,16 +224,16 @@ export default function CriticalMineralDetailCard({ detail, onClose }: CriticalM
       </div>
 
       {mineralInfo && (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">WHAT IS {detail.mineralType.toUpperCase()}</div>
-          <div className="wv-hotspot-summary">{mineralInfo.description}</div>
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">WHAT IS {detail.mineralType.toUpperCase()}</div>
+          <div className="si-hotspot-summary">{mineralInfo.description}</div>
         </div>
       )}
 
       {mineralInfo && (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">KEY USES</div>
-          <div className="wv-hotspot-subscores">
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">KEY USES</div>
+          <div className="si-hotspot-subscores">
             {mineralInfo.keyUses.map((use) => (
               <div key={use}>· {use}</div>
             ))}
@@ -242,32 +242,32 @@ export default function CriticalMineralDetailCard({ detail, onClose }: CriticalM
       )}
 
       {mineralInfo && (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">WHY IT'S CRITICAL</div>
-          <div className="wv-hotspot-summary">{mineralInfo.whyCritical}</div>
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">WHY IT'S CRITICAL</div>
+          <div className="si-hotspot-summary">{mineralInfo.whyCritical}</div>
         </div>
       )}
 
       {detail.commodities.length > 0 && (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">COMMODITIES</div>
-          <div className="wv-hotspot-tags">
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">COMMODITIES</div>
+          <div className="si-hotspot-tags">
             {detail.commodities.join("  ·  ")}
           </div>
         </div>
       )}
 
       {detail.geopoliticalNotes ? (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">GEOPOLITICAL NOTES</div>
-          <div className="wv-hotspot-summary">{detail.geopoliticalNotes}</div>
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">GEOPOLITICAL NOTES</div>
+          <div className="si-hotspot-summary">{detail.geopoliticalNotes}</div>
         </div>
       ) : null}
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">COORDINATES</div>
-        <div className="wv-hotspot-updated">{formatLatLon(detail.lat, detail.lon)}</div>
-        <div className="wv-hotspot-updated">Updated: {updatedLabel}</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">COORDINATES</div>
+        <div className="si-hotspot-updated">{formatLatLon(detail.lat, detail.lon)}</div>
+        <div className="si-hotspot-updated">Updated: {updatedLabel}</div>
       </div>
     </div>,
     document.body

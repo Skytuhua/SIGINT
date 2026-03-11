@@ -3,6 +3,7 @@
 import React from "react";
 import { useMarketData } from "../../hooks/useMarketData";
 import type { QuotesResponse } from "../../lib/server/news/providers/marketTypes";
+import Term from "./shared/Term";
 
 interface YieldDef {
   maturity: string;
@@ -71,31 +72,31 @@ export default function YieldCurvePanel({ style }: Props) {
   }
 
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Yield Curve</span>
-        <div className="wv-market-yield-legend">
-          <span><span className="wv-market-yield-legend-dot" style={{ background: "#89e5ff" }} />CURRENT</span>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Yield Curve</span>
+        <div className="si-market-yield-legend">
+          <span><span className="si-market-yield-legend-dot" style={{ background: "#89e5ff" }} />CURRENT</span>
         </div>
-        <span className={`wv-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
+        <span className={`si-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
           {isLive ? "LIVE" : "STATIC"}
         </span>
       </div>
 
-      <div className="wv-market-panel-body" style={{ padding: "0 0 4px 0" }}>
+      <div className="si-market-panel-body" style={{ padding: "0 0 4px 0" }}>
         {/* Spread annotation */}
         {spread != null && (
-          <div style={{ padding: "3px 10px", fontSize: 9, color: "#ffab40", letterSpacing: "0.06em", borderBottom: "1px solid var(--wv-line)" }}>
-            3M–10Y SPREAD:&nbsp;
-            <strong>{Number(spread) > 0 ? "+" : ""}{spread}bp</strong>
+          <div style={{ padding: "3px 10px", fontSize: 9, color: "#ffab40", letterSpacing: "0.06em", borderBottom: "1px solid var(--si-line)" }}>
+            3M–10Y <Term id="SPREAD">SPREAD</Term>:&nbsp;
+            <strong>{Number(spread) > 0 ? "+" : ""}{spread}<Term id="BP">bp</Term></strong>
             &nbsp;&nbsp;
-            <span style={{ color: "var(--wv-text-muted)" }}>
-              {Number(spread) < 0 ? "INVERTED" : "NORMAL"}
+            <span style={{ color: "var(--si-text-muted)" }}>
+              {Number(spread) < 0 ? <Term id="INVERTED">INVERTED</Term> : "NORMAL"}
             </span>
           </div>
         )}
 
-        <div className="wv-market-yield-canvas">
+        <div className="si-market-yield-canvas">
           <svg
             viewBox={`0 0 ${W} ${H}`}
             width="100%"
@@ -153,7 +154,7 @@ export default function YieldCurvePanel({ style }: Props) {
         </div>
       </div>
 
-      <div className="wv-market-panel-footer">
+      <div className="si-market-panel-footer">
         {isLive ? "US Treasury · Yahoo Finance · 15min refresh" : "Waiting for data…"}
       </div>
     </div>

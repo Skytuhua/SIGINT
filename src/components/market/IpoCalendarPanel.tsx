@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Term from "./shared/Term";
 
 interface IpoRow {
   date: string;
@@ -27,7 +28,7 @@ const IPOS: IpoRow[] = [
 ];
 
 const STATUS_COLOR: Record<string, string> = {
-  Upcoming:  "var(--wv-text-muted)",
+  Upcoming:  "var(--si-text-muted)",
   Priced:    "#ffab40",
   Trading:   "#36b37e",
   Withdrawn: "#ff5a5f",
@@ -39,33 +40,33 @@ interface Props {
 
 export default function IpoCalendarPanel({ style }: Props) {
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">IPO Pipeline</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)" }}>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title"><Term id="IPO">IPO</Term> Pipeline</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)" }}>
           {IPOS.filter((i) => i.status === "Upcoming").length} upcoming
         </span>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+        <span className="si-market-panel-badge is-reference">REFERENCE</span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
-        <div className="wv-ipo-header">
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
+        <div className="si-ipo-header">
           <span>DATE</span><span>COMPANY</span><span>TICKER</span>
           <span>SECTOR</span><span style={{ textAlign: "right" }}>RANGE</span>
-          <span style={{ textAlign: "right" }}>MKT CAP</span><span>STATUS</span>
+          <span style={{ textAlign: "right" }}><Term id="MKTCAP">MKT CAP</Term></span><span>STATUS</span>
         </div>
         {IPOS.map((ipo, i) => (
-          <div key={i} className="wv-ipo-row">
-            <span style={{ color: "var(--wv-text-muted)" }}>{ipo.date}</span>
-            <span style={{ color: "var(--wv-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ipo.company}</span>
+          <div key={i} className="si-ipo-row">
+            <span style={{ color: "var(--si-text-muted)" }}>{ipo.date}</span>
+            <span style={{ color: "var(--si-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ipo.company}</span>
             <span style={{ color: "#89e5ff", fontWeight: 700 }}>{ipo.ticker}</span>
-            <span style={{ color: "var(--wv-text-muted)", fontSize: 9, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ipo.sector}</span>
-            <span style={{ textAlign: "right", color: "var(--wv-text)" }}>{ipo.range}</span>
-            <span style={{ textAlign: "right", color: "var(--wv-text)", fontWeight: 600 }}>{ipo.mcap}</span>
+            <span style={{ color: "var(--si-text-muted)", fontSize: 9, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ipo.sector}</span>
+            <span style={{ textAlign: "right", color: "var(--si-text)" }}>{ipo.range}</span>
+            <span style={{ textAlign: "right", color: "var(--si-text)", fontWeight: 600 }}>{ipo.mcap}</span>
             <span style={{ color: STATUS_COLOR[ipo.status], fontSize: 9, fontWeight: 600 }}>{ipo.status}</span>
           </div>
         ))}
       </div>
-      <div className="wv-market-panel-footer">Renaissance Capital · IPO Monitor · placeholder data</div>
+      <div className="si-market-panel-footer">Renaissance Capital · IPO Monitor · Curated reference data</div>
     </div>
   );
 }

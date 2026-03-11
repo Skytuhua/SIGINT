@@ -2,6 +2,7 @@
 
 import React from "react";
 import { MiniSparkline } from "./shared/MiniSparkline";
+import Term from "./shared/Term";
 
 interface EmRow {
   pair: string;
@@ -32,7 +33,7 @@ const EM_FX: EmRow[] = [
 const REGIME_COLOR: Record<string, string> = {
   "Risk-On":  "#36b37e",
   "Risk-Off": "#ff5a5f",
-  "Neutral":  "var(--wv-text-muted)",
+  "Neutral":  "var(--si-text-muted)",
 };
 
 interface Props {
@@ -41,28 +42,28 @@ interface Props {
 
 export default function EmCurrenciesPanel({ style }: Props) {
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">EM Currencies</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)" }}>USD cross-rates</span>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title"><Term id="EM_FX">EM</Term> Currencies</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)" }}>USD cross-rates</span>
+        <span className="si-market-panel-badge is-reference">REFERENCE</span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
-        <div className="wv-em-header">
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
+        <div className="si-em-header">
           <span>PAIR</span><span>RATE</span>
           <span style={{ textAlign: "right" }}>1D%</span>
           <span style={{ textAlign: "right" }}>1W%</span>
           <span style={{ textAlign: "right" }}>1M%</span>
           <span style={{ textAlign: "right" }}>YTD%</span>
-          <span style={{ textAlign: "right" }}>CB</span>
+          <span style={{ textAlign: "right" }}><Term id="CB_RATE">CB</Term></span>
           <span>TREND</span>
         </div>
         {EM_FX.map((r) => {
           const up = r.chg1d <= 0; // USD weakening = EM strengthening = bullish for EM
           return (
-            <div key={r.pair} className="wv-em-row" title={r.country}>
+            <div key={r.pair} className="si-em-row" title={r.country}>
               <span style={{ color: "#89e5ff", fontWeight: 700 }}>{r.pair}</span>
-              <span style={{ color: "var(--wv-text)", fontWeight: 600 }}>{r.rate}</span>
+              <span style={{ color: "var(--si-text)", fontWeight: 600 }}>{r.rate}</span>
               <span style={{ textAlign: "right", color: r.chg1d <= 0 ? "#36b37e" : "#ff5a5f" }}>
                 {r.chg1d > 0 ? "+" : ""}{r.chg1d.toFixed(2)}%
               </span>
@@ -75,13 +76,13 @@ export default function EmCurrenciesPanel({ style }: Props) {
               <span style={{ textAlign: "right", color: r.ytd <= 0 ? "#36b37e" : "#ff5a5f" }}>
                 {r.ytd > 0 ? "+" : ""}{r.ytd.toFixed(1)}%
               </span>
-              <span style={{ textAlign: "right", color: "var(--wv-text-muted)" }}>{r.cbRate}%</span>
+              <span style={{ textAlign: "right", color: "var(--si-text-muted)" }}>{r.cbRate}%</span>
               <span><MiniSparkline prices={r.hist} up={up} width={36} height={12} /></span>
             </div>
           );
         })}
       </div>
-      <div className="wv-market-panel-footer">Reuters · Bloomberg · placeholder data</div>
+      <div className="si-market-panel-footer">Reuters · Bloomberg · Curated reference data</div>
     </div>
   );
 }

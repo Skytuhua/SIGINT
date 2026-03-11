@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 
 type Preset = "normal" | "crt" | "nvg" | "flir";
 
@@ -24,10 +24,10 @@ const card: React.CSSProperties = {
 };
 
 export default function StylePresetBar() {
-  const stylePreset = useWorldViewStore((s) => s.ui.stylePreset);
-  const setStylePreset = useWorldViewStore((s) => s.setStylePreset);
-  const scenes = useWorldViewStore((s) => s.scenes);
-  const currentSceneIdx = useWorldViewStore((s) => s.currentSceneIdx);
+  const stylePreset = useSIGINTStore((s) => s.ui.stylePreset);
+  const setStylePreset = useSIGINTStore((s) => s.setStylePreset);
+  const scenes = useSIGINTStore((s) => s.scenes);
+  const currentSceneIdx = useSIGINTStore((s) => s.currentSceneIdx);
 
   const sceneLabel = useMemo(() => {
     const scene = scenes[currentSceneIdx];

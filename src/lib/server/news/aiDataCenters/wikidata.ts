@@ -240,7 +240,7 @@ export async function fetchDataCentersFromWikidata(): Promise<{
         {
           headers: {
             Accept: "application/sparql-results+json",
-            "User-Agent": "WorldView/1.0 (https://github.com/worldview; contact@worldview.app)",
+            "User-Agent": "SIGINT/1.0 (https://github.com/sigint; contact@sigint.app)",
           },
         },
         WIKIDATA_POLICY.timeoutMs,

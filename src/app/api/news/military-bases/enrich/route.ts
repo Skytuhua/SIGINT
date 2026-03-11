@@ -162,7 +162,7 @@ async function fetchOverpassCandidate(lat: number, lon: number): Promise<{
             method: "POST",
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
-              "User-Agent": "WorldView/0.1 (research; military-bases enrichment)",
+              "User-Agent": "SIGINT/0.1 (research; military-bases enrichment)",
               Accept: "application/json",
             },
             body: `data=${encodeURIComponent(query)}`,
@@ -219,7 +219,7 @@ async function runWikidataSparql(query: string): Promise<{
     url.toString(),
     {
       headers: {
-        "User-Agent": "WorldView/0.1 (research; military-bases enrichment)",
+        "User-Agent": "SIGINT/0.1 (research; military-bases enrichment)",
         Accept: "application/sparql-results+json",
       },
     },
@@ -396,7 +396,7 @@ async function fetchWikipediaSummary(title: string): Promise<{
         url,
         {
           headers: {
-            "User-Agent": "WorldView/0.1 (research; military-bases enrichment)",
+            "User-Agent": "SIGINT/0.1 (research; military-bases enrichment)",
             Accept: "application/json",
           },
         },

@@ -3,6 +3,7 @@
 import React, { useMemo, useState, useRef, useCallback, useEffect } from "react";
 import { SCREENER_UNIVERSE, ScreenerRow } from "./shared/screenerData";
 import { heatColor } from "./shared/heatColor";
+import Term from "./shared/Term";
 import { useMarketData } from "../../hooks/useMarketData";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -434,25 +435,25 @@ export default function MarketHeatmapPanel({ style, onTickerClick }: Props) {
   const isPannable = currentZoom > 1.05;
 
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Sector Heatmap</span>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Sector Heatmap</span>
         <span
           style={{
             fontSize: 9,
-            color: "var(--wv-text-muted)",
+            color: "var(--si-text-muted)",
             letterSpacing: "0.04em",
           }}
         >
-          S&P 500 · {isLive ? "LIVE" : "STATIC"} · Scroll to zoom · Click stock for chart
+          S&P 500 · <Term id="HEATMAP">Heatmap</Term> · <Term id="MKTCAP">Cap-Weighted</Term> · Scroll to zoom
         </span>
-        <span className={`wv-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
+        <span className={`si-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
           {isLive ? "LIVE" : "STATIC"}
         </span>
       </div>
       <div
         ref={containerRef}
-        className="wv-market-panel-body"
+        className="si-market-panel-body"
         onMouseDown={handleMouseDown}
         onDoubleClick={handleDoubleClick}
         style={{
@@ -604,7 +605,7 @@ export default function MarketHeatmapPanel({ style, onTickerClick }: Props) {
               padding: "2px 8px",
               fontSize: 8,
               fontFamily: "monospace",
-              color: "var(--wv-text-muted)",
+              color: "var(--si-text-muted)",
               pointerEvents: "none",
               zIndex: 10,
             }}
@@ -634,7 +635,7 @@ export default function MarketHeatmapPanel({ style, onTickerClick }: Props) {
             }}
           >
             <div style={{ fontWeight: 700, fontSize: 12 }}>{hoveredTile.sym}</div>
-            <div style={{ color: "var(--wv-text-muted)", fontSize: 9 }}>{hoveredTile.name}</div>
+            <div style={{ color: "var(--si-text-muted)", fontSize: 9 }}>{hoveredTile.name}</div>
             <div style={{ color: SECTOR_LABEL_COLORS[hoveredTile.sector] ?? "#89e5ff", fontSize: 9 }}>
               {hoveredTile.sector}
             </div>
@@ -644,7 +645,7 @@ export default function MarketHeatmapPanel({ style, onTickerClick }: Props) {
           </div>
         )}
       </div>
-      <div className="wv-market-panel-footer">
+      <div className="si-market-panel-footer">
         {isLive ? "Yahoo Finance · live data · 1s refresh" : "S&P 500 · static data"} · {SCREENER_UNIVERSE.length} stocks
       </div>
     </div>

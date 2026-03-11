@@ -132,17 +132,17 @@ export default function LiveVideoPanel({
         {...lockHeaderProps}
         controls={<PanelControls onRefresh={onRefresh} loading={loading} refreshText="LIVE" />}
       />
-      <PanelBody className="wv-news-video-body">
+      <PanelBody className="si-news-video-body">
         {displayVideoId ? (
           <iframe
-            className="wv-news-video-frame"
-            src={`https://www.youtube.com/embed/${displayVideoId}?autoplay=1&mute=1&playsinline=1&rel=0`}
+            className="si-news-video-frame"
+            src={`https://www.youtube.com/embed/${displayVideoId}?autoplay=1&mute=1&playsinline=1&rel=0&hl=en`}
             title={`${title} - Live stream`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
         ) : (
-          <div className="wv-news-empty">
+          <div className="si-news-empty">
             {fallbackActive
               ? "Video discovery degraded. Showing RSS uploads when available, or paste a URL."
               : totalCount > 0
@@ -150,8 +150,8 @@ export default function LiveVideoPanel({
               : "No streams discovered yet. Paste a YouTube URL to play manually."}
           </div>
         )}
-        <div className="wv-news-video-controls-row">
-          <div className="wv-news-video-channel-filter">
+        <div className="si-news-video-controls-row">
+          <div className="si-news-video-channel-filter">
             <label htmlFor={`${panelId}-channel-filter`}>Source</label>
             <select
               id={`${panelId}-channel-filter`}
@@ -173,7 +173,7 @@ export default function LiveVideoPanel({
               ))}
             </select>
           </div>
-          <div className="wv-news-video-manual">
+          <div className="si-news-video-manual">
             <input
               value={panelState.manualUrl}
               placeholder="Paste YouTube URL or ID"
@@ -181,7 +181,7 @@ export default function LiveVideoPanel({
             />
           </div>
         </div>
-        <div className="wv-news-video-tabs" role="tablist" aria-label={`${title} sources`}>
+        <div className="si-news-video-tabs" role="tablist" aria-label={`${title} sources`}>
           {tabItems.map((stream) => (
             <button
               key={`${stream.channelId}-${stream.videoId}`}
@@ -192,13 +192,13 @@ export default function LiveVideoPanel({
               onClick={() => setPanelState({ selectedVideoId: stream.videoId, manualUrl: "" })}
             >
               <span>{stream.channelName}</span>
-              <span className={`wv-tab-state ${stream.status === "live" ? "is-live" : "is-recent"}`}>
+              <span className={`si-tab-state ${stream.status === "live" ? "is-live" : "is-recent"}`}>
                 {stream.status === "live" ? "LIVE" : "RECENT"}
               </span>
             </button>
           ))}
           {!tabItems.length ? (
-            <div className="wv-news-empty">No streams for this category.</div>
+            <div className="si-news-empty">No streams for this category.</div>
           ) : null}
         </div>
       </PanelBody>

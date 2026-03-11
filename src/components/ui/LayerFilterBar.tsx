@@ -1,6 +1,6 @@
 "use client";
 
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import type { TimeWindow } from "../../lib/events/schema";
 
 const TIME_OPTIONS: { label: string; value: TimeWindow }[] = [
@@ -40,8 +40,8 @@ const segBtn = (active: boolean): React.CSSProperties => ({
 });
 
 export default function LayerFilterBar() {
-  const layerFilters = useWorldViewStore((s) => s.layerFilters);
-  const setLayerFilters = useWorldViewStore((s) => s.setLayerFilters);
+  const layerFilters = useSIGINTStore((s) => s.layerFilters);
+  const setLayerFilters = useSIGINTStore((s) => s.setLayerFilters);
 
   return (
     <div style={bar}>

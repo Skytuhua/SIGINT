@@ -132,20 +132,20 @@ export default function SanctionsEntityDetailCard({ detail, onClose }: Sanctions
   const newsCount = profile?.news.length ?? 0;
 
   return createPortal(
-    <div className="wv-hotspot-card" role="dialog" aria-label="Sanctions entity detail">
+    <div className="si-hotspot-card" role="dialog" aria-label="Sanctions entity detail">
       {/* Header */}
-      <div className="wv-hotspot-card-hdr">
-        <div className="wv-hotspot-card-headline">
-          <div className="wv-hotspot-name">{detail.name.toUpperCase()}</div>
+      <div className="si-hotspot-card-hdr">
+        <div className="si-hotspot-card-headline">
+          <div className="si-hotspot-name">{detail.name.toUpperCase()}</div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
-            <span className="wv-hotspot-tags">{detail.entityType}</span>
-            <span className={`wv-hotspot-tier ${statusPillClass(detail.status)}`}>{detail.status}</span>
-            <span className="wv-hotspot-tier is-construction">{detail.authority}</span>
+            <span className="si-hotspot-tags">{detail.entityType}</span>
+            <span className={`si-hotspot-tier ${statusPillClass(detail.status)}`}>{detail.status}</span>
+            <span className="si-hotspot-tier is-construction">{detail.authority}</span>
           </div>
         </div>
         <button
           type="button"
-          className="wv-hotspot-close"
+          className="si-hotspot-close"
           onClick={onClose}
           aria-label="Close sanctions entity details"
         >
@@ -184,17 +184,17 @@ export default function SanctionsEntityDetailCard({ detail, onClose }: Sanctions
       {activeTab === "overview" && (
         <>
           {aliasesRaw.length > 0 && (
-            <div className="wv-hotspot-section">
-              <div className="wv-hotspot-kicker">ALIASES</div>
-              <div className="wv-hotspot-summary">
+            <div className="si-hotspot-section">
+              <div className="si-hotspot-kicker">ALIASES</div>
+              <div className="si-hotspot-summary">
                 {aliasesRaw.join(", ")}
               </div>
             </div>
           )}
 
-          <div className="wv-hotspot-section">
-            <div className="wv-hotspot-kicker">PROGRAM</div>
-            <div className="wv-hotspot-subscores">
+          <div className="si-hotspot-section">
+            <div className="si-hotspot-kicker">PROGRAM</div>
+            <div className="si-hotspot-subscores">
               <div>Program {detail.program || "Unknown"}</div>
               <div>Designated {detail.designationDate ?? "Unknown"}</div>
               <div>
@@ -202,7 +202,7 @@ export default function SanctionsEntityDetailCard({ detail, onClose }: Sanctions
                 {detail.placeName ?? detail.jurisdictionCountry ?? "Unknown"}
                 {detail.geoConfidence && (
                   <span
-                    className={`wv-hotspot-tier ${confidencePillClass(detail.geoConfidence)}`}
+                    className={`si-hotspot-tier ${confidencePillClass(detail.geoConfidence)}`}
                     style={{ marginLeft: 6, fontSize: "0.65rem" }}
                   >
                     {detail.geoConfidence}
@@ -216,9 +216,9 @@ export default function SanctionsEntityDetailCard({ detail, onClose }: Sanctions
           </div>
 
           {idEntries.length > 0 && (
-            <div className="wv-hotspot-section">
-              <div className="wv-hotspot-kicker">IDENTIFIERS</div>
-              <div className="wv-hotspot-subscores">
+            <div className="si-hotspot-section">
+              <div className="si-hotspot-kicker">IDENTIFIERS</div>
+              <div className="si-hotspot-subscores">
                 {idEntries.map(([label, val]) => (
                   <div key={label}>
                     {label}: {val}
@@ -228,11 +228,11 @@ export default function SanctionsEntityDetailCard({ detail, onClose }: Sanctions
             </div>
           )}
 
-          <div className="wv-hotspot-section">
-            <div className="wv-hotspot-kicker">SOURCE</div>
+          <div className="si-hotspot-section">
+            <div className="si-hotspot-kicker">SOURCE</div>
             <div>{detail.sourceName}</div>
             {detail.sourceUrl && (
-              <details className="wv-hotspot-trace">
+              <details className="si-hotspot-trace">
                 <summary>Source Trace</summary>
                 <ul>
                   <li>
@@ -267,9 +267,9 @@ export default function SanctionsEntityDetailCard({ detail, onClose }: Sanctions
           ) : (
             <>
               {profile?.aiSummary && (
-                <div className="wv-hotspot-section">
-                  <div className="wv-hotspot-kicker">AI SUMMARY</div>
-                  <div className="wv-hotspot-summary" style={{ lineHeight: 1.55 }}>
+                <div className="si-hotspot-section">
+                  <div className="si-hotspot-kicker">AI SUMMARY</div>
+                  <div className="si-hotspot-summary" style={{ lineHeight: 1.55 }}>
                     {profile.aiSummary}
                   </div>
                 </div>
@@ -288,8 +288,8 @@ export default function SanctionsEntityDetailCard({ detail, onClose }: Sanctions
                 if (os.dissolutionDate) rows.push(["Dissolved", os.dissolutionDate]);
                 if (rows.length === 0 && !os.description) return null;
                 return (
-                  <div className="wv-hotspot-section">
-                    <div className="wv-hotspot-kicker">
+                  <div className="si-hotspot-section">
+                    <div className="si-hotspot-kicker">
                       PROFILE
                       {os.opensanctionsUrl && (
                         <a
@@ -303,21 +303,21 @@ export default function SanctionsEntityDetailCard({ detail, onClose }: Sanctions
                       )}
                     </div>
                     {rows.length > 0 && (
-                      <div className="wv-hotspot-subscores" style={{ marginBottom: os.description ? 6 : 0 }}>
+                      <div className="si-hotspot-subscores" style={{ marginBottom: os.description ? 6 : 0 }}>
                         {rows.map(([label, val]) => (
                           <div key={label}>{label}: {val}</div>
                         ))}
                       </div>
                     )}
                     {os.description && (
-                      <div className="wv-hotspot-summary" style={{ lineHeight: 1.55, marginTop: 4 }}>
+                      <div className="si-hotspot-summary" style={{ lineHeight: 1.55, marginTop: 4 }}>
                         {os.description}
                       </div>
                     )}
                     {os.topics.length > 0 && (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
                         {os.topics.map((t) => (
-                          <span key={t} className="wv-hotspot-tags" style={{ fontSize: "0.6rem" }}>{t}</span>
+                          <span key={t} className="si-hotspot-tags" style={{ fontSize: "0.6rem" }}>{t}</span>
                         ))}
                       </div>
                     )}
@@ -326,8 +326,8 @@ export default function SanctionsEntityDetailCard({ detail, onClose }: Sanctions
               })()}
 
               {profile?.wikipedia && (
-                <div className="wv-hotspot-section">
-                  <div className="wv-hotspot-kicker">
+                <div className="si-hotspot-section">
+                  <div className="si-hotspot-kicker">
                     BACKGROUND
                     {profile.wikipedia.pageUrl && (
                       <a
@@ -340,7 +340,7 @@ export default function SanctionsEntityDetailCard({ detail, onClose }: Sanctions
                       </a>
                     )}
                   </div>
-                  <div className="wv-hotspot-summary" style={{ lineHeight: 1.55 }}>
+                  <div className="si-hotspot-summary" style={{ lineHeight: 1.55 }}>
                     {profile.wikipedia.extract}
                   </div>
                 </div>

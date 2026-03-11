@@ -5,7 +5,7 @@ import type { CategoryPanelConfig } from "../../config/newsConfig";
 import { CATEGORY_COLORS } from "../../config/newsConfig";
 import type { NewsArticle, NewsCategory } from "../../lib/news/types";
 import { fetchJsonWithPolicy, isAbortError } from "../../lib/runtime/fetchJson";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 
 interface Props {
   config: CategoryPanelConfig;
@@ -56,7 +56,7 @@ function putDedicatedMemo(key: string, items: NewsArticle[]): void {
 }
 
 export default function CategoryFeedPanel({ config, liveCutoffMs }: Props) {
-  const feedItems = useWorldViewStore((s) => s.news.feedItems);
+  const feedItems = useSIGINTStore((s) => s.news.feedItems);
   const [dedicatedItems, setDedicatedItems] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -163,7 +163,7 @@ export default function CategoryFeedPanel({ config, liveCutoffMs }: Props) {
 
   useEffect(() => {
     if (!loading) {
-      useWorldViewStore.getState().setNewsCategoryPanelHasArticles(config.id, sortedItems.length > 0);
+      useSIGINTStore.getState().setNewsCategoryPanelHasArticles(config.id, sortedItems.length > 0);
     }
   }, [config.id, loading, sortedItems.length]);
 
@@ -172,30 +172,30 @@ export default function CategoryFeedPanel({ config, liveCutoffMs }: Props) {
     : (CATEGORY_COLORS[config.category as NewsCategory] ?? "#4caf50");
 
   return (
-    <div className="wv-catfeed">
-      <div className="wv-catfeed-body">
+    <div className="si-catfeed">
+      <div className="si-catfeed-body">
         {sortedItems.length === 0 && !loading && (
-          <div className="wv-catfeed-empty">No articles yet</div>
+          <div className="si-catfeed-empty">No articles yet</div>
         )}
         {loading && sortedItems.length === 0 && (
-          <div className="wv-catfeed-empty">Loading...</div>
+          <div className="si-catfeed-empty">Loading...</div>
         )}
         {sortedItems.map((item) => (
           <button
             key={item.id}
             type="button"
-            className="wv-catfeed-item"
-            onClick={() => useWorldViewStore.getState().setStoryPopupArticle(item)}
+            className="si-catfeed-item"
+            onClick={() => useSIGINTStore.getState().setStoryPopupArticle(item)}
             onContextMenu={(e) => {
               e.preventDefault();
               window.open(item.url, "_blank", "noopener,noreferrer");
             }}
             title="Click to view | Right-click to open link"
           >
-            <span className="wv-catfeed-dot" style={{ background: catColor }} />
-            <div className="wv-catfeed-text">
-              <div className="wv-catfeed-headline">{item.headline}</div>
-              <div className="wv-catfeed-meta">
+            <span className="si-catfeed-dot" style={{ background: catColor }} />
+            <div className="si-catfeed-text">
+              <div className="si-catfeed-headline">{item.headline}</div>
+              <div className="si-catfeed-meta">
                 {item.source} | {relativeTime(item.publishedAt)}
               </div>
             </div>

@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { SCREENER_UNIVERSE, type ScreenerRow } from "../shared/screenerData";
+import Term from "../shared/Term";
+import StockComparisonPanel from "../StockComparisonPanel";
 
 type SortDir = "asc" | "desc";
 type SortCol = keyof ScreenerRow;
@@ -24,7 +26,7 @@ interface Props {
 
 function ChgCell({ v }: { v: number }) {
   return (
-    <span style={{ color: v > 0 ? "#36b37e" : v < 0 ? "#ff5a5f" : "var(--wv-text-muted)", fontWeight: 600 }}>
+    <span style={{ color: v > 0 ? "#36b37e" : v < 0 ? "#ff5a5f" : "var(--si-text-muted)", fontWeight: 600 }}>
       {v > 0 ? "+" : ""}{v.toFixed(2)}%
     </span>
   );
@@ -98,11 +100,11 @@ export default function MarketScreenerTab({ onTickerClick }: Props) {
     return rows.slice(0, 50);
   }, [filters, sortCol, sortDir]);
 
-  function SortHeader({ col, label, align = "right" }: { col: SortCol; label: string; align?: string }) {
+  function SortHeader({ col, label, align = "right" }: { col: SortCol; label: React.ReactNode; align?: string }) {
     const active = sortCol === col;
     return (
       <th
-        className="wv-screen-th"
+        className="si-screen-th"
         style={{ textAlign: align as "left" | "right" | "center", cursor: "pointer", userSelect: "none" }}
         onClick={() => handleSort(col)}
       >
@@ -112,49 +114,52 @@ export default function MarketScreenerTab({ onTickerClick }: Props) {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "visible" }}>
+      {/* Stock Comparison */}
+      <StockComparisonPanel onTickerClick={onTickerClick} />
+
       {/* Filter bar */}
-      <div className="wv-screen-filter-bar">
-        <label className="wv-screen-filter-label">Sector</label>
-        <select className="wv-screen-select" value={filters.sector} onChange={(e) => setFilter("sector", e.target.value)}>
+      <div className="si-screen-filter-bar">
+        <label className="si-screen-filter-label">Sector</label>
+        <select className="si-screen-select" value={filters.sector} onChange={(e) => setFilter("sector", e.target.value)}>
           {SECTORS.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
 
-        <label className="wv-screen-filter-label">Mkt Cap</label>
-        <select className="wv-screen-select" value={filters.marketCap} onChange={(e) => setFilter("marketCap", e.target.value)}>
+        <label className="si-screen-filter-label"><Term id="MKTCAP">Mkt Cap</Term></label>
+        <select className="si-screen-select" value={filters.marketCap} onChange={(e) => setFilter("marketCap", e.target.value)}>
           {["ALL", ">500B", "100-500B", "<100B"].map((v) => <option key={v} value={v}>{v}</option>)}
         </select>
 
-        <label className="wv-screen-filter-label">P/E</label>
-        <select className="wv-screen-select" value={filters.pe} onChange={(e) => setFilter("pe", e.target.value)}>
+        <label className="si-screen-filter-label"><Term id="PE">P/E</Term></label>
+        <select className="si-screen-select" value={filters.pe} onChange={(e) => setFilter("pe", e.target.value)}>
           {["ALL", "<15", "15-30", ">30", "N/A"].map((v) => <option key={v} value={v}>{v}</option>)}
         </select>
 
-        <label className="wv-screen-filter-label">1D Chg</label>
-        <select className="wv-screen-select" value={filters.chg1d} onChange={(e) => setFilter("chg1d", e.target.value)}>
+        <label className="si-screen-filter-label">1D Chg</label>
+        <select className="si-screen-select" value={filters.chg1d} onChange={(e) => setFilter("chg1d", e.target.value)}>
           {["ALL", ">2%", "0-2%", "<0%"].map((v) => <option key={v} value={v}>{v}</option>)}
         </select>
 
-        <label className="wv-screen-filter-label">Avg Vol</label>
-        <select className="wv-screen-select" value={filters.volume} onChange={(e) => setFilter("volume", e.target.value)}>
+        <label className="si-screen-filter-label">Avg Vol</label>
+        <select className="si-screen-select" value={filters.volume} onChange={(e) => setFilter("volume", e.target.value)}>
           {["ALL", ">50M", "10-50M", "<10M"].map((v) => <option key={v} value={v}>{v}</option>)}
         </select>
 
         <button
-          className="wv-market-tab"
+          className="si-market-tab"
           style={{ marginLeft: "auto", padding: "2px 10px" }}
           onClick={() => setFilters(INITIAL_FILTERS)}
         >
           RESET
         </button>
-        <span style={{ fontSize: 10, color: "var(--wv-text-muted)", alignSelf: "center" }}>
+        <span style={{ fontSize: 10, color: "var(--si-text-muted)", alignSelf: "center" }}>
           {results.length} results
         </span>
       </div>
 
       {/* Table */}
       <div style={{ flex: "1 1 0", minHeight: 0, overflowY: "auto" }}>
-        <table className="wv-screen-table">
+        <table className="si-screen-table">
           <thead>
             <tr>
               <SortHeader col="sym"           label="SYM"    align="left" />
@@ -163,36 +168,36 @@ export default function MarketScreenerTab({ onTickerClick }: Props) {
               <SortHeader col="price"         label="PRICE" />
               <SortHeader col="chg1d"         label="1D%" />
               <SortHeader col="chg1w"         label="1W%" />
-              <SortHeader col="marketCapB"    label="MKTCAP" />
-              <SortHeader col="pe"            label="P/E" />
-              <SortHeader col="ps"            label="P/S" />
-              <SortHeader col="roe"           label="ROE%" />
-              <SortHeader col="grossMarginPct" label="GM%" />
-              <SortHeader col="beta"          label="BETA" />
-              <SortHeader col="divYield"      label="DIV%" />
+              <SortHeader col="marketCapB"    label={<Term id="MKTCAP">MKTCAP</Term>} />
+              <SortHeader col="pe"            label={<Term id="PE">P/E</Term>} />
+              <SortHeader col="ps"            label={<Term id="PS">P/S</Term>} />
+              <SortHeader col="roe"           label={<Term id="ROE">ROE%</Term>} />
+              <SortHeader col="grossMarginPct" label={<Term id="GM">GM%</Term>} />
+              <SortHeader col="beta"          label={<Term id="BETA">BETA</Term>} />
+              <SortHeader col="divYield"      label={<Term id="DIV_YIELD">DIV%</Term>} />
             </tr>
           </thead>
           <tbody>
             {results.map((r) => (
               <tr
                   key={r.sym}
-                  className="wv-screen-row"
+                  className="si-screen-row"
                   onClick={() => onTickerClick?.(r.sym)}
                   style={{ cursor: onTickerClick ? "pointer" : "default" }}
                 >
-                  <td className="wv-screen-td" style={{ color: "#89e5ff", fontWeight: 700 }}>{r.sym}</td>
-                  <td className="wv-screen-td wv-screen-td-name">{r.name}</td>
-                  <td className="wv-screen-td" style={{ color: "var(--wv-text-muted)" }}>{r.sector}</td>
-                  <td className="wv-screen-td wv-screen-td-num">${r.price.toFixed(2)}</td>
-                  <td className="wv-screen-td wv-screen-td-num"><ChgCell v={r.chg1d} /></td>
-                  <td className="wv-screen-td wv-screen-td-num"><ChgCell v={r.chg1w} /></td>
-                  <td className="wv-screen-td wv-screen-td-num">{fmtCap(r.marketCapB)}</td>
-                  <td className="wv-screen-td wv-screen-td-num">{r.pe != null ? r.pe.toFixed(1) : "—"}</td>
-                  <td className="wv-screen-td wv-screen-td-num">{r.ps.toFixed(1)}</td>
-                  <td className="wv-screen-td wv-screen-td-num">{r.roe != null ? r.roe.toFixed(0) + "%" : "—"}</td>
-                  <td className="wv-screen-td wv-screen-td-num">{r.grossMarginPct.toFixed(0)}%</td>
-                  <td className="wv-screen-td wv-screen-td-num">{r.beta.toFixed(2)}</td>
-                  <td className="wv-screen-td wv-screen-td-num">{r.divYield.toFixed(2)}%</td>
+                  <td className="si-screen-td" style={{ color: "#89e5ff", fontWeight: 700 }}>{r.sym}</td>
+                  <td className="si-screen-td si-screen-td-name">{r.name}</td>
+                  <td className="si-screen-td" style={{ color: "var(--si-text-muted)" }}>{r.sector}</td>
+                  <td className="si-screen-td si-screen-td-num">${r.price.toFixed(2)}</td>
+                  <td className="si-screen-td si-screen-td-num"><ChgCell v={r.chg1d} /></td>
+                  <td className="si-screen-td si-screen-td-num"><ChgCell v={r.chg1w} /></td>
+                  <td className="si-screen-td si-screen-td-num">{fmtCap(r.marketCapB)}</td>
+                  <td className="si-screen-td si-screen-td-num">{r.pe != null ? r.pe.toFixed(1) : "—"}</td>
+                  <td className="si-screen-td si-screen-td-num">{r.ps.toFixed(1)}</td>
+                  <td className="si-screen-td si-screen-td-num">{r.roe != null ? r.roe.toFixed(0) + "%" : "—"}</td>
+                  <td className="si-screen-td si-screen-td-num">{r.grossMarginPct.toFixed(0)}%</td>
+                  <td className="si-screen-td si-screen-td-num">{r.beta.toFixed(2)}</td>
+                  <td className="si-screen-td si-screen-td-num">{r.divYield.toFixed(2)}%</td>
                 </tr>
             ))}
           </tbody>

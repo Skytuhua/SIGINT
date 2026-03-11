@@ -17,8 +17,8 @@ const fontMono = Roboto_Mono({
 });
 
 export const metadata = {
-  title: "WorldView",
-  description: "WorldView geospatial intelligence dashboard powered by CesiumJS",
+  title: "SIGINT",
+  description: "SIGINT geospatial intelligence dashboard powered by CesiumJS",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

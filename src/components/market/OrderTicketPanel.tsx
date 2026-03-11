@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Term from "./shared/Term";
 
 type Side = "BUY" | "SELL";
 type OrderType = "MARKET" | "LIMIT" | "STOP" | "STOP-LIMIT";
@@ -71,27 +72,27 @@ export default function OrderTicketPanel({ sym, spotPrice }: Props) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       {/* Ticket */}
-      <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--wv-line)" }}>
+      <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--si-line)" }}>
         {/* BUY / SELL */}
-        <div className="wv-order-side-row">
+        <div className="si-order-side-row">
           {(["BUY", "SELL"] as Side[]).map((s) => (
             <button
               key={s}
-              className={`wv-order-side-btn ${s === "BUY" ? "buy" : "sell"}${side === s ? " is-active" : ""}`}
+              className={`si-order-side-btn ${s === "BUY" ? "buy" : "sell"}${side === s ? " is-active" : ""}`}
               onClick={() => setSide(s)}
             >
               {s}
             </button>
           ))}
-          <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 700, color: "var(--wv-text)" }}>{sym}</span>
+          <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 700, color: "var(--si-text)" }}>{sym}</span>
         </div>
 
         {/* Order type */}
-        <div className="wv-order-type-row">
+        <div className="si-order-type-row">
           {(["MARKET", "LIMIT", "STOP", "STOP-LIMIT"] as OrderType[]).map((t) => (
             <button
               key={t}
-              className={`wv-order-type-btn${orderType === t ? " is-active" : ""}`}
+              className={`si-order-type-btn${orderType === t ? " is-active" : ""}`}
               onClick={() => setOrderType(t)}
             >
               {t}
@@ -100,11 +101,11 @@ export default function OrderTicketPanel({ sym, spotPrice }: Props) {
         </div>
 
         {/* Inputs */}
-        <div className="wv-order-inputs">
-          <div className="wv-order-input-row">
-            <label className="wv-order-label">Qty (shares)</label>
+        <div className="si-order-inputs">
+          <div className="si-order-input-row">
+            <label className="si-order-label">Qty (shares)</label>
             <input
-              className="wv-order-input"
+              className="si-order-input"
               type="number"
               min="1"
               value={qty}
@@ -112,10 +113,10 @@ export default function OrderTicketPanel({ sym, spotPrice }: Props) {
             />
           </div>
           {needsStop && (
-            <div className="wv-order-input-row">
-              <label className="wv-order-label">Stop $</label>
+            <div className="si-order-input-row">
+              <label className="si-order-label">Stop $</label>
               <input
-                className="wv-order-input"
+                className="si-order-input"
                 type="number"
                 step="0.01"
                 value={stopPrice}
@@ -124,10 +125,10 @@ export default function OrderTicketPanel({ sym, spotPrice }: Props) {
             </div>
           )}
           {needsLimit && (
-            <div className="wv-order-input-row">
-              <label className="wv-order-label">Limit $</label>
+            <div className="si-order-input-row">
+              <label className="si-order-label">Limit $</label>
               <input
-                className="wv-order-input"
+                className="si-order-input"
                 type="number"
                 step="0.01"
                 value={limitPrice}
@@ -138,14 +139,14 @@ export default function OrderTicketPanel({ sym, spotPrice }: Props) {
         </div>
 
         {/* Est Value */}
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--wv-text-muted)", marginTop: 6 }}>
-          <span>Spot: <span style={{ color: "var(--wv-text)" }}>${spotPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></span>
-          <span>Est. Value: <span style={{ color: "var(--wv-text)", fontWeight: 600 }}>${estValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span></span>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--si-text-muted)", marginTop: 6 }}>
+          <span>Spot: <span style={{ color: "var(--si-text)" }}>${spotPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></span>
+          <span>Est. Value: <span style={{ color: "var(--si-text)", fontWeight: 600 }}>${estValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span></span>
         </div>
 
         {/* Send button */}
         <button
-          className={`wv-order-send-btn${flash ? " is-flash" : ""} ${side === "BUY" ? "buy" : "sell"}`}
+          className={`si-order-send-btn${flash ? " is-flash" : ""} ${side === "BUY" ? "buy" : "sell"}`}
           onClick={sendOrder}
         >
           {flash ? "✓ ORDER SENT" : `SEND ${side} ORDER`}
@@ -158,23 +159,23 @@ export default function OrderTicketPanel({ sym, spotPrice }: Props) {
 
       {/* Blotter */}
       <div style={{ flex: "1 1 0", minHeight: 0, overflowY: "auto", padding: "6px 14px" }}>
-        <div style={{ fontSize: 9, color: "var(--wv-text-muted)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-          Order Blotter
+        <div style={{ fontSize: 9, color: "var(--si-text-muted)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <Term id="BLOTTER">Order Blotter</Term>
         </div>
         {orders.length === 0 && (
-          <div style={{ fontSize: 10, color: "var(--wv-text-muted)", fontStyle: "italic", paddingTop: 8 }}>
+          <div style={{ fontSize: 10, color: "var(--si-text-muted)", fontStyle: "italic", paddingTop: 8 }}>
             No orders this session
           </div>
         )}
         {orders.map((o) => (
-          <div key={o.id} className="wv-order-blotter-row">
-            <span style={{ color: "var(--wv-text-muted)", minWidth: 52 }}>{o.time}</span>
-            <span className={o.side === "BUY" ? "wv-order-buy-label" : "wv-order-sell-label"}>{o.side}</span>
-            <span style={{ color: "var(--wv-text)", minWidth: 40, fontWeight: 600 }}>{o.sym}</span>
-            <span style={{ color: "var(--wv-text-muted)" }}>{o.type}</span>
-            <span style={{ color: "var(--wv-text)", minWidth: 44 }}>{o.qty.toLocaleString()}</span>
-            <span style={{ color: "var(--wv-text)" }}>${o.price.toFixed(2)}</span>
-            <span className="wv-order-filled-badge">{o.status}</span>
+          <div key={o.id} className="si-order-blotter-row">
+            <span style={{ color: "var(--si-text-muted)", minWidth: 52 }}>{o.time}</span>
+            <span className={o.side === "BUY" ? "si-order-buy-label" : "si-order-sell-label"}>{o.side}</span>
+            <span style={{ color: "var(--si-text)", minWidth: 40, fontWeight: 600 }}>{o.sym}</span>
+            <span style={{ color: "var(--si-text-muted)" }}>{o.type}</span>
+            <span style={{ color: "var(--si-text)", minWidth: 44 }}>{o.qty.toLocaleString()}</span>
+            <span style={{ color: "var(--si-text)" }}>${o.price.toFixed(2)}</span>
+            <span className="si-order-filled-badge">{o.status}</span>
           </div>
         ))}
       </div>

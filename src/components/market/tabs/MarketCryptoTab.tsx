@@ -5,7 +5,7 @@ import CryptoMetricsPanel from "../CryptoMetricsPanel";
 import WatchlistPanel from "../WatchlistPanel";
 import ChartPanel from "../ChartPanel";
 import OrderBookPanel from "../OrderBookPanel";
-import MarketNewsTape from "../MarketNewsTape";
+import TradingViewWidget from "../shared/TradingViewWidget";
 import SectionLabel from "../shared/SectionLabel";
 
 interface Props {
@@ -14,32 +14,53 @@ interface Props {
 
 export default function MarketCryptoTab({ onTickerClick }: Props) {
   return (
-    <div className="wv-overview-scroll">
+    <div className="si-overview-scroll">
 
       {/* ── 1: CRYPTO MARKETS ────────────────────────────────────── */}
       <SectionLabel label="CRYPTO MARKETS" sub="Ranked by market cap · Price · Volume · Dominance" />
-      <div className="wv-overview-row-full">
+      <div className="si-overview-row-full">
         <CryptoMarketPanel style={{ minHeight: 460 }} />
       </div>
 
       {/* ── 2: ON-CHAIN METRICS & WATCHLIST ──────────────────────── */}
       <SectionLabel label="ON-CHAIN METRICS & WATCHLIST" sub="Network health · Derivatives · DeFi · Funding rates" />
-      <div className="wv-overview-row-2col">
+      <div className="si-overview-row-2col">
         <CryptoMetricsPanel style={{ minHeight: 380 }} />
-        <WatchlistPanel style={{ minHeight: 340 }} onTickerClick={onTickerClick} />
+        <WatchlistPanel style={{ minHeight: 380 }} onTickerClick={onTickerClick} />
       </div>
 
-      {/* ── 3: CHART & ORDER BOOK ────────────────────────────────── */}
-      <SectionLabel label="PRICE ACTION & MARKET DEPTH" sub="Candlestick chart · Bid/ask depth" />
-      <div className="wv-overview-row-2col">
-        <ChartPanel style={{ minHeight: 300 }} />
-        <OrderBookPanel style={{ minHeight: 300 }} />
+      {/* ── 3: CHART & MARKET DEPTH ────────────────────────────── */}
+      <SectionLabel label="PRICE ACTION & MARKET DEPTH" sub="Live TradingView charts · Real-time data" />
+      <div className="si-overview-row-2col">
+        <ChartPanel style={{ minHeight: 360 }} />
+        <OrderBookPanel style={{ minHeight: 360 }} />
       </div>
 
-      {/* ── 4: NEWS ──────────────────────────────────────────────── */}
-      <SectionLabel label="CRYPTO NEWS" sub="Bitcoin · Ethereum · DeFi · Regulation" />
-      <div className="wv-overview-row-full">
-        <MarketNewsTape style={{ minHeight: 240 }} />
+      {/* ── 4: CRYPTO NEWS ─────────────────────────────────────── */}
+      <SectionLabel label="CRYPTO NEWS" sub="Bitcoin · Ethereum · DeFi · Regulation · Real-time" />
+      <div className="si-overview-row-full">
+        <div className="si-market-panel" style={{ minHeight: 400 }}>
+          <div className="si-market-panel-header">
+            <span className="si-market-panel-title">Crypto News Feed</span>
+            <span className="si-market-panel-badge is-live">LIVE</span>
+          </div>
+          <div className="si-market-panel-body" style={{ padding: 0, overflow: "hidden" }}>
+            <TradingViewWidget
+              scriptSrc="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js"
+              config={{
+                feedMode: "market",
+                market: "crypto",
+                width: "100%",
+                height: "100%",
+                displayMode: "regular",
+              }}
+              height="100%"
+              width="100%"
+              style={{ minHeight: 340 }}
+            />
+          </div>
+          <div className="si-market-panel-footer">TradingView · Crypto News Timeline · real-time</div>
+        </div>
       </div>
 
       <div style={{ height: 24 }} />

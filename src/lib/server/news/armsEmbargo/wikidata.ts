@@ -9,7 +9,7 @@ import type {
 
 const SPARQL_ENDPOINT = "https://query.wikidata.org/sparql";
 const REQUEST_TIMEOUT_MS = 30_000;
-const USER_AGENT = "WorldView/1.0 (arms-embargo-layer; https://github.com/worldview)";
+const USER_AGENT = "SIGINT/1.0 (arms-embargo-layer; https://github.com/sigint)";
 
 const SPARQL_QUERY = `
 SELECT DISTINCT

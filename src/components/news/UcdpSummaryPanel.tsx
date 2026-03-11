@@ -31,8 +31,8 @@ export default function UcdpSummaryPanel({
   const hasStats = stats && stats.eventCount > 0;
 
   return (
-    <div className="wv-news-layers-group" style={{ marginBottom: 8 }}>
-      <div className="wv-news-layers-group-label">
+    <div className="si-news-layers-group" style={{ marginBottom: 8 }}>
+      <div className="si-news-layers-group-label">
         UCDP SUMMARY
         {loading ? (
           <span style={{ marginLeft: 6, opacity: 0.5, fontSize: 10 }}>loading…</span>

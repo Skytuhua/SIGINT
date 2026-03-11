@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Term from "./shared/Term";
 
 interface ShortRow {
   sym: string;
@@ -42,7 +43,7 @@ function scoreBar(score: number) {
 }
 
 function pct(v: number, small = false) {
-  const color = v > 0 ? "#36b37e" : v < 0 ? "#ff5a5f" : "var(--wv-text-muted)";
+  const color = v > 0 ? "#36b37e" : v < 0 ? "#ff5a5f" : "var(--si-text-muted)";
   return (
     <span style={{ color, fontFamily: "monospace", fontSize: small ? 9 : 10 }}>
       {v > 0 ? "+" : ""}{v.toFixed(2)}%
@@ -57,29 +58,29 @@ interface Props {
 
 export default function ShortInterestPanel({ style, onTickerClick }: Props) {
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Short Interest & Squeeze Screen</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)", letterSpacing: "0.04em" }}>
-          Short Float · Days to Cover · Borrow Rate
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Short Interest & Squeeze Screen</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)", letterSpacing: "0.04em" }}>
+          <Term id="SI_PCT">Short Float</Term> · <Term id="DAYS_TO_COVER">Days to Cover</Term> · Borrow Rate
         </span>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+        <span className="si-market-panel-badge is-reference">REFERENCE</span>
       </div>
-      <div className="wv-market-panel-body-auto" style={{ padding: 0 }}>
+      <div className="si-market-panel-body-auto" style={{ padding: 0 }}>
         <div style={{
           display: "grid",
           gridTemplateColumns: "44px 1fr 52px 44px 56px 46px 46px 1fr",
           padding: "4px 10px",
-          borderBottom: "1px solid var(--wv-line)",
+          borderBottom: "1px solid var(--si-line)",
           fontSize: 8.5,
-          color: "var(--wv-text-muted)",
+          color: "var(--si-text-muted)",
           fontWeight: 600,
           letterSpacing: "0.06em",
         }}>
           <span>SYM</span>
           <span>NAME</span>
-          <span style={{ textAlign: "right" }}>SHORT%</span>
-          <span style={{ textAlign: "right" }}>DTC</span>
+          <span style={{ textAlign: "right" }}><Term id="SI_PCT">SHORT%</Term></span>
+          <span style={{ textAlign: "right" }}><Term id="DAYS_TO_COVER">DTC</Term></span>
           <span style={{ textAlign: "right" }}>BORROW</span>
           <span style={{ textAlign: "right" }}>1D</span>
           <span style={{ textAlign: "right" }}>1W</span>
@@ -103,12 +104,12 @@ export default function ShortInterestPanel({ style, onTickerClick }: Props) {
               }}
             >
               <span style={{ color: sigColor, fontWeight: 700, fontFamily: "monospace", fontSize: 9.5 }}>{r.sym}</span>
-              <span style={{ color: "var(--wv-text-muted)", fontSize: 9, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</span>
-              <span style={{ textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: r.shortPct > 20 ? "#ff5a5f" : "var(--wv-text-bright)" }}>
+              <span style={{ color: "var(--si-text-muted)", fontSize: 9, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</span>
+              <span style={{ textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: r.shortPct > 20 ? "#ff5a5f" : "var(--si-text-bright)" }}>
                 {r.shortPct.toFixed(1)}%
               </span>
-              <span style={{ textAlign: "right", fontFamily: "monospace", color: "var(--wv-text-muted)" }}>{r.dtc.toFixed(1)}d</span>
-              <span style={{ textAlign: "right", fontFamily: "monospace", color: r.borrowRate > 10 ? "#ffab40" : "var(--wv-text-muted)" }}>
+              <span style={{ textAlign: "right", fontFamily: "monospace", color: "var(--si-text-muted)" }}>{r.dtc.toFixed(1)}d</span>
+              <span style={{ textAlign: "right", fontFamily: "monospace", color: r.borrowRate > 10 ? "#ffab40" : "var(--si-text-muted)" }}>
                 {r.borrowRate.toFixed(1)}%
               </span>
               <span style={{ textAlign: "right" }}>{pct(r.chg1d, true)}</span>
@@ -118,7 +119,7 @@ export default function ShortInterestPanel({ style, onTickerClick }: Props) {
           );
         })}
       </div>
-      <div className="wv-market-panel-footer">FINRA · SEC Form 3/4 · placeholder data</div>
+      <div className="si-market-panel-footer">FINRA · SEC Form 3/4 · Curated reference data</div>
     </div>
   );
 }

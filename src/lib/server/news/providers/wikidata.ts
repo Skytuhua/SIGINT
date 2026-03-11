@@ -106,7 +106,7 @@ async function runSparql(query: string): Promise<WikidataEntity | null> {
     url.toString(),
     {
       headers: {
-        "User-Agent": "WorldView/0.1 (research; https://github.com/worldview)",
+        "User-Agent": "SIGINT/0.1 (research; https://github.com/sigint)",
         Accept: "application/sparql-results+json",
       },
     },

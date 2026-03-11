@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Term from "./shared/Term";
 
 interface StorageRow {
   commodity: string;
@@ -36,17 +37,17 @@ interface Props {
 
 export default function CommodityStoragePanel({ style }: Props) {
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Storage & Inventory</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)" }}>vs. 5-Year Average</span>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Storage & Inventory</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)" }}>vs. 5-Year Average</span>
+        <span className="si-market-panel-badge is-reference">REFERENCE</span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
-        <div className="wv-storage-header">
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
+        <div className="si-storage-header">
           <span>COMMODITY</span>
           <span style={{ textAlign: "right" }}>CURRENT</span>
-          <span style={{ textAlign: "right" }}>5YR AVG</span>
+          <span style={{ textAlign: "right" }}><Term id="FIVE_YR_AVG">5YR AVG</Term></span>
           <span style={{ textAlign: "right" }}>WK CHG</span>
           <span style={{ textAlign: "right" }}>VS AVG</span>
           <span style={{ width: 80 }}>VS AVG BAR</span>
@@ -56,12 +57,12 @@ export default function CommodityStoragePanel({ style }: Props) {
           const barPct = Math.min(100, Math.max(0, 50 + r.pctVsAvg * 2));
           const barColor = r.status === "Surplus" ? "rgba(54,179,126,0.5)" : r.status === "Deficit" ? "rgba(255,90,95,0.5)" : "rgba(255,171,64,0.4)";
           return (
-            <div key={r.commodity} className="wv-storage-row">
-              <span style={{ color: "var(--wv-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.commodity}</span>
-              <span style={{ textAlign: "right", color: "var(--wv-text)", fontWeight: 600 }}>
-                {r.current.toLocaleString()} <span style={{ color: "var(--wv-text-muted)", fontSize: 8 }}>{r.unit}</span>
+            <div key={r.commodity} className="si-storage-row">
+              <span style={{ color: "var(--si-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.commodity}</span>
+              <span style={{ textAlign: "right", color: "var(--si-text)", fontWeight: 600 }}>
+                {r.current.toLocaleString()} <span style={{ color: "var(--si-text-muted)", fontSize: 8 }}>{r.unit}</span>
               </span>
-              <span style={{ textAlign: "right", color: "var(--wv-text-muted)" }}>{r.avg5y.toLocaleString()}</span>
+              <span style={{ textAlign: "right", color: "var(--si-text-muted)" }}>{r.avg5y.toLocaleString()}</span>
               <span style={{ textAlign: "right", color: r.chgWeek >= 0 ? "#36b37e" : "#ff5a5f" }}>
                 {r.chgWeek > 0 ? "+" : ""}{r.chgWeek}
               </span>
@@ -88,7 +89,7 @@ export default function CommodityStoragePanel({ style }: Props) {
           );
         })}
       </div>
-      <div className="wv-market-panel-footer">EIA · LME · COMEX Warehouse · placeholder data</div>
+      <div className="si-market-panel-footer">EIA · LME · COMEX Warehouse · Curated reference data</div>
     </div>
   );
 }

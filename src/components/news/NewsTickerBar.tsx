@@ -1,8 +1,8 @@
 "use client";
 
-import { useWorldViewStore } from "@/store";
+import { useSIGINTStore } from "@/store";
 
-const CATEGORY_COLORS: Record<string, string> = {
+export const CATEGORY_COLORS: Record<string, string> = {
   world:        "#89e5ff",
   defense:      "#ff6b6b",
   markets:      "#36b37e",
@@ -26,7 +26,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function NewsTickerBar() {
-  const feedItems = useWorldViewStore((s) => s.news.feedItems);
+  const feedItems = useSIGINTStore((s) => s.news.feedItems);
 
   if (!feedItems.length) return null;
 
@@ -38,22 +38,22 @@ export default function NewsTickerBar() {
   const doubled = [...top, ...top];
 
   return (
-    <div className="wv-news-ticker-bar">
-      <div className="wv-news-ticker-label">NEWS</div>
-      <div className="wv-news-ticker-track">
-        <div className="wv-news-ticker-scroll">
+    <div className="si-news-ticker-bar">
+      <div className="si-news-ticker-label">NEWS</div>
+      <div className="si-news-ticker-track">
+        <div className="si-news-ticker-scroll">
           {doubled.map((item, i) => {
             const catColor = CATEGORY_COLORS[item.category] ?? "#89e5ff";
             return (
-              <div key={i} className="wv-news-ticker-item">
+              <div key={i} className="si-news-ticker-item">
                 <span
-                  className="wv-news-ticker-cat"
+                  className="si-news-ticker-cat"
                   style={{ color: catColor }}
                 >
                   {item.category.toUpperCase()}
                 </span>
-                <span className="wv-news-ticker-source">{item.source}</span>
-                <span className="wv-news-ticker-headline">{item.headline}</span>
+                <span className="si-news-ticker-source">{item.source}</span>
+                <span className="si-news-ticker-headline">{item.headline}</span>
               </div>
             );
           })}

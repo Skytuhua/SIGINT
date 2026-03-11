@@ -3,6 +3,7 @@
 import React from "react";
 import { useMarketData } from "../../hooks/useMarketData";
 import type { QuotesResponse } from "../../lib/server/news/providers/marketTypes";
+import Term from "./shared/Term";
 
 type Scenario = "BASELINE" | "RISK-OFF" | "RATES UP" | "OIL SHOCK";
 
@@ -70,6 +71,28 @@ const GROUPS: SnapshotGroupDef[] = [
   },
 ];
 
+const SYM_TERM_MAP: Record<string, { id: string; label: string }> = {
+  ES:  { id: "ES",  label: "ES" },
+  NQ:  { id: "NQ",  label: "NQ" },
+  RTY: { id: "RTY", label: "RTY" },
+  YM:  { id: "YM",  label: "YM" },
+  DXY: { id: "DXY", label: "DXY" },
+  WTI: { id: "WTI", label: "WTI" },
+  XAU: { id: "GC",  label: "Gold" },
+};
+
+function renderSym(sym: string) {
+  const t = SYM_TERM_MAP[sym];
+  return t ? <Term id={t.id}>{sym}</Term> : <>{sym}</>;
+}
+
+function renderLabel(sym: string, label: string) {
+  if (sym === "XAU") return <><Term id="GC">Gold</Term></>;
+  if (sym === "WTI") return <><Term id="WTI">Crude Oil WTI</Term></>;
+  if (label === "Brent Crude" || label === "Brent") return <Term id="BRENT">{label}</Term>;
+  return <>{label}</>;
+}
+
 const ALL_YF_SYMBOLS = GROUPS.flatMap((g) => g.rows.map((r) => r.yfSym));
 const ENDPOINT = `/api/market/quotes?symbols=${ALL_YF_SYMBOLS.join(",")}`;
 
@@ -86,19 +109,19 @@ export default function GlobalSnapshotPanel({ scenario = "BASELINE", style, onTi
   const quotes = data.quotes ?? {};
 
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Global Snapshot</span>
-        <span className={`wv-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Global Snapshot</span>
+        <span className={`si-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
           {isLive ? "LIVE" : "STATIC"}
         </span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
         {GROUPS.map((group) => (
           <div key={group.id}>
-            <div className="wv-market-snap-group-label">
+            <div className="si-market-snap-group-label">
               <span>{group.label}</span>
-              <span style={{ marginLeft: "auto" }}>{group.col3Label}</span>
+              <span style={{ marginLeft: "auto" }}>{group.col3Label === "YTD%" ? <><Term id="YTD">YTD</Term>%</> : group.col3Label}</span>
             </div>
             {group.rows.map((row) => {
               const q = quotes[row.yfSym];
@@ -120,21 +143,21 @@ export default function GlobalSnapshotPanel({ scenario = "BASELINE", style, onTi
               return (
                 <div
                   key={row.sym}
-                  className="wv-market-snap-row"
+                  className="si-market-snap-row"
                   style={{
                     ...(isHighlighted ? { background: "rgba(255,171,64,0.07)" } : {}),
                     cursor: onTickerClick ? "pointer" : "default",
                   }}
                   onClick={() => onTickerClick?.(row.sym)}
                 >
-                  <span className="wv-market-snap-sym">{row.sym}</span>
-                  <span className="wv-market-snap-name" title={row.label}>{row.label}</span>
-                  <span className="wv-market-snap-price">{q ? priceStr : "—"}</span>
-                  <span className={`wv-market-snap-chg ${chgClass}`}>
+                  <span className="si-market-snap-sym">{renderSym(row.sym)}</span>
+                  <span className="si-market-snap-name" title={row.label}>{renderLabel(row.sym, row.label)}</span>
+                  <span className="si-market-snap-price">{q ? priceStr : "—"}</span>
+                  <span className={`si-market-snap-chg ${chgClass}`}>
                     {q ? `${sign}${dayPct.toFixed(2)}%` : "—"}
                   </span>
-                  <span className="wv-market-snap-col3">
-                    <span style={{ color: "var(--wv-text-muted)" }}>—</span>
+                  <span className="si-market-snap-col3">
+                    <span style={{ color: "var(--si-text-muted)" }}>—</span>
                   </span>
                 </div>
               );
@@ -142,7 +165,7 @@ export default function GlobalSnapshotPanel({ scenario = "BASELINE", style, onTi
           </div>
         ))}
       </div>
-      <div className="wv-market-panel-footer">
+      <div className="si-market-panel-footer">
         {isLive ? "Yahoo Finance · 60s refresh" : "Waiting for data…"}
       </div>
     </div>

@@ -9,7 +9,7 @@ interface InlineFilterProps {
 export default function InlineFilter({ value, placeholder = "Filter", onChange }: InlineFilterProps) {
   return (
     <input
-      className="wv-inline-filter"
+      className="si-inline-filter"
       value={value}
       placeholder={placeholder}
       onChange={(event) => onChange(event.target.value)}

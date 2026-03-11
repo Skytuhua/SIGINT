@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Term from "./shared/Term";
 
 interface DivRow {
   exDate: string;
@@ -35,31 +36,31 @@ interface Props {
 
 export default function DividendCalendarPanel({ style, onTickerClick }: Props) {
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Dividend Calendar</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)" }}>Next 30 days · Ex-Date</span>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Dividend Calendar</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)" }}>Next 30 days · <Term id="EX_DATE">Ex-Date</Term></span>
+        <span className="si-market-panel-badge is-reference">REFERENCE</span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
-        <div className="wv-div-header">
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
+        <div className="si-div-header">
           <span>EX</span><span>PAY</span><span>SYM</span><span>AMT</span>
-          <span style={{ textAlign: "right" }}>YIELD</span><span style={{ textAlign: "right" }}>YoY</span>
+          <span style={{ textAlign: "right" }}><Term id="DIV_YIELD">YIELD</Term></span><span style={{ textAlign: "right" }}>YoY</span>
         </div>
         {DIVIDENDS.map((d, i) => (
-          <div key={i} className="wv-div-row" onClick={() => onTickerClick?.(d.sym)} style={{ cursor: onTickerClick ? "pointer" : "default" }}>
-            <span style={{ color: "var(--wv-text-muted)" }}>{d.exDate}</span>
-            <span style={{ color: "var(--wv-text-muted)" }}>{d.payDate}</span>
+          <div key={i} className="si-div-row" onClick={() => onTickerClick?.(d.sym)} style={{ cursor: onTickerClick ? "pointer" : "default" }}>
+            <span style={{ color: "var(--si-text-muted)" }}>{d.exDate}</span>
+            <span style={{ color: "var(--si-text-muted)" }}>{d.payDate}</span>
             <span style={{ color: "#89e5ff", fontWeight: 700 }}>{d.sym}</span>
             <span style={{ color: "#36b37e", fontWeight: 600 }}>{d.amount}</span>
-            <span style={{ textAlign: "right", color: d.yld > 4 ? "#ffab40" : "var(--wv-text)" }}>{d.yld.toFixed(2)}%</span>
-            <span style={{ textAlign: "right", color: d.chgYoy > 0 ? "#36b37e" : d.chgYoy < 0 ? "#ff5a5f" : "var(--wv-text-muted)" }}>
+            <span style={{ textAlign: "right", color: d.yld > 4 ? "#ffab40" : "var(--si-text)" }}>{d.yld.toFixed(2)}%</span>
+            <span style={{ textAlign: "right", color: d.chgYoy > 0 ? "#36b37e" : d.chgYoy < 0 ? "#ff5a5f" : "var(--si-text-muted)" }}>
               {d.chgYoy === 0 ? "—" : `+${d.chgYoy.toFixed(1)}%`}
             </span>
           </div>
         ))}
       </div>
-      <div className="wv-market-panel-footer">NASDAQ · Bloomberg · placeholder data</div>
+      <div className="si-market-panel-footer">NASDAQ · Bloomberg · Curated reference data</div>
     </div>
   );
 }

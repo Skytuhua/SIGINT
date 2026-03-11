@@ -65,7 +65,7 @@ export async function geocodeNominatim(place: string): Promise<CachedFetchResult
         url.toString(),
         {
           headers: {
-            "User-Agent": "WorldView/0.1 (research; geocoding for news geo-tagging)",
+            "User-Agent": "SIGINT/0.1 (research; geocoding for news geo-tagging)",
             "Accept-Language": "en",
           },
         },
@@ -125,7 +125,7 @@ export async function reverseGeocodeNominatim(
         url.toString(),
         {
           headers: {
-            "User-Agent": "WorldView/0.1 (research; reverse geocoding for news map)",
+            "User-Agent": "SIGINT/0.1 (research; reverse geocoding for news map)",
             "Accept-Language": "en",
           },
         },

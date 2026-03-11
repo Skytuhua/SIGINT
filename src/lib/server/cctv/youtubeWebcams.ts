@@ -185,7 +185,7 @@ async function searchLiveWebcams(apiKey: string): Promise<CctvCamera[]> {
     try {
       const resp = await fetchJsonOrThrow<YtSearchResponse>(
         url.toString(),
-        { headers: { "User-Agent": "WorldView/0.1 (cctv-webcam-search)" } },
+        { headers: { "User-Agent": "SIGINT/0.1 (cctv-webcam-search)" } },
         SEARCH_API_POLICY.timeoutMs
       );
 
@@ -221,7 +221,7 @@ async function searchLiveWebcams(apiKey: string): Promise<CctvCamera[]> {
     try {
       const resp = await fetchJsonOrThrow<YtVideosResponse>(
         videosUrl.toString(),
-        { headers: { "User-Agent": "WorldView/0.1 (cctv-webcam-videos)" } },
+        { headers: { "User-Agent": "SIGINT/0.1 (cctv-webcam-videos)" } },
         SEARCH_API_POLICY.timeoutMs
       );
 
@@ -282,7 +282,7 @@ async function discoverFromChannels(apiKey: string): Promise<CctvCamera[]> {
 
   const channelsResp = await fetchJsonOrThrow<YtChannelsResponse>(
     channelsUrl.toString(),
-    { headers: { "User-Agent": "WorldView/0.1 (cctv-webcam-channels)" } },
+    { headers: { "User-Agent": "SIGINT/0.1 (cctv-webcam-channels)" } },
     SEARCH_API_POLICY.timeoutMs
   );
 
@@ -314,7 +314,7 @@ async function discoverFromChannels(apiKey: string): Promise<CctvCamera[]> {
     try {
       const resp = await fetchJsonOrThrow<YtPlaylistItemsResponse>(
         playlistUrl.toString(),
-        { headers: { "User-Agent": "WorldView/0.1 (cctv-webcam-playlist)" } },
+        { headers: { "User-Agent": "SIGINT/0.1 (cctv-webcam-playlist)" } },
         SEARCH_API_POLICY.timeoutMs
       );
 
@@ -403,7 +403,7 @@ async function discoverFromRss(): Promise<CctvCamera[]> {
     try {
       const resp = await fetch(rssUrl, {
         headers: {
-          "User-Agent": "WorldView/0.1 (cctv-webcam-rss)",
+          "User-Agent": "SIGINT/0.1 (cctv-webcam-rss)",
           Accept: "application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
         },
         cache: "no-store",

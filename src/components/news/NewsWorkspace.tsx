@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { CATEGORY_LABELS, CATEGORY_PANEL_CONFIGS, LIVE_VIDEO_PANELS, NEWS_VIDEO_CHANNELS, PRESET_QUERIES } from "../../config/newsConfig";
 import CategoryFeedPanel from "./CategoryFeedPanel";
-import NewsTickerBar from "./NewsTickerBar";
+import NewsTickerBar, { CATEGORY_COLORS } from "./NewsTickerBar";
 import { makeFingerprint } from "../../lib/news/engine/dedupe";
 import { InMemoryNewsIndex } from "../../lib/news/index/inMemoryIndex";
 import { parseQuery } from "../../lib/news/query/parse";
@@ -28,7 +28,7 @@ import {
   readPersistentFeedCache,
   writePersistentFeedCache,
 } from "../../lib/runtime/persistentFeedCache";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import { shallow } from "zustand/shallow";
 import { List } from "react-window";
 import { perfMark, perfMeasure, startJankSampler, stopJankSampler } from "../../lib/news/perf";
@@ -41,11 +41,15 @@ import dynamic from "next/dynamic";
 import NewsDraggableGrid from "./NewsDraggableGrid";
 import NewsPopupModal from "./NewsPopupModal";
 
+const NewsDailyBriefingModal = dynamic(() => import("./NewsDailyBriefingModal"), {
+  ssr: false,
+});
+
 const PanelSkeleton = () => (
-  <div className="wv-panel-state" style={{ padding: 8 }}>
-    <div className="wv-skeleton-block" />
-    <div className="wv-skeleton-row" />
-    <div className="wv-skeleton-row" />
+  <div className="si-panel-state" style={{ padding: 8 }}>
+    <div className="si-skeleton-block" />
+    <div className="si-skeleton-row" />
+    <div className="si-skeleton-row" />
   </div>
 );
 
@@ -119,7 +123,7 @@ const CATEGORY_TABS = [
 ] as const;
 
 const SEARCH_INDEX = new InMemoryNewsIndex(5000);
-const NEWS_CACHE_META_KEY = "worldview-news-feed-cache-meta-v1";
+const NEWS_CACHE_META_KEY = "sigint-news-feed-cache-meta-v1";
 const NEWS_CACHE_STORE_KEY = "news:workspace:feed";
 const NEWS_CACHE_MAX_ITEMS = 240;
 const NEWS_CACHE_MAX_MARKERS = 600;
@@ -139,12 +143,26 @@ interface NewsMapOverlayProps {
 }
 
 function NewsMapOverlay({ ready }: NewsMapOverlayProps) {
+  const [showLegend, setShowLegend] = useState(false);
   return (
     <>
-      <div className="wv-news-globe-overlay wv-news-globe-overlay-top">
+      <div className="si-news-globe-overlay si-news-globe-overlay-top">
         <span>{ready ? "NEWS MAP READY" : "INITIALIZING NEWS MAP..."}</span>
+        <button type="button" onClick={() => setShowLegend((p) => !p)} style={{ marginLeft: 8, fontSize: 9, padding: "1px 6px", background: "var(--si-bg-2)", border: "var(--si-border) solid var(--si-line)", color: showLegend ? "var(--si-accent)" : "var(--si-text-muted)", cursor: "pointer" }}>
+          LEGEND
+        </button>
       </div>
-      <div className="wv-news-globe-overlay wv-news-globe-overlay-bottom">
+      {showLegend ? (
+        <div className="si-news-legend">
+          {Object.entries(CATEGORY_COLORS).map(([cat, color]) => (
+            <div key={cat} className="si-news-legend-row">
+              <span className="si-news-legend-dot" style={{ background: color }} />
+              {cat.toUpperCase()}
+            </div>
+          ))}
+        </div>
+      ) : null}
+      <div className="si-news-globe-overlay si-news-globe-overlay-bottom">
         <span>2D world map with news event markers</span>
       </div>
     </>
@@ -508,7 +526,7 @@ interface SearchOverlayRowProps {
   selectedItemId: string | null;
   markersRef: GeoMarker[];
   onRowClick: (idx: number, item: NormalizedNewsItem, markerId: string | null) => void;
-  onRowContextMenu: (item: NormalizedNewsItem) => void;
+  onRowContextMenu: (item: NormalizedNewsItem, event: React.MouseEvent) => void;
 }
 
 function SearchOverlayRow({
@@ -525,23 +543,23 @@ function SearchOverlayRow({
   return (
     <div
       style={style}
-      className={`wv-news-terminal-row ${item.id === selectedItemId ? "is-selected" : ""}`.trim()}
+      className={`si-news-terminal-row ${item.id === selectedItemId ? "is-selected" : ""}`.trim()}
       onClick={() => {
         const marker = markersRef.find((m) => m.articleId === item.id);
         onRowClick(index, item, marker?.id ?? null);
       }}
       onContextMenu={(event) => {
         event.preventDefault();
-        onRowContextMenu(item);
+        onRowContextMenu(item, event);
       }}
       role="row"
     >
-      <span className="wv-news-terminal-cell wv-col-time">{formatShortTime(item.publishedAt)}</span>
-      <span className="wv-news-terminal-cell wv-col-source">{item.source}</span>
-      <span className="wv-news-terminal-cell wv-col-entity">{extractEntity(item)}</span>
-      <span className="wv-news-terminal-cell wv-col-region">{extractRegion(item)}</span>
-      <span className="wv-news-terminal-cell wv-col-headline">{item.headline}</span>
-      <span className="wv-news-terminal-cell wv-col-score">{Math.round(item.score)}</span>
+      <span className="si-news-terminal-cell si-col-time">{formatShortTime(item.publishedAt)}</span>
+      <span className="si-news-terminal-cell si-col-source">{item.source}</span>
+      <span className="si-news-terminal-cell si-col-entity">{extractEntity(item)}</span>
+      <span className="si-news-terminal-cell si-col-region">{extractRegion(item)}</span>
+      <span className="si-news-terminal-cell si-col-headline">{item.headline}</span>
+      <span className="si-news-terminal-cell si-col-score">{Math.round(item.score)}</span>
     </div>
   );
 }
@@ -549,8 +567,8 @@ function SearchOverlayRow({
 export default function NewsWorkspace({ embedded = false }: { embedded?: boolean }) {
   perfMark("news:mount:start");
 
-  const dashboardView = useWorldViewStore((s) => s.dashboard.activeView);
-  const news = useWorldViewStore(
+  const dashboardView = useSIGINTStore((s) => s.dashboard.activeView);
+  const news = useSIGINTStore(
     (s) => ({
       query: s.news.query,
       feedItems: s.news.feedItems,
@@ -577,34 +595,39 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     shallow,
   );
 
-  const setNewsQuery = useWorldViewStore((s) => s.setNewsQuery);
-  const setNewsQueryAst = useWorldViewStore((s) => s.setNewsQueryAst);
-  const setNewsQueryState = useWorldViewStore((s) => s.setNewsQueryState);
-  const setNewsUiState = useWorldViewStore((s) => s.setNewsUiState);
-  const setNewsFeedItems = useWorldViewStore((s) => s.setNewsFeedItems);
-  const setNewsMarkers = useWorldViewStore((s) => s.setNewsMarkers);
-  const setNewsFacets = useWorldViewStore((s) => s.setNewsFacets);
-  const setNewsThreads = useWorldViewStore((s) => s.setNewsThreads);
-  const setSelectedStory = useWorldViewStore((s) => s.setSelectedStory);
-  const setStoryPopupArticle = useWorldViewStore((s) => s.setStoryPopupArticle);
-  const setHighlightMarker = useWorldViewStore((s) => s.setHighlightMarker);
-  const setSearchInView = useWorldViewStore((s) => s.setSearchInView);
-  const setNewsLayoutPreset = useWorldViewStore((s) => s.setNewsLayoutPreset);
-  const resetNewsLayout = useWorldViewStore((s) => s.resetNewsLayout);
-  const setNewsPanelLayouts = useWorldViewStore((s) => s.setNewsPanelLayouts);
-  const setNewsPanelVisibility = useWorldViewStore((s) => s.setNewsPanelVisibility);
-  const setNewsPanelLock = useWorldViewStore((s) => s.setNewsPanelLock);
-  const saveNewsSearch = useWorldViewStore((s) => s.saveNewsSearch);
-  const deleteNewsSearch = useWorldViewStore((s) => s.deleteNewsSearch);
-  const upsertNewsAlert = useWorldViewStore((s) => s.upsertNewsAlert);
-  const ackNewsAlert = useWorldViewStore((s) => s.ackNewsAlert);
-  const setNewsVideoState = useWorldViewStore((s) => s.setNewsVideoState);
-  const setNewsVideoPanelState = useWorldViewStore((s) => s.setNewsVideoPanelState);
-  const setHeadlineTape = useWorldViewStore((s) => s.setHeadlineTape);
-  const advanceHeadlineTape = useWorldViewStore((s) => s.advanceHeadlineTape);
-  const setNewsBackendHealth = useWorldViewStore((s) => s.setNewsBackendHealth);
-  const setNewsLastUpdated = useWorldViewStore((s) => s.setNewsLastUpdated);
+  const setNewsQuery = useSIGINTStore((s) => s.setNewsQuery);
+  const setNewsQueryAst = useSIGINTStore((s) => s.setNewsQueryAst);
+  const setNewsQueryState = useSIGINTStore((s) => s.setNewsQueryState);
+  const setNewsUiState = useSIGINTStore((s) => s.setNewsUiState);
+  const setNewsFeedItems = useSIGINTStore((s) => s.setNewsFeedItems);
+  const setNewsMarkers = useSIGINTStore((s) => s.setNewsMarkers);
+  const setNewsFacets = useSIGINTStore((s) => s.setNewsFacets);
+  const setNewsThreads = useSIGINTStore((s) => s.setNewsThreads);
+  const setSelectedStory = useSIGINTStore((s) => s.setSelectedStory);
+  const setStoryPopupArticle = useSIGINTStore((s) => s.setStoryPopupArticle);
+  const setHighlightMarker = useSIGINTStore((s) => s.setHighlightMarker);
+  const setSearchInView = useSIGINTStore((s) => s.setSearchInView);
+  const setNewsLayoutPreset = useSIGINTStore((s) => s.setNewsLayoutPreset);
+  const resetNewsLayout = useSIGINTStore((s) => s.resetNewsLayout);
+  const setNewsPanelLayouts = useSIGINTStore((s) => s.setNewsPanelLayouts);
+  const setNewsPanelVisibility = useSIGINTStore((s) => s.setNewsPanelVisibility);
+  const setNewsPanelLock = useSIGINTStore((s) => s.setNewsPanelLock);
+  const saveNewsSearch = useSIGINTStore((s) => s.saveNewsSearch);
+  const deleteNewsSearch = useSIGINTStore((s) => s.deleteNewsSearch);
+  const upsertNewsAlert = useSIGINTStore((s) => s.upsertNewsAlert);
+  const ackNewsAlert = useSIGINTStore((s) => s.ackNewsAlert);
+  const setNewsVideoState = useSIGINTStore((s) => s.setNewsVideoState);
+  const setNewsVideoPanelState = useSIGINTStore((s) => s.setNewsVideoPanelState);
+  const setHeadlineTape = useSIGINTStore((s) => s.setHeadlineTape);
+  const advanceHeadlineTape = useSIGINTStore((s) => s.advanceHeadlineTape);
+  const setNewsBackendHealth = useSIGINTStore((s) => s.setNewsBackendHealth);
+  const setNewsLastUpdated = useSIGINTStore((s) => s.setNewsLastUpdated);
 
+  const [showBriefing, setShowBriefing] = useState(() =>
+    typeof window !== "undefined"
+      ? localStorage.getItem("si-news-briefing-disabled") !== "true"
+      : true
+  );
   const [selectedRow, setSelectedRow] = useState(0);
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [geoMode, setGeoMode] = useState<"pointdata" | "country" | "adm1">("pointdata");
@@ -619,11 +642,19 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   const [videoDiscoverySource, setVideoDiscoverySource] = useState<"youtube-data-api" | "youtube-rss">("youtube-data-api");
   const [videoFallbackActive, setVideoFallbackActive] = useState(false);
   const [contextItem, setContextItem] = useState<NewsArticle | null>(null);
+  const [contextPos, setContextPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [newsMapReady, setNewsMapReady] = useState(false);
   const [searchInputDraft, setSearchInputDraft] = useState(news.query || "time:24h");
   const [panelMenuOpen, setPanelMenuOpen] = useState(false);
   const [searchResultsOpen, setSearchResultsOpen] = useState(false);
   const [topbarExpanded, setTopbarExpanded] = useState(false);
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try { return new Set(JSON.parse(localStorage.getItem("si-news-bookmarks") || "[]")); } catch { return new Set(); }
+  });
+  const [bookmarkPanelOpen, setBookmarkPanelOpen] = useState(false);
+  const [timeRange, setTimeRange] = useState<string | null>(null);
+  const [showStats, setShowStats] = useState(false);
   const initialLayoutAppliedRef = useRef(false);
   const layoutTopOffsetCheckedRef = useRef(false);
   const cacheHydratedRef = useRef(false);
@@ -654,6 +685,15 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     bbox: null as string | null,
     geoMode: "pointdata" as "pointdata" | "country" | "adm1",
   });
+
+  const toggleBookmark = useCallback((id: string) => {
+    setBookmarkedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      localStorage.setItem("si-news-bookmarks", JSON.stringify(Array.from(next)));
+      return next;
+    });
+  }, []);
 
   const feedItems = news.feedItems as NormalizedNewsItem[];
   const newsBackendHealth = news.backendHealth ?? {};
@@ -818,9 +858,12 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       if (sourceMuted.has(src)) return false;
       return true;
     });
-    if (activeCategory === "all") return bySource;
-    return bySource.filter((item) => item.category === activeCategory);
-  }, [feedItems, activeCategory, news.mutedSources]);
+    const byCategory = activeCategory === "all" ? bySource : bySource.filter((item) => item.category === activeCategory);
+    if (!timeRange) return byCategory;
+    const ms: Record<string, number> = { "1h": 3600e3, "6h": 21600e3, "24h": 86400e3, "7d": 604800e3 };
+    const cutoff = Date.now() - (ms[timeRange] ?? 86400e3);
+    return byCategory.filter((item) => item.publishedAt >= cutoff);
+  }, [feedItems, activeCategory, news.mutedSources, timeRange]);
 
   const liveCutoff = Date.now() - LIVE_CUTOFF_MS;
   const terminalItems = useMemo(() => {
@@ -917,7 +960,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       const controller = new AbortController();
       searchAbortRef.current = controller;
 
-      const stateNews = useWorldViewStore.getState().news;
+      const stateNews = useSIGINTStore.getState().news;
       const context = {
         ...searchContextRef.current,
         query: stateNews.query,
@@ -1252,7 +1295,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
         }
 
         if (lastPayload && !appliedFromAttempt) {
-          const existingItems = useWorldViewStore.getState().news.feedItems;
+          const existingItems = useSIGINTStore.getState().news.feedItems;
           const upstreamDegraded =
             Object.values(lastPayload.degraded ?? {}).some(Boolean) ||
             Object.values(lastPayload.backendHealth ?? {}).some((state) => state !== "ok");
@@ -1592,7 +1635,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     if (!panelMenuOpen) return;
     const onPointerDown = (event: MouseEvent) => {
       if (!(event.target instanceof HTMLElement)) return;
-      if (event.target.closest(".wv-news-toolbar-panels")) return;
+      if (event.target.closest(".si-news-toolbar-panels")) return;
       setPanelMenuOpen(false);
     };
     const onEscape = (event: KeyboardEvent) => {
@@ -1605,6 +1648,32 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       window.removeEventListener("keydown", onEscape);
     };
   }, [panelMenuOpen]);
+
+  useEffect(() => {
+    if (!bookmarkPanelOpen) return;
+    const onPointerDown = (event: MouseEvent) => {
+      if (!(event.target instanceof HTMLElement)) return;
+      if (event.target.closest(".si-news-bookmarks-popover") || event.target.closest("button")?.textContent?.startsWith("SAVED")) return;
+      setBookmarkPanelOpen(false);
+    };
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setBookmarkPanelOpen(false);
+    };
+    window.addEventListener("mousedown", onPointerDown);
+    window.addEventListener("keydown", onEscape);
+    return () => { window.removeEventListener("mousedown", onPointerDown); window.removeEventListener("keydown", onEscape); };
+  }, [bookmarkPanelOpen]);
+
+  useEffect(() => {
+    if (!contextItem) return;
+    const onDown = (e: MouseEvent) => {
+      if (!(e.target instanceof HTMLElement) || !e.target.closest(".si-news-context-menu")) setContextItem(null);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setContextItem(null); };
+    window.addEventListener("mousedown", onDown);
+    window.addEventListener("keydown", onKey);
+    return () => { window.removeEventListener("mousedown", onDown); window.removeEventListener("keydown", onKey); };
+  }, [contextItem]);
 
   useEffect(() => {
     if (dashboardView !== "news" || layoutTopOffsetCheckedRef.current) return;
@@ -1838,13 +1907,13 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       }
       if (event.key.toLowerCase() === "g") {
         event.preventDefault();
-        useWorldViewStore.getState().setNewsPanelFocus("news-globe");
+        useSIGINTStore.getState().setNewsPanelFocus("news-globe");
         return;
       }
       if (event.key.toLowerCase() === "v") {
         event.preventDefault();
         setNewsPanelVisibility("news-video-general", true);
-        useWorldViewStore.getState().setNewsPanelFocus("news-video-general");
+        useSIGINTStore.getState().setNewsPanelFocus("news-video-general");
         return;
       }
       if (event.key.toLowerCase() === "a") {
@@ -1950,8 +2019,8 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
             {...lockHeaderProps("news-globe")}
             controls={<PanelControls onRefresh={() => void runSearch("manual")} />}
           />
-          <PanelBody noPadding className="wv-news-globe-body">
-            <div className="wv-news-globe-cube">
+          <PanelBody noPadding className="si-news-globe-body">
+            <div className="si-news-globe-cube">
               <div style={{ position: "relative", width: "100%", height: "100%" }}>
                 {newsMapEngine === "maplibre" ? (
                   <MapLibreNewsMap
@@ -2018,7 +2087,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       node: (
         <Panel key={cfg.id} panelId={cfg.id} workspace="news">
           <PanelHeader title={cfg.title} {...lockHeaderProps(cfg.id)} />
-          <PanelBody noPadding className="wv-catfeed-panel-body">
+          <PanelBody noPadding className="si-catfeed-panel-body">
             <CategoryFeedPanel config={cfg} liveCutoffMs={LIVE_CUTOFF_MS} />
           </PanelBody>
         </Panel>
@@ -2038,23 +2107,57 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   );
 
   return (
-    <div className={`wv-news-workspace ${embedded ? "is-embedded" : ""}`.trim()}>
+    <div className={`si-news-workspace ${embedded ? "is-embedded" : ""}`.trim()}>
+      {showBriefing && <NewsDailyBriefingModal onClose={() => setShowBriefing(false)} />}
       <NewsTickerBar />
-      <div className="wv-news-toolbar">
-        <div className="wv-toolbar-status">
+      <div className="si-news-toolbar">
+        <div className="si-toolbar-status">
           {loading ? "SEARCHING..." : `${filteredItems.length} STORIES`}
           {news.lastUpdated ? ` | UPDATED ${formatUtc(news.lastUpdated)}` : ""}
           {news.ui.statusLine ? ` | ${news.ui.statusLine}` : ""}
         </div>
-        <div className="wv-toolbar-actions">
+        <div className="si-toolbar-actions">
+          <button type="button" onClick={() => setShowBriefing(true)}>DAILY BRIEFING</button>
+          <div className="si-news-toolbar-panels">
+            <button type="button" onClick={() => setBookmarkPanelOpen((p) => !p)}>
+              SAVED {bookmarkedIds.size > 0 ? `(${bookmarkedIds.size})` : ""}
+            </button>
+            {bookmarkPanelOpen ? (
+              <div className="si-news-panel-popover si-news-bookmarks-popover">
+                {bookmarkedIds.size === 0 ? (
+                  <div style={{ padding: 6, color: "var(--si-text-muted)", fontSize: 10 }}>No saved articles</div>
+                ) : (
+                  Array.from(bookmarkedIds).map((id) => {
+                    const item = feedItems.find((f) => f.id === id);
+                    return (
+                      <div key={id} className="si-news-bookmark-row">
+                        <span className="si-news-bookmark-title" onClick={() => { if (item) { setStoryPopupArticle(item); setBookmarkPanelOpen(false); } }}>
+                          {item?.headline ?? id.slice(0, 30)}
+                        </span>
+                        <button type="button" onClick={() => toggleBookmark(id)} title="Remove">x</button>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            ) : null}
+          </div>
+          <button type="button" onClick={() => {
+            const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
+            const rows = filteredItems.map((i) => [i.publishedAt, q(i.headline ?? ""), q(i.source ?? ""), q(i.category ?? ""), q(i.url ?? ""), i.score ?? ""].join(","));
+            const csv = ["publishedAt,headline,source,category,url,score", ...rows].join("\n");
+            const blob = new Blob([csv], { type: "text/csv" });
+            const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `news-export-${Date.now()}.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
+          }}>EXPORT</button>
+          <button type="button" onClick={() => setShowStats((p) => !p)}>{showStats ? "HIDE STATS" : "STATS"}</button>
           <button type="button" onClick={() => resetNewsLayout()}>RESET LAYOUT</button>
           <button type="button" onClick={() => setNewsUiState({ showHelpHints: !news.ui.showHelpHints })}>
             {news.ui.showHelpHints ? "HIDE HINTS" : "SHOW HINTS"}
           </button>
-          <div className="wv-news-toolbar-panels">
+          <div className="si-news-toolbar-panels">
             <button type="button" onClick={() => setPanelMenuOpen((prev) => !prev)}>PANELS</button>
             {panelMenuOpen ? (
-              <div className="wv-news-panel-popover">
+              <div className="si-news-panel-popover">
                 {Object.keys(news.panelVisibility).map((panelId) => (
                   <label key={panelId}>
                     <input
@@ -2069,19 +2172,40 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
             ) : null}
           </div>
           {news.ui.showHelpHints ? (
-            <span className="wv-news-hotkeys" title="Keyboard shortcuts (when not typing)">
+            <span className="si-news-hotkeys" title="Keyboard shortcuts (when not typing)">
               <kbd>/</kbd> focus search | <kbd>j</kbd>/<kbd>k</kbd> move | <kbd>Enter</kbd> open story | <kbd>g</kbd> globe | <kbd>v</kbd> video | <kbd>a</kbd> new alert
             </span>
           ) : null}
         </div>
       </div>
 
-      <div className="wv-news-topbar">
-        <div className="wv-news-topbar-main">
-          <div className="wv-news-query-row">
+      <div className="si-news-filter-bar">
+        <div className="si-news-time-filters">
+          {(["1h", "6h", "24h", "7d"] as const).map((range) => (
+            <button key={range} type="button" className={timeRange === range ? "is-active" : ""} onClick={() => setTimeRange(timeRange === range ? null : range)}>
+              {range.toUpperCase()}
+            </button>
+          ))}
+        </div>
+        {showStats ? (
+          <div className="si-news-stats-bar">
+            {Object.entries(
+              filteredItems.reduce<Record<string, number>>((acc, item) => { acc[item.category] = (acc[item.category] ?? 0) + 1; return acc; }, {})
+            ).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([cat, count]) => (
+              <span key={cat} className="si-news-stat-badge" style={{ borderColor: CATEGORY_COLORS[cat] ?? "#89e5ff" }}>
+                <span style={{ color: CATEGORY_COLORS[cat] ?? "#89e5ff" }}>{cat.toUpperCase()}</span> {count}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="si-news-topbar">
+        <div className="si-news-topbar-main">
+          <div className="si-news-query-row">
             <input
               type="text"
-              className="wv-news-search-input"
+              className="si-news-search-input"
               ref={searchInputRef}
               value={searchInputDraft}
               onChange={(event) => {
@@ -2117,7 +2241,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
             </button>
             <button
               type="button"
-              className="wv-topbar-toggle"
+              className="si-topbar-toggle"
               onClick={() => setTopbarExpanded((prev) => !prev)}
               title={topbarExpanded ? "Hide presets & saved searches" : "Show presets & saved searches"}
             >
@@ -2125,7 +2249,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
             </button>
           </div>
           {suggestOpen && suggestions.length ? (
-            <div className="wv-news-suggest-list">
+            <div className="si-news-suggest-list">
               {suggestions.map((entry) => (
                 <button
                   key={`${entry.type}-${entry.value}`}
@@ -2142,12 +2266,12 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
               ))}
             </div>
           ) : null}
-          <div className="wv-news-query-hints">
+          <div className="si-news-query-hints">
             {QUERY_HINT_ITEMS.map((item) => (
               <button
                 key={item.chip}
                 type="button"
-                className="wv-hint-chip"
+                className="si-hint-chip"
                 title={`${item.hint}. Click to add filter. Example: ${item.example}`}
                 onClick={() => {
                   setSearchInputDraft((prev) => {
@@ -2158,14 +2282,14 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
                   searchInputRef.current?.focus();
                 }}
               >
-                <span className="wv-hint-chip-label">{item.hint}</span>
+                <span className="si-hint-chip-label">{item.hint}</span>
               </button>
             ))}
           </div>
         </div>
         {topbarExpanded ? (
-          <div className="wv-news-topbar-expanded">
-            <div className="wv-news-presets">
+          <div className="si-news-topbar-expanded">
+            <div className="si-news-presets">
               {PRESET_QUERIES.map((preset) => (
                 <button
                   key={preset.label}
@@ -2180,7 +2304,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
               ))}
             </div>
             {news.savedSearches.length ? (
-              <div className="wv-news-facet-grid">
+              <div className="si-news-facet-grid">
                 {news.savedSearches.map((entry) => (
                   <button
                     key={entry.id}
@@ -2203,14 +2327,14 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           </div>
         ) : null}
         {searchResultsOpen ? (
-          <div className="wv-news-search-overlay">
-            <div className="wv-news-search-overlay-header">
-              <span className="wv-news-search-overlay-title">
+          <div className="si-news-search-overlay">
+            <div className="si-news-search-overlay-header">
+              <span className="si-news-search-overlay-title">
                 SEARCH RESULTS  | {news.query || "all"}  | {terminalItems.length} stories
               </span>
               <button type="button" onClick={() => setSearchResultsOpen(false)}>CLOSE</button>
             </div>
-            <div className="wv-news-category-tabs">
+            <div className="si-news-category-tabs">
               <button type="button" className={activeCategory === "all" ? "is-active" : ""} onClick={() => setActiveCategory("all")}>
                 All
               </button>
@@ -2220,16 +2344,16 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
                 </button>
               ))}
             </div>
-            <div className="wv-news-search-overlay-body">
-              <div className="wv-news-terminal-table-scroll">
-                <div className="wv-news-terminal-table">
-                  <div className="wv-news-terminal-row wv-news-terminal-head" role="row">
-                    <span className="wv-news-terminal-cell wv-col-time">TIME</span>
-                    <span className="wv-news-terminal-cell wv-col-source">SOURCE</span>
-                    <span className="wv-news-terminal-cell wv-col-entity">ENTITY</span>
-                    <span className="wv-news-terminal-cell wv-col-region">REGION</span>
-                    <span className="wv-news-terminal-cell wv-col-headline">HEADLINE</span>
-                    <span className="wv-news-terminal-cell wv-col-score">SCORE</span>
+            <div className="si-news-search-overlay-body">
+              <div className="si-news-terminal-table-scroll">
+                <div className="si-news-terminal-table">
+                  <div className="si-news-terminal-row si-news-terminal-head" role="row">
+                    <span className="si-news-terminal-cell si-col-time">TIME</span>
+                    <span className="si-news-terminal-cell si-col-source">SOURCE</span>
+                    <span className="si-news-terminal-cell si-col-entity">ENTITY</span>
+                    <span className="si-news-terminal-cell si-col-region">REGION</span>
+                    <span className="si-news-terminal-cell si-col-headline">HEADLINE</span>
+                    <span className="si-news-terminal-cell si-col-score">SCORE</span>
                   </div>
                   {terminalItems.length > 0 ? (
                     <List
@@ -2248,14 +2372,17 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
                           setHighlightMarker(markerId);
                           setSearchResultsOpen(false);
                         },
-                        onRowContextMenu: (item: NormalizedNewsItem) => {
+                        onRowContextMenu: (item: NormalizedNewsItem, event: React.MouseEvent) => {
+                          const x = Math.min(event.clientX, window.innerWidth - 220);
+                          const y = Math.min(event.clientY, window.innerHeight - 140);
+                          setContextPos({ x, y });
                           setContextItem(item);
                         },
                       }}
                       style={{ height: "calc(100% - 28px)", overflow: "auto" }}
                     />
                   ) : (
-                    <div className="wv-news-empty">
+                    <div className="si-news-empty">
                       {news.queryState.lastEmptyReason ?? "No results for current filters."}
                       {backendIssueSummary ? ` (${backendIssueSummary})` : ""}
                     </div>
@@ -2267,7 +2394,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
         ) : null}
       </div>
 
-      <div className="wv-news-grid-area">
+      <div className="si-news-grid-area">
         <NewsDraggableGrid
           panels={panelNodes.filter((panel) => news.panelVisibility[panel.id] !== false)}
           emptyCategoryPanelIds={CATEGORY_PANEL_CONFIGS.filter((c) => news.categoryPanelHasArticles[c.id] === false).map((c) => c.id)}
@@ -2280,22 +2407,25 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           relatedItems={news.storyPopupArticle.id === selectedItem?.id ? relatedItems : undefined}
           timeline={news.storyPopupArticle.id === selectedItem?.id ? timeline : undefined}
           onClose={() => setStoryPopupArticle(null)}
+          isBookmarked={bookmarkedIds.has(news.storyPopupArticle.id)}
+          onToggleBookmark={toggleBookmark}
         />
       ) : null}
 
       {contextItem ? (
-        <div className="wv-news-context-menu" role="menu" aria-label="row actions">
+        <div className="si-news-context-menu" role="menu" aria-label="row actions" style={{ left: contextPos.x, top: contextPos.y }}>
           <button type="button" onClick={() => { window.open(contextItem.url, "_blank", "noopener,noreferrer"); setContextItem(null); }}>
             Open Link
           </button>
           <button type="button" onClick={() => { void navigator.clipboard.writeText(contextItem.url); setContextItem(null); }}>
             Copy Link
           </button>
-          <button type="button" onClick={() => { useWorldViewStore.getState().muteNewsSource(contextItem.source, true); setContextItem(null); }}>
+          <button type="button" onClick={() => { useSIGINTStore.getState().muteNewsSource(contextItem.source, true); setContextItem(null); }}>
             Mute Source
           </button>
-
-
+          <button type="button" onClick={() => { toggleBookmark(contextItem.id); setContextItem(null); }}>
+            {bookmarkedIds.has(contextItem.id) ? "Remove Bookmark" : "Bookmark"}
+          </button>
           <button type="button" onClick={() => setContextItem(null)}>Close</button>
         </div>
       ) : null}

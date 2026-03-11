@@ -6,7 +6,7 @@ const SEC_SUBMISSIONS_BASE = "https://data.sec.gov/submissions";
 const SEC_TICKERS_URL = "https://www.sec.gov/files/company_tickers.json";
 
 const SEC_HEADERS = {
-  "User-Agent": "WorldView/0.1 research@worldview.app",
+  "User-Agent": "SIGINT/0.1 research@sigint.app",
   Accept: "application/json",
 };
 

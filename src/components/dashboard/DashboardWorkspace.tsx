@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import DraggableDashboardGrid from "./DraggableDashboardGrid";
 import Panel from "./panel/Panel";
 import PanelBody from "./panel/PanelBody";
@@ -30,18 +30,18 @@ interface DashboardWorkspaceProps {
 }
 
 export default function DashboardWorkspace({ embedded = false }: DashboardWorkspaceProps) {
-  const liveData = useWorldViewStore((s) => s.liveData);
-  const health = useWorldViewStore((s) => s.liveData.health);
-  const sourceHealth = useWorldViewStore((s) => s.liveData.sourceHealth);
-  const lastUpdated = useWorldViewStore((s) => s.liveData.lastUpdated);
-  const panelVisibility = useWorldViewStore((s) => s.dashboard.panelVisibility);
-  const panelLocks = useWorldViewStore((s) => s.dashboard.panelLocks);
-  const setPanelVisibility = useWorldViewStore((s) => s.setPanelVisibility);
-  const setPanelLock = useWorldViewStore((s) => s.setPanelLock);
-  const bumpRefreshTick = useWorldViewStore((s) => s.bumpRefreshTick);
-  const openInspector = useWorldViewStore((s) => s.openInspector);
-  const pinEntity = useWorldViewStore((s) => s.pinEntity);
-  const resetPanelLayouts = useWorldViewStore((s) => s.resetPanelLayouts);
+  const liveData = useSIGINTStore((s) => s.liveData);
+  const health = useSIGINTStore((s) => s.liveData.health);
+  const sourceHealth = useSIGINTStore((s) => s.liveData.sourceHealth);
+  const lastUpdated = useSIGINTStore((s) => s.liveData.lastUpdated);
+  const panelVisibility = useSIGINTStore((s) => s.dashboard.panelVisibility);
+  const panelLocks = useSIGINTStore((s) => s.dashboard.panelLocks);
+  const setPanelVisibility = useSIGINTStore((s) => s.setPanelVisibility);
+  const setPanelLock = useSIGINTStore((s) => s.setPanelLock);
+  const bumpRefreshTick = useSIGINTStore((s) => s.bumpRefreshTick);
+  const openInspector = useSIGINTStore((s) => s.openInspector);
+  const pinEntity = useSIGINTStore((s) => s.pinEntity);
+  const resetPanelLayouts = useSIGINTStore((s) => s.resetPanelLayouts);
   const [showViewMenu, setShowViewMenu] = useState(false);
   const viewMenuRef = useRef<HTMLDivElement | null>(null);
 
@@ -57,6 +57,35 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
         .slice(0, 40),
     [liveData.spaceWeather]
   );
+
+  const threatItems = useMemo(() => {
+    const items: Array<{ id: string; source: string; title: string; ts: number; level: "error" | "warn" }> = [];
+    for (const eq of liveData.earthquakes ?? []) {
+      if (eq.mag >= 5.0) {
+        items.push({
+          id: `eq-${eq.id}`, source: "USGS",
+          title: `M${eq.mag.toFixed(1)} — ${eq.place}`, ts: eq.time, level: "error",
+        });
+      }
+    }
+    for (const d of liveData.disasters ?? []) {
+      if (d.alertLevel === "Orange" || d.alertLevel === "Red") {
+        items.push({
+          id: `dis-${d.id}`, source: "GDACS",
+          title: d.title, ts: d.updatedAt ?? Date.now(), level: d.alertLevel === "Red" ? "error" : "warn",
+        });
+      }
+    }
+    for (const sw of liveData.spaceWeather ?? []) {
+      if (sw.level === "ALERT" || sw.level === "WARNING") {
+        items.push({
+          id: `sw-${sw.id}`, source: "SWPC",
+          title: sw.title, ts: sw.issueDatetime, level: sw.level === "ALERT" ? "error" : "warn",
+        });
+      }
+    }
+    return items.sort((a, b) => b.ts - a.ts).slice(0, 50);
+  }, [liveData.earthquakes, liveData.disasters, liveData.spaceWeather]);
 
   const flightColumns = useMemo<ColumnDef<FlightTableRow>[]>(
     () => [
@@ -221,6 +250,8 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
     { id: "feed", label: "Ops Feed" },
     { id: "cctv-live", label: "Live Webcams" },
     { id: "space-weather", label: "Space Weather" },
+    { id: "threat-board", label: "Threat Board" },
+    { id: "source-health", label: "Data Sources" },
   ] as const;
 
   const lockHeaderProps = (panelId: string) => ({
@@ -247,13 +278,13 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
             }
           />
           <PanelBody>
-            <div className="wv-kpi-strip">
+            <div className="si-kpi-strip">
               {kpis.map((tile) => (
-                <article key={tile.id} className="wv-kpi-strip-item" title={`${tile.label}: ${tile.value}`}>
-                  <div className="wv-kpi-strip-main">
-                    <span className="wv-kpi-label">{tile.label}</span>
-                    <span className="wv-kpi-value">{tile.value}</span>
-                    <span className={`wv-kpi-delta ${tile.delta >= 0 ? "is-up" : "is-down"}`}>
+                <article key={tile.id} className="si-kpi-strip-item" title={`${tile.label}: ${tile.value}`}>
+                  <div className="si-kpi-strip-main">
+                    <span className="si-kpi-label">{tile.label}</span>
+                    <span className="si-kpi-value">{tile.value}</span>
+                    <span className={`si-kpi-delta ${tile.delta >= 0 ? "is-up" : "is-down"}`}>
                       {tile.delta >= 0 ? "UP" : "DOWN"} {Math.abs(tile.delta).toFixed(1)}%
                     </span>
                   </div>
@@ -413,12 +444,12 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
           />
           <PanelBody>
             <div
-              className="wv-feed-list"
+              className="si-feed-list"
               role="log"
               aria-label="Operations feed"
             >
               {feedItems.slice(0, 120).map((item) => (
-                <div key={item.id} className={`wv-feed-item is-${item.level}`}>
+                <div key={item.id} className={`si-feed-item is-${item.level}`}>
                   <span>{new Date(item.ts).toISOString().slice(11, 19)}</span>
                   <strong>{item.source}</strong>
                   <span title={item.message}>{item.message}</span>
@@ -465,12 +496,12 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
             }
           />
           <PanelBody>
-            <div className="wv-feed-list" role="log" aria-label="Space weather feed">
+            <div className="si-feed-list" role="log" aria-label="Space weather feed">
               {spaceWeatherItems.length ? (
                 spaceWeatherItems.map((item) => (
                   <div
                     key={item.id}
-                    className={`wv-feed-item ${
+                    className={`si-feed-item ${
                       item.level === "ALERT" ? "is-error" : item.level === "WARNING" ? "is-warn" : "is-info"
                     }`}
                   >
@@ -480,7 +511,7 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
                   </div>
                 ))
               ) : (
-                <div className="wv-feed-item is-warn">
+                <div className="si-feed-item is-warn">
                   <span>--:--:--</span>
                   <strong>INFO</strong>
                   <span>No SWPC alerts received yet.</span>
@@ -502,6 +533,105 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
       node: (
         <Panel panelId="markets">
           <MarketsPanel />
+        </Panel>
+      ),
+    },
+    {
+      id: "threat-board",
+      node: (
+        <Panel panelId="threat-board">
+          <PanelHeader
+            title="THREAT BOARD"
+            subtitle="Unified high-severity alerts from all data feeds."
+            {...lockHeaderProps("threat-board")}
+            controls={<PanelControls onRefresh={bumpRefreshTick} refreshText="REFRESH" />}
+          />
+          <PanelBody>
+            <div className="si-feed-list" role="log" aria-label="Threat board">
+              {threatItems.length ? (
+                threatItems.map((item) => (
+                  <div key={item.id} className={`si-feed-item is-${item.level}`}>
+                    <span>{new Date(item.ts).toISOString().slice(11, 19)}</span>
+                    <strong>{item.source}</strong>
+                    <span title={item.title}>{item.title}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="si-feed-item is-info">
+                  <span>--:--:--</span>
+                  <strong>INFO</strong>
+                  <span>No high-severity alerts active.</span>
+                </div>
+              )}
+            </div>
+          </PanelBody>
+          <PanelFooter
+            source="USGS + GDACS + SWPC"
+            updatedAt={Date.now()}
+            health={threatItems.some((t) => t.level === "error") ? "stale" : "ok"}
+            message={`${threatItems.length} active high-severity alert${threatItems.length === 1 ? "" : "s"}.`}
+          />
+        </Panel>
+      ),
+    },
+    {
+      id: "source-health",
+      node: (
+        <Panel panelId="source-health">
+          <PanelHeader
+            title="DATA SOURCES"
+            subtitle="Health status of all operational data feeds."
+            {...lockHeaderProps("source-health")}
+            controls={<PanelControls onRefresh={bumpRefreshTick} refreshText="REFRESH" />}
+          />
+          <PanelBody>
+            <div className="si-feed-list" role="log" aria-label="Data sources health">
+              {Object.entries(sourceHealth ?? {}).length ? (
+                Object.entries(sourceHealth ?? {}).map(([name, state]) => {
+                  const statusColor =
+                    state.status === "live" ? "#69f0ae"
+                    : state.status === "cached" ? "#4fc3f7"
+                    : state.status === "degraded" ? "#ffc107"
+                    : "#ff5252";
+                  const level =
+                    state.status === "unavailable" ? "error"
+                    : state.status === "degraded" ? "warn"
+                    : "info";
+                  return (
+                    <div key={name} className={`si-feed-item is-${level}`}>
+                      <span style={{ color: statusColor, fontWeight: 700 }}>{"\u25CF"}</span>
+                      <strong>{name.toUpperCase()}</strong>
+                      <span>
+                        {state.status.toUpperCase()}
+                        {state.lastSuccessAt
+                          ? ` — last ok ${new Date(state.lastSuccessAt).toISOString().slice(11, 19)}`
+                          : ""}
+                        {state.errorCode ? ` [${state.errorCode}]` : ""}
+                      </span>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="si-feed-item is-info">
+                  <span>--:--:--</span>
+                  <strong>INFO</strong>
+                  <span>No source health data available yet.</span>
+                </div>
+              )}
+            </div>
+          </PanelBody>
+          <PanelFooter
+            source="SYSTEM"
+            updatedAt={Date.now()}
+            health={
+              Object.values(sourceHealth ?? {}).some((s) => s.status === "unavailable")
+                ? "error"
+                : Object.values(sourceHealth ?? {}).some((s) => s.status === "degraded")
+                ? "stale"
+                : "ok"
+            }
+            message="Shows real-time status of each external data feed."
+          />
         </Panel>
       ),
     },
@@ -532,23 +662,23 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
   }, [showViewMenu]);
 
   return (
-    <div className={`wv-dashboard-workspace ${embedded ? "is-embedded" : ""}`.trim()}>
-      <div className="wv-dashboard-toolbar">
-        <div className="wv-toolbar-status">DASHBOARD MODE / ULTRA WORKSTATION GRID / FREEFORM WINDOW MOVE</div>
-        <div className="wv-toolbar-actions">
-          <div className="wv-view-menu-wrap" ref={viewMenuRef}>
+    <div className={`si-dashboard-workspace ${embedded ? "is-embedded" : ""}`.trim()}>
+      <div className="si-dashboard-toolbar">
+        <div className="si-toolbar-status">DASHBOARD MODE / ULTRA WORKSTATION GRID / FREEFORM WINDOW MOVE</div>
+        <div className="si-toolbar-actions">
+          <div className="si-view-menu-wrap" ref={viewMenuRef}>
             <button
               type="button"
-              className={`wv-inline-action ${showViewMenu ? "is-active" : ""}`}
+              className={`si-inline-action ${showViewMenu ? "is-active" : ""}`}
               onClick={() => setShowViewMenu((open) => !open)}
               aria-expanded={showViewMenu}
             >
               VIEW WINDOWS
             </button>
             {showViewMenu ? (
-              <div className="wv-view-menu" role="menu" aria-label="Toggle dashboard windows">
+              <div className="si-view-menu" role="menu" aria-label="Toggle dashboard windows">
                 {panelCatalog.map((panel) => (
-                  <label key={panel.id} className="wv-view-menu-item">
+                  <label key={panel.id} className="si-view-menu-item">
                     <input
                       type="checkbox"
                       checked={panelVisibility[panel.id] !== false}
@@ -560,7 +690,7 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
               </div>
             ) : null}
           </div>
-          <button type="button" className="wv-inline-action" onClick={resetPanelLayouts}>
+          <button type="button" className="si-inline-action" onClick={resetPanelLayouts}>
             RESET LAYOUT
           </button>
         </div>
@@ -568,7 +698,7 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
       {panelNodes.length ? (
         <DraggableDashboardGrid panels={panelNodes} />
       ) : (
-        <div className="wv-dashboard-empty">No windows enabled. Open VIEW WINDOWS to add panels.</div>
+        <div className="si-dashboard-empty">No windows enabled. Open VIEW WINDOWS to add panels.</div>
       )}
     </div>
   );

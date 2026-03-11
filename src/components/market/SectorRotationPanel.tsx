@@ -4,6 +4,7 @@ import React from "react";
 import { useMarketData } from "../../hooks/useMarketData";
 import type { QuotesResponse } from "../../lib/server/news/providers/marketTypes";
 import { SCREENER_UNIVERSE } from "./shared/screenerData";
+import Term from "./shared/Term";
 
 interface SectorDef {
   sector: string;
@@ -75,6 +76,22 @@ function pctStyle(v: number): React.CSSProperties {
 
 function fmt(v: number) { return `${v > 0 ? "+" : ""}${v.toFixed(2)}%`; }
 
+const ETF_TERM_IDS: Record<string, string> = {
+  XLK: "XLK", XLC: "XLC", XLF: "XLF", XLI: "XLI", XLV: "XLV",
+  XLY: "XLY", XLP: "XLP", XLB: "XLB", XLRE: "XLRE", XLU: "XLU", XLE: "XLE",
+};
+
+function renderEtf(etf: string) {
+  const id = ETF_TERM_IDS[etf];
+  return id ? <Term id={id}>{etf}</Term> : <>{etf}</>;
+}
+
+function renderSignal(signal: "LEADING" | "NEUTRAL" | "LAGGING") {
+  if (signal === "LEADING") return <Term id="LEADING">LEADING</Term>;
+  if (signal === "LAGGING") return <Term id="LAGGING">LAGGING</Term>;
+  return <>NEUTRAL</>;
+}
+
 function deriveSignal(d1: number, m1: number): "LEADING" | "NEUTRAL" | "LAGGING" {
   if (d1 > 0.5 && m1 > 2) return "LEADING";
   if (d1 < -0.5 && m1 < -2) return "LAGGING";
@@ -101,25 +118,25 @@ export default function SectorRotationPanel({ style, onTickerClick }: Props) {
   });
 
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Sector Rotation</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)", letterSpacing: "0.04em" }}>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Sector <Term id="SECTOR_ROTATION">Rotation</Term></span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)", letterSpacing: "0.04em" }}>
           SPDR ETFs · Multi-Timeframe Performance
         </span>
-        <span className={`wv-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
+        <span className={`si-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
           {isLive ? "LIVE" : "STATIC"}
         </span>
       </div>
-      <div className="wv-market-panel-body-auto" style={{ padding: 0 }}>
+      <div className="si-market-panel-body-auto" style={{ padding: 0 }}>
         {/* Header */}
         <div style={{
           display: "grid",
           gridTemplateColumns: GRID_COLS,
           padding: "4px 10px",
-          borderBottom: "1px solid var(--wv-line)",
+          borderBottom: "1px solid var(--si-line)",
           fontSize: 8.5,
-          color: "var(--wv-text-muted)",
+          color: "var(--si-text-muted)",
           fontWeight: 600,
           letterSpacing: "0.06em",
         }}>
@@ -157,24 +174,24 @@ export default function SectorRotationPanel({ style, onTickerClick }: Props) {
               }}
               onClick={() => onTickerClick?.(r.etf)}
             >
-              <span style={{ color: "var(--wv-text-bright)", fontWeight: 600 }}>{r.sector}</span>
-              <span style={{ textAlign: "right", color: "var(--wv-text-muted)", fontFamily: "monospace" }}>{r.etf}</span>
-              <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: "var(--wv-text-muted)" }}>
+              <span style={{ color: "var(--si-text-bright)", fontWeight: 600 }}>{r.sector}</span>
+              <span style={{ textAlign: "right", color: "var(--si-text-muted)", fontFamily: "monospace" }}>{renderEtf(r.etf)}</span>
+              <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: "var(--si-text-muted)" }}>
                 {fund?.mktCapB ? `$${(fund.mktCapB / 1000).toFixed(1)}T` : "—"}
               </span>
-              <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: "var(--wv-text-muted)" }}>
+              <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: "var(--si-text-muted)" }}>
                 {fund?.avgPE ? fund.avgPE.toFixed(1) : "—"}
               </span>
-              <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: fund?.avgBeta > 1.2 ? "#ffab40" : "var(--wv-text-muted)" }}>
+              <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: fund?.avgBeta > 1.2 ? "#ffab40" : "var(--si-text-muted)" }}>
                 {fund?.avgBeta ? fund.avgBeta.toFixed(2) : "—"}
               </span>
-              <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: fund?.avgROE > 20 ? "#36b37e" : "var(--wv-text-muted)" }}>
+              <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: fund?.avgROE > 20 ? "#36b37e" : "var(--si-text-muted)" }}>
                 {fund?.avgROE ? `${fund.avgROE.toFixed(1)}%` : "—"}
               </span>
-              <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: fund?.avgNetMgn > 20 ? "#36b37e" : fund?.avgNetMgn < 0 ? "#ff5a5f" : "var(--wv-text-muted)" }}>
+              <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: fund?.avgNetMgn > 20 ? "#36b37e" : fund?.avgNetMgn < 0 ? "#ff5a5f" : "var(--si-text-muted)" }}>
                 {fund?.avgNetMgn != null ? `${fund.avgNetMgn.toFixed(1)}%` : "—"}
               </span>
-              <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: fund?.avgDiv > 1.5 ? "#36b37e" : "var(--wv-text-muted)" }}>
+              <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: fund?.avgDiv > 1.5 ? "#36b37e" : "var(--si-text-muted)" }}>
                 {fund?.avgDiv ? `${fund.avgDiv.toFixed(2)}%` : "—"}
               </span>
               {([r.d1, r.w1, r.m1, r.m3, r.ytd] as number[]).map((v, i) => (
@@ -200,13 +217,13 @@ export default function SectorRotationPanel({ style, onTickerClick }: Props) {
                 borderRadius: 2,
                 margin: "0 4px",
               }}>
-                {r.signal}
+                {renderSignal(r.signal)}
               </span>
             </div>
           );
         })}
       </div>
-      <div className="wv-market-panel-footer">
+      <div className="si-market-panel-footer">
         {isLive ? "SPDR Sector ETFs · Yahoo Finance · 2min refresh" : "SPDR Sector ETFs · static data"}
       </div>
     </div>

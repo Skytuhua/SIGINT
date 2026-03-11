@@ -2,6 +2,7 @@
 
 import React from "react";
 import TradingViewWidget from "./shared/TradingViewWidget";
+import Term from "./shared/Term";
 
 interface Props {
   style?: React.CSSProperties;
@@ -9,15 +10,15 @@ interface Props {
 
 export default function FxMatrixPanel({ style }: Props) {
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">FX Cross-Rate Matrix</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)", letterSpacing: "0.04em" }}>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">FX <Term id="CROSS_RATE">Cross-Rate</Term> Matrix</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)", letterSpacing: "0.04em" }}>
           LIVE RATES
         </span>
-        <span className="wv-market-panel-badge is-live">LIVE</span>
+        <span className="si-market-panel-badge is-live">LIVE</span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0, overflow: "hidden" }}>
+      <div className="si-market-panel-body" style={{ padding: 0, overflow: "hidden" }}>
         <TradingViewWidget
           scriptSrc="https://s3.tradingview.com/external-embedding/embed-widget-forex-cross-rates.js"
           config={{
@@ -30,7 +31,7 @@ export default function FxMatrixPanel({ style }: Props) {
           style={{ minHeight: 240 }}
         />
       </div>
-      <div className="wv-market-panel-footer">TradingView · FX Cross Rates · real-time</div>
+      <div className="si-market-panel-footer">TradingView · FX Cross Rates · real-time</div>
     </div>
   );
 }

@@ -445,7 +445,7 @@ async function fetchArmedConflictDirect(
   try {
     const res = await fetch(url.toString(), {
       signal: controller.signal,
-      headers: { "User-Agent": "WorldView/0.1 (research)" },
+      headers: { "User-Agent": "SIGINT/0.1 (research)" },
       cache: "no-store",
     });
     clearTimeout(timer);
@@ -729,27 +729,6 @@ async function getLayerPayload(layerId: string, origin: string, requestUrl: stri
     }
   }
 
-  if (layerId === "displacement-flows") {
-    const url = new URL(requestUrl);
-    const mode = (url.searchParams.get("mode") ?? "all") as "all" | "refugee" | "idp";
-    const causeRaw = url.searchParams.get("cause") ?? "";
-    const cause = causeRaw ? causeRaw.split(",").filter(Boolean) : [];
-    const minVolume = Math.max(0, parseInt(url.searchParams.get("minVolume") ?? "0") || 0);
-    try {
-      const { collection } = await getDisplacementFlowsLayer({ mode, cause, minVolume, maxFeatures: 2000 });
-      if (collection.features.length > 0) return collection as GenericFeatureCollection;
-    } catch (err) {
-      console.warn("[displacement-flows] fetch failed:", err);
-    }
-    const stale = getCached(layerId);
-    if (stale && stale.features.length > 0) return stale;
-    try {
-      return await loadSnapshot(layerId);
-    } catch {
-      return { type: "FeatureCollection", features: [] };
-    }
-  }
-
   if (layerId === "earthquakes") {
     const quakes = await fetchJson<Earthquake[]>(`${origin}/api/earthquakes`);
     return fromEarthquakes(quakes ?? []);
@@ -783,6 +762,12 @@ async function getLayerPayload(layerId: string, origin: string, requestUrl: stri
 
 export async function GET(request: Request, { params }: { params: { layerId: string } }) {
   const layerId = params.layerId;
+
+  // Path traversal protection: only allow lowercase alphanumeric + hyphens
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(layerId)) {
+    return NextResponse.json({ error: "Invalid layer ID" }, { status: 400 });
+  }
+
   const origin = new URL(request.url).origin;
 
   // Fresh cache hit — return immediately.

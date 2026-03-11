@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Term from "./shared/Term";
 
 interface FactorRow {
   category: string;
@@ -48,6 +49,15 @@ function pctStyle(v: number): React.CSSProperties {
 
 function fmt(v: number) { return `${v > 0 ? "+" : ""}${v.toFixed(2)}%`; }
 
+const FACTOR_TERM_MAP: Record<string, string> = {
+  "Momentum": "MOMENTUM",
+};
+
+function renderFactorName(name: string) {
+  const id = FACTOR_TERM_MAP[name];
+  return id ? <Term id={id}>{name}</Term> : <>{name}</>;
+}
+
 let prevCat = "";
 
 interface Props { style?: React.CSSProperties; }
@@ -55,23 +65,23 @@ interface Props { style?: React.CSSProperties; }
 export default function FactorPerformancePanel({ style }: Props) {
   prevCat = "";
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Factor & Style Returns</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)", letterSpacing: "0.04em" }}>
-          Cap · Style · Smart Beta · International
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Factor & Style Returns</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)", letterSpacing: "0.04em" }}>
+          Cap · Style · <Term id="SMART_BETA">Smart Beta</Term> · International
         </span>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+        <span className="si-market-panel-badge is-reference">REFERENCE</span>
       </div>
-      <div className="wv-market-panel-body-auto" style={{ padding: 0 }}>
+      <div className="si-market-panel-body-auto" style={{ padding: 0 }}>
         {/* Header */}
         <div style={{
           display: "grid",
           gridTemplateColumns: "52px 1fr 50px 50px 50px 50px 50px 55px",
           padding: "4px 10px",
-          borderBottom: "1px solid var(--wv-line)",
+          borderBottom: "1px solid var(--si-line)",
           fontSize: 8.5,
-          color: "var(--wv-text-muted)",
+          color: "var(--si-text-muted)",
           fontWeight: 600,
           letterSpacing: "0.06em",
         }}>
@@ -111,10 +121,10 @@ export default function FactorPerformancePanel({ style }: Props) {
                     {r.category}
                   </span>
                 ) : <span />}
-                <span style={{ color: "var(--wv-text-bright)", fontWeight: 600 }}>{r.name}</span>
+                <span style={{ color: "var(--si-text-bright)", fontWeight: 600 }}>{renderFactorName(r.name)}</span>
                 <span style={{
                   textAlign: "right", fontFamily: "monospace",
-                  fontSize: 9, color: "var(--wv-text-muted)",
+                  fontSize: 9, color: "var(--si-text-muted)",
                 }}>
                   {r.etf}
                 </span>
@@ -135,7 +145,7 @@ export default function FactorPerformancePanel({ style }: Props) {
           );
         })}
       </div>
-      <div className="wv-market-panel-footer">iShares · Vanguard · SPDR ETFs · placeholder data</div>
+      <div className="si-market-panel-footer">iShares · Vanguard · SPDR ETFs · Curated reference data</div>
     </div>
   );
 }

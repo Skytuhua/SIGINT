@@ -72,21 +72,21 @@ export default function ArmsEmbargoZoneDetailCard({
       : "Unknown";
 
   return createPortal(
-    <div className="wv-hotspot-card" role="dialog" aria-label="Arms embargo zone detail">
-      <div className="wv-hotspot-card-hdr">
-        <div className="wv-hotspot-card-headline">
-          <div className="wv-hotspot-name">
+    <div className="si-hotspot-card" role="dialog" aria-label="Arms embargo zone detail">
+      <div className="si-hotspot-card-hdr">
+        <div className="si-hotspot-card-headline">
+          <div className="si-hotspot-name">
             ARMS EMBARGO ZONE — {detail.countryLabel.toUpperCase()}
           </div>
           {prog ? (
-            <span className={`wv-hotspot-tier ${statusPillClass(prog.status)}`}>
+            <span className={`si-hotspot-tier ${statusPillClass(prog.status)}`}>
               {prog.status}
             </span>
           ) : null}
         </div>
         <button
           type="button"
-          className="wv-hotspot-close"
+          className="si-hotspot-close"
           onClick={onClose}
           aria-label="Close arms embargo zone details"
         >
@@ -95,10 +95,10 @@ export default function ArmsEmbargoZoneDetailCard({
       </div>
 
       {hasManyProgrammes ? (
-        <div className="wv-hotspot-tags" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <div className="si-hotspot-tags" style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <button
             type="button"
-            className="wv-hotspot-window-btn"
+            className="si-hotspot-window-btn"
             disabled={selectedIdx <= 0}
             onClick={() => setSelectedIdx((i) => Math.max(0, i - 1))}
             aria-label="Previous programme"
@@ -110,7 +110,7 @@ export default function ArmsEmbargoZoneDetailCard({
           </span>
           <button
             type="button"
-            className="wv-hotspot-window-btn"
+            className="si-hotspot-window-btn"
             disabled={selectedIdx >= programmes.length - 1}
             onClick={() => setSelectedIdx((i) => Math.min(programmes.length - 1, i + 1))}
             aria-label="Next programme"
@@ -122,14 +122,14 @@ export default function ArmsEmbargoZoneDetailCard({
 
       {prog ? (
         <>
-          <div className="wv-hotspot-tags">{prog.name}</div>
+          <div className="si-hotspot-tags">{prog.name}</div>
 
-          <div className="wv-hotspot-section">
-            <div className="wv-hotspot-kicker">DETAILS</div>
-            <div className="wv-hotspot-subscores">
+          <div className="si-hotspot-section">
+            <div className="si-hotspot-kicker">DETAILS</div>
+            <div className="si-hotspot-subscores">
               <div>
                 Scope{" "}
-                <span className={`wv-hotspot-tier ${scopePillClass(prog.scope)}`}>
+                <span className={`si-hotspot-tier ${scopePillClass(prog.scope)}`}>
                   {prog.scope}
                 </span>
               </div>
@@ -140,8 +140,8 @@ export default function ArmsEmbargoZoneDetailCard({
           </div>
 
           {prog.measures.length > 0 ? (
-            <div className="wv-hotspot-section">
-              <div className="wv-hotspot-kicker">MEASURES</div>
+            <div className="si-hotspot-section">
+              <div className="si-hotspot-kicker">MEASURES</div>
               <ul style={{ margin: 0, paddingLeft: 16, fontSize: 11, lineHeight: 1.5 }}>
                 {prog.measures.map((m, i) => (
                   <li key={i}>{m}</li>
@@ -151,15 +151,15 @@ export default function ArmsEmbargoZoneDetailCard({
           ) : null}
 
           {prog.legalBasis ? (
-            <div className="wv-hotspot-section">
-              <div className="wv-hotspot-kicker">LEGAL BASIS</div>
-              <div className="wv-hotspot-summary">{prog.legalBasis}</div>
+            <div className="si-hotspot-section">
+              <div className="si-hotspot-kicker">LEGAL BASIS</div>
+              <div className="si-hotspot-summary">{prog.legalBasis}</div>
             </div>
           ) : null}
 
-          <div className="wv-hotspot-section">
-            <div className="wv-hotspot-kicker">SOURCE TRACE</div>
-            <details className="wv-hotspot-trace" open>
+          <div className="si-hotspot-section">
+            <div className="si-hotspot-kicker">SOURCE TRACE</div>
+            <details className="si-hotspot-trace" open>
               <summary>Sources ({prog.sources.length})</summary>
               <ul>
                 {prog.sources.map((src, i) => (
@@ -177,31 +177,31 @@ export default function ArmsEmbargoZoneDetailCard({
           </div>
         </>
       ) : (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-summary">No programme data available</div>
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-summary">No programme data available</div>
         </div>
       )}
 
       {detail.sourceStatus ? (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">PIPELINE STATUS</div>
-          <div className="wv-hotspot-status-row">
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">PIPELINE STATUS</div>
+          <div className="si-hotspot-status-row">
             {Object.entries(detail.sourceStatus).map(([source, status]) => (
-              <span key={source} className={`wv-hotspot-status ${pipelineStatusClass(status)}`}>
+              <span key={source} className={`si-hotspot-status ${pipelineStatusClass(status)}`}>
                 {source}:{status}
               </span>
             ))}
           </div>
-          <div className="wv-hotspot-updated">Updated: {updatedLabel}</div>
+          <div className="si-hotspot-updated">Updated: {updatedLabel}</div>
         </div>
       ) : (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">LAST UPDATED</div>
-          <div className="wv-hotspot-updated">{updatedLabel}</div>
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">LAST UPDATED</div>
+          <div className="si-hotspot-updated">{updatedLabel}</div>
         </div>
       )}
 
-      <div className="wv-hotspot-section" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 6 }}>
+      <div className="si-hotspot-section" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 6 }}>
         <div style={{ fontSize: 9, opacity: 0.45, lineHeight: 1.4 }}>
           Open-source listing. Not legal advice. Verify via linked authority pages.
         </div>

@@ -14,7 +14,7 @@ const TTL_MS = 12_000;
 const FETCH_TIMEOUT_MS = 18_000;
 const BACKOFF_MS = 120_000;
 
-const UA = { 'User-Agent': 'WorldView/0.1 (educational/research use)' } as const;
+const UA = { 'User-Agent': 'SIGINT/0.1 (educational/research use)' } as const;
 
 let cacheP1: { data: Flight[]; expires: number } | null = null;
 let cacheP2: { data: Flight[]; expires: number } | null = null;

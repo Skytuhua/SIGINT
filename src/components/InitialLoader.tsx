@@ -118,7 +118,7 @@ export default function InitialLoader({ onDone }: Props) {
           color: "#8fb8d8",
         }}
       >
-        WORLDVIEW CONSOLE
+        SIGINT CONSOLE
       </div>
 
       {/* Status panel */}
@@ -181,7 +181,7 @@ export default function InitialLoader({ onDone }: Props) {
                   minWidth: 90,
                   justifyContent: "flex-end",
                   animation: isLoading
-                    ? "wv-init-pulse 1.2s ease-in-out infinite"
+                    ? "si-init-pulse 1.2s ease-in-out infinite"
                     : undefined,
                 }}
               >
@@ -227,7 +227,7 @@ export default function InitialLoader({ onDone }: Props) {
 
       {/* Keyframe for loading pulse */}
       <style>{`
-        @keyframes wv-init-pulse {
+        @keyframes si-init-pulse {
           0%, 100% { opacity: 0.35; }
           50% { opacity: 1; }
         }

@@ -30,6 +30,7 @@ export interface EnrichedVideo extends RssVideo {
   viewerCount?: number;
   actualStartTime?: string;
   actualEndTime?: string;
+  regionBlocked?: boolean;
 }
 
 // ─── Policy ───────────────────────────────────────────────────────────────────
@@ -129,7 +130,7 @@ export async function fetchChannelRss(
     const response = await fetch(rssUrl, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "WorldView/0.1 (youtube-rss-hybrid)",
+        "User-Agent": "SIGINT/0.1 (youtube-rss-hybrid)",
         Accept: "application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
       },
       cache: "no-store",
@@ -177,6 +178,10 @@ interface YtVideoItem {
   };
   contentDetails?: {
     duration?: string;
+    regionRestriction?: {
+      allowed?: string[];
+      blocked?: string[];
+    };
   };
   liveStreamingDetails?: {
     actualStartTime?: string;
@@ -233,7 +238,7 @@ export async function enrichWithLiveStatus(
     try {
       const resp = await fetchJsonOrThrow<YtVideosResponse>(
         url.toString(),
-        { headers: { "User-Agent": "WorldView/0.1 (rss-hybrid-enrich)" } },
+        { headers: { "User-Agent": "SIGINT/0.1 (rss-hybrid-enrich)" } },
         9_000
       );
       for (const item of resp.items ?? []) {
@@ -260,6 +265,17 @@ export async function enrichWithLiveStatus(
     const liveMeta = meta.liveStreamingDetails;
     const liveNow = broadcast === "live" && !liveMeta?.actualEndTime;
 
+    // Check region restriction — filter videos blocked in the US
+    const restriction = meta.contentDetails?.regionRestriction;
+    let regionBlocked = false;
+    if (restriction) {
+      if (restriction.allowed && !restriction.allowed.includes("US")) {
+        regionBlocked = true;
+      } else if (restriction.blocked?.includes("US")) {
+        regionBlocked = true;
+      }
+    }
+
     return {
       ...rssVideo,
       // Use API title/thumbnail if available (richer than RSS)
@@ -272,6 +288,7 @@ export async function enrichWithLiveStatus(
         : undefined,
       actualStartTime: liveMeta?.actualStartTime,
       actualEndTime: liveMeta?.actualEndTime,
+      regionBlocked,
     };
   });
 }
@@ -313,7 +330,7 @@ export async function resolveUsername(
     const url = `https://www.googleapis.com/youtube/v3/channels?part=id&forUsername=${encodeURIComponent(username)}&key=${apiKey}`;
     const resp = await fetchJsonOrThrow<{ items?: Array<{ id?: string }> }>(
       url,
-      { headers: { "User-Agent": "WorldView/0.1 (resolve-username)" } },
+      { headers: { "User-Agent": "SIGINT/0.1 (resolve-username)" } },
       5_000
     );
     return resp.items?.[0]?.id?.trim() ?? null;

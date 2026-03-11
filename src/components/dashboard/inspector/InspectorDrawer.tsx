@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useWorldViewStore } from "../../../store";
+import { useSIGINTStore } from "../../../store";
 import { featureFlags } from "../../../config/featureFlags";
 import PanelTabs from "../panel/PanelTabs";
 import Toggle from "../controls/Toggle";
@@ -221,13 +221,13 @@ function flightSummaryRows(flight: Flight, id: string): SummaryRow[] {
 }
 
 export default function InspectorDrawer() {
-  const inspector = useWorldViewStore((s) => s.dashboard.inspector);
-  const setInspectorTab = useWorldViewStore((s) => s.setInspectorTab);
-  const setInspectorPinned = useWorldViewStore((s) => s.setInspectorPinned);
-  const setInspectorSplitView = useWorldViewStore((s) => s.setInspectorSplitView);
-  const clearSelectionContext = useWorldViewStore((s) => s.clearSelectionContext);
-  const setInspectorNote = useWorldViewStore((s) => s.setInspectorNote);
-  const satUpdatedAt = useWorldViewStore((s) => s.liveData.lastUpdated.satellites);
+  const inspector = useSIGINTStore((s) => s.dashboard.inspector);
+  const setInspectorTab = useSIGINTStore((s) => s.setInspectorTab);
+  const setInspectorPinned = useSIGINTStore((s) => s.setInspectorPinned);
+  const setInspectorSplitView = useSIGINTStore((s) => s.setInspectorSplitView);
+  const clearSelectionContext = useSIGINTStore((s) => s.clearSelectionContext);
+  const setInspectorNote = useSIGINTStore((s) => s.setInspectorNote);
+  const satUpdatedAt = useSIGINTStore((s) => s.liveData.lastUpdated.satellites);
 
   const entity = inspector.entity;
 
@@ -341,25 +341,25 @@ export default function InspectorDrawer() {
   }, [entity, satUpdatedAt]);
 
   const cctvCamera = entity?.type === "cctv" ? (entity.data as CctvCamera) : null;
-  const openCctvFloating = useWorldViewStore((s) => s.openCctvFloating);
-  const markCctvBroken = useWorldViewStore((s) => s.markCctvBroken);
+  const openCctvFloating = useSIGINTStore((s) => s.openCctvFloating);
+  const markCctvBroken = useSIGINTStore((s) => s.markCctvBroken);
 
   return (
     <aside
-      className={`wv-inspector ${inspector.open ? "is-open" : ""} ${inspector.splitView ? "is-split" : ""}`}
+      className={`si-inspector ${inspector.open ? "is-open" : ""} ${inspector.splitView ? "is-split" : ""}`}
       aria-label="Inspector drawer"
     >
-      <div className="wv-inspector-header">
+      <div className="si-inspector-header">
         <div>
-          <div className="wv-inspector-title">INSPECTOR</div>
-          <div className="wv-inspector-subtitle">{entity ? `${entity.type.toUpperCase()} / ${entity.id}` : "No selection"}</div>
+          <div className="si-inspector-title">INSPECTOR</div>
+          <div className="si-inspector-subtitle">{entity ? `${entity.type.toUpperCase()} / ${entity.id}` : "No selection"}</div>
         </div>
-        <div className="wv-inspector-actions">
+        <div className="si-inspector-actions">
           <Toggle checked={inspector.pinned} onChange={setInspectorPinned} label="Pin" />
           {featureFlags.enableInspectorSplitView ? (
             <Toggle checked={inspector.splitView} onChange={setInspectorSplitView} label="Split" />
           ) : null}
-          <button type="button" className="wv-inline-action" onClick={clearSelectionContext}>
+          <button type="button" className="si-inline-action" onClick={clearSelectionContext}>
             CLOSE
           </button>
         </div>
@@ -371,12 +371,12 @@ export default function InspectorDrawer() {
         onChange={(next) => setInspectorTab(next)}
       />
 
-      <div className="wv-inspector-body">
+      <div className="si-inspector-body">
         {inspector.tab === "summary" && (
           <>
-            <div className="wv-inspector-grid">
+            <div className="si-inspector-grid">
               {summaryRows.map((row) => (
-                <div key={`${row.key}-${row.value}`} className={`wv-inspector-row ${row.section ? "is-section" : ""}`}>
+                <div key={`${row.key}-${row.value}`} className={`si-inspector-row ${row.section ? "is-section" : ""}`}>
                   <span>{row.key}</span>
                   <span title={row.value}>{row.value}</span>
                 </div>
@@ -392,7 +392,7 @@ export default function InspectorDrawer() {
                 />
                 <button
                   type="button"
-                  className="wv-inline-action"
+                  className="si-inline-action"
                   style={{
                     marginTop: 8,
                     width: "100%",
@@ -416,21 +416,21 @@ export default function InspectorDrawer() {
         )}
 
         {inspector.tab === "history" && (
-          <div className="wv-inspector-list">
+          <div className="si-inspector-list">
             <div>Tracking history trail: {entity ? "Available in globe layer" : "--"}</div>
             <div>Flight path state: {entity?.type === "flight" ? "Linked" : "Idle"}</div>
           </div>
         )}
 
         {inspector.tab === "related" && (
-          <div className="wv-inspector-list">
+          <div className="si-inspector-list">
             <div>Related entities are resolved by layer and geographic proximity.</div>
             <div>Use row hover actions to pin/open additional context.</div>
           </div>
         )}
 
         {inspector.tab === "notes" && (
-          <label className="wv-inspector-notes">
+          <label className="si-inspector-notes">
             <span>Analyst Notes</span>
             <textarea
               value={noteValue}

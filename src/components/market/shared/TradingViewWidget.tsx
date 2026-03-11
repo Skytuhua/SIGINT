@@ -92,7 +92,7 @@ function TradingViewWidgetInner({
             alignItems: "center",
             justifyContent: "center",
             height: "100%",
-            color: "var(--wv-text-muted, #666)",
+            color: "var(--si-text-muted, #666)",
             fontSize: 11,
             letterSpacing: "0.05em",
           }}

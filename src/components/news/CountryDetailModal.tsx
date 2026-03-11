@@ -14,7 +14,7 @@ import type {
 } from "../../lib/news/types";
 import { perfMark, perfMeasure } from "../../lib/news/perf";
 import { fetchJsonWithPolicy, isAbortError } from "../../lib/runtime/fetchJson";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import IconButton from "../dashboard/controls/IconButton";
 import DenseSelect from "../dashboard/controls/DenseSelect";
 import PanelBody from "../dashboard/panel/PanelBody";
@@ -122,9 +122,9 @@ function buildProfile(code: string, articles: NewsArticle[]): CountryProfile {
 }
 
 function threatLevel(index: number): { label: string; className: string } {
-  if (index >= 70) return { label: "HIGH", className: "wv-cm-threat-high" };
-  if (index >= 40) return { label: "MEDIUM", className: "wv-cm-threat-medium" };
-  return { label: "LOW", className: "wv-cm-threat-low" };
+  if (index >= 70) return { label: "HIGH", className: "si-cm-threat-high" };
+  if (index >= 40) return { label: "MEDIUM", className: "si-cm-threat-medium" };
+  return { label: "LOW", className: "si-cm-threat-low" };
 }
 
 function relativeTime(ts: number): string {
@@ -319,56 +319,56 @@ function ArticleDetailAside({
   onClose: () => void;
 }) {
   return (
-    <aside className="wv-country-detail is-standalone" aria-label="News detail">
-      <div className="wv-country-detail-header">
-        <div className="wv-country-detail-title">DETAIL</div>
-        <div className="wv-country-detail-controls">
+    <aside className="si-country-detail is-standalone" aria-label="News detail">
+      <div className="si-country-detail-header">
+        <div className="si-country-detail-title">DETAIL</div>
+        <div className="si-country-detail-controls">
           <button
             type="button"
-            className="wv-inline-action"
+            className="si-inline-action"
             onClick={() => window.open(article.url, "_blank", "noopener,noreferrer")}
           >
             OPEN
           </button>
-          <button type="button" className="wv-inline-action" onClick={onClose}>
+          <button type="button" className="si-inline-action" onClick={onClose}>
             CLOSE
           </button>
         </div>
       </div>
-      <div className="wv-country-detail-body">
-        <div className="wv-country-detail-headline" title={article.headline}>
+      <div className="si-country-detail-body">
+        <div className="si-country-detail-headline" title={article.headline}>
           {article.headline}
         </div>
-        <div className="wv-country-detail-meta">
+        <div className="si-country-detail-meta">
           <span>{article.source}</span>
-          <span className="wv-country-sep">|</span>
+          <span className="si-country-sep">|</span>
           <span>{fmtUtcTime(article.publishedAt)}</span>
-          <span className="wv-country-sep">|</span>
+          <span className="si-country-sep">|</span>
           <span>{article.domain}</span>
         </div>
-        <div className="wv-country-detail-section">
-          <div className="wv-country-detail-label">SUMMARY</div>
+        <div className="si-country-detail-section">
+          <div className="si-country-detail-label">SUMMARY</div>
           {detailStatus === "loading" ? (
-            <div className="wv-panel-state">
-              <div className="wv-skeleton-row" />
-              <div className="wv-skeleton-row" />
-              <div className="wv-skeleton-row" />
+            <div className="si-panel-state">
+              <div className="si-skeleton-row" />
+              <div className="si-skeleton-row" />
+              <div className="si-skeleton-row" />
             </div>
           ) : null}
           {detailStatus === "ready" && detailSummary?.summary ? (
-            <div className="wv-country-detail-text">{detailSummary.summary}</div>
+            <div className="si-country-detail-text">{detailSummary.summary}</div>
           ) : null}
           {detailStatus === "unsupported" ? (
-            <div className="wv-country-detail-muted">Summary is unavailable for this link type.</div>
+            <div className="si-country-detail-muted">Summary is unavailable for this link type.</div>
           ) : null}
           {detailStatus === "error" ? (
-            <div className="wv-country-detail-muted">Could not generate a full-article summary right now.</div>
+            <div className="si-country-detail-muted">Could not generate a full-article summary right now.</div>
           ) : null}
         </div>
         {article.snippet ? (
-          <div className="wv-country-detail-section">
-            <div className="wv-country-detail-label">SNIPPET</div>
-            <div className="wv-country-detail-text">{article.snippet}</div>
+          <div className="si-country-detail-section">
+            <div className="si-country-detail-label">SNIPPET</div>
+            <div className="si-country-detail-text">{article.snippet}</div>
           </div>
         ) : null}
       </div>
@@ -407,21 +407,21 @@ const CountryNewsRow = memo(function CountryNewsRow({
     <div style={style}>
       <button
         type="button"
-        className={`wv-country-news-row ${selected ? "is-selected" : ""}`.trim()}
+        className={`si-country-news-row ${selected ? "is-selected" : ""}`.trim()}
         onClick={() => onSelectArticle(article)}
         title={article.headline}
       >
-        <span className="wv-country-news-src" aria-hidden="true">
+        <span className="si-country-news-src" aria-hidden="true">
           {article.source.slice(0, 2).toUpperCase()}
         </span>
-        <span className="wv-country-news-headline">{article.headline}</span>
-        <span className="wv-country-news-age">{relativeTime(article.publishedAt)}</span>
-        <span className="wv-country-news-rel">
-          <span className="wv-country-rel-dot" style={{ background: CATEGORY_COLORS[article.category] }} />
-          <span className="wv-country-rel-tag">{article.category.toUpperCase()}</span>
-          <span className="wv-country-rel-score">{score.toFixed(0)}</span>
+        <span className="si-country-news-headline">{article.headline}</span>
+        <span className="si-country-news-age">{relativeTime(article.publishedAt)}</span>
+        <span className="si-country-news-rel">
+          <span className="si-country-rel-dot" style={{ background: CATEGORY_COLORS[article.category] }} />
+          <span className="si-country-rel-tag">{article.category.toUpperCase()}</span>
+          <span className="si-country-rel-score">{score.toFixed(0)}</span>
         </span>
-        <span className="wv-country-row-actions" aria-hidden="true">
+        <span className="si-country-row-actions" aria-hidden="true">
           <span
             role="button"
             tabIndex={-1}
@@ -478,15 +478,15 @@ const CountryNewsRow = memo(function CountryNewsRow({
 
 export default function CountryDetailModal({ countryCode, dockSide = "left", onClose }: Props) {
   const normalizedCountryCode = normalizeCountryCode(countryCode) ?? countryCode.toUpperCase();
-  const feedItems = useWorldViewStore((s) => s.news.feedItems);
-  const setNewsUiState = useWorldViewStore((s) => s.setNewsUiState);
-  const savedSearches = useWorldViewStore((s) => s.news.savedSearches);
-  const alerts = useWorldViewStore((s) => s.news.alerts);
-  const saveNewsSearch = useWorldViewStore((s) => s.saveNewsSearch);
-  const deleteNewsSearch = useWorldViewStore((s) => s.deleteNewsSearch);
-  const upsertNewsAlert = useWorldViewStore((s) => s.upsertNewsAlert);
-  const ackNewsAlert = useWorldViewStore((s) => s.ackNewsAlert);
-  const setNewsQuery = useWorldViewStore((s) => s.setNewsQuery);
+  const feedItems = useSIGINTStore((s) => s.news.feedItems);
+  const setNewsUiState = useSIGINTStore((s) => s.setNewsUiState);
+  const savedSearches = useSIGINTStore((s) => s.news.savedSearches);
+  const alerts = useSIGINTStore((s) => s.news.alerts);
+  const saveNewsSearch = useSIGINTStore((s) => s.saveNewsSearch);
+  const deleteNewsSearch = useSIGINTStore((s) => s.deleteNewsSearch);
+  const upsertNewsAlert = useSIGINTStore((s) => s.upsertNewsAlert);
+  const ackNewsAlert = useSIGINTStore((s) => s.ackNewsAlert);
+  const setNewsQuery = useSIGINTStore((s) => s.setNewsQuery);
   const setNewsUiStateRef = useRef(setNewsUiState);
   const profileAbortRef = useRef<AbortController | null>(null);
   const newsAbortRef = useRef<AbortController | null>(null);
@@ -742,7 +742,7 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
     setUrlCountryParam(normalizedCountryCode);
   }, [normalizedCountryCode]);
 
-  const countryDock = useWorldViewStore((s) => s.news.ui.countryDock);
+  const countryDock = useSIGINTStore((s) => s.news.ui.countryDock);
   const isPinned = countryDock.pinned;
   const showQuickActions = countryDock.showQuickActions;
 
@@ -879,27 +879,27 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
   }
 
   return (
-    <div className={`wv-country-dock-layout is-${dockSide}`.trim()}>
+    <div className={`si-country-dock-layout is-${dockSide}`.trim()}>
       <aside
-        className="wv-country-dock is-expanded"
+        className="si-country-dock is-expanded"
         role="dialog"
         aria-label={`Country ${normalizedCountryCode}`}
       >
-      <div className="wv-country-dock-header">
-        <div className="wv-country-dock-ident">
-          <span className="wv-country-dock-flag" aria-hidden="true">
+      <div className="si-country-dock-header">
+        <div className="si-country-dock-ident">
+          <span className="si-country-dock-flag" aria-hidden="true">
             {getFlag(normalizedCountryCode)}
           </span>
-          <div className="wv-country-dock-title">
-            <span className="wv-country-dock-name">
+          <div className="si-country-dock-title">
+            <span className="si-country-dock-name">
               {countryDisplayName}
             </span>
-            <span className="wv-country-dock-code">({normalizedCountryCode})</span>
+            <span className="si-country-dock-code">({normalizedCountryCode})</span>
           </div>
-          <span className={`wv-country-chip ${threat.className}`}>{threat.label}</span>
-          <span className="wv-country-dock-trend">{trendText}</span>
+          <span className={`si-country-chip ${threat.className}`}>{threat.label}</span>
+          <span className="si-country-dock-trend">{trendText}</span>
         </div>
-        <div className="wv-country-dock-controls">
+        <div className="si-country-dock-controls">
           <IconButton
             label={isPinned ? "Unpin drawer" : "Pin drawer"}
             text="PIN"
@@ -911,13 +911,13 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
       </div>
 
       {showQuickActions ? (
-        <div className="wv-country-dock-actions">
-          <button type="button" className="wv-inline-action" onClick={() => setNewsQuery(`country:${normalizedCountryCode}`)}>
+        <div className="si-country-dock-actions">
+          <button type="button" className="si-inline-action" onClick={() => setNewsQuery(`country:${normalizedCountryCode}`)}>
             OPEN_DETAILS
           </button>
           <button
             type="button"
-            className={`wv-inline-action ${trackedSavedSearch ? "is-active" : ""}`.trim()}
+            className={`si-inline-action ${trackedSavedSearch ? "is-active" : ""}`.trim()}
             onClick={() => {
               const id = `country-${normalizedCountryCode}`;
               if (trackedSavedSearch) {
@@ -939,7 +939,7 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
           </button>
           <button
             type="button"
-            className={`wv-inline-action ${trackedAlert ? "is-active" : ""}`.trim()}
+            className={`si-inline-action ${trackedAlert ? "is-active" : ""}`.trim()}
             onClick={() => {
               const id = `country-${normalizedCountryCode}`;
               if (trackedAlert) {
@@ -978,7 +978,7 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
           </button>
           <button
             type="button"
-            className="wv-inline-action"
+            className="si-inline-action"
             onClick={async () => {
               const share = new URL(window.location.href);
               share.searchParams.set("country", normalizedCountryCode);
@@ -994,7 +994,7 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
           </button>
           <button
             type="button"
-            className="wv-inline-action"
+            className="si-inline-action"
             onClick={() => setDockState({ showQuickActions: false })}
             title="Hide quick actions"
           >
@@ -1002,22 +1002,22 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
           </button>
         </div>
       ) : (
-        <div className="wv-country-dock-actions is-collapsed">
-          <button type="button" className="wv-inline-action" onClick={() => setDockState({ showQuickActions: true })}>
+        <div className="si-country-dock-actions is-collapsed">
+          <button type="button" className="si-inline-action" onClick={() => setDockState({ showQuickActions: true })}>
             SHOW_ACTIONS
           </button>
         </div>
       )}
 
-      <div className="wv-country-grid">
+      <div className="si-country-grid">
         {/* Instability Index + Active Signals (merged) */}
-        <section className="wv-panel wv-country-panel wv-country-panel-instability-signals">
-          <div className="wv-country-panel-header">
-            <div className="wv-country-panel-title">INSTABILITY &amp; SIGNALS</div>
-            <div className="wv-country-panel-meta">
+        <section className="si-panel si-country-panel si-country-panel-instability-signals">
+          <div className="si-country-panel-header">
+            <div className="si-country-panel-title">INSTABILITY &amp; SIGNALS</div>
+            <div className="si-country-panel-meta">
               {apiLoading ? "LOADING" : apiError ? (apiData ? "STALE" : "ERROR") : noInstabilityData ? "NO DATA" : "READY"}
             </div>
-            <div className="wv-country-panel-controls">
+            <div className="si-country-panel-controls">
               <IconButton
                 label="Refresh instability"
                 text="REFRESH"
@@ -1028,76 +1028,76 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
           </div>
           <PanelBody>
             {apiError && !apiData && !profile.articles.length ? (
-              <div className="wv-panel-state">
-                <div className="wv-panel-state-line">{apiError}</div>
-                <button type="button" className="wv-inline-action" onClick={() => void fetchCountryProfile()}>
+              <div className="si-panel-state">
+                <div className="si-panel-state-line">{apiError}</div>
+                <button type="button" className="si-inline-action" onClick={() => void fetchCountryProfile()}>
                   RETRY
                 </button>
               </div>
             ) : (
-              <div className="wv-country-instability-signals" style={{ opacity: apiLoading && !apiData ? 0.7 : 1 }}>
-                <div className="wv-country-instability-block">
+              <div className="si-country-instability-signals" style={{ opacity: apiLoading && !apiData ? 0.7 : 1 }}>
+                <div className="si-country-instability-block">
                   {noInstabilityData ? (
-                    <div className="wv-panel-state wv-country-instability-no-data" style={{ padding: 4 }}>
-                      <div className="wv-panel-state-line" style={{ fontSize: 10 }}>
+                    <div className="si-panel-state si-country-instability-no-data" style={{ padding: 4 }}>
+                      <div className="si-panel-state-line" style={{ fontSize: 10 }}>
                         No instability data for the last 30 days.
                       </div>
                     </div>
                   ) : (
                     <>
-                      <div className="wv-country-instability-kpi">
-                        <div className="wv-country-instability-value">{instabilityIndex}</div>
-                        <div className="wv-country-instability-scale">/100</div>
+                      <div className="si-country-instability-kpi">
+                        <div className="si-country-instability-value">{instabilityIndex}</div>
+                        <div className="si-country-instability-scale">/100</div>
                       </div>
-                      <div className="wv-country-breakdown">
-                        <div className="wv-country-breakdown-title">Breakdown</div>
+                      <div className="si-country-breakdown">
+                        <div className="si-country-breakdown-title">Breakdown</div>
                         {breakdownData.map((row) => (
-                          <div key={row.code} className="wv-country-breakdown-row">
-                            <span className="wv-country-breakdown-label">{row.label}</span>
-                            <span className="wv-country-breakdown-bar" aria-hidden="true">
-                              <span className="wv-country-breakdown-fill" style={{ width: `${row.value}%` }} />
+                          <div key={row.code} className="si-country-breakdown-row">
+                            <span className="si-country-breakdown-label">{row.label}</span>
+                            <span className="si-country-breakdown-bar" aria-hidden="true">
+                              <span className="si-country-breakdown-fill" style={{ width: `${row.value}%` }} />
                             </span>
-                            <span className="wv-country-breakdown-val">{row.value}</span>
+                            <span className="si-country-breakdown-val">{row.value}</span>
                           </div>
                         ))}
                       </div>
                     </>
                   )}
                 </div>
-                <div className="wv-country-signals-block">
+                <div className="si-country-signals-block">
                   {newsLoading && profile.articles.length === 0 ? (
-                    <div className="wv-panel-state">
-                      <div className="wv-skeleton-row" />
-                      <div className="wv-skeleton-row" />
-                      <div className="wv-skeleton-row" />
-                      <div className="wv-skeleton-row" />
+                    <div className="si-panel-state">
+                      <div className="si-skeleton-row" />
+                      <div className="si-skeleton-row" />
+                      <div className="si-skeleton-row" />
+                      <div className="si-skeleton-row" />
                     </div>
                   ) : (
-                    <div className="wv-country-timeline">
-                      <div className="wv-country-timeline-title">7-day activity</div>
+                    <div className="si-country-timeline">
+                      <div className="si-country-timeline-title">7-day activity</div>
                       {TIMELINE_ROWS.map((row) => {
                         const hasData = profile.timeline.some((entry) => entry[row.key] > 0);
                         return (
-                          <div key={row.key} className="wv-country-timeline-row">
-                            <span className="wv-country-timeline-label" style={{ color: row.color }}>
+                          <div key={row.key} className="si-country-timeline-row">
+                            <span className="si-country-timeline-label" style={{ color: row.color }}>
                               {row.label}
                             </span>
-                            <div className="wv-country-timeline-main">
-                              <div className="wv-country-timeline-bars" role="img" aria-label={`${row.label} 7-day spark`}>
+                            <div className="si-country-timeline-main">
+                              <div className="si-country-timeline-bars" role="img" aria-label={`${row.label} 7-day spark`}>
                                 {profile.timeline.map((entry) => (
                                   <span
                                     key={`${row.key}-${entry.date}`}
-                                    className="wv-country-timeline-bar"
+                                    className="si-country-timeline-bar"
                                     style={{
                                       height: `${Math.max(2, (entry[row.key] / maxTimelineVal) * 18)}px`,
-                                      background: entry[row.key] > 0 ? row.color : "var(--wv-line)",
+                                      background: entry[row.key] > 0 ? row.color : "var(--si-line)",
                                       opacity: entry[row.key] > 0 ? 0.85 : 0.28,
                                     }}
                                     title={`${entry.date}: ${entry[row.key]}`}
                                   />
                                 ))}
                               </div>
-                              {!hasData ? <span className="wv-country-timeline-empty">No events in 7 days</span> : null}
+                              {!hasData ? <span className="si-country-timeline-empty">No events in 7 days</span> : null}
                             </div>
                           </div>
                         );
@@ -1133,10 +1133,10 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
         </section>
 
         {/* Intelligence Brief */}
-        <section className="wv-panel wv-country-panel wv-country-panel-brief">
-          <div className="wv-country-panel-header">
-            <div className="wv-country-panel-title">INTELLIGENCE BRIEF</div>
-            <div className="wv-country-panel-controls">
+        <section className="si-panel si-country-panel si-country-panel-brief">
+          <div className="si-country-panel-header">
+            <div className="si-country-panel-title">INTELLIGENCE BRIEF</div>
+            <div className="si-country-panel-controls">
               {topHeadline ? (
                 <IconButton
                   label="View full brief"
@@ -1150,44 +1150,44 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
           </div>
           <PanelBody>
             {apiLoading && !topHeadline ? (
-              <div className="wv-panel-state">
-                <div className="wv-skeleton-row" />
-                <div className="wv-skeleton-row" />
+              <div className="si-panel-state">
+                <div className="si-skeleton-row" />
+                <div className="si-skeleton-row" />
               </div>
             ) : topHeadline ? (
-              <div className="wv-country-brief">
-                <div className="wv-country-brief-line" title={topHeadline.headline}>
+              <div className="si-country-brief">
+                <div className="si-country-brief-line" title={topHeadline.headline}>
                   {topHeadline.headline}
                 </div>
-                <div className="wv-country-brief-meta">
+                <div className="si-country-brief-meta">
                   <span>{topHeadline.source}</span>
-                  <span className="wv-country-sep">|</span>
+                  <span className="si-country-sep">|</span>
                   <span>{relativeTime(topHeadline.publishedAt)}</span>
-                  <span className="wv-country-sep">|</span>
+                  <span className="si-country-sep">|</span>
                   <span>{topHeadline.domain}</span>
                 </div>
                 {apiData?.acledSummary && apiData.acledSummary.totalEvents > 0 ? (
-                  <div className="wv-country-brief-note">
+                  <div className="si-country-brief-note">
                     {apiData.acledSummary.totalEvents} events / 30d • {apiData.acledSummary.totalFatalities} fatalities
                   </div>
                 ) : (
-                  <div className="wv-country-brief-note wv-country-muted">No ACLED summary available.</div>
+                  <div className="si-country-brief-note si-country-muted">No ACLED summary available.</div>
                 )}
               </div>
             ) : (
-              <div className="wv-panel-state">
-                <div className="wv-panel-state-line">No brief available (no recent articles).</div>
+              <div className="si-panel-state">
+                <div className="si-panel-state-line">No brief available (no recent articles).</div>
               </div>
             )}
           </PanelBody>
         </section>
 
         {/* Top News */}
-        <section className="wv-panel wv-country-panel wv-country-panel-news">
-          <div className="wv-country-panel-header">
-            <div className="wv-country-panel-title">TOP NEWS</div>
-            <div className="wv-country-panel-meta">{sortedArticles.length ? `${sortedArticles.length} items` : "EMPTY"}</div>
-            <div className="wv-country-panel-controls">
+        <section className="si-panel si-country-panel si-country-panel-news">
+          <div className="si-country-panel-header">
+            <div className="si-country-panel-title">TOP NEWS</div>
+            <div className="si-country-panel-meta">{sortedArticles.length ? `${sortedArticles.length} items` : "EMPTY"}</div>
+            <div className="si-country-panel-controls">
               <DenseSelect
                 ariaLabel="News sort"
                 value={newsSort}
@@ -1201,34 +1201,34 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
             </div>
           </div>
           <PanelBody noPadding>
-            <div className="wv-country-news">
-              <div className="wv-country-news-scroll">
-                <div className="wv-country-news-head">
+            <div className="si-country-news">
+              <div className="si-country-news-scroll">
+                <div className="si-country-news-head">
                   <span>SRC</span>
                   <span>HEADLINE</span>
                   <span>AGE</span>
                   <span>REL</span>
                 </div>
                 {newsLoading && !sortedNews.length ? (
-                  <div className="wv-country-news-state" style={{ minHeight: 120 }}>
-                    <div className="wv-skeleton-row" />
-                    <div className="wv-skeleton-row" />
-                    <div className="wv-skeleton-row" />
-                    <div className="wv-skeleton-row" />
+                  <div className="si-country-news-state" style={{ minHeight: 120 }}>
+                    <div className="si-skeleton-row" />
+                    <div className="si-skeleton-row" />
+                    <div className="si-skeleton-row" />
+                    <div className="si-skeleton-row" />
                   </div>
                 ) : newsError && !sortedNews.length ? (
-                  <div className="wv-panel-state" style={{ padding: 6 }}>
-                    <div className="wv-panel-state-line">{newsError}</div>
-                    <button type="button" className="wv-inline-action" onClick={() => void fetchCountryNews()}>
+                  <div className="si-panel-state" style={{ padding: 6 }}>
+                    <div className="si-panel-state-line">{newsError}</div>
+                    <button type="button" className="si-inline-action" onClick={() => void fetchCountryNews()}>
                       RETRY
                     </button>
                   </div>
                 ) : !sortedNews.length ? (
-                  <div className="wv-panel-state" style={{ padding: 6 }}>
-                    <div className="wv-panel-state-line">No news articles found for this country.</div>
+                  <div className="si-panel-state" style={{ padding: 6 }}>
+                    <div className="si-panel-state-line">No news articles found for this country.</div>
                   </div>
                 ) : (
-                  <div className="wv-country-news-body" style={{ height: Math.min(sortedNews.length * 36, 400) }}>
+                  <div className="si-country-news-body" style={{ height: Math.min(sortedNews.length * 36, 400) }}>
                     <List
                       rowCount={sortedNews.length}
                       rowHeight={36}
@@ -1260,11 +1260,11 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
         </section>
 
         {/* Prediction Markets */}
-        <section className="wv-panel wv-country-panel wv-country-panel-markets">
-          <div className="wv-country-panel-header">
-            <div className="wv-country-panel-title">PREDICTION MARKETS</div>
-            <div className="wv-country-panel-meta">{predictionMarkets.length ? `${predictionMarkets.length} mkts` : "EMPTY"}</div>
-            <div className="wv-country-panel-controls">
+        <section className="si-panel si-country-panel si-country-panel-markets">
+          <div className="si-country-panel-header">
+            <div className="si-country-panel-title">PREDICTION MARKETS</div>
+            <div className="si-country-panel-meta">{predictionMarkets.length ? `${predictionMarkets.length} mkts` : "EMPTY"}</div>
+            <div className="si-country-panel-controls">
               <DenseSelect
                 ariaLabel="Market sort"
                 value={marketsSort}
@@ -1288,44 +1288,44 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
           </div>
           <PanelBody noPadding>
             {apiLoading && !sortedMarkets.length ? (
-              <div className="wv-country-rows-pad">
-                <div className="wv-skeleton-row" />
-                <div className="wv-skeleton-row" />
-                <div className="wv-skeleton-row" />
+              <div className="si-country-rows-pad">
+                <div className="si-skeleton-row" />
+                <div className="si-skeleton-row" />
+                <div className="si-skeleton-row" />
               </div>
             ) : marketsError && !sortedMarkets.length ? (
-              <div className="wv-panel-state" style={{ padding: 6 }}>
-                <div className="wv-panel-state-line">{marketsError}</div>
-                <button type="button" className="wv-inline-action" onClick={() => void fetchCountryProfile()}>
+              <div className="si-panel-state" style={{ padding: 6 }}>
+                <div className="si-panel-state-line">{marketsError}</div>
+                <button type="button" className="si-inline-action" onClick={() => void fetchCountryProfile()}>
                   RETRY
                 </button>
               </div>
             ) : !sortedMarkets.length ? (
-              <div className="wv-panel-state" style={{ padding: 6 }}>
-                <div className="wv-panel-state-line">No active prediction markets found.</div>
+              <div className="si-panel-state" style={{ padding: 6 }}>
+                <div className="si-panel-state-line">No active prediction markets found.</div>
               </div>
             ) : (
-              <div className="wv-country-market-list">
-                <div className="wv-country-market-scroll">
-                  <div className="wv-country-market-body">
+              <div className="si-country-market-list">
+                <div className="si-country-market-scroll">
+                  <div className="si-country-market-body">
                     {sortedMarkets.slice(0, 18).map((market) => {
                       const { yesPct, noPct } = normalizeMarketSplit(market.yesPrice, market.noPrice);
                       return (
                         <button
                           key={market.id}
                           type="button"
-                          className="wv-country-market-row"
+                          className="si-country-market-row"
                           onClick={() => window.open(`https://polymarket.com/event/${market.slug}`, "_blank", "noopener,noreferrer")}
                           title={market.question}
                         >
-                          <span className="wv-country-market-q">{market.question}</span>
-                          <div className="wv-country-market-prediction">
-                            <span className="wv-country-market-vol">{formatVolume(market.volume)}</span>
-                            <span className="wv-country-market-bar" role="img" aria-label={`Yes ${yesPct} percent, No ${noPct} percent`}>
-                              <span className="wv-country-market-yes" style={{ width: `${yesPct}%` }}>
+                          <span className="si-country-market-q">{market.question}</span>
+                          <div className="si-country-market-prediction">
+                            <span className="si-country-market-vol">{formatVolume(market.volume)}</span>
+                            <span className="si-country-market-bar" role="img" aria-label={`Yes ${yesPct} percent, No ${noPct} percent`}>
+                              <span className="si-country-market-yes" style={{ width: `${yesPct}%` }}>
                                 {yesPct}%
                               </span>
-                              <span className="wv-country-market-no" style={{ width: `${noPct}%` }}>
+                              <span className="si-country-market-no" style={{ width: `${noPct}%` }}>
                                 {noPct}%
                               </span>
                             </span>
@@ -1361,26 +1361,26 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
         </section>
 
         {/* Infrastructure Exposure */}
-        <section className="wv-panel wv-country-panel wv-country-panel-infra">
-          <div className="wv-country-panel-header">
-            <div className="wv-country-panel-title">INFRASTRUCTURE EXPOSURE</div>
-            <div className="wv-country-panel-meta">{infraTabs.length ? `${infraTabs.reduce((a, t) => a + t.count, 0)} rows` : "EMPTY"}</div>
+        <section className="si-panel si-country-panel si-country-panel-infra">
+          <div className="si-country-panel-header">
+            <div className="si-country-panel-title">INFRASTRUCTURE EXPOSURE</div>
+            <div className="si-country-panel-meta">{infraTabs.length ? `${infraTabs.reduce((a, t) => a + t.count, 0)} rows` : "EMPTY"}</div>
           </div>
           <PanelBody noPadding>
             {infraTabs.length ? (
-              <div className="wv-country-infra">
+              <div className="si-country-infra">
                 <PanelTabs
                   value={infraTab}
                   onChange={(value) => setInfraTab(value)}
                   options={infraTabs.map((t) => ({ value: t.value, label: `${t.label} ${t.count}` }))}
                 />
-                <div className="wv-country-infra-table">
-                  <div className="wv-country-infra-scroll">
-                    <div className="wv-country-infra-head">
+                <div className="si-country-infra-table">
+                  <div className="si-country-infra-scroll">
+                    <div className="si-country-infra-head">
                       <span>NAME</span>
                       <span className="is-right">LEN/DIST</span>
                     </div>
-                    <div className="wv-country-infra-body">
+                    <div className="si-country-infra-body">
                       {(infraTab === "pipelines"
                         ? infrastructure.pipelines
                         : infraTab === "dataCenters"
@@ -1398,11 +1398,11 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
                                   ? String(item.capacity)
                                   : "";
                           return (
-                            <div key={`${infraTab}-${idx}`} className="wv-country-infra-row">
-                              <span className="wv-country-infra-name" title={item.name}>
+                            <div key={`${infraTab}-${idx}`} className="si-country-infra-row">
+                              <span className="si-country-infra-name" title={item.name}>
                                 {item.name}
                               </span>
-                              <span className="wv-country-infra-val">{value}</span>
+                              <span className="si-country-infra-val">{value}</span>
                             </div>
                           );
                         })}
@@ -1411,21 +1411,21 @@ export default function CountryDetailModal({ countryCode, dockSide = "left", onC
                 </div>
               </div>
             ) : (
-              <div className="wv-panel-state" style={{ padding: 6 }}>
-                <div className="wv-panel-state-line">No infrastructure data available.</div>
+              <div className="si-panel-state" style={{ padding: 6 }}>
+                <div className="si-panel-state-line">No infrastructure data available.</div>
               </div>
             )}
           </PanelBody>
         </section>
       </div>
 
-      <div className="wv-country-dock-footer">
+      <div className="si-country-dock-footer">
         <span>ARTICLES {profile.articles.length}</span>
-        <span className="wv-country-sep">|</span>
+        <span className="si-country-sep">|</span>
         <span>24H {articles24h}</span>
-        <span className="wv-country-sep">|</span>
+        <span className="si-country-sep">|</span>
         <span>SOURCES {sourcesCount}</span>
-        <span className="wv-country-sep">|</span>
+        <span className="si-country-sep">|</span>
         <span>CATS {categoriesCount}</span>
       </div>
       </aside>

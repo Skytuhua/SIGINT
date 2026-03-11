@@ -171,7 +171,7 @@ async function getActiveEventsSnapshot(): Promise<CachedFetchResult<GammaEventsR
       const url = `${GAMMA_BASE}/events?closed=false&active=true&limit=${SNAPSHOT_LIMIT}&order=volume`;
       return fetchJsonOrThrow<GammaEventsResponse>(
         url,
-        { headers: { "User-Agent": "WorldView/0.1" } },
+        { headers: { "User-Agent": "SIGINT/0.1" } },
         POLICY.timeoutMs,
       );
     },
@@ -187,7 +187,7 @@ async function searchGammaByKeyword(keyword: string): Promise<GammaEventsRespons
       const url = `${GAMMA_BASE}/events?search=${encodeURIComponent(keyword)}&active=true&closed=false&limit=30&order=volume`;
       return fetchJsonOrThrow<GammaEventsResponse>(
         url,
-        { headers: { "User-Agent": "WorldView/0.1" } },
+        { headers: { "User-Agent": "SIGINT/0.1" } },
         8_000,
       );
     },

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import { MiniSparkline } from "./shared/MiniSparkline";
+import Term from "./shared/Term";
 
 // ─── Static market data ────────────────────────────────────────────────────
 
@@ -102,7 +103,7 @@ const IMPACT_DOT: Record<Impact, string> = { high: "#ff5a5f", med: "#ffab40", lo
 interface Props { onClose: () => void; }
 
 export default function DailyLineupModal({ onClose }: Props) {
-  const feedItems = useWorldViewStore((s) => s.news.feedItems);
+  const feedItems = useSIGINTStore((s) => s.news.feedItems);
   const [turnOff, setTurnOff] = useState(false);
   const [aiPage, setAiPage]   = useState(0);
   const [utc, setUtc]         = useState("");
@@ -130,7 +131,7 @@ export default function DailyLineupModal({ onClose }: Props) {
   }, [turnOff]);
 
   function handleClose() {
-    if (turnOff) localStorage.setItem("wv-daily-lineup-disabled", "true");
+    if (turnOff) localStorage.setItem("si-daily-lineup-disabled", "true");
     onClose();
   }
 
@@ -204,7 +205,7 @@ export default function DailyLineupModal({ onClose }: Props) {
           position: "sticky", top: 0, zIndex: 2,
         }}>
           <span style={{ color: "#7fa8c4", fontWeight: 700, fontSize: 10, letterSpacing: 2 }}>
-            WORLDVIEW · DAILY LINEUP
+            SIGINT · DAILY LINEUP
           </span>
           <span style={{ fontSize: 9, color: "#5f7488", letterSpacing: 1 }}>
             NORTH AMERICAN EDITION
@@ -264,7 +265,7 @@ export default function DailyLineupModal({ onClose }: Props) {
             borderTop: "1px solid rgba(80,100,125,0.1)",
             display: "flex", gap: 24, flexWrap: "wrap", alignItems: "center",
           }}>
-            <span style={{ fontSize: 9, color: "#5f7488", letterSpacing: 1 }}>F/X</span>
+            <span style={{ fontSize: 9, color: "#5f7488", letterSpacing: 1 }}><Term id="CROSS_RATE">F/X</Term></span>
             {FX_RATES.map((fx) => (
               <div key={fx.pair} style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 <span style={{ fontSize: 9, color: "#8da3b8", letterSpacing: 1 }}>{fx.pair}</span>
@@ -299,7 +300,7 @@ export default function DailyLineupModal({ onClose }: Props) {
           <div style={rightCell}>
             <div style={sectionTitle}>Analyst Activity</div>
             <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 9, color: "#6e849d", letterSpacing: 1, marginBottom: 6 }}>Upgrades:</div>
+              <div style={{ fontSize: 9, color: "#6e849d", letterSpacing: 1, marginBottom: 6 }}><Term id="OW">Upgrades</Term>:</div>
               <div>
                 {UPGRADES.map((t) => (
                   <span key={t} style={{
@@ -311,7 +312,7 @@ export default function DailyLineupModal({ onClose }: Props) {
               </div>
             </div>
             <div>
-              <div style={{ fontSize: 9, color: "#6e849d", letterSpacing: 1, marginBottom: 6 }}>Downgrades:</div>
+              <div style={{ fontSize: 9, color: "#6e849d", letterSpacing: 1, marginBottom: 6 }}><Term id="UW">Downgrades</Term>:</div>
               <div>
                 {DOWNGRADES.map((t) => (
                   <span key={t} style={{
@@ -378,12 +379,12 @@ export default function DailyLineupModal({ onClose }: Props) {
               </div>
             ))}
             <div style={{ marginTop: 6, fontSize: 9, color: "#5f7488", letterSpacing: 1 }}>
-              BLS · Fed Reserve · Static Placeholder
+              BLS · <Term id="FOMC">Fed Reserve</Term> · Static Placeholder
             </div>
           </div>
 
           <div style={rightCell}>
-            <div style={sectionTitle}>Earnings Calendar</div>
+            <div style={sectionTitle}><Term id="EPS">Earnings</Term> Calendar</div>
             {EARNINGS.map((ev, i) => (
               <div key={i} style={{
                 display: "grid", gridTemplateColumns: "38px 8px 1fr",
@@ -436,7 +437,7 @@ export default function DailyLineupModal({ onClose }: Props) {
               </div>
             ))}
             <div style={{ marginTop: 6, fontSize: 9, color: "#5f7488", letterSpacing: 1 }}>
-              {feedItems.length > 0 ? "WorldView Live Feed" : "Static Placeholder"}
+              {feedItems.length > 0 ? "SIGINT Live Feed" : "Static Placeholder"}
             </div>
           </div>
 

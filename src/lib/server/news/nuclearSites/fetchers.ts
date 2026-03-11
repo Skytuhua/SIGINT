@@ -303,7 +303,7 @@ export async function fetchFromOverpass(): Promise<NuclearFetchResult> {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "WorldView/0.1 (research; nuclear-sites)",
+            "User-Agent": "SIGINT/0.1 (research; nuclear-sites)",
           },
           body,
         },

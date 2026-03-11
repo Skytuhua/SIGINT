@@ -123,7 +123,7 @@ export default function InteractiveChart({ sym, basePrice }: Props) {
   const toggleBtn = (label: string, active: boolean, onToggle: () => void) => (
     <button
       key={label}
-      className={`wv-chart-toggle-btn${active ? " is-active" : ""}`}
+      className={`si-chart-toggle-btn${active ? " is-active" : ""}`}
       onClick={onToggle}
     >
       {label}
@@ -133,20 +133,20 @@ export default function InteractiveChart({ sym, basePrice }: Props) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       {/* Toolbar */}
-      <div className="wv-chart-toolbar">
-        <div className="wv-chart-tf-row">
+      <div className="si-chart-toolbar">
+        <div className="si-chart-tf-row">
           {(["1D", "5D", "1M", "3M", "1Y"] as TF[]).map((t) => (
             <button
               key={t}
-              className={`wv-chart-tf-btn${tf === t ? " is-active" : ""}`}
+              className={`si-chart-tf-btn${tf === t ? " is-active" : ""}`}
               onClick={() => setTf(t)}
             >
               {t}
             </button>
           ))}
         </div>
-        <div className="wv-chart-indicator-row">
-          <span className="wv-chart-indicator-label">INDICATORS</span>
+        <div className="si-chart-indicator-row">
+          <span className="si-chart-indicator-label">INDICATORS</span>
           {toggleBtn("MA20", showMA20, () => setShowMA20((v) => !v))}
           {toggleBtn("MA50", showMA50, () => setShowMA50((v) => !v))}
           {toggleBtn("VOL", showVolume, () => setShowVolume((v) => !v))}
@@ -157,8 +157,8 @@ export default function InteractiveChart({ sym, basePrice }: Props) {
 
       {/* Hover tooltip */}
       {hc && (
-        <div className="wv-chart-tooltip">
-          <span className="wv-chart-tooltip-ts">{new Date(hc.ts).toLocaleTimeString()}</span>
+        <div className="si-chart-tooltip">
+          <span className="si-chart-tooltip-ts">{new Date(hc.ts).toLocaleTimeString()}</span>
           <span>O <strong>{fmtPrice(hc.open)}</strong></span>
           <span>H <strong style={{ color: "#36b37e" }}>{fmtPrice(hc.high)}</strong></span>
           <span>L <strong style={{ color: "#ff5a5f" }}>{fmtPrice(hc.low)}</strong></span>
@@ -325,10 +325,10 @@ export default function InteractiveChart({ sym, basePrice }: Props) {
       </div>
 
       {/* Legend */}
-      <div className="wv-chart-legend">
-        {showMA20 && <span><span style={{ background: "#89e5ff" }} className="wv-chart-legend-dot" />MA20</span>}
-        {showMA50 && <span><span style={{ background: "#ffab40" }} className="wv-chart-legend-dot" />MA50</span>}
-        <span style={{ marginLeft: "auto", color: "var(--wv-text-muted)" }}>{sym} · {tf} · SIMULATED DATA</span>
+      <div className="si-chart-legend">
+        {showMA20 && <span><span style={{ background: "#89e5ff" }} className="si-chart-legend-dot" />MA20</span>}
+        {showMA50 && <span><span style={{ background: "#ffab40" }} className="si-chart-legend-dot" />MA50</span>}
+        <span style={{ marginLeft: "auto", color: "var(--si-text-muted)" }}>{sym} · {tf} · SIMULATED DATA</span>
       </div>
     </div>
   );

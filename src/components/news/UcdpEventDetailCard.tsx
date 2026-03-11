@@ -89,20 +89,20 @@ export default function UcdpEventDetailCard({
 
   return createPortal(
     <div
-      className="wv-hotspot-card"
+      className="si-hotspot-card"
       role="dialog"
       aria-label="UCDP event detail"
     >
-      <div className="wv-hotspot-card-hdr">
-        <div className="wv-hotspot-card-headline">
-          <div className="wv-hotspot-name">{titleLine}</div>
-          <span className={`wv-hotspot-tier ${severityClass(sevLabel)}`}>
+      <div className="si-hotspot-card-hdr">
+        <div className="si-hotspot-card-headline">
+          <div className="si-hotspot-name">{titleLine}</div>
+          <span className={`si-hotspot-tier ${severityClass(sevLabel)}`}>
             {sevLabel.toUpperCase()}
           </span>
         </div>
         <button
           type="button"
-          className="wv-hotspot-close"
+          className="si-hotspot-close"
           onClick={onClose}
           aria-label="Close UCDP event details"
         >
@@ -111,32 +111,32 @@ export default function UcdpEventDetailCard({
       </div>
 
       {detail.violenceType ? (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">VIOLENCE TYPE</div>
-          <div className="wv-hotspot-summary">
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">VIOLENCE TYPE</div>
+          <div className="si-hotspot-summary">
             {violenceLabel(detail.violenceType)}
           </div>
         </div>
       ) : null}
 
       {actorTitle ? (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">ACTORS</div>
-          <div className="wv-hotspot-summary">{actorTitle}</div>
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">ACTORS</div>
+          <div className="si-hotspot-summary">{actorTitle}</div>
         </div>
       ) : null}
 
       {detail.date ? (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">DATE</div>
-          <div className="wv-hotspot-summary">{detail.date}</div>
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">DATE</div>
+          <div className="si-hotspot-summary">{detail.date}</div>
         </div>
       ) : null}
 
       {detail.fatalities_best > 0 ? (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">FATALITIES</div>
-          <div className="wv-hotspot-subscores">
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">FATALITIES</div>
+          <div className="si-hotspot-subscores">
             <div>Best estimate: {detail.fatalities_best}</div>
             <div>
               Range: {detail.fatalities_low}–{detail.fatalities_high}
@@ -145,9 +145,9 @@ export default function UcdpEventDetailCard({
         </div>
       ) : null}
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">SEVERITY</div>
-        <div className="wv-hotspot-subscores">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">SEVERITY</div>
+        <div className="si-hotspot-subscores">
           <div>
             {sevLabel} ({sevScore})
           </div>
@@ -155,9 +155,9 @@ export default function UcdpEventDetailCard({
       </div>
 
       {locationTitle ? (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">LOCATION</div>
-          <div className="wv-hotspot-subscores">
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">LOCATION</div>
+          <div className="si-hotspot-subscores">
             {(detail.admin1 || detail.country) && (
               <div>
                 {[detail.admin1, detail.country].filter(Boolean).join(", ")}
@@ -168,9 +168,9 @@ export default function UcdpEventDetailCard({
         </div>
       ) : null}
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">SOURCE</div>
-        <ul className="wv-hotspot-trace">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">SOURCE</div>
+        <ul className="si-hotspot-trace">
           <li>UCDP GED — Verified (Fatality-Coded)</li>
           {detail.sourceDatasetVersion ? (
             <li>Dataset v{detail.sourceDatasetVersion}</li>

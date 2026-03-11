@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import CctvFeedView from "./inspector/CctvFeedView";
 
 const MIN_W = 320;
@@ -10,9 +10,9 @@ const DEFAULT_W = 420;
 const DEFAULT_H = 300;
 
 export default function CctvFloatingPanel() {
-  const floating = useWorldViewStore((s) => s.cctv.floating);
-  const close = useWorldViewStore((s) => s.closeCctvFloating);
-  const markCctvBroken = useWorldViewStore((s) => s.markCctvBroken);
+  const floating = useSIGINTStore((s) => s.cctv.floating);
+  const close = useSIGINTStore((s) => s.closeCctvFloating);
+  const markCctvBroken = useSIGINTStore((s) => s.markCctvBroken);
 
   const [pos, setPos] = useState({ x: 60, y: 60 });
   const [size, setSize] = useState({ w: DEFAULT_W, h: DEFAULT_H });
@@ -75,7 +75,7 @@ export default function CctvFloatingPanel() {
   return (
     <div
       ref={panelRef}
-      className="wv-cctv-floating-panel"
+      className="si-cctv-floating-panel"
       style={{
         position: "fixed",
         left: pos.x,

@@ -63,51 +63,51 @@ function truncate(s: string, max: number): string {
 function DetailCard({ item, onClose }: { item: StreamItem; onClose: () => void }) {
   const now = Date.now();
   return (
-    <div className="wv-terminal-detail">
-      <div className="wv-terminal-detail-header">
-        <span className="wv-terminal-detail-cat" style={{ color: catColor(item.category) }}>
+    <div className="si-terminal-detail">
+      <div className="si-terminal-detail-header">
+        <span className="si-terminal-detail-cat" style={{ color: catColor(item.category) }}>
           [{item.category.toUpperCase()}]
         </span>
-        <button type="button" className="wv-terminal-detail-close" onClick={onClose} title="Close">&times;</button>
+        <button type="button" className="si-terminal-detail-close" onClick={onClose} title="Close">&times;</button>
       </div>
-      <h3 className="wv-terminal-detail-headline">{item.headline}</h3>
-      <div className="wv-terminal-detail-meta">
+      <h3 className="si-terminal-detail-headline">{item.headline}</h3>
+      <div className="si-terminal-detail-meta">
         <span>{relativeAge(item.timestamp, now)}</span>
         <span>{shortTime(item.timestamp)}</span>
         <span>Confidence: {item.confidence}</span>
         <span>Importance: {item.importance}</span>
       </div>
       {item.geo && (
-        <div className="wv-terminal-detail-geo">
+        <div className="si-terminal-detail-geo">
           {item.geo.placeName && <span>{item.geo.placeName}</span>}
           {item.geo.countryCode && <span>{item.geo.countryCode}</span>}
           <span>{item.geo.lat.toFixed(2)}, {item.geo.lon.toFixed(2)}</span>
         </div>
       )}
       {item.entities.length > 0 && (
-        <div className="wv-terminal-detail-entities">
+        <div className="si-terminal-detail-entities">
           {item.entities.map((e, i) => (
-            <span key={i} className="wv-terminal-detail-entity">{e.name}{e.ticker ? ` (${e.ticker})` : ""}</span>
+            <span key={i} className="si-terminal-detail-entity">{e.name}{e.ticker ? ` (${e.ticker})` : ""}</span>
           ))}
         </div>
       )}
       {item.tickers.length > 0 && (
-        <div className="wv-terminal-detail-tickers">
-          {item.tickers.map((t) => <span key={t} className="wv-terminal-detail-ticker">${t}</span>)}
+        <div className="si-terminal-detail-tickers">
+          {item.tickers.map((t) => <span key={t} className="si-terminal-detail-ticker">${t}</span>)}
         </div>
       )}
-      <div className="wv-terminal-detail-sources">
-        <span className="wv-terminal-detail-label">Sources ({item.duplicateCount}):</span>
+      <div className="si-terminal-detail-sources">
+        <span className="si-terminal-detail-label">Sources ({item.duplicateCount}):</span>
         {item.sources.map((s, i) => <span key={i}>{s}</span>)}
       </div>
       {item.topSignals && item.topSignals.length > 0 && (
-        <div className="wv-terminal-detail-top-reason">
-          <span className="wv-terminal-detail-label">Why it&apos;s top:</span>
+        <div className="si-terminal-detail-top-reason">
+          <span className="si-terminal-detail-label">Why it&apos;s top:</span>
           {item.topSignals.map((s, i) => <span key={i}>{s}</span>)}
         </div>
       )}
-      <div className="wv-terminal-detail-actions">
-        <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="wv-terminal-detail-action">
+      <div className="si-terminal-detail-actions">
+        <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="si-terminal-detail-action">
           OPEN SOURCE
         </a>
       </div>
@@ -123,11 +123,11 @@ function SourceHealthBar({ health }: { health: Record<string, SourceHealthEntry>
   const entries = Object.values(health);
   if (entries.length === 0) return null;
   return (
-    <div className="wv-terminal-health">
+    <div className="si-terminal-health">
       {entries.map((e) => (
         <span
           key={e.sourceId}
-          className={`wv-terminal-health-dot wv-terminal-health-${e.status}`}
+          className={`si-terminal-health-dot si-terminal-health-${e.status}`}
           title={`${e.sourceId}: ${e.status}${e.errorCode ? ` (${e.errorCode})` : ""}${e.lastSuccessAt ? ` last ok ${relativeAge(e.lastSuccessAt, Date.now())}` : ""}`}
         >
           {e.sourceId.toUpperCase()}
@@ -157,16 +157,16 @@ const TerminalRow = memo(function TerminalRow({ item, selected, density, now, on
   if (density === "light") {
     return (
       <div
-        className={`wv-trow wv-trow-light${selected ? " is-selected" : ""}`}
+        className={`si-trow si-trow-light${selected ? " is-selected" : ""}`}
         onClick={onClick}
         onContextMenu={onContextMenu}
         role="row"
         tabIndex={-1}
       >
-        <span className="wv-trow-age">{age}</span>
-        <span className="wv-trow-cat" style={{ color: cc }}>[{item.category.toUpperCase()}]</span>
-        <span className="wv-trow-headline">{truncate(item.headline, 120)}</span>
-        <span className="wv-trow-domain">{item.sourceDomain}</span>
+        <span className="si-trow-age">{age}</span>
+        <span className="si-trow-cat" style={{ color: cc }}>[{item.category.toUpperCase()}]</span>
+        <span className="si-trow-headline">{truncate(item.headline, 120)}</span>
+        <span className="si-trow-domain">{item.sourceDomain}</span>
       </div>
     );
   }
@@ -174,21 +174,21 @@ const TerminalRow = memo(function TerminalRow({ item, selected, density, now, on
   if (density === "heavy") {
     return (
       <div
-        className={`wv-trow wv-trow-heavy${selected ? " is-selected" : ""}`}
+        className={`si-trow si-trow-heavy${selected ? " is-selected" : ""}`}
         onClick={onClick}
         onContextMenu={onContextMenu}
         role="row"
         tabIndex={-1}
       >
-        <span className="wv-trow-age">{age}</span>
-        <span className="wv-trow-cat" style={{ color: cc }}>[{item.category.toUpperCase()}]</span>
-        {item.tags.slice(0, 3).map((t) => <span key={t} className="wv-trow-tag">{t}</span>)}
-        <span className="wv-trow-headline">{truncate(item.headline, 100)}</span>
-        <span className="wv-trow-entities">{item.entities.slice(0, 2).map((e) => e.name).join(", ")}</span>
-        <span className="wv-trow-tickers">{item.tickers.join(" ")}</span>
-        <span className="wv-trow-domain">{item.sourceDomain}</span>
-        <span className="wv-trow-time">{shortTime(item.timestamp)}</span>
-        <span className="wv-trow-score">{item.importance}</span>
+        <span className="si-trow-age">{age}</span>
+        <span className="si-trow-cat" style={{ color: cc }}>[{item.category.toUpperCase()}]</span>
+        {item.tags.slice(0, 3).map((t) => <span key={t} className="si-trow-tag">{t}</span>)}
+        <span className="si-trow-headline">{truncate(item.headline, 100)}</span>
+        <span className="si-trow-entities">{item.entities.slice(0, 2).map((e) => e.name).join(", ")}</span>
+        <span className="si-trow-tickers">{item.tickers.join(" ")}</span>
+        <span className="si-trow-domain">{item.sourceDomain}</span>
+        <span className="si-trow-time">{shortTime(item.timestamp)}</span>
+        <span className="si-trow-score">{item.importance}</span>
       </div>
     );
   }
@@ -196,18 +196,18 @@ const TerminalRow = memo(function TerminalRow({ item, selected, density, now, on
   // medium (default)
   return (
     <div
-      className={`wv-trow wv-trow-medium${selected ? " is-selected" : ""}`}
+      className={`si-trow si-trow-medium${selected ? " is-selected" : ""}`}
       onClick={onClick}
       onContextMenu={onContextMenu}
       role="row"
       tabIndex={-1}
     >
-      <span className="wv-trow-age">{age}</span>
-      <span className="wv-trow-cat" style={{ color: cc }}>[{item.category.toUpperCase()}]</span>
-      <span className="wv-trow-headline">{truncate(item.headline, 110)}</span>
-      <span className="wv-trow-domain">{item.sourceDomain}</span>
-      <span className="wv-trow-tickers">{item.tickers.join(" ")}</span>
-      <span className="wv-trow-time">{shortTime(item.timestamp)}</span>
+      <span className="si-trow-age">{age}</span>
+      <span className="si-trow-cat" style={{ color: cc }}>[{item.category.toUpperCase()}]</span>
+      <span className="si-trow-headline">{truncate(item.headline, 110)}</span>
+      <span className="si-trow-domain">{item.sourceDomain}</span>
+      <span className="si-trow-tickers">{item.tickers.join(" ")}</span>
+      <span className="si-trow-time">{shortTime(item.timestamp)}</span>
     </div>
   );
 });
@@ -440,16 +440,16 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
         subtitle={`${clockStr} | Flow: ${expectedFlowPerMin} items/min | ${connected ? "LIVE" : "RECONNECTING..."}`}
         {...lockHeaderProps}
         controls={
-          <div className="wv-terminal-controls">
-            <button type="button" className="wv-terminal-density-btn" onClick={cycleDensity} title="Toggle density">
+          <div className="si-terminal-controls">
+            <button type="button" className="si-terminal-density-btn" onClick={cycleDensity} title="Toggle density">
               {densityLabel}
             </button>
           </div>
         }
       />
-      <PanelBody ref={bodyRef} className="wv-news-terminal-body">
+      <PanelBody ref={bodyRef} className="si-news-terminal-body">
         {/* Tab bar */}
-        <div className="wv-news-category-tabs">
+        <div className="si-news-category-tabs">
           {TERMINAL_TABS.map((tab, idx) => (
             <button
               key={tab}
@@ -464,8 +464,8 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
         </div>
 
         {/* Filter bar */}
-        <div className="wv-terminal-filterbar">
-          <div className="wv-terminal-filterbar-row">
+        <div className="si-terminal-filterbar">
+          <div className="si-terminal-filterbar-row">
             {TIME_WINDOW_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
@@ -476,8 +476,8 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
                 {opt.label}
               </button>
             ))}
-            <span className="wv-terminal-filterbar-sep">|</span>
-            <label className="wv-terminal-filterbar-importance">
+            <span className="si-terminal-filterbar-sep">|</span>
+            <label className="si-terminal-filterbar-importance">
               Min Imp:
               <input
                 type="range"
@@ -489,15 +489,15 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
               />
               <span>{minImportance}</span>
             </label>
-            <span className="wv-terminal-filterbar-sep">|</span>
+            <span className="si-terminal-filterbar-sep">|</span>
             <button type="button" onClick={() => setFiltersOpen(!filtersOpen)}>
               {filtersOpen ? "Hide Filters" : "Filters"}
             </button>
             {watchlists.length > 0 && (
               <>
-                <span className="wv-terminal-filterbar-sep">|</span>
+                <span className="si-terminal-filterbar-sep">|</span>
                 <select
-                  className="wv-terminal-watchlist-select"
+                  className="si-terminal-watchlist-select"
                   value={activeWatchlistId ?? ""}
                   onChange={(e) => setActiveWatchlistId(e.target.value || null)}
                 >
@@ -525,11 +525,11 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
 
         {/* Search overlay */}
         {searchMode && (
-          <div className="wv-terminal-search">
+          <div className="si-terminal-search">
             <input
               ref={searchInputRef}
               type="text"
-              className="wv-terminal-search-input"
+              className="si-terminal-search-input"
               placeholder="Search buffer..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -538,13 +538,13 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
               }}
               autoFocus
             />
-            <span className="wv-terminal-search-count">{displayItems.length} matches</span>
+            <span className="si-terminal-search-count">{displayItems.length} matches</span>
           </div>
         )}
 
         {/* Feed rows */}
         <div
-          className="wv-news-terminal-table-scroll"
+          className="si-news-terminal-table-scroll"
           ref={containerRef}
           onKeyDown={handleKeyDown}
           tabIndex={0}
@@ -568,7 +568,7 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
               style={{ height: "100%", overflow: "auto" }}
             />
           ) : (
-            <div className="wv-news-empty">
+            <div className="si-news-empty">
               {connected ? "Waiting for items..." : "Connecting to stream..."}
             </div>
           )}
@@ -588,7 +588,7 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
       <SourceHealthBar health={sourceHealth} />
 
       {/* Keyboard hints */}
-      <div className="wv-news-hotkeys" style={{ padding: "2px 6px", borderTop: "1px solid var(--wv-line-2)" }}>
+      <div className="si-news-hotkeys" style={{ padding: "2px 6px", borderTop: "1px solid var(--si-line-2)" }}>
         <kbd>j</kbd>/<kbd>k</kbd> nav &nbsp;
         <kbd>Enter</kbd> detail &nbsp;
         <kbd>o</kbd> open &nbsp;

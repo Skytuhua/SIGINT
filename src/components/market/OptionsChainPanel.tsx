@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { bsPrice, bsGreeks, tickerIV } from "./shared/blackScholes";
+import Term from "./shared/Term";
 
 interface Props {
   sym: string;
@@ -71,12 +72,12 @@ export default function OptionsChainPanel({ sym, spotPrice }: Props) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       {/* Toolbar */}
-      <div className="wv-opt-toolbar">
-        <div className="wv-opt-expiry-row">
+      <div className="si-opt-toolbar">
+        <div className="si-opt-expiry-row">
           {expiries.map((e, i) => (
             <button
               key={i}
-              className={`wv-opt-expiry-btn${expiryIdx === i ? " is-active" : ""}`}
+              className={`si-opt-expiry-btn${expiryIdx === i ? " is-active" : ""}`}
               onClick={() => setExpiryIdx(i)}
             >
               {e.label}
@@ -84,47 +85,47 @@ export default function OptionsChainPanel({ sym, spotPrice }: Props) {
           ))}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 10 }}>
-          <span style={{ color: "var(--wv-text-muted)" }}>
-            IV: <span style={{ color: "#ffab40" }}>{(iv * 100).toFixed(0)}%</span>
+          <span style={{ color: "var(--si-text-muted)" }}>
+            <Term id="IV">IV</Term>: <span style={{ color: "#ffab40" }}>{(iv * 100).toFixed(0)}%</span>
           </span>
           <button
-            className={`wv-chart-toggle-btn${showGreeks ? " is-active" : ""}`}
+            className={`si-chart-toggle-btn${showGreeks ? " is-active" : ""}`}
             onClick={() => setShowGreeks((v) => !v)}
           >
-            GREEKS
+            <Term id="GREEKS">GREEKS</Term>
           </button>
         </div>
       </div>
 
       {/* Header row */}
-      <div className={`wv-opt-header-row${showGreeks ? " show-greeks" : ""}`}>
+      <div className={`si-opt-header-row${showGreeks ? " show-greeks" : ""}`}>
         {showGreeks ? (
           <>
-            <span className="wv-opt-call-side">Δ</span>
-            <span className="wv-opt-call-side">Γ</span>
-            <span className="wv-opt-call-side">Θ</span>
+            <span className="si-opt-call-side">Δ</span>
+            <span className="si-opt-call-side">Γ</span>
+            <span className="si-opt-call-side">Θ</span>
           </>
         ) : (
           <>
-            <span className="wv-opt-call-side">OI</span>
-            <span className="wv-opt-call-side">VOL</span>
+            <span className="si-opt-call-side">OI</span>
+            <span className="si-opt-call-side">VOL</span>
           </>
         )}
-        <span className="wv-opt-call-side">BID</span>
-        <span className="wv-opt-call-side">ASK</span>
-        <span className="wv-opt-strike-cell">STRIKE</span>
-        <span className="wv-opt-put-side">BID</span>
-        <span className="wv-opt-put-side">ASK</span>
+        <span className="si-opt-call-side">BID</span>
+        <span className="si-opt-call-side">ASK</span>
+        <span className="si-opt-strike-cell"><Term id="STRIKE">STRIKE</Term></span>
+        <span className="si-opt-put-side">BID</span>
+        <span className="si-opt-put-side">ASK</span>
         {showGreeks ? (
           <>
-            <span className="wv-opt-put-side">Δ</span>
-            <span className="wv-opt-put-side">Γ</span>
-            <span className="wv-opt-put-side">Θ</span>
+            <span className="si-opt-put-side">Δ</span>
+            <span className="si-opt-put-side">Γ</span>
+            <span className="si-opt-put-side">Θ</span>
           </>
         ) : (
           <>
-            <span className="wv-opt-put-side">VOL</span>
-            <span className="wv-opt-put-side">OI</span>
+            <span className="si-opt-put-side">VOL</span>
+            <span className="si-opt-put-side">OI</span>
           </>
         )}
       </div>
@@ -155,52 +156,52 @@ export default function OptionsChainPanel({ sym, spotPrice }: Props) {
           return (
             <div
               key={K}
-              className={`wv-opt-row${showGreeks ? " show-greeks" : ""}${isATM ? " is-atm" : ""}`}
+              className={`si-opt-row${showGreeks ? " show-greeks" : ""}${isATM ? " is-atm" : ""}`}
               style={{ background: rowBg }}
             >
               {/* Call side */}
               <div
-                className="wv-opt-call-half"
+                className="si-opt-call-half"
                 style={{ background: itmCall ? "rgba(54,179,126,0.06)" : "transparent" }}
               >
                 {showGreeks && callG ? (
                   <>
-                    <span className="wv-opt-greek">{fmtGreek(callG.delta)}</span>
-                    <span className="wv-opt-greek">{fmtGreek(callG.gamma, 4)}</span>
-                    <span className="wv-opt-greek" style={{ color: "#ff5a5f" }}>{fmtGreek(callG.theta)}</span>
+                    <span className="si-opt-greek">{fmtGreek(callG.delta)}</span>
+                    <span className="si-opt-greek">{fmtGreek(callG.gamma, 4)}</span>
+                    <span className="si-opt-greek" style={{ color: "#ff5a5f" }}>{fmtGreek(callG.theta)}</span>
                   </>
                 ) : (
                   <>
-                    <span className="wv-opt-oi">{fmtOI(callOI)}</span>
-                    <span className="wv-opt-oi">{fmtOI(Math.round(callOI * 0.4))}</span>
+                    <span className="si-opt-oi">{fmtOI(callOI)}</span>
+                    <span className="si-opt-oi">{fmtOI(Math.round(callOI * 0.4))}</span>
                   </>
                 )}
-                <span className="wv-opt-bid">{fmtPrice(callBid)}</span>
-                <span className="wv-opt-ask">{fmtPrice(callAsk)}</span>
+                <span className="si-opt-bid">{fmtPrice(callBid)}</span>
+                <span className="si-opt-ask">{fmtPrice(callAsk)}</span>
               </div>
 
               {/* Strike */}
-              <span className={`wv-opt-strike-cell${isATM ? " is-atm" : ""}`}>
+              <span className={`si-opt-strike-cell${isATM ? " is-atm" : ""}`}>
                 {K < 10 ? K.toFixed(3) : K >= 1000 ? K.toFixed(0) : K.toFixed(2)}
               </span>
 
               {/* Put side */}
               <div
-                className="wv-opt-put-half"
+                className="si-opt-put-half"
                 style={{ background: itmPut ? "rgba(255,90,95,0.06)" : "transparent" }}
               >
-                <span className="wv-opt-bid">{fmtPrice(putBid)}</span>
-                <span className="wv-opt-ask">{fmtPrice(putAsk)}</span>
+                <span className="si-opt-bid">{fmtPrice(putBid)}</span>
+                <span className="si-opt-ask">{fmtPrice(putAsk)}</span>
                 {showGreeks && putG ? (
                   <>
-                    <span className="wv-opt-greek" style={{ color: "#ff5a5f" }}>{fmtGreek(putG.delta)}</span>
-                    <span className="wv-opt-greek">{fmtGreek(putG.gamma, 4)}</span>
-                    <span className="wv-opt-greek" style={{ color: "#ff5a5f" }}>{fmtGreek(putG.theta)}</span>
+                    <span className="si-opt-greek" style={{ color: "#ff5a5f" }}>{fmtGreek(putG.delta)}</span>
+                    <span className="si-opt-greek">{fmtGreek(putG.gamma, 4)}</span>
+                    <span className="si-opt-greek" style={{ color: "#ff5a5f" }}>{fmtGreek(putG.theta)}</span>
                   </>
                 ) : (
                   <>
-                    <span className="wv-opt-oi">{fmtOI(Math.round(putOI * 0.4))}</span>
-                    <span className="wv-opt-oi">{fmtOI(putOI)}</span>
+                    <span className="si-opt-oi">{fmtOI(Math.round(putOI * 0.4))}</span>
+                    <span className="si-opt-oi">{fmtOI(putOI)}</span>
                   </>
                 )}
               </div>
@@ -210,7 +211,7 @@ export default function OptionsChainPanel({ sym, spotPrice }: Props) {
       </div>
 
       {/* Footer */}
-      <div style={{ padding: "4px 10px", fontSize: 9, color: "var(--wv-text-muted)", borderTop: "1px solid var(--wv-line)", display: "flex", gap: 12 }}>
+      <div style={{ padding: "4px 10px", fontSize: 9, color: "var(--si-text-muted)", borderTop: "1px solid var(--si-line)", display: "flex", gap: 12 }}>
         <span>Model: Black-Scholes</span>
         <span>r = {(r * 100).toFixed(1)}%</span>
         <span>IV = {(iv * 100).toFixed(0)}%</span>

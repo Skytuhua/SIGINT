@@ -138,7 +138,7 @@ async function _run(): Promise<void> {
       // Seed the Zustand store — await so it's done before preloadComplete() fires
       const storeModule = await storeImport;
       if (storeModule && items.length > 0) {
-        try { storeModule.useWorldViewStore.getState().setNewsFeedItems(items); } catch {}
+        try { storeModule.useSIGINTStore.getState().setNewsFeedItems(items); } catch {}
       }
 
       const s: SubsystemStatus =

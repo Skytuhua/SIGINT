@@ -9,7 +9,7 @@ interface DenseSelectProps {
 
 export default function DenseSelect({ value, options, onChange, ariaLabel }: DenseSelectProps) {
   return (
-    <label className="wv-dense-select">
+    <label className="si-dense-select">
       <span className="sr-only">{ariaLabel}</span>
       <select
         value={value}

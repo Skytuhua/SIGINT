@@ -46,7 +46,7 @@ async function fetchIndicator(
   const url = `${WB_BASE}/country/${countryIso2}/indicator/${indicator}?format=json&per_page=5&date=2018:2024&mrv=1`;
   const resp = await fetchJsonOrThrow<WBIndicatorResponse>(
     url,
-    { headers: { "User-Agent": "WorldView/0.1" } },
+    { headers: { "User-Agent": "SIGINT/0.1" } },
     POLICY.timeoutMs,
   );
   const rows = resp[1];
@@ -115,7 +115,7 @@ export async function getCountryInfo(
           latitude: string;
           longitude: string;
         }> | null]
-      >(url, { headers: { "User-Agent": "WorldView/0.1" } }, POLICY.timeoutMs);
+      >(url, { headers: { "User-Agent": "SIGINT/0.1" } }, POLICY.timeoutMs);
 
       const rows = resp[1];
       if (!rows?.length) return null;

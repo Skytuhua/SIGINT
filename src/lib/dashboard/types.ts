@@ -121,6 +121,8 @@ export const DEFAULT_PANEL_IDS = [
   "feed",
   "cctv-live",
   "space-weather",
+  "threat-board",
+  "source-health",
 ] as const;
 
 export const DEFAULT_PANEL_LAYOUTS: DashboardLayouts = {
@@ -135,6 +137,8 @@ export const DEFAULT_PANEL_LAYOUTS: DashboardLayouts = {
     // Sat list + space weather share the bottom row side-by-side.
     { i: "sat-list", x: 0, y: 252, w: 180, h: 96, minW: 90, minH: 60 },
     { i: "space-weather", x: 180, y: 252, w: 180, h: 96, minW: 120, minH: 72 },
+    { i: "threat-board", x: 0, y: 348, w: 180, h: 72, minW: 90, minH: 48 },
+    { i: "source-health", x: 180, y: 348, w: 180, h: 72, minW: 90, minH: 48 },
   ],
   md: [
     { i: "kpi", x: 0, y: 0, w: 300, h: 24, maxH: 36 },
@@ -145,6 +149,8 @@ export const DEFAULT_PANEL_LAYOUTS: DashboardLayouts = {
     { i: "quake-table", x: 150, y: 144, w: 150, h: 108, minH: 72 },
     { i: "sat-list", x: 0, y: 252, w: 150, h: 96, minH: 60 },
     { i: "space-weather", x: 150, y: 252, w: 150, h: 96, minW: 120, minH: 72 },
+    { i: "threat-board", x: 0, y: 348, w: 150, h: 72, minH: 48 },
+    { i: "source-health", x: 150, y: 348, w: 150, h: 72, minH: 48 },
   ],
   sm: [
     { i: "kpi", x: 0, y: 0, w: 180, h: 24, maxH: 36 },
@@ -155,6 +161,8 @@ export const DEFAULT_PANEL_LAYOUTS: DashboardLayouts = {
     { i: "sat-list", x: 0, y: 336, w: 180, h: 96, minH: 60 },
     { i: "feed", x: 0, y: 432, w: 180, h: 120, minH: 96 },
     { i: "space-weather", x: 0, y: 552, w: 180, h: 96, minW: 120, minH: 72 },
+    { i: "threat-board", x: 0, y: 648, w: 180, h: 72, minH: 48 },
+    { i: "source-health", x: 0, y: 720, w: 180, h: 72, minH: 48 },
   ],
   xs: [
     { i: "kpi", x: 0, y: 0, w: 60, h: 24, maxH: 36 },
@@ -164,5 +172,7 @@ export const DEFAULT_PANEL_LAYOUTS: DashboardLayouts = {
     { i: "feed", x: 0, y: 312, w: 60, h: 72, minH: 48 },
     { i: "cctv-live", x: 0, y: 384, w: 60, h: 140, minW: 60, minH: 110 },
     { i: "space-weather", x: 0, y: 524, w: 60, h: 96, minW: 60, minH: 72 },
+    { i: "threat-board", x: 0, y: 620, w: 60, h: 72, minH: 48 },
+    { i: "source-health", x: 0, y: 692, w: 60, h: 72, minH: 48 },
   ],
 };

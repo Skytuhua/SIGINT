@@ -12,7 +12,7 @@ export default function MiniBar({ values, max, color = "#6f94ad" }: MiniBarProps
   const upper = max ?? Math.max(...values, 1);
 
   return (
-    <div className="wv-mini-bar" role="img" aria-label="distribution bars">
+    <div className="si-mini-bar" role="img" aria-label="distribution bars">
       {values.map((value, index) => (
         <span
           key={`${index}-${value}`}

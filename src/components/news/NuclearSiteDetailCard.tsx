@@ -84,15 +84,15 @@ export default function NuclearSiteDetailCard({ detail, onClose }: NuclearSiteDe
       : "Unknown";
 
   return createPortal(
-    <div className="wv-hotspot-card" role="dialog" aria-label="Nuclear facility detail">
-      <div className="wv-hotspot-card-hdr">
-        <div className="wv-hotspot-card-headline">
-          <div className="wv-hotspot-name">{detail.name.toUpperCase()}</div>
-          <span className={`wv-hotspot-tier ${statusPillClass(detail.status)}`}>{detail.status}</span>
+    <div className="si-hotspot-card" role="dialog" aria-label="Nuclear facility detail">
+      <div className="si-hotspot-card-hdr">
+        <div className="si-hotspot-card-headline">
+          <div className="si-hotspot-name">{detail.name.toUpperCase()}</div>
+          <span className={`si-hotspot-tier ${statusPillClass(detail.status)}`}>{detail.status}</span>
         </div>
         <button
           type="button"
-          className="wv-hotspot-close"
+          className="si-hotspot-close"
           onClick={onClose}
           aria-label="Close nuclear facility details"
         >
@@ -100,11 +100,11 @@ export default function NuclearSiteDetailCard({ detail, onClose }: NuclearSiteDe
         </button>
       </div>
 
-      <div className="wv-hotspot-tags">{detail.type}</div>
+      <div className="si-hotspot-tags">{detail.type}</div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">METADATA</div>
-        <div className="wv-hotspot-subscores">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">METADATA</div>
+        <div className="si-hotspot-subscores">
           <div>
             Country{" "}
             {locationLines.length ? locationLines.join(" / ") : detail.country ?? "Unknown"}
@@ -115,15 +115,15 @@ export default function NuclearSiteDetailCard({ detail, onClose }: NuclearSiteDe
         </div>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">SUMMARY</div>
-        <div className="wv-hotspot-summary">{detail.summary}</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">SUMMARY</div>
+        <div className="si-hotspot-summary">{detail.summary}</div>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">SOURCES</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">SOURCES</div>
         <div>{sourcesSummary || "Unknown"}</div>
-        <details className="wv-hotspot-trace">
+        <details className="si-hotspot-trace">
           <summary>Source Trace</summary>
           <ul>
             {detail.wikidataUrl ? (
@@ -155,21 +155,21 @@ export default function NuclearSiteDetailCard({ detail, onClose }: NuclearSiteDe
       </div>
 
       {detail.sourceStatus ? (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">PIPELINE STATUS</div>
-          <div className="wv-hotspot-status-row">
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">PIPELINE STATUS</div>
+          <div className="si-hotspot-status-row">
             {Object.entries(detail.sourceStatus).map(([source, status]) => (
-              <span key={source} className={`wv-hotspot-status ${pipelineStatusClass(status)}`}>
+              <span key={source} className={`si-hotspot-status ${pipelineStatusClass(status)}`}>
                 {source}:{status}
               </span>
             ))}
           </div>
-          <div className="wv-hotspot-updated">Updated: {updatedLabel}</div>
+          <div className="si-hotspot-updated">Updated: {updatedLabel}</div>
         </div>
       ) : (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">LAST UPDATED</div>
-          <div className="wv-hotspot-updated">{updatedLabel}</div>
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">LAST UPDATED</div>
+          <div className="si-hotspot-updated">{updatedLabel}</div>
         </div>
       )}
     </div>,

@@ -9,12 +9,12 @@ interface Props {
 
 export default function EconCalendarPanel({ style }: Props) {
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Economic Calendar</span>
-        <span className="wv-market-panel-badge is-live">LIVE</span>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Economic Calendar</span>
+        <span className="si-market-panel-badge is-live">LIVE</span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0, overflow: "hidden" }}>
+      <div className="si-market-panel-body" style={{ padding: 0, overflow: "hidden" }}>
         <TradingViewWidget
           scriptSrc="https://s3.tradingview.com/external-embedding/embed-widget-events.js"
           config={{
@@ -25,10 +25,10 @@ export default function EconCalendarPanel({ style }: Props) {
           }}
           height="100%"
           width="100%"
-          style={{ minHeight: 260 }}
+          style={{ minHeight: 500 }}
         />
       </div>
-      <div className="wv-market-panel-footer">TradingView · Economic Calendar · real-time</div>
+      <div className="si-market-panel-footer">TradingView · Economic Calendar · real-time</div>
     </div>
   );
 }

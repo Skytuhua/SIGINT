@@ -3,6 +3,7 @@
 import React from "react";
 import { useMarketData } from "../../hooks/useMarketData";
 import type { EarningsResponse, EarningsEntry } from "../../lib/server/news/providers/marketTypes";
+import Term from "./shared/Term";
 
 type Surprise = "beat" | "miss" | "in-line" | null;
 
@@ -27,43 +28,43 @@ export default function EarningsTracker({ style, onTickerClick }: Props) {
   const hasData = upcoming.length > 0 || recent.length > 0;
 
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Earnings Tracker</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)", letterSpacing: "0.04em" }}>
-          BMO = pre-market · AMC = after-market
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Earnings Tracker</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)", letterSpacing: "0.04em" }}>
+          <Term id="BMO">BMO</Term> = pre-market · <Term id="AMC">AMC</Term> = after-market
         </span>
-        <span className={`wv-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
+        <span className={`si-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
           {isLive ? "LIVE" : "STATIC"}
         </span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
         {!hasData && (
-          <div style={{ padding: "16px 10px", fontSize: 10, color: "var(--wv-text-muted)", textAlign: "center" }}>
+          <div style={{ padding: "16px 10px", fontSize: 10, color: "var(--si-text-muted)", textAlign: "center" }}>
             Waiting for earnings data…
           </div>
         )}
 
         {upcoming.length > 0 && (
           <>
-            <div className="wv-market-earn-section-label" style={{ color: "#89e5ff" }}>
+            <div className="si-market-earn-section-label" style={{ color: "#89e5ff" }}>
               UPCOMING
             </div>
             {upcoming.map((e: EarningsEntry) => (
               <div
                 key={`${e.sym}-${e.date}`}
-                className="wv-market-earn-row"
+                className="si-market-earn-row"
                 style={{ cursor: onTickerClick ? "pointer" : "default" }}
                 onClick={() => onTickerClick?.(e.sym)}
               >
-                <span className="wv-market-earn-time">{e.time}</span>
+                <span className="si-market-earn-time">{e.time}</span>
                 <span
-                  className="wv-market-earn-dot"
-                  style={{ background: "var(--wv-text-muted)", width: 5, height: 5, borderRadius: "50%", display: "inline-block", flexShrink: 0 }}
+                  className="si-market-earn-dot"
+                  style={{ background: "var(--si-text-muted)", width: 5, height: 5, borderRadius: "50%", display: "inline-block", flexShrink: 0 }}
                 />
-                <span className="wv-market-earn-sym">{e.sym}</span>
-                <span className="wv-market-earn-company" title={e.company}>{e.company}</span>
-                <span className="wv-market-earn-eps-est">EST {e.epsEst}</span>
+                <span className="si-market-earn-sym">{e.sym}</span>
+                <span className="si-market-earn-company" title={e.company}>{e.company}</span>
+                <span className="si-market-earn-eps-est"><Term id="EPS">EST</Term> {e.epsEst}</span>
               </div>
             ))}
           </>
@@ -71,7 +72,7 @@ export default function EarningsTracker({ style, onTickerClick }: Props) {
 
         {recent.length > 0 && (
           <>
-            <div className="wv-market-earn-section-label" style={{ color: "var(--wv-text-muted)", marginTop: 2 }}>
+            <div className="si-market-earn-section-label" style={{ color: "var(--si-text-muted)", marginTop: 2 }}>
               RECENT
             </div>
             {recent.map((e: EarningsEntry) => {
@@ -79,28 +80,28 @@ export default function EarningsTracker({ style, onTickerClick }: Props) {
               return (
                 <div
                   key={`${e.sym}-${e.date}`}
-                  className="wv-market-earn-row"
+                  className="si-market-earn-row"
                   style={{ cursor: onTickerClick ? "pointer" : "default" }}
                   onClick={() => onTickerClick?.(e.sym)}
                 >
-                  <span className="wv-market-earn-time">{e.date}</span>
+                  <span className="si-market-earn-time">{e.date}</span>
                   <span
-                    className="wv-market-earn-dot"
+                    className="si-market-earn-dot"
                     style={{
-                      background: e.surprise === "beat" ? "#36b37e" : e.surprise === "miss" ? "#ff5a5f" : "var(--wv-text-muted)",
+                      background: e.surprise === "beat" ? "#36b37e" : e.surprise === "miss" ? "#ff5a5f" : "var(--si-text-muted)",
                       width: 5, height: 5, borderRadius: "50%", display: "inline-block", flexShrink: 0,
                     }}
                   />
-                  <span className="wv-market-earn-sym">{e.sym}</span>
-                  <span className="wv-market-earn-company">{e.epsAct ?? "—"}</span>
-                  {s && <span className={`wv-market-earn-surprise ${s.cls}`}>{s.label}</span>}
+                  <span className="si-market-earn-sym">{e.sym}</span>
+                  <span className="si-market-earn-company">{e.epsAct ?? "—"}</span>
+                  {s && <span className={`si-market-earn-surprise ${s.cls}`}>{s.label}</span>}
                 </div>
               );
             })}
           </>
         )}
       </div>
-      <div className="wv-market-panel-footer">
+      <div className="si-market-panel-footer">
         {isLive ? "Yahoo Finance · 15min refresh" : "Waiting for data…"}
       </div>
     </div>

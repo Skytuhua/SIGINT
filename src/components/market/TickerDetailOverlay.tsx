@@ -42,12 +42,19 @@ const TV_SYMBOL_MAP: Record<string, string> = {
   ZC: "CBOT:ZC1!", ZW: "CBOT:ZW1!", ZS: "CBOT:ZS1!", KC: "NYMEX:KC1!",
   RB: "NYMEX:RB1!",
   "CL=F": "NYMEX:CL1!", "GC=F": "COMEX:GC1!", "SI=F": "COMEX:SI1!",
+  // Sector ETFs (AMEX)
+  XLK: "AMEX:XLK", XLC: "AMEX:XLC", XLF: "AMEX:XLF", XLI: "AMEX:XLI",
+  XLV: "AMEX:XLV", XLY: "AMEX:XLY", XLP: "AMEX:XLP", XLB: "AMEX:XLB",
+  XLRE: "AMEX:XLRE", XLU: "AMEX:XLU", XLE: "AMEX:XLE",
+  // Other common ETFs (AMEX)
+  SLV: "AMEX:SLV", TLT: "AMEX:TLT", HYG: "AMEX:HYG", EEM: "AMEX:EEM",
+  EFA: "AMEX:EFA", VTI: "AMEX:VTI", VOO: "AMEX:VOO", AGG: "AMEX:AGG",
 };
 
 function getTvSymbol(sym: string): string {
   if (TV_SYMBOL_MAP[sym]) return TV_SYMBOL_MAP[sym];
-  // Assume NASDAQ for most stocks
-  return `NASDAQ:${sym}`;
+  // Let TradingView resolve the exchange automatically
+  return sym;
 }
 
 type OverlayTab = "CHART" | "FUNDAMENTALS" | "OPTIONS" | "ORDER";
@@ -77,27 +84,27 @@ export default function TickerDetailOverlay({ sym, onClose }: Props) {
   const tvSymbol = getTvSymbol(sym);
 
   return (
-    <div className="wv-ticker-overlay">
+    <div className="si-ticker-overlay">
       {/* Header */}
-      <div className="wv-ticker-overlay-header">
-        <button className="wv-ticker-overlay-back" onClick={onClose}>
+      <div className="si-ticker-overlay-header">
+        <button className="si-ticker-overlay-back" onClick={onClose}>
           ◀ BACK
         </button>
-        <div className="wv-ticker-overlay-sym-block">
-          <span className="wv-ticker-overlay-sym">{sym}</span>
-          <span className="wv-ticker-overlay-name">{displayName}</span>
+        <div className="si-ticker-overlay-sym-block">
+          <span className="si-ticker-overlay-sym">{sym}</span>
+          <span className="si-ticker-overlay-name">{displayName}</span>
         </div>
-        <button className="wv-ticker-overlay-close" onClick={onClose} title="Close (Esc)">
+        <button className="si-ticker-overlay-close" onClick={onClose} title="Close (Esc)">
           ✕
         </button>
       </div>
 
       {/* Sub-tab bar */}
-      <div className="wv-ticker-overlay-tabs">
+      <div className="si-ticker-overlay-tabs">
         {OVERLAY_TABS.map((t) => (
           <button
             key={t}
-            className={`wv-ticker-overlay-tab${tab === t ? " is-active" : ""}`}
+            className={`si-ticker-overlay-tab${tab === t ? " is-active" : ""}`}
             onClick={() => setTab(t)}
           >
             {t}
@@ -106,7 +113,7 @@ export default function TickerDetailOverlay({ sym, onClose }: Props) {
       </div>
 
       {/* Content */}
-      <div className="wv-ticker-overlay-content">
+      <div className="si-ticker-overlay-content">
         {tab === "CHART" && (
           <TradingViewWidget
             scriptSrc="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js"

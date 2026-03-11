@@ -66,8 +66,8 @@ function YoutubePlayer({
 
   if (error) {
     return (
-      <div className="wv-cctv-feed-error" style={{ height }}>
-        <div className="wv-cctv-feed-error-icon" aria-hidden>!</div>
+      <div className="si-cctv-feed-error" style={{ height }}>
+        <div className="si-cctv-feed-error-icon" aria-hidden>!</div>
         <span>This live stream recording is not available.</span>
       </div>
     );
@@ -75,7 +75,7 @@ function YoutubePlayer({
 
   return (
     <iframe
-      className="wv-cctv-feed-video"
+      className="si-cctv-feed-video"
       src={iframeSrc}
       title="YouTube video"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -167,7 +167,7 @@ function HlsPlayer({
 
   if (error) {
     return (
-      <div className="wv-cctv-feed-error">
+      <div className="si-cctv-feed-error">
         Stream unavailable
       </div>
     );
@@ -177,7 +177,7 @@ function HlsPlayer({
   return (
     <video
       ref={videoRef}
-      className="wv-cctv-feed-video"
+      className="si-cctv-feed-video"
       muted
       autoPlay
       playsInline
@@ -222,7 +222,7 @@ function SnapshotViewer({
 
   if (error) {
     return (
-      <div className="wv-cctv-feed-error">
+      <div className="si-cctv-feed-error">
         Snapshot unavailable
       </div>
     );
@@ -269,6 +269,16 @@ export default function CctvFeedView({
       if (videoId) {
         iframeSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&rel=0`;
       }
+    } else {
+      // Validate domain before using an embed URL directly
+      try {
+        const embedUrl = new URL(streamUrl);
+        if (!embedUrl.hostname.endsWith("youtube.com") && !embedUrl.hostname.endsWith("youtube-nocookie.com")) {
+          iframeSrc = "";
+        }
+      } catch {
+        iframeSrc = "";
+      }
     }
     return (
       <YoutubePlayer
@@ -311,7 +321,7 @@ export default function CctvFeedView({
   }
 
   return (
-    <div className="wv-cctv-feed-error">
+    <div className="si-cctv-feed-error">
       No feed available
     </div>
   );

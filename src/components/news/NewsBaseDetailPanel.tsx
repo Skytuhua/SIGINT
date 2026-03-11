@@ -33,29 +33,29 @@ export default function NewsBaseDetailPanel({ base, onClose }: NewsBaseDetailPan
   const lonLabel = formatCoord(base.lon);
 
   return (
-    <div className="wv-news-base-panel" role="dialog" aria-label="Military base details">
-      <div className="wv-news-base-panel-header">
-        <span className="wv-news-base-panel-kicker">MILITARY BASE</span>
+    <div className="si-news-base-panel" role="dialog" aria-label="Military base details">
+      <div className="si-news-base-panel-header">
+        <span className="si-news-base-panel-kicker">MILITARY BASE</span>
         <button
           type="button"
-          className="wv-news-base-panel-close"
+          className="si-news-base-panel-close"
           onClick={onClose}
           aria-label="Close base details"
         >
           ×
         </button>
       </div>
-      <div className="wv-news-base-panel-body">
-        <div className="wv-news-base-panel-name">{name}</div>
-        <div className="wv-news-base-panel-row">
-          <span className="wv-news-base-panel-label">Location</span>
-          <span className="wv-news-base-panel-value">
+      <div className="si-news-base-panel-body">
+        <div className="si-news-base-panel-name">{name}</div>
+        <div className="si-news-base-panel-row">
+          <span className="si-news-base-panel-label">Location</span>
+          <span className="si-news-base-panel-value">
             {latLabel}, {lonLabel}
           </span>
         </div>
-        <div className="wv-news-base-panel-row">
-          <span className="wv-news-base-panel-label">Source</span>
-          <span className="wv-news-base-panel-value">WorldView Military Bases snapshot</span>
+        <div className="si-news-base-panel-row">
+          <span className="si-news-base-panel-label">Source</span>
+          <span className="si-news-base-panel-value">SIGINT Military Bases snapshot</span>
         </div>
       </div>
     </div>

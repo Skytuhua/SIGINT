@@ -29,19 +29,19 @@ const DOUBLED = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
 export default function MarketTickerBar() {
   return (
-    <div className="wv-market-ticker-bar">
-      <div className="wv-market-ticker-label">LIVE</div>
-      <div className="wv-market-ticker-track">
-        <div className="wv-market-ticker-scroll">
+    <div className="si-market-ticker-bar">
+      <div className="si-market-ticker-label">LIVE</div>
+      <div className="si-market-ticker-track">
+        <div className="si-market-ticker-scroll">
           {DOUBLED.map((item, i) => {
             const chgClass =
               item.chg > 0 ? "is-up" : item.chg < 0 ? "is-down" : "is-flat";
             const sign = item.chg > 0 ? "+" : "";
             return (
-              <div key={i} className="wv-market-ticker-item">
-                <span className="wv-market-ticker-sym">{item.sym}</span>
-                <span className="wv-market-ticker-price">{item.price}</span>
-                <span className={`wv-market-ticker-chg ${chgClass}`}>
+              <div key={i} className="si-market-ticker-item">
+                <span className="si-market-ticker-sym">{item.sym}</span>
+                <span className="si-market-ticker-price">{item.price}</span>
+                <span className={`si-market-ticker-chg ${chgClass}`}>
                   {sign}{item.chg.toFixed(2)}%
                 </span>
               </div>

@@ -69,7 +69,7 @@ export async function getHackerNewsTop(maxItems = 30): Promise<CachedFetchResult
     request: async () => {
       const ids = await fetchJsonOrThrow<number[]>(
         `${HN_BASE}/topstories.json`,
-        { headers: { "User-Agent": "WorldView/0.1" } },
+        { headers: { "User-Agent": "SIGINT/0.1" } },
         POLICY.timeoutMs,
       );
       const sliced = ids.slice(0, maxItems);
@@ -77,7 +77,7 @@ export async function getHackerNewsTop(maxItems = 30): Promise<CachedFetchResult
         sliced.map((id) =>
           fetchJsonOrThrow<HNItem>(
             `${HN_BASE}/item/${id}.json`,
-            { headers: { "User-Agent": "WorldView/0.1" } },
+            { headers: { "User-Agent": "SIGINT/0.1" } },
             POLICY.timeoutMs,
           ).catch(() => null),
         ),

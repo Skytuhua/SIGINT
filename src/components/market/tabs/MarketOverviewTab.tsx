@@ -20,6 +20,7 @@ import ShortInterestPanel from "../ShortInterestPanel";
 import CryptoMarketPanel from "../CryptoMarketPanel";
 import FedFuturesPanel from "../FedFuturesPanel";
 import CreditSpreadPanel from "../CreditSpreadPanel";
+import MarketRegimePanel from "../MarketRegimePanel";
 
 type Scenario = "BASELINE" | "RISK-OFF" | "RATES UP" | "OIL SHOCK";
 
@@ -30,10 +31,10 @@ interface Props {
 
 function SectionLabel({ label, sub }: { label: string; sub?: string }) {
   return (
-    <div className="wv-overview-section-label">
-      <span className="wv-overview-section-title">{label}</span>
-      {sub && <span className="wv-overview-section-sub">{sub}</span>}
-      <div className="wv-overview-section-rule" />
+    <div className="si-overview-section-label">
+      <span className="si-overview-section-title">{label}</span>
+      {sub && <span className="si-overview-section-sub">{sub}</span>}
+      <div className="si-overview-section-rule" />
     </div>
   );
 }
@@ -45,17 +46,17 @@ export default function MarketOverviewTab({ scenario, onTickerClick }: Props) {
   }, []);
 
   return (
-    <div className="wv-overview-scroll">
+    <div className="si-overview-scroll">
 
       {/* ── SECTION 1: SECTOR HEATMAP ──────────────────────────────── */}
       <SectionLabel label="SECTOR HEATMAP" sub="S&P 500 individual stocks · 1D performance" />
-      <div className="wv-overview-row-full">
+      <div className="si-overview-row-full">
         <MarketHeatmapPanel style={{ minHeight: 500 }} onTickerClick={onTickerClick} />
       </div>
 
       {/* ── SECTION 2: SNAPSHOT & MOVERS ───────────────────────────── */}
       <SectionLabel label="EQUITY MARKETS" sub="Snapshot · Top movers" />
-      <div className="wv-overview-row-2col">
+      <div className="si-overview-row-2col">
         <GlobalSnapshotPanel
           scenario={scenario}
           style={{ minHeight: 340 }}
@@ -66,13 +67,16 @@ export default function MarketOverviewTab({ scenario, onTickerClick }: Props) {
 
       {/* ── SECTION 3: SECTOR PERFORMANCE ─────────────────────────── */}
       <SectionLabel label="SECTOR PERFORMANCE" sub="Sector ETF returns across timeframes" />
-      <div className="wv-overview-row-full">
+      <div className="si-overview-row-full">
         <SectorRotationPanel style={{ minHeight: 320 }} onTickerClick={onTickerClick} />
       </div>
 
-      {/* ── SECTION 4: VOLATILITY & BREADTH ────────────────────────── */}
-      <SectionLabel label="SENTIMENT & BREADTH" sub="Risk regime · Market internals · Correlations" />
-      <div className="wv-overview-row-3col">
+      {/* ── SECTION 4: SENTIMENT & REGIME ────────────────────────── */}
+      <SectionLabel label="SENTIMENT & BREADTH" sub="Fear & Greed regime · Risk gauges · Market internals · Correlations" />
+      <div className="si-overview-row-full">
+        <MarketRegimePanel style={{ minHeight: 280 }} />
+      </div>
+      <div className="si-overview-row-3col">
         <VolatilityPanel style={{ minHeight: 260 }} />
         <MarketBreadthPanel style={{ minHeight: 280 }} />
         <CorrelationMatrixPanel style={{ minHeight: 280 }} />
@@ -80,14 +84,14 @@ export default function MarketOverviewTab({ scenario, onTickerClick }: Props) {
 
       {/* ── SECTION 5: MARKET ACTIVITY ─────────────────────────────── */}
       <SectionLabel label="MARKET ACTIVITY" sub="Options flow · Short interest" />
-      <div className="wv-overview-row-2col">
+      <div className="si-overview-row-2col">
         <OptionsFlowPanel style={{ minHeight: 340 }} onTickerClick={onTickerClick} />
         <ShortInterestPanel style={{ minHeight: 340 }} onTickerClick={onTickerClick} />
       </div>
 
       {/* ── SECTION 6: RATES & MACRO ───────────────────────────────── */}
       <SectionLabel label="RATES & MACRO" sub="Yield curve · Fed futures · Credit spreads" />
-      <div className="wv-overview-row-3col">
+      <div className="si-overview-row-3col">
         <YieldCurvePanel style={{ minHeight: 300 }} />
         <FedFuturesPanel style={{ minHeight: 300 }} />
         <CreditSpreadPanel style={{ minHeight: 300 }} />
@@ -95,33 +99,33 @@ export default function MarketOverviewTab({ scenario, onTickerClick }: Props) {
 
       {/* ── SECTION 7: CENTRAL BANKS & ECON ────────────────────────── */}
       <SectionLabel label="CENTRAL BANKS & ECONOMIC CALENDAR" sub="Policy rates · Upcoming events" />
-      <div className="wv-overview-row-2col">
+      <div className="si-overview-row-2col">
         <CentralBankPanel style={{ minHeight: 320 }} />
         <EconCalendarPanel style={{ minHeight: 320 }} />
       </div>
 
       {/* ── SECTION 8: FX ──────────────────────────────────────────── */}
       <SectionLabel label="FOREIGN EXCHANGE" sub="Cross-rate matrix · FX movers" />
-      <div className="wv-overview-row-2col">
+      <div className="si-overview-row-2col">
         <FxMatrixPanel style={{ minHeight: 280 }} />
         <TopMoversPanel filter="fx" style={{ minHeight: 260 }} onTickerClick={onTickerClick} />
       </div>
 
       {/* ── SECTION 9: COMMODITIES ─────────────────────────────────── */}
       <SectionLabel label="COMMODITIES" sub="Energy · Metals · Agriculture" />
-      <div className="wv-overview-row-full">
+      <div className="si-overview-row-full">
         <CommoditiesBoard style={{ minHeight: 240 }} />
       </div>
 
       {/* ── SECTION 10: CRYPTO ─────────────────────────────────────── */}
       <SectionLabel label="CRYPTO MARKETS" sub="Top cryptocurrencies by market cap" />
-      <div className="wv-overview-row-full">
+      <div className="si-overview-row-full">
         <CryptoMarketPanel style={{ minHeight: 360 }} onTickerClick={onTickerClick} />
       </div>
 
       {/* ── SECTION 11: EARNINGS & NEWS ────────────────────────────── */}
       <SectionLabel label="EARNINGS & NEWS" sub="Calendar · Market tape" />
-      <div className="wv-overview-row-2col">
+      <div className="si-overview-row-2col">
         <EarningsTracker style={{ minHeight: 300 }} onTickerClick={onTickerClick} />
         <MarketNewsTape style={{ minHeight: 300 }} />
       </div>

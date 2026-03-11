@@ -213,7 +213,7 @@ export const CctvStreamFormat = z.enum([
 ]);
 export type CctvStreamFormat = z.infer<typeof CctvStreamFormat>;
 
-export const CctvRegion = z.enum(["mideast", "europe", "americas", "asia"]);
+export const CctvRegion = z.enum(["mideast", "europe", "americas", "asia", "africa", "oceania"]);
 export type CctvRegion = z.infer<typeof CctvRegion>;
 
 export const CctvCameraSchema = z.object({

@@ -1,11 +1,11 @@
 "use client";
 
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 
 export default function DebugOverlay() {
-  const debug = useWorldViewStore((s) => s.debug);
-  const layers = useWorldViewStore((s) => s.layers);
-  const ui = useWorldViewStore((s) => s.ui);
+  const debug = useSIGINTStore((s) => s.debug);
+  const layers = useSIGINTStore((s) => s.layers);
+  const ui = useSIGINTStore((s) => s.ui);
 
   const enabledLayers = Object.entries(layers)
     .filter(([, v]) => v)

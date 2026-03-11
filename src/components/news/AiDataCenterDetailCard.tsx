@@ -193,22 +193,22 @@ export default function AiDataCenterDetailCard({ detail, onClose }: Props) {
   if (!mounted) return null;
 
   return createPortal(
-    <div className="wv-hotspot-card" role="dialog" aria-label="AI data center cluster detail">
+    <div className="si-hotspot-card" role="dialog" aria-label="AI data center cluster detail">
 
       {/* Header */}
-      <div className="wv-hotspot-card-hdr">
-        <div className="wv-hotspot-card-headline">
+      <div className="si-hotspot-card-hdr">
+        <div className="si-hotspot-card-headline">
           <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", opacity: 0.5, marginBottom: 2 }}>
             AI DATA CENTER CLUSTER
           </div>
-          <div className="wv-hotspot-name">{detail.name.toUpperCase()}</div>
-          <span className={`wv-hotspot-tier tier-${tier.toLowerCase()}`}>
+          <div className="si-hotspot-name">{detail.name.toUpperCase()}</div>
+          <span className={`si-hotspot-tier tier-${tier.toLowerCase()}`}>
             {tierLabel(tier)}
           </span>
         </div>
         <button
           type="button"
-          className="wv-hotspot-close"
+          className="si-hotspot-close"
           onClick={onClose}
           aria-label="Close data center details"
         >
@@ -218,11 +218,11 @@ export default function AiDataCenterDetailCard({ detail, onClose }: Props) {
 
       {/* Tags */}
       {tags.length > 0 && (
-        <div className="wv-hotspot-tags">{tags.join(" / ")}</div>
+        <div className="si-hotspot-tags">{tags.join(" / ")}</div>
       )}
 
       {/* Location */}
-      <div style={{ marginTop: 2, color: "var(--wv-text-muted)", fontSize: 9 }}>
+      <div style={{ marginTop: 2, color: "var(--si-text-muted)", fontSize: 9 }}>
         {[detail.admin1, detail.country].filter(Boolean).join(", ")}
         {" \u00b7 "}
         {formatLatLon(detail.centroidLat, detail.centroidLon)}
@@ -234,30 +234,30 @@ export default function AiDataCenterDetailCard({ detail, onClose }: Props) {
 
       {/* Description */}
       {detail.notes && detail.notes.trim() && (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">DESCRIPTION</div>
-          <div className="wv-hotspot-summary">{detail.notes}</div>
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">DESCRIPTION</div>
+          <div className="si-hotspot-summary">{detail.notes}</div>
         </div>
       )}
 
       {/* Strategic Context */}
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">STRATEGIC CONTEXT</div>
-        <div className="wv-hotspot-summary">{context}</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">STRATEGIC CONTEXT</div>
+        <div className="si-hotspot-summary">{context}</div>
       </div>
 
       {/* Compute Importance */}
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">COMPUTE IMPORTANCE</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">COMPUTE IMPORTANCE</div>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-          <div className="wv-hotspot-score">
+          <div className="si-hotspot-score">
             {detail.importance}<span style={{ fontSize: 11, fontWeight: 400 }}>/100</span>
           </div>
-          <div className="wv-hotspot-trend">
+          <div className="si-hotspot-trend">
             CONFIDENCE: {confidenceLabel(detail.confidence)}
           </div>
         </div>
-        <div className="wv-hotspot-subscores" style={{ marginTop: 6 }}>
+        <div className="si-hotspot-subscores" style={{ marginTop: 6 }}>
           <div>
             <div style={{ color: "#b39ddb", fontWeight: 600, fontSize: 9, marginBottom: 1 }}>OPERATOR DIVERSITY</div>
             <ScoreBar value={detail.importanceBreakdown.operatorDiversity} color="#b39ddb" />
@@ -291,14 +291,14 @@ export default function AiDataCenterDetailCard({ detail, onClose }: Props) {
 
       {/* Operators */}
       {detail.operators.length > 0 && (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">OPERATORS</div>
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">OPERATORS</div>
           {opBreakdown && (
-            <div style={{ color: "var(--wv-text-muted)", fontSize: 9, marginBottom: 4 }}>{opBreakdown}</div>
+            <div style={{ color: "var(--si-text-muted)", fontSize: 9, marginBottom: 4 }}>{opBreakdown}</div>
           )}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 2 }}>
             {detail.operators.map((op, i) => (
-              <span key={op} className="wv-hotspot-status" style={{ color: detail.operatorTypes[i] === "hyperscaler" ? "#7c4dff" : "#b39ddb" }}>
+              <span key={op} className="si-hotspot-status" style={{ color: detail.operatorTypes[i] === "hyperscaler" ? "#7c4dff" : "#b39ddb" }}>
                 {op}
                 {detail.operatorTypes[i] === "hyperscaler" && (
                   <span style={{ opacity: 0.6, marginLeft: 2 }}>⬡</span>
@@ -310,9 +310,9 @@ export default function AiDataCenterDetailCard({ detail, onClose }: Props) {
       )}
 
       {/* Sites */}
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">SITES ({detail.siteCount})</div>
-        <ul className="wv-hotspot-drivers">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">SITES ({detail.siteCount})</div>
+        <ul className="si-hotspot-drivers">
           {visibleSites.map((s) => (
             <li key={`${s.sourceType}-${s.sourceId}`}>
               <span style={{ color: "#b39ddb" }}>{s.name}</span>
@@ -345,9 +345,9 @@ export default function AiDataCenterDetailCard({ detail, onClose }: Props) {
 
       {/* Evidence */}
       {evidence.length > 0 && (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">EVIDENCE</div>
-          <ul className="wv-hotspot-drivers">
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">EVIDENCE</div>
+          <ul className="si-hotspot-drivers">
             {evidence.map((e, i) => (
               <li key={i}>{e}</li>
             ))}
@@ -356,8 +356,8 @@ export default function AiDataCenterDetailCard({ detail, onClose }: Props) {
       )}
 
       {/* External References */}
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">SOURCE TRACE</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">SOURCE TRACE</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 2 }}>
           {detail.sourceTrace?.wikidataQids.slice(0, 5).map((qid) => (
             <a
@@ -365,8 +365,8 @@ export default function AiDataCenterDetailCard({ detail, onClose }: Props) {
               href={`https://www.wikidata.org/wiki/${qid}`}
               target="_blank"
               rel="noreferrer"
-              className="wv-hotspot-status"
-              style={{ textDecoration: "none", color: "var(--wv-text-muted)", cursor: "pointer" }}
+              className="si-hotspot-status"
+              style={{ textDecoration: "none", color: "var(--si-text-muted)", cursor: "pointer" }}
             >
               WD:{qid}
             </a>
@@ -377,8 +377,8 @@ export default function AiDataCenterDetailCard({ detail, onClose }: Props) {
               href={`https://www.openstreetmap.org/${osmId}`}
               target="_blank"
               rel="noreferrer"
-              className="wv-hotspot-status"
-              style={{ textDecoration: "none", color: "var(--wv-text-muted)", cursor: "pointer" }}
+              className="si-hotspot-status"
+              style={{ textDecoration: "none", color: "var(--si-text-muted)", cursor: "pointer" }}
             >
               OSM:{osmId}
             </a>
@@ -389,8 +389,8 @@ export default function AiDataCenterDetailCard({ detail, onClose }: Props) {
             href={osmMapUrl}
             target="_blank"
             rel="noreferrer"
-            className="wv-hotspot-status"
-            style={{ textDecoration: "none", color: "var(--wv-text-muted)", cursor: "pointer" }}
+            className="si-hotspot-status"
+            style={{ textDecoration: "none", color: "var(--si-text-muted)", cursor: "pointer" }}
           >
             VIEW ON OSM ↗
           </a>
@@ -398,8 +398,8 @@ export default function AiDataCenterDetailCard({ detail, onClose }: Props) {
             href={googleMapsUrl}
             target="_blank"
             rel="noreferrer"
-            className="wv-hotspot-status"
-            style={{ textDecoration: "none", color: "var(--wv-text-muted)", cursor: "pointer" }}
+            className="si-hotspot-status"
+            style={{ textDecoration: "none", color: "var(--si-text-muted)", cursor: "pointer" }}
           >
             GOOGLE MAPS ↗
           </a>
@@ -407,24 +407,24 @@ export default function AiDataCenterDetailCard({ detail, onClose }: Props) {
       </div>
 
       {/* Pipeline Status */}
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">PIPELINE STATUS</div>
-        <div className="wv-hotspot-status-row">
-          <span className={`wv-hotspot-status ${sourceStatusClass(wdStatus)}`}>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">PIPELINE STATUS</div>
+        <div className="si-hotspot-status-row">
+          <span className={`si-hotspot-status ${sourceStatusClass(wdStatus)}`}>
             wikidata:{wdStatus}
           </span>
-          <span className={`wv-hotspot-status ${sourceStatusClass(osmStatus)}`}>
+          <span className={`si-hotspot-status ${sourceStatusClass(osmStatus)}`}>
             overpass:{osmStatus}
           </span>
         </div>
         {detail.sourceTrace && (
-          <details className="wv-hotspot-trace" style={{ marginTop: 4 }}>
+          <details className="si-hotspot-trace" style={{ marginTop: 4 }}>
             <summary>Source timestamps</summary>
             <div>WD: {formatAge(detail.sourceTrace.lastUpdated.wikidata)}</div>
             <div>OSM: {formatAge(detail.sourceTrace.lastUpdated.overpass)}</div>
           </details>
         )}
-        <div className="wv-hotspot-updated">Last refresh: {updatedLabel}</div>
+        <div className="si-hotspot-updated">Last refresh: {updatedLabel}</div>
       </div>
 
     </div>,

@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 
 export default function HUD() {
-  const fps = useWorldViewStore((s) => s.debug.fps);
-  const entityCount = useWorldViewStore((s) => s.debug.entityCount);
-  const stylePreset = useWorldViewStore((s) => s.ui.stylePreset);
+  const fps = useSIGINTStore((s) => s.debug.fps);
+  const entityCount = useSIGINTStore((s) => s.debug.entityCount);
+  const stylePreset = useSIGINTStore((s) => s.ui.stylePreset);
   const [utc, setUtc] = useState("");
   const [recVisible, setRecVisible] = useState(true);
 

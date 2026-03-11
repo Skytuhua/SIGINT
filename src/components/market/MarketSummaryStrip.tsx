@@ -22,7 +22,7 @@ const SYMBOLS = [
 
 export default function MarketSummaryStrip({ onTickerClick }: Props) {
   return (
-    <div className="wv-summary-strip" style={{ padding: 0, overflow: "hidden" }}>
+    <div className="si-summary-strip" style={{ padding: 0, overflow: "hidden" }}>
       <TradingViewWidget
         scriptSrc="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js"
         config={{

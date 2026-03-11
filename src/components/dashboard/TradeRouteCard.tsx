@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useEffect, useState, useCallback } from "react";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import { TRADE_ROUTE_GRAPH, NODE_MAP } from "../../lib/cesium/tradeRoutes/data";
 import { getRouteGeometry } from "../../lib/cesium/tradeRoutes/geometry";
 import { CATEGORY_COLORS, CATEGORY_LABELS } from "../../lib/cesium/tradeRoutes/types";
@@ -10,12 +10,12 @@ import type { DisruptionSignal } from "../../lib/cesium/tradeRoutes/types";
 const IMPORTANCE_BARS = ["▏", "▎", "▍", "▌", "█"];
 
 export default function TradeRouteCard() {
-  const selectedRouteId = useWorldViewStore((s) => s.tradeRouteSelection.selectedRouteId);
-  const selectedNodeId = useWorldViewStore((s) => s.tradeRouteSelection.selectedNodeId);
-  const disruptionSignals = useWorldViewStore((s) => s.tradeRouteSelection.disruptionSignals);
-  const setSelection = useWorldViewStore((s) => s.setTradeRouteSelection);
-  const setDisruptions = useWorldViewStore((s) => s.setTradeRouteDisruptions);
-  const layerEnabled = useWorldViewStore((s) => s.layers.tradeRoutes);
+  const selectedRouteId = useSIGINTStore((s) => s.tradeRouteSelection.selectedRouteId);
+  const selectedNodeId = useSIGINTStore((s) => s.tradeRouteSelection.selectedNodeId);
+  const disruptionSignals = useSIGINTStore((s) => s.tradeRouteSelection.disruptionSignals);
+  const setSelection = useSIGINTStore((s) => s.setTradeRouteSelection);
+  const setDisruptions = useSIGINTStore((s) => s.setTradeRouteDisruptions);
+  const layerEnabled = useSIGINTStore((s) => s.layers.tradeRoutes);
 
   const route = useMemo(
     () => TRADE_ROUTE_GRAPH.routes.find((r) => r.id === selectedRouteId) ?? null,
@@ -85,21 +85,21 @@ export default function TradeRouteCard() {
   const catLabel = route ? CATEGORY_LABELS[route.category] : "";
 
   return (
-    <div className="wv-trade-route-card">
+    <div className="si-trade-route-card">
       {/* Header */}
-      <div className="wv-trc-header">
-        <span className="wv-trc-title">{route?.name ?? selectedNode?.name ?? "Trade Route"}</span>
-        <button className="wv-trc-close" onClick={close} title="Close">×</button>
+      <div className="si-trc-header">
+        <span className="si-trc-title">{route?.name ?? selectedNode?.name ?? "Trade Route"}</span>
+        <button className="si-trc-close" onClick={close} title="Close">×</button>
       </div>
 
       {route && (
         <>
           {/* Category + Importance */}
-          <div className="wv-trc-row">
-            <span className="wv-trc-label">CATEGORY</span>
+          <div className="si-trc-row">
+            <span className="si-trc-label">CATEGORY</span>
             <span style={{ color: catColor }}>{catLabel.toUpperCase()}</span>
-            <span className="wv-trc-sep">|</span>
-            <span className="wv-trc-label">IMPORTANCE</span>
+            <span className="si-trc-sep">|</span>
+            <span className="si-trc-label">IMPORTANCE</span>
             <span style={{ color: catColor, letterSpacing: 2 }}>
               {IMPORTANCE_BARS.slice(0, route.importance).join("")}
               <span style={{ opacity: 0.4 }}> {route.importance}/5</span>
@@ -107,26 +107,26 @@ export default function TradeRouteCard() {
           </div>
 
           {/* Path chain */}
-          <div className="wv-trc-row wv-trc-path">
-            <span className="wv-trc-label">PATH</span>
+          <div className="si-trc-row si-trc-path">
+            <span className="si-trc-label">PATH</span>
             <span>{pathChain.join(" → ")}</span>
           </div>
 
           {/* Why it matters */}
-          <div className="wv-trc-row">
-            <span className="wv-trc-label">WHY IT MATTERS</span>
-            <span className="wv-trc-value">{route.whyItMatters}</span>
+          <div className="si-trc-row">
+            <span className="si-trc-label">WHY IT MATTERS</span>
+            <span className="si-trc-value">{route.whyItMatters}</span>
           </div>
 
           {/* Key nodes */}
           {keyNodes.length > 0 && (
-            <div className="wv-trc-row">
-              <span className="wv-trc-label">KEY CHOKEPOINTS</span>
-              <span className="wv-trc-value">
+            <div className="si-trc-row">
+              <span className="si-trc-label">KEY CHOKEPOINTS</span>
+              <span className="si-trc-value">
                 {keyNodes.map((n, i) => (
                   <span key={n.id}>
                     <button
-                      className="wv-trc-node-link"
+                      className="si-trc-node-link"
                       onClick={() => setSelection({ selectedNodeId: n.id })}
                     >
                       {n.name}
@@ -140,18 +140,18 @@ export default function TradeRouteCard() {
 
           {/* Segment length */}
           {geometry && (
-            <div className="wv-trc-row">
-              <span className="wv-trc-label">ROUTE LENGTH</span>
-              <span className="wv-trc-value">{Math.round(geometry.lengthKm).toLocaleString()} km</span>
+            <div className="si-trc-row">
+              <span className="si-trc-label">ROUTE LENGTH</span>
+              <span className="si-trc-value">{Math.round(geometry.lengthKm).toLocaleString()} km</span>
             </div>
           )}
 
           {/* Source trace */}
-          <div className="wv-trc-row">
-            <span className="wv-trc-label">SOURCE TRACE</span>
-            <span className="wv-trc-links">
+          <div className="si-trc-row">
+            <span className="si-trc-label">SOURCE TRACE</span>
+            <span className="si-trc-links">
               {route.sourceTrace.map((url, i) => (
-                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="wv-trc-link">
+                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="si-trc-link">
                   {url.includes("wikidata") ? `WD:${url.split("/").pop()}` : url.split("/").pop()}
                 </a>
               ))}
@@ -160,14 +160,14 @@ export default function TradeRouteCard() {
 
           {/* Disruption signals */}
           {(disruptionSignals.length > 0 || loadingDisruptions) && (
-            <div className="wv-trc-disruptions">
-              <span className="wv-trc-label">RECENT DISRUPTION SIGNALS</span>
-              {loadingDisruptions && <span className="wv-trc-loading">Loading...</span>}
+            <div className="si-trc-disruptions">
+              <span className="si-trc-label">RECENT DISRUPTION SIGNALS</span>
+              {loadingDisruptions && <span className="si-trc-loading">Loading...</span>}
               {disruptionSignals.map((sig) => (
-                <div key={sig.chokepoint} className="wv-trc-disruption-group">
-                  <span className="wv-trc-disruption-choke">{sig.chokepoint}</span>
+                <div key={sig.chokepoint} className="si-trc-disruption-group">
+                  <span className="si-trc-disruption-choke">{sig.chokepoint}</span>
                   {sig.headlines.slice(0, 3).map((h, i) => (
-                    <a key={i} href={h.url} target="_blank" rel="noopener noreferrer" className="wv-trc-disruption-headline">
+                    <a key={i} href={h.url} target="_blank" rel="noopener noreferrer" className="si-trc-disruption-headline">
                       {h.title}
                     </a>
                   ))}
@@ -180,31 +180,31 @@ export default function TradeRouteCard() {
 
       {/* Selected node detail (when clicking a specific node) */}
       {selectedNode && (
-        <div className="wv-trc-node-detail">
-          <div className="wv-trc-row">
-            <span className="wv-trc-label">NODE TYPE</span>
-            <span className="wv-trc-value">{selectedNode.type.toUpperCase()}</span>
+        <div className="si-trc-node-detail">
+          <div className="si-trc-row">
+            <span className="si-trc-label">NODE TYPE</span>
+            <span className="si-trc-value">{selectedNode.type.toUpperCase()}</span>
           </div>
-          <div className="wv-trc-row">
-            <span className="wv-trc-label">COORDINATES</span>
-            <span className="wv-trc-value">
+          <div className="si-trc-row">
+            <span className="si-trc-label">COORDINATES</span>
+            <span className="si-trc-value">
               {selectedNode.lat.toFixed(4)}°, {selectedNode.lon.toFixed(4)}°
             </span>
           </div>
           {selectedNode.country && (
-            <div className="wv-trc-row">
-              <span className="wv-trc-label">COUNTRY</span>
-              <span className="wv-trc-value">{selectedNode.country}</span>
+            <div className="si-trc-row">
+              <span className="si-trc-label">COUNTRY</span>
+              <span className="si-trc-value">{selectedNode.country}</span>
             </div>
           )}
           {selectedNode.wikidataId && (
-            <div className="wv-trc-row">
-              <span className="wv-trc-label">WIKIDATA</span>
+            <div className="si-trc-row">
+              <span className="si-trc-label">WIKIDATA</span>
               <a
                 href={`https://www.wikidata.org/wiki/${selectedNode.wikidataId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="wv-trc-link"
+                className="si-trc-link"
               >
                 {selectedNode.wikidataId}
               </a>
@@ -213,40 +213,40 @@ export default function TradeRouteCard() {
 
           {/* Summary */}
           {selectedNode.summary && (
-            <div className="wv-trc-node-summary">{selectedNode.summary}</div>
+            <div className="si-trc-node-summary">{selectedNode.summary}</div>
           )}
 
           {/* Hub-specific fields */}
           {selectedNode.type === "hub" && (
             <>
               {selectedNode.throughput && (
-                <div className="wv-trc-row">
-                  <span className="wv-trc-label">THROUGHPUT</span>
-                  <span className="wv-trc-value">{selectedNode.throughput}</span>
+                <div className="si-trc-row">
+                  <span className="si-trc-label">THROUGHPUT</span>
+                  <span className="si-trc-value">{selectedNode.throughput}</span>
                 </div>
               )}
               {selectedNode.globalRank && (
-                <div className="wv-trc-row">
-                  <span className="wv-trc-label">GLOBAL RANK</span>
-                  <span className="wv-trc-value" style={{ color: "#4fc3f7" }}>{selectedNode.globalRank}</span>
+                <div className="si-trc-row">
+                  <span className="si-trc-label">GLOBAL RANK</span>
+                  <span className="si-trc-value" style={{ color: "#4fc3f7" }}>{selectedNode.globalRank}</span>
                 </div>
               )}
               {selectedNode.topExports && selectedNode.topExports.length > 0 && (
-                <div className="wv-trc-row">
-                  <span className="wv-trc-label">TOP EXPORTS</span>
-                  <span className="wv-trc-commodities">
+                <div className="si-trc-row">
+                  <span className="si-trc-label">TOP EXPORTS</span>
+                  <span className="si-trc-commodities">
                     {selectedNode.topExports.map((c) => (
-                      <span key={c} className="wv-trc-commodity wv-trc-commodity--export">{c}</span>
+                      <span key={c} className="si-trc-commodity si-trc-commodity--export">{c}</span>
                     ))}
                   </span>
                 </div>
               )}
               {selectedNode.topImports && selectedNode.topImports.length > 0 && (
-                <div className="wv-trc-row">
-                  <span className="wv-trc-label">TOP IMPORTS</span>
-                  <span className="wv-trc-commodities">
+                <div className="si-trc-row">
+                  <span className="si-trc-label">TOP IMPORTS</span>
+                  <span className="si-trc-commodities">
                     {selectedNode.topImports.map((c) => (
-                      <span key={c} className="wv-trc-commodity wv-trc-commodity--import">{c}</span>
+                      <span key={c} className="si-trc-commodity si-trc-commodity--import">{c}</span>
                     ))}
                   </span>
                 </div>
@@ -258,35 +258,35 @@ export default function TradeRouteCard() {
           {selectedNode.type === "chokepoint" && (
             <>
               {selectedNode.dailyVessels !== undefined && selectedNode.dailyVessels > 0 && (
-                <div className="wv-trc-row">
-                  <span className="wv-trc-label">DAILY VESSELS</span>
-                  <span className="wv-trc-value">{selectedNode.dailyVessels.toLocaleString()} ships/day</span>
+                <div className="si-trc-row">
+                  <span className="si-trc-label">DAILY VESSELS</span>
+                  <span className="si-trc-value">{selectedNode.dailyVessels.toLocaleString()} ships/day</span>
                 </div>
               )}
               {selectedNode.tradeSharePct && (
-                <div className="wv-trc-row">
-                  <span className="wv-trc-label">TRADE SHARE</span>
-                  <span className="wv-trc-value" style={{ color: "#ffab40" }}>{selectedNode.tradeSharePct}</span>
+                <div className="si-trc-row">
+                  <span className="si-trc-label">TRADE SHARE</span>
+                  <span className="si-trc-value" style={{ color: "#ffab40" }}>{selectedNode.tradeSharePct}</span>
                 </div>
               )}
               {selectedNode.widthKm !== undefined && selectedNode.widthKm > 0 && (
-                <div className="wv-trc-row">
-                  <span className="wv-trc-label">MIN WIDTH</span>
-                  <span className="wv-trc-value">{selectedNode.widthKm} km</span>
+                <div className="si-trc-row">
+                  <span className="si-trc-label">MIN WIDTH</span>
+                  <span className="si-trc-value">{selectedNode.widthKm} km</span>
                 </div>
               )}
               {selectedNode.controlledBy && (
-                <div className="wv-trc-row">
-                  <span className="wv-trc-label">CONTROLLED BY</span>
-                  <span className="wv-trc-value">{selectedNode.controlledBy}</span>
+                <div className="si-trc-row">
+                  <span className="si-trc-label">CONTROLLED BY</span>
+                  <span className="si-trc-value">{selectedNode.controlledBy}</span>
                 </div>
               )}
               {selectedNode.primaryCommodities && selectedNode.primaryCommodities.length > 0 && (
-                <div className="wv-trc-row">
-                  <span className="wv-trc-label">PRIMARY CARGO</span>
-                  <span className="wv-trc-commodities">
+                <div className="si-trc-row">
+                  <span className="si-trc-label">PRIMARY CARGO</span>
+                  <span className="si-trc-commodities">
                     {selectedNode.primaryCommodities.map((c) => (
-                      <span key={c} className="wv-trc-commodity wv-trc-commodity--neutral">{c}</span>
+                      <span key={c} className="si-trc-commodity si-trc-commodity--neutral">{c}</span>
                     ))}
                   </span>
                 </div>
@@ -297,9 +297,9 @@ export default function TradeRouteCard() {
       )}
 
       {/* Last updated */}
-      <div className="wv-trc-footer">
-        <span className="wv-trc-label">LAST UPDATED</span>
-        <span className="wv-trc-value">{new Date().toISOString().slice(0, 19).replace("T", " ")} UTC</span>
+      <div className="si-trc-footer">
+        <span className="si-trc-label">LAST UPDATED</span>
+        <span className="si-trc-value">{new Date().toISOString().slice(0, 19).replace("T", " ")} UTC</span>
       </div>
     </div>
   );

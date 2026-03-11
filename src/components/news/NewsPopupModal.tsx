@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { GdeltArticle, NewsArticle } from "../../lib/news/types";
 import { formatUtc } from "../../lib/dashboard/format";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 
 interface Props {
   article: NewsArticle | null;
   relatedItems?: GdeltArticle[];
   timeline?: Array<{ date: string; value: number }>;
   onClose: () => void;
+  isBookmarked?: boolean;
+  onToggleBookmark?: (id: string) => void;
 }
 
 type SummaryStatus = "idle" | "loading" | "ready" | "error" | "unsupported";
@@ -30,6 +32,17 @@ interface ArticleSummaryResponse {
   model?: string;
   unavailableReason?: SummaryUnavailableReason;
   error?: string;
+}
+
+const POSITIVE_RE = /\b(surge|gain|rise|growth|rally|profit|record high|boom|soar|upgrade)\b/i;
+const NEGATIVE_RE = /\b(fall|crash|decline|drop|loss|crisis|plunge|slump|downgrade|recession|fear)\b/i;
+
+function classifySentiment(text: string): "positive" | "negative" | "neutral" {
+  const pos = POSITIVE_RE.test(text);
+  const neg = NEGATIVE_RE.test(text);
+  if (pos && !neg) return "positive";
+  if (neg && !pos) return "negative";
+  return "neutral";
 }
 
 const summaryMemo = new Map<string, ArticleSummaryResponse>();
@@ -84,7 +97,12 @@ export default function NewsPopupModal({
   relatedItems: providedRelated = [],
   timeline: providedTimeline = [],
   onClose,
+  isBookmarked,
+  onToggleBookmark,
 }: Props) {
+  const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current); }, []);
   const [relatedItems, setRelatedItems] = useState<GdeltArticle[]>(providedRelated);
   const [timeline, setTimeline] = useState<Array<{ date: string; value: number }>>(providedTimeline);
   const [summaryStatus, setSummaryStatus] = useState<SummaryStatus>("idle");
@@ -185,7 +203,7 @@ export default function NewsPopupModal({
 
   return (
     <div
-      className="wv-news-popup-overlay"
+      className="si-news-popup-overlay"
       role="dialog"
       aria-modal="true"
       aria-label="News story"
@@ -193,82 +211,97 @@ export default function NewsPopupModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="wv-news-popup">
-        <div className="wv-news-popup-header">
-          <h2 className="wv-news-popup-title">STORY</h2>
-          <button
-            type="button"
-            className="wv-news-popup-close"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            x
-          </button>
+      <div className="si-news-popup">
+        <div className="si-news-popup-header">
+          <h2 className="si-news-popup-title">STORY</h2>
+          <div style={{ display: "flex", gap: 4, alignItems: "center", marginLeft: "auto" }}>
+            {onToggleBookmark && article ? (
+              <button type="button" style={{ background: "none", border: "none", cursor: "pointer", color: isBookmarked ? "var(--si-amber)" : "var(--si-text-muted)", fontSize: 14 }} onClick={() => onToggleBookmark(article.id)} title={isBookmarked ? "Remove bookmark" : "Bookmark"}>
+                {isBookmarked ? "\u2605" : "\u2606"}
+              </button>
+            ) : null}
+            <button type="button" style={{ background: "none", border: "var(--si-border) solid var(--si-line)", cursor: "pointer", color: copied ? "var(--si-accent)" : "var(--si-text-muted)", fontSize: 10, padding: "2px 6px" }} onClick={() => {
+              if (article) { void navigator.clipboard.writeText(article.url); setCopied(true); if (copyTimerRef.current) clearTimeout(copyTimerRef.current); copyTimerRef.current = setTimeout(() => setCopied(false), 1500); }
+            }}>
+              {copied ? "COPIED" : "COPY LINK"}
+            </button>
+            <button
+              type="button"
+              className="si-news-popup-close"
+              onClick={onClose}
+              aria-label="Close"
+            >
+              x
+            </button>
+          </div>
         </div>
-        <div className="wv-news-popup-body">
-          <div className="wv-sv-header">
-            <h4 className="wv-sv-headline">{article.headline}</h4>
-            <div className="wv-sv-meta">
-              <span className="wv-sv-source">{article.source}</span>
-              <span className="wv-sv-sep">|</span>
+        <div className="si-news-popup-body">
+          <div className="si-sv-header">
+            <h4 className="si-sv-headline">
+              <span className={`si-news-sentiment is-${classifySentiment(article.headline)}`} />
+              {article.headline}
+            </h4>
+            <div className="si-sv-meta">
+              <span className="si-sv-source">{article.source}</span>
+              <span className="si-sv-sep">|</span>
               <span>{formatUtc(article.publishedAt)}</span>
-              <span className="wv-sv-sep">|</span>
+              <span className="si-sv-sep">|</span>
               <span>{article.domain}</span>
               {article.entity && article.entity !== "none" ? (
                 <>
-                  <span className="wv-sv-sep">|</span>
-                  <span className="wv-sv-entity">{article.entity}</span>
+                  <span className="si-sv-sep">|</span>
+                  <span className="si-sv-entity">{article.entity}</span>
                 </>
               ) : null}
             </div>
           </div>
-          <div className="wv-sv-divider" />
-          <div className="wv-sv-actions">
+          <div className="si-sv-divider" />
+          <div className="si-sv-actions">
             <a
               href={article.url}
               target="_blank"
               rel="noreferrer"
-              className="wv-sv-btn"
+              className="si-sv-btn"
             >
               OPEN SOURCE
             </a>
             <button
               type="button"
-              className="wv-sv-btn"
+              className="si-sv-btn"
               onClick={() => {
-                const news = useWorldViewStore.getState().news;
+                const news = useSIGINTStore.getState().news;
                 const marker = news.markers.find((m) => m.articleId === article.id);
-                useWorldViewStore.getState().setHighlightMarker(marker?.id ?? null);
+                useSIGINTStore.getState().setHighlightMarker(marker?.id ?? null);
               }}
             >
               HIGHLIGHT MARKER
             </button>
           </div>
-          <div className="wv-sv-divider" />
-          <div className="wv-sv-section">
-            <div className="wv-sv-section-label">SUMMARY</div>
+          <div className="si-sv-divider" />
+          <div className="si-sv-section">
+            <div className="si-sv-section-label">SUMMARY</div>
             {summaryStatus === "loading" ? (
-              <div className="wv-sv-summary is-loading">
+              <div className="si-sv-summary is-loading">
                 Generating article summary...
               </div>
             ) : null}
             {summaryStatus === "ready" && summary?.summary ? (
-              <div className="wv-sv-summary">{summary.summary}</div>
+              <div className="si-sv-summary">{summary.summary}</div>
             ) : null}
             {summaryStatus === "unsupported" ? (
-              <div className="wv-sv-summary-note">
+              <div className="si-sv-summary-note">
                 Summary is unavailable for this link type.
               </div>
             ) : null}
             {summaryStatus === "error" ? (
-              <div className="wv-sv-summary-note">
+              <div className="si-sv-summary-note">
                 {summary?.unavailableReason === "low_relevance"
                   ? "Summary was skipped because the article content did not match the headline closely enough."
                   : "Could not generate a full-article summary right now."}
               </div>
             ) : null}
             {summaryEngineLabel ? (
-              <div className="wv-sv-summary-meta">
+              <div className="si-sv-summary-meta">
                 ENGINE {summaryEngineLabel}
                 {summary?.degraded ? " | FALLBACK" : ""}
                 {summary?.cacheHit === "stale" ? " | CACHED STALE" : ""}
@@ -277,12 +310,12 @@ export default function NewsPopupModal({
           </div>
           {article.snippet ? (
             <>
-              <div className="wv-sv-divider" />
-              <div className="wv-sv-section">
-                <div className="wv-sv-section-label">SOURCE SNIPPET</div>
-                <div className="wv-sv-snippet">{article.snippet}</div>
+              <div className="si-sv-divider" />
+              <div className="si-sv-section">
+                <div className="si-sv-section-label">SOURCE SNIPPET</div>
+                <div className="si-sv-snippet">{article.snippet}</div>
                 {summaryStatus !== "ready" ? (
-                  <div className="wv-sv-snippet-note">
+                  <div className="si-sv-snippet-note">
                     Showing source snippet fallback.
                   </div>
                 ) : null}
@@ -291,10 +324,10 @@ export default function NewsPopupModal({
           ) : null}
           {Number.isFinite(article.lat) && Number.isFinite(article.lon) ? (
             <>
-              <div className="wv-sv-divider" />
-              <div className="wv-sv-section">
-                <div className="wv-sv-section-label">LOCATION</div>
-                <div className="wv-sv-section-value">
+              <div className="si-sv-divider" />
+              <div className="si-sv-section">
+                <div className="si-sv-section-label">LOCATION</div>
+                <div className="si-sv-section-value">
                   {article.placeName ?? "Coordinates"} (
                   {(article.lat as number).toFixed(4)},{" "}
                   {(article.lon as number).toFixed(4)})
@@ -304,19 +337,19 @@ export default function NewsPopupModal({
           ) : null}
           {relatedItems.length > 0 ? (
             <>
-              <div className="wv-sv-divider" />
-              <div className="wv-sv-section">
-                <div className="wv-sv-section-label">
+              <div className="si-sv-divider" />
+              <div className="si-sv-section">
+                <div className="si-sv-section-label">
                   RELATED ({relatedItems.length})
                 </div>
-                <div className="wv-sv-related-list">
+                <div className="si-sv-related-list">
                   {relatedItems.map((entry) => (
                     <a
                       key={`${entry.url}-${entry.seendate ?? ""}`}
                       href={entry.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="wv-sv-related-item"
+                      className="si-sv-related-item"
                     >
                       {entry.title || entry.url}
                     </a>
@@ -327,18 +360,18 @@ export default function NewsPopupModal({
           ) : null}
           {timeline.length > 0 ? (
             <>
-              <div className="wv-sv-divider" />
-              <div className="wv-sv-section">
-                <div className="wv-sv-section-label">TIMELINE (7D)</div>
-                <div className="wv-sv-timeline">
+              <div className="si-sv-divider" />
+              <div className="si-sv-section">
+                <div className="si-sv-section-label">TIMELINE (7D)</div>
+                <div className="si-sv-timeline">
                   {timeline.slice(-24).map((point) => (
                     <div
                       key={point.date}
-                      className="wv-sv-timeline-col"
+                      className="si-sv-timeline-col"
                       title={`${point.date}: ${point.value}`}
                     >
                       <div
-                        className="wv-sv-timeline-bar"
+                        className="si-sv-timeline-bar"
                         style={{
                           height: `${Math.max(4, Math.min(56, point.value * 4))}px`,
                         }}
@@ -351,10 +384,10 @@ export default function NewsPopupModal({
           ) : null}
           {provenance ? (
             <>
-              <div className="wv-sv-divider" />
-              <details className="wv-sv-provenance">
+              <div className="si-sv-divider" />
+              <details className="si-sv-provenance">
                 <summary>PROVENANCE</summary>
-                <div className="wv-sv-prov-grid">
+                <div className="si-sv-prov-grid">
                   <span>headline</span>
                   <span>{provenance.headlineSource}</span>
                   <span>coords</span>

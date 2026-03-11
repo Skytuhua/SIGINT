@@ -34,7 +34,7 @@ export default function Sparkline({
   if (!values.length) {
     return (
       <svg
-        className="wv-sparkline"
+        className="si-sparkline"
         width={width}
         height={height}
         viewBox={`0 0 ${geometryWidth} ${height}`}
@@ -58,7 +58,7 @@ export default function Sparkline({
 
   return (
     <svg
-      className="wv-sparkline"
+      className="si-sparkline"
       width={width}
       height={height}
       viewBox={`0 0 ${geometryWidth} ${height}`}

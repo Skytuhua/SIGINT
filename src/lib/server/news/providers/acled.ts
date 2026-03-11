@@ -104,7 +104,7 @@ async function fetchGdeltConflictCount(
   try {
     const resp = await fetchJsonOrThrow<{ timeline?: Array<{ data: GdeltTimelineEntry[] }> }>(
       url,
-      { headers: { "User-Agent": "WorldView/0.1" } },
+      { headers: { "User-Agent": "SIGINT/0.1" } },
       POLICY.timeoutMs,
     );
     const series = resp.timeline?.[0]?.data ?? [];
@@ -123,7 +123,7 @@ async function fetchGdeltConflictArticles(
   try {
     const resp = await fetchJsonOrThrow<{ articles?: GdeltDocArticle[] }>(
       url,
-      { headers: { "User-Agent": "WorldView/0.1" } },
+      { headers: { "User-Agent": "SIGINT/0.1" } },
       POLICY.timeoutMs,
     );
     return resp.articles ?? [];

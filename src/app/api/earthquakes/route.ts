@@ -43,7 +43,7 @@ export async function GET() {
 
   try {
     const res = await fetch(USGS_URL, {
-      headers: { 'User-Agent': 'WorldView/0.1 (educational/research use)' },
+      headers: { 'User-Agent': 'SIGINT/0.1 (educational/research use)' },
     });
     if (!res.ok) throw new Error(`USGS returned ${res.status}`);
 

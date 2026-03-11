@@ -1,6 +1,6 @@
 "use client";
 
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 
 const panel: React.CSSProperties = {
   position: "absolute",
@@ -105,9 +105,9 @@ function Slider({
 }
 
 export default function RightPanel() {
-  const ui = useWorldViewStore((s) => s.ui);
-  const setUi = useWorldViewStore((s) => s.setUi);
-  const setDetectMode = useWorldViewStore((s) => s.setDetectMode);
+  const ui = useSIGINTStore((s) => s.ui);
+  const setUi = useSIGINTStore((s) => s.setUi);
+  const setDetectMode = useSIGINTStore((s) => s.setDetectMode);
 
   return (
     <div style={panel}>

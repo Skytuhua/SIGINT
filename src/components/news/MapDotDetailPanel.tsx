@@ -477,21 +477,21 @@ export default function MapDotDetailPanel({ detail, onClose }: MapDotDetailPanel
   if (!mounted) return null;
 
   return createPortal(
-    <div className="wv-dot-detail" role="dialog" aria-label="Feature details">
-      <div className="wv-dot-detail-hdr">
-        <span className="wv-dot-detail-type">{detail.layerType}</span>
-        <button type="button" className="wv-dot-detail-close" onClick={onClose} aria-label="Close feature details">
+    <div className="si-dot-detail" role="dialog" aria-label="Feature details">
+      <div className="si-dot-detail-hdr">
+        <span className="si-dot-detail-type">{detail.layerType}</span>
+        <button type="button" className="si-dot-detail-close" onClick={onClose} aria-label="Close feature details">
           ×
         </button>
       </div>
 
-      <div className="wv-dot-detail-title">{detail.title}</div>
+      <div className="si-dot-detail-title">{detail.title}</div>
 
-      <div className="wv-dot-detail-body">
+      <div className="si-dot-detail-body">
         {displayFields.map((field, i) => (
-          <div key={i} className="wv-dot-detail-row">
-            <span className="wv-dot-detail-lbl">{field.label}</span>
-            <span className="wv-dot-detail-val">{field.value}</span>
+          <div key={i} className="si-dot-detail-row">
+            <span className="si-dot-detail-lbl">{field.label}</span>
+            <span className="si-dot-detail-val">{field.value}</span>
           </div>
         ))}
       </div>

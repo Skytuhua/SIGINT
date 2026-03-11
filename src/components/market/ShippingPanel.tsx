@@ -2,6 +2,7 @@
 
 import React from "react";
 import { MiniSparkline } from "./shared/MiniSparkline";
+import Term from "./shared/Term";
 
 interface ShippingRow {
   id: string;
@@ -65,7 +66,7 @@ const SHIPPING: ShippingRow[] = [
 const SIGNAL_COLOR: Record<string, string> = {
   Rising:    "#36b37e",
   Falling:   "#ff5a5f",
-  Stable:    "var(--wv-text-muted)",
+  Stable:    "var(--si-text-muted)",
   Elevated:  "#ffab40",
   Depressed: "#ff5a5f",
 };
@@ -76,14 +77,14 @@ interface Props {
 
 export default function ShippingPanel({ style }: Props) {
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Shipping & Freight</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)" }}>Global trade proxy</span>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Shipping & Freight</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)" }}>Global trade proxy</span>
+        <span className="si-market-panel-badge is-reference">REFERENCE</span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
-        <div className="wv-shipping-header">
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
+        <div className="si-shipping-header">
           <span>INDEX</span>
           <span style={{ textAlign: "right" }}>VALUE</span>
           <span style={{ textAlign: "right" }}>1D%</span>
@@ -93,9 +94,9 @@ export default function ShippingPanel({ style }: Props) {
           <span>SIGNAL</span>
         </div>
         {SHIPPING.map((s) => (
-          <div key={s.id} className="wv-shipping-row" title={`${s.desc} · ${s.unit}`}>
-            <span style={{ color: "#89e5ff", fontWeight: 700 }}>{s.label}</span>
-            <span style={{ textAlign: "right", fontWeight: 600, color: "var(--wv-text)" }}>{s.value}</span>
+          <div key={s.id} className="si-shipping-row" title={`${s.desc} · ${s.unit}`}>
+            <span style={{ color: "#89e5ff", fontWeight: 700 }}>{s.label.startsWith("Baltic") ? <><Term id="BALTIC">Baltic</Term>{s.label.slice(6)}</> : s.label}</span>
+            <span style={{ textAlign: "right", fontWeight: 600, color: "var(--si-text)" }}>{s.value}</span>
             <span style={{ textAlign: "right", color: s.chg1d >= 0 ? "#36b37e" : "#ff5a5f" }}>
               {s.chg1d >= 0 ? "+" : ""}{s.chg1d.toFixed(1)}%
             </span>
@@ -110,7 +111,7 @@ export default function ShippingPanel({ style }: Props) {
           </div>
         ))}
       </div>
-      <div className="wv-market-panel-footer">Baltic Exchange · Drewry · Shanghai Exchange · placeholder data</div>
+      <div className="si-market-panel-footer">Baltic Exchange · Drewry · Shanghai Exchange · Curated reference data</div>
     </div>
   );
 }

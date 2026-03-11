@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CctvCamera, CctvRegion } from "../../lib/providers/types";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import CctvFeedView from "./inspector/CctvFeedView";
 import Panel from "./panel/Panel";
 import PanelBody from "./panel/PanelBody";
@@ -16,6 +16,8 @@ const REGIONS = [
   { value: "europe" as const, label: "EUROPE" },
   { value: "americas" as const, label: "AMERICAS" },
   { value: "asia" as const, label: "ASIA" },
+  { value: "africa" as const, label: "AFRICA" },
+  { value: "oceania" as const, label: "OCEANIA" },
 ];
 
 const DISPLAY_COUNT = 4;
@@ -54,24 +56,72 @@ export default function LiveCctvPanel({
   onRefresh,
   loading,
 }: LiveCctvPanelProps) {
-  const brokenIds = useWorldViewStore((s) => s.cctv.brokenIds);
-  const markCctvBroken = useWorldViewStore((s) => s.markCctvBroken);
+  const brokenIds = useSIGINTStore((s) => s.cctv.brokenIds);
+  const markCctvBroken = useSIGINTStore((s) => s.markCctvBroken);
   const [selectedRegion, setSelectedRegion] = useState<"all" | CctvRegion>("all");
   const [viewMode, setViewMode] = useState<"grid" | "single">("grid");
   const [cycleIndex, setCycleIndex] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [remoteResults, setRemoteResults] = useState<CctvCamera[]>([]);
+  const [searching, setSearching] = useState(false);
+  const searchAbort = useRef<AbortController | null>(null);
+
+  // Debounced remote search against insecam.org
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setRemoteResults([]);
+      setSearching(false);
+      return;
+    }
+
+    setSearching(true);
+    const timer = setTimeout(async () => {
+      searchAbort.current?.abort();
+      const ac = new AbortController();
+      searchAbort.current = ac;
+
+      try {
+        const resp = await fetch(`/api/cctv/insecam/search?q=${encodeURIComponent(q)}`, {
+          signal: ac.signal,
+        });
+        if (resp.ok) {
+          const data: CctvCamera[] = await resp.json();
+          if (!ac.signal.aborted) setRemoteResults(data);
+        }
+      } catch {
+        // aborted or network error — ignore
+      } finally {
+        if (!ac.signal.aborted) setSearching(false);
+      }
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+      searchAbort.current?.abort();
+    };
+  }, [searchQuery]);
 
   const healthyCameras = useMemo(() => {
-    const seenVideoIds = new Set<string>();
+    const ALLOWED_FORMATS = new Set(["YOUTUBE", "JPEG", "IMAGE_STREAM"]);
+    const seenIds = new Set<string>();
     const result: CctvCamera[] = [];
 
     for (const cam of cameras) {
       if (!cam.snapshotUrl) continue;
       if (brokenIds[cam.id]) continue;
-      if (cam.streamFormat !== "YOUTUBE") continue;
+      if (!ALLOWED_FORMATS.has(cam.streamFormat ?? "")) continue;
+      // Only allow YouTube streams or proxied cameras (snapshotUrl via /api/)
+      // to avoid raw HTTP URLs that fail due to CORS/mixed-content
+      if (cam.streamFormat !== "YOUTUBE" && !cam.snapshotUrl.startsWith("/api/")) continue;
 
-      const videoId = getYoutubeIdFromUrl(cam.streamUrl) ?? cam.id;
-      if (seenVideoIds.has(videoId)) continue;
-      seenVideoIds.add(videoId);
+      // Dedup: use YouTube video ID for YouTube cams, cam.id for others
+      const dedupKey =
+        cam.streamFormat === "YOUTUBE"
+          ? (getYoutubeIdFromUrl(cam.streamUrl) ?? cam.id)
+          : cam.id;
+      if (seenIds.has(dedupKey)) continue;
+      seenIds.add(dedupKey);
       result.push(cam);
     }
 
@@ -79,18 +129,38 @@ export default function LiveCctvPanel({
   }, [cameras, brokenIds]);
 
   const filteredCameras = useMemo(() => {
+    // Search takes priority — matches across all regions + remote results
+    const q = searchQuery.trim().toLowerCase();
+    if (q) {
+      const localMatches = healthyCameras.filter(
+        (c) =>
+          c.city.toLowerCase().includes(q) ||
+          (c.name?.toLowerCase().includes(q)) ||
+          (c.section?.toLowerCase().includes(q)),
+      );
+
+      // Merge remote results, dedup by ID
+      const seenIds = new Set(localMatches.map((c) => c.id));
+      const merged = [...localMatches];
+      for (const cam of remoteResults) {
+        if (!seenIds.has(cam.id)) {
+          seenIds.add(cam.id);
+          merged.push(cam);
+        }
+      }
+      return merged;
+    }
+
     if (!healthyCameras.length) return [];
     if (selectedRegion === "all") return healthyCameras;
 
     const regional = healthyCameras.filter((c) => c.region === selectedRegion);
-    // If a region has no healthy cameras, fall back to the global pool so the panel
-    // always has something to show (as you requested: "just pick some working cameras").
     return regional.length > 0 ? regional : healthyCameras;
-  }, [healthyCameras, selectedRegion]);
+  }, [healthyCameras, selectedRegion, searchQuery, remoteResults]);
 
   useEffect(() => {
     setCycleIndex(0);
-  }, [selectedRegion]);
+  }, [selectedRegion, searchQuery]);
 
   const displayedCameras = useMemo(() => {
     if (filteredCameras.length === 0) return [];
@@ -110,31 +180,56 @@ export default function LiveCctvPanel({
 
   const handleNextSet = useCallback(() => {
     advanceCycle();
-    onRefresh();
-  }, [advanceCycle, onRefresh]);
+  }, [advanceCycle]);
 
   const regionTabs = (
-    <div className="wv-cctv-live-tabs" role="tablist" aria-label="Region filter">
-      {REGIONS.map((r) => (
-        <button
-          key={r.value}
-          type="button"
-          role="tab"
-          aria-selected={selectedRegion === r.value}
-          className={`wv-cctv-live-tab ${selectedRegion === r.value ? "is-active" : ""}`}
-          onClick={() => setSelectedRegion(r.value)}
-        >
-          {r.label}
-        </button>
-      ))}
+    <div className="si-cctv-live-filters">
+      <div className="si-cctv-live-tabs" role="tablist" aria-label="Region filter">
+        {REGIONS.map((r) => (
+          <button
+            key={r.value}
+            type="button"
+            role="tab"
+            aria-selected={selectedRegion === r.value}
+            className={`si-cctv-live-tab ${selectedRegion === r.value ? "is-active" : ""}`}
+            onClick={() => setSelectedRegion(r.value)}
+          >
+            {r.label}
+          </button>
+        ))}
+      </div>
+      <div className="si-cctv-live-search">
+        <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+          <circle cx="11" cy="11" r="8" />
+          <path d="M21 21l-4.35-4.35" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Search city..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="si-cctv-live-search-input"
+          aria-label="Search cameras by city"
+        />
+        {searchQuery && (
+          <button
+            type="button"
+            className="si-cctv-live-search-clear"
+            onClick={() => setSearchQuery("")}
+            aria-label="Clear search"
+          >
+            &times;
+          </button>
+        )}
+      </div>
     </div>
   );
 
   const viewModeControls = (
-    <div className="wv-cctv-live-view-mode" aria-label="View mode">
+    <div className="si-cctv-live-view-mode" aria-label="View mode">
       <button
         type="button"
-        className={`wv-cctv-live-view-btn ${viewMode === "grid" ? "is-active" : ""}`}
+        className={`si-cctv-live-view-btn ${viewMode === "grid" ? "is-active" : ""}`}
         onClick={() => setViewMode("grid")}
         aria-label="2x2 grid view"
         title="2x2 grid"
@@ -148,7 +243,7 @@ export default function LiveCctvPanel({
       </button>
       <button
         type="button"
-        className={`wv-cctv-live-view-btn ${viewMode === "single" ? "is-active" : ""}`}
+        className={`si-cctv-live-view-btn ${viewMode === "single" ? "is-active" : ""}`}
         onClick={() => setViewMode("single")}
         aria-label="Single large view"
         title="Single view"
@@ -164,7 +259,7 @@ export default function LiveCctvPanel({
     <Panel panelId={panelId}>
       <PanelHeader
         title="LIVE WEBCAMS"
-        subtitle="YouTube Live"
+        subtitle="Live Feeds"
         filters={regionTabs}
         {...lockHeaderProps}
         controls={
@@ -180,20 +275,20 @@ export default function LiveCctvPanel({
         }
       />
       <PanelBody noPadding>
-        <div className="wv-cctv-live-body">
+        <div className="si-cctv-live-body">
           {filteredCameras.length === 0 ? (
-            <div className="wv-cctv-live-empty">
+            <div className="si-cctv-live-empty">
               <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden>
                 <rect x="2" y="5" width="20" height="14" rx="2" />
                 <path d="M10 9l5 3-5 3V9z" fill="currentColor" stroke="none" />
               </svg>
-              <span>No live streams for this region</span>
+              <span>{searching ? "Searching insecam.org..." : "No live streams for this region"}</span>
             </div>
           ) : viewMode === "grid" ? (
-            <div className="wv-cctv-live-grid">
+            <div className="si-cctv-live-grid">
               {displayedCameras.map((cam) => (
-                <div key={cam.id} className="wv-cctv-live-cell">
-                  <div className="wv-cctv-live-cell-feed">
+                <div key={cam.id} className="si-cctv-live-cell">
+                  <div className="si-cctv-live-cell-feed">
                     <CctvFeedView
                       camera={cam}
                       mosaic
@@ -201,15 +296,15 @@ export default function LiveCctvPanel({
                       onStreamError={markCctvBroken}
                     />
                   </div>
-                  <div className="wv-cctv-live-cell-overlay">
-                    <div className="wv-cctv-live-badge">
-                      <span className="wv-cctv-live-dot" aria-hidden />
+                  <div className="si-cctv-live-cell-overlay">
+                    <div className="si-cctv-live-badge">
+                      <span className="si-cctv-live-dot" aria-hidden />
                       LIVE
                     </div>
-                    <div className="wv-cctv-live-cell-info">
-                      <span className="wv-cctv-live-cell-city">{cam.city.toUpperCase()}</span>
+                    <div className="si-cctv-live-cell-info">
+                      <span className="si-cctv-live-cell-city">{cam.city.toUpperCase()}</span>
                       {cam.name && cam.name !== cam.city && (
-                        <span className="wv-cctv-live-cell-name">{cam.name}</span>
+                        <span className="si-cctv-live-cell-name">{cam.name}</span>
                       )}
                     </div>
                   </div>
@@ -217,8 +312,8 @@ export default function LiveCctvPanel({
               ))}
             </div>
           ) : (
-            <div className="wv-cctv-live-single">
-              <div className="wv-cctv-live-single-feed">
+            <div className="si-cctv-live-single">
+              <div className="si-cctv-live-single-feed">
                 {displayedCameras[0] ? (
                   <>
                     <CctvFeedView
@@ -227,21 +322,21 @@ export default function LiveCctvPanel({
                       onSnapshotError={markCctvBroken}
                       onStreamError={markCctvBroken}
                     />
-                    <div className="wv-cctv-live-cell-overlay">
-                      <div className="wv-cctv-live-badge">
-                        <span className="wv-cctv-live-dot" aria-hidden />
+                    <div className="si-cctv-live-cell-overlay">
+                      <div className="si-cctv-live-badge">
+                        <span className="si-cctv-live-dot" aria-hidden />
                         LIVE
                       </div>
-                      <div className="wv-cctv-live-cell-info">
-                        <span className="wv-cctv-live-cell-city">{displayedCameras[0].city.toUpperCase()}</span>
+                      <div className="si-cctv-live-cell-info">
+                        <span className="si-cctv-live-cell-city">{displayedCameras[0].city.toUpperCase()}</span>
                         {displayedCameras[0].name && displayedCameras[0].name !== displayedCameras[0].city && (
-                          <span className="wv-cctv-live-cell-name">{displayedCameras[0].name}</span>
+                          <span className="si-cctv-live-cell-name">{displayedCameras[0].name}</span>
                         )}
                       </div>
                     </div>
                   </>
                 ) : (
-                  <div className="wv-cctv-feed-error">No feed available</div>
+                  <div className="si-cctv-feed-error">No feed available</div>
                 )}
               </div>
             </div>
@@ -249,10 +344,10 @@ export default function LiveCctvPanel({
         </div>
       </PanelBody>
       <PanelFooter
-        source="YouTube Live"
+        source="YouTube Live / Insecam"
         updatedAt={Date.now()}
-        health={loading ? "loading" : "ok"}
-        message={`${filteredCameras.length} streams`}
+        health={loading || searching ? "loading" : "ok"}
+        message={`${filteredCameras.length} streams${searching ? " (searching...)" : ""}`}
       />
     </Panel>
   );

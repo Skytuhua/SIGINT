@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import type { PropagatedSat, Flight, Earthquake, CctvCamera } from "../../lib/providers/types";
 import type { NormalizedNewsItem } from "../../lib/news/types";
 
@@ -48,8 +48,8 @@ function Row({ l, v }: { l: string; v: string | number | null | undefined }) {
 }
 
 function SatPanel({ data }: { data: PropagatedSat }) {
-  const setTrackingId = useWorldViewStore((s) => s.setTrackingId);
-  const trackingId = useWorldViewStore((s) => s.selection.trackingId);
+  const setTrackingId = useSIGINTStore((s) => s.setTrackingId);
+  const trackingId = useSIGINTStore((s) => s.selection.trackingId);
   const isTracking = trackingId === data.noradId;
 
   return (
@@ -126,8 +126,8 @@ function rssiColor(rssi: number | undefined): string {
 function FlightPanel({ data }: { data: Flight }) {
   const msToKts = (ms: number | null) => (ms != null ? `${(ms * 1.944).toFixed(0)} kts` : "--");
   const mToFt = (m: number | null) => (m != null ? `${(m * 3.281).toFixed(0)} ft` : "--");
-  const setTrackedFlightId = useWorldViewStore((s) => s.setTrackedFlightId);
-  const trackedFlightId = useWorldViewStore((s) => s.selection.trackedFlightId);
+  const setTrackedFlightId = useSIGINTStore((s) => s.setTrackedFlightId);
+  const trackedFlightId = useSIGINTStore((s) => s.selection.trackedFlightId);
   const isTracking = trackedFlightId === data.icao;
   const isMil = Boolean(data.isMilitary);
 
@@ -389,7 +389,7 @@ function QuakePanel({ data }: { data: Earthquake }) {
 }
 
 function CctvPanelContent({ data }: { data: CctvCamera }) {
-  const openCctvFloating = useWorldViewStore((s) => s.openCctvFloating);
+  const openCctvFloating = useSIGINTStore((s) => s.openCctvFloating);
   return (
     <>
       <div style={{ color: "#00e5ff", fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
@@ -471,10 +471,10 @@ function ActionBtn({
 }
 
 export default function SelectionPanel() {
-  const selectedEntity = useWorldViewStore((s) => s.selection.selectedEntity);
-  const selectEntity = useWorldViewStore((s) => s.selectEntity);
-  const pinEntity = useWorldViewStore((s) => s.pinEntity);
-  const setTrackedFlightId = useWorldViewStore((s) => s.setTrackedFlightId);
+  const selectedEntity = useSIGINTStore((s) => s.selection.selectedEntity);
+  const selectEntity = useSIGINTStore((s) => s.selectEntity);
+  const pinEntity = useSIGINTStore((s) => s.pinEntity);
+  const setTrackedFlightId = useSIGINTStore((s) => s.setTrackedFlightId);
 
   if (!selectedEntity) return null;
 

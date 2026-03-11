@@ -76,8 +76,6 @@ export const NEWS_VIDEO_CHANNELS: YouTubeChannel[] = [
   // ── Canada ────────────────────────────────────────────────────────
   { channelId: "UChLtXXpo4Ge1ReTEboVvTDg", label: "Global News (CA)",      priority: 76,  region: "global", categories: ["general"] },
 
-  // ── International / Multilateral ──────────────────────────────────
-  { channelId: "UCgrNz-aDmcr2uuto8_DL2jg", label: "CGTN",                  priority: 74,  region: "asia",   categories: ["general"] },
 ];
 
 /** Live video panel definitions: main category + subcategory (source) choices */

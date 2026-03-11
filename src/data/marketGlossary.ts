@@ -1,0 +1,1181 @@
+/* ────────────────────────────────────────────────────────────────
+   Market Glossary — centralised term definitions for the entire
+   market section.  Keyed by uppercase ID for O(1) lookup from
+   the <Term> component.
+   ──────────────────────────────────────────────────────────────── */
+
+export type GlossaryCategory =
+  | "GENERAL"
+  | "EQUITIES"
+  | "RATES"
+  | "FX"
+  | "COMMODITIES"
+  | "CRYPTO"
+  | "OPTIONS"
+  | "CREDIT"
+  | "MACRO"
+  | "VOLATILITY"
+  | "BREADTH"
+  | "PORTFOLIO";
+
+export interface GlossaryEntry {
+  /** Short display form, e.g. "VIX" */
+  term: string;
+  /** Expanded name, e.g. "CBOE Volatility Index" */
+  full: string;
+  /** 1-2 sentence plain-English definition */
+  definition: string;
+  /** What it is useful for */
+  usage: string;
+  category: GlossaryCategory;
+}
+
+export const MARKET_GLOSSARY: Record<string, GlossaryEntry> = {
+  /* ── GENERAL ──────────────────────────────────────────────── */
+  MKTCAP: {
+    term: "Mkt Cap",
+    full: "Market Capitalization",
+    definition: "Total value of a company's outstanding shares (price \u00d7 shares).",
+    usage: "Gauges company size; used for index weighting.",
+    category: "GENERAL",
+  },
+  VOL: {
+    term: "Vol",
+    full: "Volume",
+    definition: "Number of shares or contracts traded in a period.",
+    usage: "High volume confirms price moves; low volume suggests weak conviction.",
+    category: "GENERAL",
+  },
+  YTD: {
+    term: "YTD",
+    full: "Year-to-Date",
+    definition: "Performance since January 1 of the current year.",
+    usage: "Quick benchmark for annual performance.",
+    category: "GENERAL",
+  },
+  "52W_HIGH": {
+    term: "52W High",
+    full: "52-Week High",
+    definition: "Highest price in the past year.",
+    usage: "Breakout signal when exceeded; acts as a resistance level.",
+    category: "GENERAL",
+  },
+  "52W_LOW": {
+    term: "52W Low",
+    full: "52-Week Low",
+    definition: "Lowest price in the past year.",
+    usage: "Support level; may indicate value or distress.",
+    category: "GENERAL",
+  },
+  LIVE: {
+    term: "LIVE",
+    full: "Live Data",
+    definition: "Real-time or near-real-time market data.",
+    usage: "Indicates the data you see is fresh.",
+    category: "GENERAL",
+  },
+  STATIC: {
+    term: "STATIC",
+    full: "Static Data",
+    definition: "Sample or placeholder data, not pulled live.",
+    usage: "Shown when live feeds are unavailable.",
+    category: "GENERAL",
+  },
+  DEGRADED: {
+    term: "DEGRADED",
+    full: "Degraded Data",
+    definition: "Fallback data served when the primary source fails.",
+    usage: "Data may be stale or approximate.",
+    category: "GENERAL",
+  },
+  PROXY: {
+    term: "PROXY",
+    full: "Proxy Data",
+    definition: "Derived or approximated data used as a stand-in.",
+    usage: "Shown when exact data is not available.",
+    category: "GENERAL",
+  },
+  PNL: {
+    term: "P&L",
+    full: "Profit & Loss",
+    definition: "Dollar gain or loss on a position or portfolio.",
+    usage: "Tracks investment performance.",
+    category: "GENERAL",
+  },
+  VOLMULT: {
+    term: "Vol\u00d7",
+    full: "Volume Multiple",
+    definition: "Current volume divided by the 3-month average.",
+    usage: "Flags unusual trading activity (e.g. 2.5\u00d7 = 2.5 times normal).",
+    category: "GENERAL",
+  },
+
+  /* ── EQUITIES ─────────────────────────────────────────────── */
+  PE: {
+    term: "P/E",
+    full: "Price-to-Earnings Ratio",
+    definition: "Stock price divided by earnings per share.",
+    usage: "Lower P/E may signal undervaluation; compare within sectors.",
+    category: "EQUITIES",
+  },
+  PS: {
+    term: "P/S",
+    full: "Price-to-Sales Ratio",
+    definition: "Stock price divided by revenue per share.",
+    usage: "Useful for unprofitable companies where P/E doesn\u2019t apply.",
+    category: "EQUITIES",
+  },
+  PB: {
+    term: "P/B",
+    full: "Price-to-Book Ratio",
+    definition: "Stock price divided by book value per share.",
+    usage: "Below 1.0 may indicate undervaluation.",
+    category: "EQUITIES",
+  },
+  EV_EBITDA: {
+    term: "EV/EBITDA",
+    full: "Enterprise Value / EBITDA",
+    definition: "Enterprise value divided by operating earnings before interest, taxes, depreciation, and amortization.",
+    usage: "Capital-structure-neutral valuation; preferred by analysts.",
+    category: "EQUITIES",
+  },
+  ROE: {
+    term: "ROE",
+    full: "Return on Equity",
+    definition: "Net income divided by shareholders\u2019 equity.",
+    usage: "Measures how efficiently a company generates profit from equity.",
+    category: "EQUITIES",
+  },
+  GM: {
+    term: "GM%",
+    full: "Gross Margin",
+    definition: "Revenue minus cost of goods sold, expressed as a percentage.",
+    usage: "Higher margins indicate pricing power.",
+    category: "EQUITIES",
+  },
+  NET_MGN: {
+    term: "Net Mgn",
+    full: "Net Margin",
+    definition: "Net income as a percentage of revenue.",
+    usage: "Bottom-line profitability measure.",
+    category: "EQUITIES",
+  },
+  BETA: {
+    term: "Beta",
+    full: "Beta (\u03b2)",
+    definition: "Sensitivity of a stock\u2019s returns relative to market moves.",
+    usage: "Beta > 1 = more volatile than the market; < 1 = less volatile.",
+    category: "EQUITIES",
+  },
+  EPS: {
+    term: "EPS",
+    full: "Earnings Per Share",
+    definition: "Net income divided by shares outstanding.",
+    usage: "Core profitability metric that drives stock valuation.",
+    category: "EQUITIES",
+  },
+  DIV_YIELD: {
+    term: "Div%",
+    full: "Dividend Yield",
+    definition: "Annual dividend per share divided by stock price.",
+    usage: "The income return from holding the stock.",
+    category: "EQUITIES",
+  },
+  BMO: {
+    term: "BMO",
+    full: "Before Market Open",
+    definition: "Earnings reported before the trading session starts.",
+    usage: "Pre-market reports can cause gap-ups or gap-downs at open.",
+    category: "EQUITIES",
+  },
+  AMC: {
+    term: "AMC",
+    full: "After Market Close",
+    definition: "Earnings reported after the trading session ends.",
+    usage: "Post-market reports affect the next day\u2019s opening price.",
+    category: "EQUITIES",
+  },
+  TNS: {
+    term: "TNS",
+    full: "Time Not Specified",
+    definition: "Earnings report time has not yet been announced.",
+    usage: "Check back closer to the earnings date.",
+    category: "EQUITIES",
+  },
+  EPS_SURPRISE: {
+    term: "EPS Surprise",
+    full: "Earnings Surprise",
+    definition: "Actual EPS compared to the analyst consensus estimate.",
+    usage: "\u201cBeat\u201d is bullish; \u201cmiss\u201d is bearish for the stock.",
+    category: "EQUITIES",
+  },
+  OW: {
+    term: "OW",
+    full: "Overweight",
+    definition: "Analyst expects the stock to outperform its benchmark.",
+    usage: "Bullish analyst rating.",
+    category: "EQUITIES",
+  },
+  EW: {
+    term: "EW",
+    full: "Equal Weight",
+    definition: "Analyst expects the stock to perform in line with its benchmark.",
+    usage: "Neutral analyst rating.",
+    category: "EQUITIES",
+  },
+  UW: {
+    term: "UW",
+    full: "Underweight",
+    definition: "Analyst expects the stock to underperform its benchmark.",
+    usage: "Bearish analyst rating.",
+    category: "EQUITIES",
+  },
+  PT: {
+    term: "PT",
+    full: "Price Target",
+    definition: "An analyst\u2019s forecast of where the stock price is heading.",
+    usage: "Helps gauge upside or downside potential.",
+    category: "EQUITIES",
+  },
+  SI_PCT: {
+    term: "SI%",
+    full: "Short Interest %",
+    definition: "Percentage of a stock\u2019s float currently sold short.",
+    usage: "High SI can lead to short squeezes; signals bearish sentiment.",
+    category: "EQUITIES",
+  },
+  DAYS_TO_COVER: {
+    term: "Days to Cover",
+    full: "Days to Cover",
+    definition: "Short interest divided by average daily volume.",
+    usage: "Higher = harder for shorts to exit; increases squeeze risk.",
+    category: "EQUITIES",
+  },
+  SPY: {
+    term: "SPY",
+    full: "SPDR S&P 500 ETF",
+    definition: "ETF tracking the S&P 500 index (cap-weighted).",
+    usage: "Most liquid equity ETF; benchmark for US stocks.",
+    category: "EQUITIES",
+  },
+  RSP: {
+    term: "RSP",
+    full: "Invesco S&P 500 Equal Weight ETF",
+    definition: "ETF giving equal weight to all S&P 500 stocks.",
+    usage: "Compare vs SPY to reveal whether rally breadth is narrow or wide.",
+    category: "EQUITIES",
+  },
+  ES: {
+    term: "ES",
+    full: "E-mini S&P 500 Futures",
+    definition: "Futures contract on the S&P 500 index.",
+    usage: "Tracks S&P 500 around the clock; key pre-market indicator.",
+    category: "EQUITIES",
+  },
+  NQ: {
+    term: "NQ",
+    full: "Nasdaq 100 Futures",
+    definition: "Futures contract on the Nasdaq 100 index.",
+    usage: "Tech-heavy index; leads sentiment in growth stocks.",
+    category: "EQUITIES",
+  },
+  RTY: {
+    term: "RTY",
+    full: "Russell 2000 Futures",
+    definition: "Futures contract on the Russell 2000 small-cap index.",
+    usage: "Measures small-cap sentiment and domestic economy health.",
+    category: "EQUITIES",
+  },
+  YM: {
+    term: "YM",
+    full: "Dow Jones Futures",
+    definition: "Futures contract on the Dow Jones Industrial Average.",
+    usage: "Blue-chip index; tracks 30 large industrial companies.",
+    category: "EQUITIES",
+  },
+  IPO: {
+    term: "IPO",
+    full: "Initial Public Offering",
+    definition: "A company\u2019s first sale of stock to the public.",
+    usage: "New investment opportunity; often volatile in early trading.",
+    category: "EQUITIES",
+  },
+  EX_DATE: {
+    term: "Ex-Date",
+    full: "Ex-Dividend Date",
+    definition: "The date after which new buyers won\u2019t receive the upcoming dividend.",
+    usage: "Buy before ex-date to qualify for the dividend payment.",
+    category: "EQUITIES",
+  },
+
+  /* ── RATES ────────────────────────────────────────────────── */
+  YIELD: {
+    term: "Yield",
+    full: "Bond Yield",
+    definition: "Annual return on a bond if held to maturity.",
+    usage: "Rising yields = falling bond prices; key macro signal.",
+    category: "RATES",
+  },
+  SPREAD: {
+    term: "Spread",
+    full: "Yield Spread",
+    definition: "Difference between two bond yields, measured in basis points.",
+    usage: "Wider spreads signal more risk; tighter = calmer markets.",
+    category: "RATES",
+  },
+  BP: {
+    term: "bp",
+    full: "Basis Point",
+    definition: "1/100th of a percentage point (0.01%).",
+    usage: "Standard unit for measuring yield and rate changes.",
+    category: "RATES",
+  },
+  INVERTED: {
+    term: "Inverted",
+    full: "Inverted Yield Curve",
+    definition: "When short-term yields exceed long-term yields.",
+    usage: "Historically predicts recessions.",
+    category: "RATES",
+  },
+  UST: {
+    term: "UST",
+    full: "US Treasury",
+    definition: "Debt securities issued by the US government.",
+    usage: "Considered risk-free; benchmark for all other interest rates.",
+    category: "RATES",
+  },
+  TBILL: {
+    term: "T-Bill",
+    full: "Treasury Bill",
+    definition: "Short-term US government debt with maturity under 1 year.",
+    usage: "Cash-equivalent safe haven.",
+    category: "RATES",
+  },
+  TIPS: {
+    term: "TIPS",
+    full: "Treasury Inflation-Protected Securities",
+    definition: "Bonds whose principal adjusts with CPI inflation.",
+    usage: "Protects purchasing power; reveals the real yield.",
+    category: "RATES",
+  },
+  BREAKEVEN: {
+    term: "Breakeven",
+    full: "Breakeven Inflation Rate",
+    definition: "Nominal yield minus TIPS yield.",
+    usage: "The market\u2019s expectation for future inflation.",
+    category: "RATES",
+  },
+  REAL_YIELD: {
+    term: "Real Yield",
+    full: "Real Yield",
+    definition: "Bond yield minus expected inflation.",
+    usage: "True purchasing-power return; negative = losing to inflation.",
+    category: "RATES",
+  },
+  SOFR: {
+    term: "SOFR",
+    full: "Secured Overnight Financing Rate",
+    definition: "Benchmark rate replacing LIBOR for dollar lending.",
+    usage: "Key reference rate for trillions in loans and derivatives.",
+    category: "RATES",
+  },
+  FOMC: {
+    term: "FOMC",
+    full: "Federal Open Market Committee",
+    definition: "The Fed\u2019s policy-setting body that meets roughly 8 times per year.",
+    usage: "Their rate decisions move all financial markets.",
+    category: "RATES",
+  },
+  FED_FUNDS: {
+    term: "Fed Funds",
+    full: "Fed Funds Rate",
+    definition: "The interest rate banks charge each other for overnight loans.",
+    usage: "The Federal Reserve\u2019s primary monetary policy tool.",
+    category: "RATES",
+  },
+  FEDWATCH: {
+    term: "FedWatch",
+    full: "CME FedWatch",
+    definition: "Implied probabilities of Fed rate changes derived from futures.",
+    usage: "Shows what the market expects the Fed to do at the next meeting.",
+    category: "RATES",
+  },
+  CUT_HIKE: {
+    term: "Cut / Hike",
+    full: "Rate Cut / Rate Hike",
+    definition: "The Fed lowering or raising the benchmark interest rate.",
+    usage: "Cuts stimulate the economy; hikes cool inflation but slow growth.",
+    category: "RATES",
+  },
+  SIGMA_CUTS: {
+    term: "\u03a3Cuts",
+    full: "Cumulative Cuts",
+    definition: "Total expected rate cuts over a forward period.",
+    usage: "Shows how much monetary easing the market has priced in.",
+    category: "RATES",
+  },
+
+  /* ── CREDIT ───────────────────────────────────────────────── */
+  OAS: {
+    term: "OAS",
+    full: "Option-Adjusted Spread",
+    definition: "Yield premium over Treasuries after adjusting for embedded options.",
+    usage: "Standard measure of corporate bond credit risk.",
+    category: "CREDIT",
+  },
+  CDX_IG: {
+    term: "CDX IG",
+    full: "CDX Investment Grade Index",
+    definition: "CDS index for investment-grade corporate bonds.",
+    usage: "Tracks credit risk for high-quality corporate borrowers.",
+    category: "CREDIT",
+  },
+  CDX_HY: {
+    term: "CDX HY",
+    full: "CDX High Yield Index",
+    definition: "CDS index for below-investment-grade (junk) bonds.",
+    usage: "Tracks credit risk for riskier corporate borrowers.",
+    category: "CREDIT",
+  },
+  EMBIG: {
+    term: "EMBIG",
+    full: "JP Morgan EMBI Global",
+    definition: "Spread index for emerging-market sovereign bonds.",
+    usage: "Measures credit risk in developing-country government debt.",
+    category: "CREDIT",
+  },
+  IG: {
+    term: "IG",
+    full: "Investment Grade",
+    definition: "Bonds rated BBB\u2212/Baa3 or higher by rating agencies.",
+    usage: "Lower risk, lower yield; considered safe for institutional investors.",
+    category: "CREDIT",
+  },
+  HY: {
+    term: "HY",
+    full: "High Yield",
+    definition: "Bonds rated below BBB\u2212 (sometimes called \u201cjunk bonds\u201d).",
+    usage: "Higher risk but higher yield; sensitive to economic downturns.",
+    category: "CREDIT",
+  },
+  CDS: {
+    term: "CDS",
+    full: "Credit Default Swap",
+    definition: "An insurance contract against a bond issuer defaulting.",
+    usage: "Rising CDS prices = rising default risk.",
+    category: "CREDIT",
+  },
+  TED_SPREAD: {
+    term: "TED Spread",
+    full: "TED Spread",
+    definition: "Difference between LIBOR and the T-Bill rate.",
+    usage: "Measures interbank lending stress.",
+    category: "CREDIT",
+  },
+  LIBOR_OIS: {
+    term: "LIBOR-OIS",
+    full: "LIBOR\u2013OIS Spread",
+    definition: "Difference between LIBOR and the overnight indexed swap rate.",
+    usage: "Indicator of banking-sector stress and counterparty risk.",
+    category: "CREDIT",
+  },
+
+  /* ── FX ───────────────────────────────────────────────────── */
+  DXY: {
+    term: "DXY",
+    full: "US Dollar Index",
+    definition: "Weighted index of the USD against 6 major currencies.",
+    usage: "Measures overall dollar strength; affects global trade.",
+    category: "FX",
+  },
+  CARRY_TRADE: {
+    term: "Carry Trade",
+    full: "Currency Carry Trade",
+    definition: "Borrowing in a low-rate currency and investing in a high-rate one.",
+    usage: "Profits from rate differentials; unwinds can be violent.",
+    category: "FX",
+  },
+  G10: {
+    term: "G10",
+    full: "Group of 10 Currencies",
+    definition: "USD, EUR, JPY, GBP, CHF, CAD, AUD, NZD, NOK, SEK.",
+    usage: "The most liquid and actively traded currencies.",
+    category: "FX",
+  },
+  EM_FX: {
+    term: "EM FX",
+    full: "Emerging Market Currencies",
+    definition: "Currencies from developing economies.",
+    usage: "Higher volatility; sensitive to USD strength and risk appetite.",
+    category: "FX",
+  },
+  CROSS_RATE: {
+    term: "Cross Rate",
+    full: "Cross Rate",
+    definition: "Exchange rate between two currencies not involving USD.",
+    usage: "Shows relative strength between non-dollar pairs.",
+    category: "FX",
+  },
+  CB_RATE: {
+    term: "CB Rate",
+    full: "Central Bank Rate",
+    definition: "A country\u2019s benchmark policy interest rate.",
+    usage: "Drives currency value and international capital flows.",
+    category: "FX",
+  },
+  CARRY_SHARPE: {
+    term: "Carry Sharpe",
+    full: "Carry Trade Sharpe Ratio",
+    definition: "Risk-adjusted return of a carry trade strategy.",
+    usage: "Higher Sharpe = better return per unit of risk taken.",
+    category: "FX",
+  },
+
+  /* ── COMMODITIES ──────────────────────────────────────────── */
+  WTI: {
+    term: "WTI",
+    full: "West Texas Intermediate",
+    definition: "US benchmark crude oil grade.",
+    usage: "Key energy price; affects inflation and energy stocks.",
+    category: "COMMODITIES",
+  },
+  BRENT: {
+    term: "Brent",
+    full: "Brent Crude",
+    definition: "International benchmark crude oil grade.",
+    usage: "Global oil pricing reference.",
+    category: "COMMODITIES",
+  },
+  NG: {
+    term: "NG",
+    full: "Natural Gas",
+    definition: "Henry Hub natural gas futures.",
+    usage: "Heating and electricity fuel; large seasonal demand swings.",
+    category: "COMMODITIES",
+  },
+  RBOB: {
+    term: "RBOB",
+    full: "RBOB Gasoline",
+    definition: "Reformulated gasoline blendstock for oxygenate blending.",
+    usage: "Tracks wholesale / retail fuel prices.",
+    category: "COMMODITIES",
+  },
+  HO: {
+    term: "HO",
+    full: "Heating Oil",
+    definition: "NYMEX heating oil futures.",
+    usage: "Tracks distillate fuel costs; seasonal demand.",
+    category: "COMMODITIES",
+  },
+  GC: {
+    term: "GC",
+    full: "Gold Futures",
+    definition: "COMEX gold futures contract.",
+    usage: "Safe-haven asset and inflation hedge.",
+    category: "COMMODITIES",
+  },
+  SI_COMMODITY: {
+    term: "SI",
+    full: "Silver Futures",
+    definition: "COMEX silver futures contract.",
+    usage: "Precious and industrial metal; more volatile than gold.",
+    category: "COMMODITIES",
+  },
+  HG: {
+    term: "HG",
+    full: "Copper Futures",
+    definition: "COMEX copper futures contract.",
+    usage: "\u201cDr. Copper\u201d \u2014 considered an economic health barometer.",
+    category: "COMMODITIES",
+  },
+  PL: {
+    term: "PL",
+    full: "Platinum Futures",
+    definition: "NYMEX platinum futures contract.",
+    usage: "Industrial + precious metal; auto-catalyst demand.",
+    category: "COMMODITIES",
+  },
+  PA: {
+    term: "PA",
+    full: "Palladium Futures",
+    definition: "NYMEX palladium futures contract.",
+    usage: "Critical for catalytic converters; supply-constrained.",
+    category: "COMMODITIES",
+  },
+  ZC: {
+    term: "ZC",
+    full: "Corn Futures",
+    definition: "CBOT corn futures (cents per bushel).",
+    usage: "Key grain; affects food and ethanol prices.",
+    category: "COMMODITIES",
+  },
+  ZW: {
+    term: "ZW",
+    full: "Wheat Futures",
+    definition: "CBOT wheat futures (cents per bushel).",
+    usage: "Staple grain; geopolitically sensitive.",
+    category: "COMMODITIES",
+  },
+  ZS: {
+    term: "ZS",
+    full: "Soybean Futures",
+    definition: "CBOT soybean futures (cents per bushel).",
+    usage: "Major crop; trade-war sensitive.",
+    category: "COMMODITIES",
+  },
+  KC: {
+    term: "KC",
+    full: "Coffee Futures",
+    definition: "ICE arabica coffee futures (cents per pound).",
+    usage: "Volatile soft commodity; weather-driven supply shocks.",
+    category: "COMMODITIES",
+  },
+  CT: {
+    term: "CT",
+    full: "Cotton Futures",
+    definition: "ICE cotton futures (cents per pound).",
+    usage: "Textile demand indicator.",
+    category: "COMMODITIES",
+  },
+  BALTIC: {
+    term: "Baltic",
+    full: "Baltic Dry Index",
+    definition: "Shipping cost index for dry bulk commodities.",
+    usage: "Leading indicator for global trade activity.",
+    category: "COMMODITIES",
+  },
+  FIVE_YR_AVG: {
+    term: "5yr Avg",
+    full: "5-Year Average",
+    definition: "Average inventory or price level over the past 5 years.",
+    usage: "Context for whether current levels are high or low.",
+    category: "COMMODITIES",
+  },
+  CENTS_BU: {
+    term: "\u00a2/bu",
+    full: "Cents per Bushel",
+    definition: "Unit of measurement for grain futures prices.",
+    usage: "Standard pricing unit for corn, wheat, and soybeans.",
+    category: "COMMODITIES",
+  },
+
+  /* ── OPTIONS ──────────────────────────────────────────────── */
+  CALL: {
+    term: "Call",
+    full: "Call Option",
+    definition: "The right (not obligation) to buy at a set price before expiry.",
+    usage: "Bullish bet; profits when the stock rises.",
+    category: "OPTIONS",
+  },
+  PUT: {
+    term: "Put",
+    full: "Put Option",
+    definition: "The right (not obligation) to sell at a set price before expiry.",
+    usage: "Bearish bet or portfolio hedge; profits when the stock falls.",
+    category: "OPTIONS",
+  },
+  STRIKE: {
+    term: "Strike",
+    full: "Strike Price",
+    definition: "The price at which the option can be exercised.",
+    usage: "Determines the breakeven point of the trade.",
+    category: "OPTIONS",
+  },
+  EXP: {
+    term: "Exp",
+    full: "Expiration Date",
+    definition: "Last day the option can be exercised.",
+    usage: "Closer expiry = faster time decay (theta).",
+    category: "OPTIONS",
+  },
+  PREMIUM: {
+    term: "Premium",
+    full: "Option Premium",
+    definition: "Price paid to buy the option contract.",
+    usage: "The cost of the bet; lost entirely if the option expires worthless.",
+    category: "OPTIONS",
+  },
+  OI: {
+    term: "OI",
+    full: "Open Interest",
+    definition: "Total number of outstanding (unsettled) option contracts.",
+    usage: "Higher OI = more liquidity at that strike price.",
+    category: "OPTIONS",
+  },
+  V_OI: {
+    term: "V/OI",
+    full: "Volume / Open Interest Ratio",
+    definition: "Today\u2019s trading volume relative to open interest.",
+    usage: "High ratio flags new, potentially unusual positioning.",
+    category: "OPTIONS",
+  },
+  IV: {
+    term: "IV",
+    full: "Implied Volatility",
+    definition: "Expected future volatility priced into the option.",
+    usage: "High IV = expensive options; often precedes a big move or event.",
+    category: "OPTIONS",
+  },
+  SWEEP: {
+    term: "Sweep",
+    full: "Sweep Order",
+    definition: "A large order split across multiple exchanges for fast execution.",
+    usage: "Signals urgency and institutional conviction.",
+    category: "OPTIONS",
+  },
+  DARK_POOL: {
+    term: "Dark Pool",
+    full: "Dark Pool Print",
+    definition: "Large block trades executed off public (lit) exchanges.",
+    usage: "Reveals institutional activity not visible on regular exchanges.",
+    category: "OPTIONS",
+  },
+  PUT_CALL: {
+    term: "P/C Ratio",
+    full: "Put/Call Ratio",
+    definition: "Total put volume divided by total call volume.",
+    usage: "High ratio = bearish sentiment; low ratio = bullish sentiment.",
+    category: "OPTIONS",
+  },
+  GREEKS: {
+    term: "Greeks",
+    full: "Option Greeks",
+    definition: "Sensitivity measures: Delta, Gamma, Theta, Vega.",
+    usage: "Quantify how option price changes with stock price, time, and volatility.",
+    category: "OPTIONS",
+  },
+
+  /* ── VOLATILITY ───────────────────────────────────────────── */
+  VIX: {
+    term: "VIX",
+    full: "CBOE Volatility Index",
+    definition: "Expected 30-day S&P 500 volatility derived from options prices.",
+    usage: "\u201cFear gauge\u201d \u2014 rises when markets panic, falls when calm.",
+    category: "VOLATILITY",
+  },
+  VVIX: {
+    term: "VVIX",
+    full: "Volatility of VIX",
+    definition: "How volatile the VIX index itself is.",
+    usage: "Extreme VVIX = uncertainty about uncertainty.",
+    category: "VOLATILITY",
+  },
+  MOVE: {
+    term: "MOVE",
+    full: "MOVE Index",
+    definition: "Expected volatility in the US Treasury bond market.",
+    usage: "The bond market\u2019s fear gauge; spikes during rate shocks.",
+    category: "VOLATILITY",
+  },
+  OVX: {
+    term: "OVX",
+    full: "CBOE Oil Volatility Index",
+    definition: "Expected 30-day crude oil volatility.",
+    usage: "Rises during supply disruptions or geopolitical events.",
+    category: "VOLATILITY",
+  },
+  GVZ: {
+    term: "GVZ",
+    full: "CBOE Gold Volatility Index",
+    definition: "Expected 30-day gold volatility.",
+    usage: "Spikes during flight-to-safety episodes.",
+    category: "VOLATILITY",
+  },
+  EVZ: {
+    term: "EVZ",
+    full: "CBOE FX Volatility Index",
+    definition: "Expected euro/dollar exchange rate volatility.",
+    usage: "Rises during currency crises or central bank surprises.",
+    category: "VOLATILITY",
+  },
+  RISK_ON: {
+    term: "Risk-On",
+    full: "Risk-On Regime",
+    definition: "Market environment favoring equities and risky assets (VIX \u2264 20).",
+    usage: "Suggests confidence; stocks and credit tend to rise.",
+    category: "VOLATILITY",
+  },
+  RISK_OFF: {
+    term: "Risk-Off",
+    full: "Risk-Off Regime",
+    definition: "Market environment favoring safe havens (VIX > 20).",
+    usage: "Suggests fear; bonds, gold, USD, and JPY tend to rise.",
+    category: "VOLATILITY",
+  },
+
+  /* ── MACRO ────────────────────────────────────────────────── */
+  HAWKISH: {
+    term: "Hawkish",
+    full: "Hawkish Stance",
+    definition: "Central bank leaning toward tighter policy or rate hikes.",
+    usage: "Strengthens the currency; pressures stocks and bonds.",
+    category: "MACRO",
+  },
+  DOVISH: {
+    term: "Dovish",
+    full: "Dovish Stance",
+    definition: "Central bank leaning toward easier policy or rate cuts.",
+    usage: "Weakens the currency; supports stocks and bonds.",
+    category: "MACRO",
+  },
+  CONSENSUS: {
+    term: "Consensus",
+    full: "Consensus Estimate",
+    definition: "Average forecast by economists for an economic data release.",
+    usage: "Markets react to deviation from consensus, not the absolute level.",
+    category: "MACRO",
+  },
+  SECTOR_ROTATION: {
+    term: "Rotation",
+    full: "Sector Rotation",
+    definition: "Money flowing from one market sector into another.",
+    usage: "Shows leadership shifts and where the economy is in its cycle.",
+    category: "MACRO",
+  },
+  MOMENTUM: {
+    term: "Momentum",
+    full: "Momentum Factor",
+    definition: "Stocks that have recently risen tend to keep rising short-term.",
+    usage: "Quantitative strategy factor; works well in trending markets.",
+    category: "MACRO",
+  },
+  SMART_BETA: {
+    term: "Smart Beta",
+    full: "Smart Beta / Factor Investing",
+    definition: "Rules-based strategies that go beyond simple market-cap weighting.",
+    usage: "Factors like value, quality, and low-volatility aim for better risk-adjusted returns.",
+    category: "MACRO",
+  },
+  LEADING: {
+    term: "Leading",
+    full: "Leading Sector",
+    definition: "A sector currently outperforming the broader market.",
+    usage: "Money is flowing in; may indicate economic cycle positioning.",
+    category: "MACRO",
+  },
+  LAGGING: {
+    term: "Lagging",
+    full: "Lagging Sector",
+    definition: "A sector currently underperforming the broader market.",
+    usage: "Money is flowing out; may rotate back later in the cycle.",
+    category: "MACRO",
+  },
+
+  /* ── CRYPTO ───────────────────────────────────────────────── */
+  DOMINANCE: {
+    term: "Dom%",
+    full: "Market Cap Dominance",
+    definition: "A coin\u2019s share of total crypto market capitalization.",
+    usage: "BTC dominance rising = risk-off sentiment within crypto.",
+    category: "CRYPTO",
+  },
+  FDV: {
+    term: "FDV",
+    full: "Fully Diluted Valuation",
+    definition: "Market cap if all possible tokens were in circulation.",
+    usage: "Shows potential dilution; compare to current market cap.",
+    category: "CRYPTO",
+  },
+  ATH: {
+    term: "ATH",
+    full: "All-Time High",
+    definition: "The highest price a coin has ever reached.",
+    usage: "% from ATH shows how far a coin has fallen from its peak.",
+    category: "CRYPTO",
+  },
+  TVL: {
+    term: "TVL",
+    full: "Total Value Locked",
+    definition: "Total assets deposited in DeFi protocols.",
+    usage: "Measures DeFi adoption and protocol trust.",
+    category: "CRYPTO",
+  },
+  DEFI: {
+    term: "DeFi",
+    full: "Decentralized Finance",
+    definition: "Financial services built on blockchain without traditional banks.",
+    usage: "Lending, trading, and yield farming without intermediaries.",
+    category: "CRYPTO",
+  },
+  FUNDING_RATE: {
+    term: "Funding",
+    full: "Funding Rate",
+    definition: "Periodic fee exchanged between long and short futures traders.",
+    usage: "Positive rate = longs pay shorts (indicates bullish crowding).",
+    category: "CRYPTO",
+  },
+  HASH_RATE: {
+    term: "Hash Rate",
+    full: "Network Hash Rate",
+    definition: "Total computational power securing a blockchain network.",
+    usage: "Higher = more secure; proxy for miner confidence.",
+    category: "CRYPTO",
+  },
+  ONCHAIN: {
+    term: "On-Chain",
+    full: "On-Chain Metrics",
+    definition: "Data read directly from the blockchain ledger.",
+    usage: "Track whale movements, exchange flows, and active addresses.",
+    category: "CRYPTO",
+  },
+
+  /* ── BREADTH ──────────────────────────────────────────────── */
+  AD_RATIO: {
+    term: "A/D Ratio",
+    full: "Advance/Decline Ratio",
+    definition: "Number of advancing stocks divided by declining stocks.",
+    usage: "Above 1 = broad market strength; below 1 = broad weakness.",
+    category: "BREADTH",
+  },
+  "200MA": {
+    term: "% > 200-MA",
+    full: "Percent Above 200-Day Moving Average",
+    definition: "Share of stocks trading above their 200-day average price.",
+    usage: "Shows long-term market health and participation.",
+    category: "BREADTH",
+  },
+  MCCLELLAN: {
+    term: "McClellan Osc",
+    full: "McClellan Oscillator",
+    definition: "Difference between fast and slow breadth exponential moving averages.",
+    usage: "Positive = broadening rally; negative = narrowing participation.",
+    category: "BREADTH",
+  },
+  TRIN: {
+    term: "TRIN",
+    full: "Arms Index (TRIN)",
+    definition: "(Advancing issues \u00f7 Declining) \u00f7 (Advancing volume \u00f7 Declining volume).",
+    usage: "Below 1 = bullish volume flow; above 1 = bearish volume flow.",
+    category: "BREADTH",
+  },
+  BREADTH_SPREAD: {
+    term: "Breadth Spread",
+    full: "Breadth Spread",
+    definition: "Number of advancing issues minus declining issues.",
+    usage: "Wide positive = healthy rally; negative = broad-based selling.",
+    category: "BREADTH",
+  },
+  NEW_HIGHS: {
+    term: "New Highs",
+    full: "New 52-Week Highs",
+    definition: "Stocks making a new 52-week high today.",
+    usage: "Rising count confirms uptrend strength.",
+    category: "BREADTH",
+  },
+  NEW_LOWS: {
+    term: "New Lows",
+    full: "New 52-Week Lows",
+    definition: "Stocks making a new 52-week low today.",
+    usage: "Rising count signals deteriorating market conditions.",
+    category: "BREADTH",
+  },
+
+  /* ── PORTFOLIO ────────────────────────────────────────────── */
+  WT_PCT: {
+    term: "Wt%",
+    full: "Portfolio Weight",
+    definition: "Position value as a percentage of total portfolio value.",
+    usage: "Shows concentration risk in any single holding.",
+    category: "PORTFOLIO",
+  },
+  AVG_COST: {
+    term: "Avg Cost",
+    full: "Average Cost Basis",
+    definition: "Average purchase price per share across all buys.",
+    usage: "Basis for calculating gains and losses.",
+    category: "PORTFOLIO",
+  },
+  EXPOSURE: {
+    term: "Exposure",
+    full: "Sector Exposure",
+    definition: "Percentage of portfolio allocated to each sector.",
+    usage: "Diversification check; avoid over-concentration.",
+    category: "PORTFOLIO",
+  },
+
+  /* ── Sector ETFs ──────────────────────────────────────────── */
+  XLK: { term: "XLK", full: "Technology Select Sector SPDR", definition: "ETF tracking S&P 500 technology stocks.", usage: "Tracks tech sector performance.", category: "EQUITIES" },
+  XLC: { term: "XLC", full: "Communication Services Select Sector SPDR", definition: "ETF tracking S&P 500 communication services stocks.", usage: "Includes META, GOOGL, NFLX, and telecom.", category: "EQUITIES" },
+  XLF: { term: "XLF", full: "Financial Select Sector SPDR", definition: "ETF tracking S&P 500 financial stocks.", usage: "Banks, insurance, capital markets.", category: "EQUITIES" },
+  XLI: { term: "XLI", full: "Industrial Select Sector SPDR", definition: "ETF tracking S&P 500 industrial stocks.", usage: "Aerospace, defense, machinery, transport.", category: "EQUITIES" },
+  XLV: { term: "XLV", full: "Health Care Select Sector SPDR", definition: "ETF tracking S&P 500 healthcare stocks.", usage: "Pharma, biotech, managed care.", category: "EQUITIES" },
+  XLY: { term: "XLY", full: "Consumer Discretionary Select Sector SPDR", definition: "ETF tracking S&P 500 consumer discretionary stocks.", usage: "Retail, autos, leisure; cyclical spending.", category: "EQUITIES" },
+  XLP: { term: "XLP", full: "Consumer Staples Select Sector SPDR", definition: "ETF tracking S&P 500 consumer staples stocks.", usage: "Food, beverage, household products; defensive.", category: "EQUITIES" },
+  XLB: { term: "XLB", full: "Materials Select Sector SPDR", definition: "ETF tracking S&P 500 materials stocks.", usage: "Chemicals, metals, paper; commodity-sensitive.", category: "EQUITIES" },
+  XLRE: { term: "XLRE", full: "Real Estate Select Sector SPDR", definition: "ETF tracking S&P 500 real estate stocks.", usage: "REITs; rate-sensitive.", category: "EQUITIES" },
+  XLU: { term: "XLU", full: "Utilities Select Sector SPDR", definition: "ETF tracking S&P 500 utility stocks.", usage: "Defensive; high dividend yield; rate-sensitive.", category: "EQUITIES" },
+  XLE: { term: "XLE", full: "Energy Select Sector SPDR", definition: "ETF tracking S&P 500 energy stocks.", usage: "Oil & gas producers and services.", category: "EQUITIES" },
+
+  /* ── Correlation Assets ───────────────────────────────────── */
+  TLT: { term: "TLT", full: "iShares 20+ Year Treasury Bond ETF", definition: "ETF tracking long-duration US Treasury bonds.", usage: "Flight-to-safety asset; inversely correlated with equities.", category: "RATES" },
+  GLD: { term: "GLD", full: "SPDR Gold Shares ETF", definition: "ETF tracking the spot price of gold.", usage: "Gold exposure without holding physical metal.", category: "COMMODITIES" },
+  USO: { term: "USO", full: "United States Oil Fund", definition: "ETF tracking WTI crude oil futures.", usage: "Quick oil price exposure for equity accounts.", category: "COMMODITIES" },
+  UUP: { term: "UUP", full: "Invesco DB US Dollar Index Bullish Fund", definition: "ETF tracking the US Dollar Index.", usage: "Dollar strength exposure.", category: "FX" },
+  EFA: { term: "EFA", full: "iShares MSCI EAFE ETF", definition: "ETF tracking developed markets outside US and Canada.", usage: "International diversification; Europe, Japan, Australia.", category: "EQUITIES" },
+  EEM: { term: "EEM", full: "iShares MSCI Emerging Markets ETF", definition: "ETF tracking emerging market equities.", usage: "Exposure to China, India, Brazil, and other developing economies.", category: "EQUITIES" },
+
+  /* ── Scenarios ────────────────────────────────────────────── */
+  BASELINE: { term: "Baseline", full: "Baseline Scenario", definition: "Normal market conditions with no major shocks.", usage: "Default view showing standard market relationships.", category: "MACRO" },
+  RISK_OFF_SCENARIO: { term: "Risk-Off", full: "Risk-Off Scenario", definition: "Flight to safety: bonds, gold, JPY up; equities and EM down.", usage: "Stress-tests how assets behave during a sell-off.", category: "MACRO" },
+  RATES_UP: { term: "Rates Up", full: "Rates Up Scenario", definition: "Yield shock: USD up, tech down, financials mixed.", usage: "Stress-tests portfolios against a sudden rise in interest rates.", category: "MACRO" },
+  OIL_SHOCK: { term: "Oil Shock", full: "Oil Shock Scenario", definition: "Energy supply disruption: crude up, airlines down, inflation risk.", usage: "Stress-tests how a commodity shock propagates through markets.", category: "MACRO" },
+
+  /* ── Correlation ──────────────────────────────────────────── */
+  CORRELATION: { term: "Corr", full: "Pearson Correlation", definition: "Measure of linear relationship between two assets (\u22121 to +1).", usage: "+1 = move together; \u22121 = move opposite; 0 = unrelated.", category: "GENERAL" },
+
+  /* ── Order Book / Trading ─────────────────────────────────── */
+  BID: {
+    term: "Bid",
+    full: "Bid Price",
+    definition: "The highest price a buyer is willing to pay for an asset.",
+    usage: "Sell orders fill at the bid; higher bids indicate strong demand.",
+    category: "GENERAL",
+  },
+  ASK: {
+    term: "Ask",
+    full: "Ask Price",
+    definition: "The lowest price a seller is willing to accept for an asset.",
+    usage: "Buy orders fill at the ask; the gap between bid and ask is the spread.",
+    category: "GENERAL",
+  },
+  ORDER_BOOK: {
+    term: "Order Book",
+    full: "Order Book / Depth of Market",
+    definition: "A real-time list of all outstanding buy and sell orders at each price level.",
+    usage: "Shows supply and demand; thick walls indicate strong support or resistance.",
+    category: "GENERAL",
+  },
+  DEPTH: {
+    term: "Depth",
+    full: "Market Depth",
+    definition: "The volume of orders at each price level in the order book.",
+    usage: "Deeper markets absorb large orders with less price impact.",
+    category: "GENERAL",
+  },
+  MARKET_ORDER: {
+    term: "Market",
+    full: "Market Order",
+    definition: "An order to buy or sell immediately at the best available price.",
+    usage: "Guaranteed execution but not guaranteed price; best for liquid markets.",
+    category: "GENERAL",
+  },
+  LIMIT_ORDER: {
+    term: "Limit",
+    full: "Limit Order",
+    definition: "An order to buy or sell only at a specified price or better.",
+    usage: "Controls the price you pay but may not execute if the market moves away.",
+    category: "GENERAL",
+  },
+  STOP_ORDER: {
+    term: "Stop",
+    full: "Stop Order",
+    definition: "An order that becomes a market order once a trigger price is hit.",
+    usage: "Used to limit losses (stop-loss) or enter on breakouts.",
+    category: "GENERAL",
+  },
+  STOP_LIMIT_ORDER: {
+    term: "Stop-Limit",
+    full: "Stop-Limit Order",
+    definition: "Combines a stop trigger with a limit price for execution.",
+    usage: "More control than a plain stop but may not fill if the price gaps through.",
+    category: "GENERAL",
+  },
+  SEC_FORM4: {
+    term: "Form 4",
+    full: "SEC Form 4",
+    definition: "Filing required when company insiders (officers, directors, >10% holders) buy or sell shares.",
+    usage: "Tracks insider conviction; cluster buying is often a bullish signal.",
+    category: "EQUITIES",
+  },
+  INSIDER: {
+    term: "Insider",
+    full: "Insider Transaction",
+    definition: "Stock purchase or sale by a company officer, director, or major shareholder.",
+    usage: "Insider buys can signal management confidence; sells are more ambiguous.",
+    category: "EQUITIES",
+  },
+
+  /* ── Economic Indicators ───────────────────────────────────── */
+  NFP: {
+    term: "NFP",
+    full: "Non-Farm Payrolls",
+    definition: "Monthly count of jobs added or lost in the US economy, excluding farms.",
+    usage: "The most-watched employment report; big misses move all markets.",
+    category: "MACRO",
+  },
+  CPI: {
+    term: "CPI",
+    full: "Consumer Price Index",
+    definition: "Measures the average change in prices paid by consumers for goods and services.",
+    usage: "Key inflation gauge; higher CPI → Fed more likely to raise rates.",
+    category: "MACRO",
+  },
+  PCE: {
+    term: "PCE",
+    full: "Personal Consumption Expenditures",
+    definition: "The Fed's preferred measure of consumer inflation.",
+    usage: "Core PCE is the inflation metric the Fed targets at 2%.",
+    category: "MACRO",
+  },
+  PMI: {
+    term: "PMI",
+    full: "Purchasing Managers' Index",
+    definition: "Survey-based indicator of manufacturing or services sector health. Above 50 = expansion.",
+    usage: "Leading indicator; a drop below 50 signals contraction.",
+    category: "MACRO",
+  },
+  JOLTS: {
+    term: "JOLTS",
+    full: "Job Openings and Labor Turnover Survey",
+    definition: "Monthly report on job openings, hires, and separations in the US.",
+    usage: "High openings = tight labor market; closely watched by the Fed.",
+    category: "MACRO",
+  },
+  UNEMPLOYMENT: {
+    term: "Unemp%",
+    full: "Unemployment Rate",
+    definition: "Percentage of the labor force that is jobless and actively seeking work.",
+    usage: "Rising unemployment can trigger Fed rate cuts; falling unemployment may trigger hikes.",
+    category: "MACRO",
+  },
+  BLOTTER: {
+    term: "Blotter",
+    full: "Order Blotter",
+    definition: "A log of all orders placed during a trading session.",
+    usage: "Tracks execution history, fills, and order status in real time.",
+    category: "GENERAL",
+  },
+  HEATMAP: {
+    term: "Heatmap",
+    full: "Market Heatmap",
+    definition: "Visual representation of stock performance using color-coded tiles sized by market cap.",
+    usage: "Quickly spot which sectors and stocks are up (green) or down (red).",
+    category: "GENERAL",
+  },
+};
+
+/** Sorted list of all categories for the glossary sidebar */
+export const GLOSSARY_CATEGORIES: GlossaryCategory[] = [
+  "GENERAL",
+  "EQUITIES",
+  "RATES",
+  "CREDIT",
+  "FX",
+  "COMMODITIES",
+  "OPTIONS",
+  "VOLATILITY",
+  "MACRO",
+  "CRYPTO",
+  "BREADTH",
+  "PORTFOLIO",
+];
+
+/** Get a glossary entry by ID (case-insensitive) */
+export function getGlossaryEntry(id: string): GlossaryEntry | undefined {
+  return MARKET_GLOSSARY[id] ?? MARKET_GLOSSARY[id.toUpperCase()];
+}
+
+/** Get all entries for a given category */
+export function getEntriesByCategory(cat: GlossaryCategory): GlossaryEntry[] {
+  return Object.values(MARKET_GLOSSARY).filter((e) => e.category === cat);
+}

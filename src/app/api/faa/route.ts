@@ -105,7 +105,7 @@ export async function GET() {
   try {
     const res = await fetch(FAA_URL, {
       headers: {
-        "User-Agent": "WorldView/0.1 (educational/research use)",
+        "User-Agent": "SIGINT/0.1 (educational/research use)",
         Accept: "application/json",
       },
       signal: AbortSignal.timeout(15_000),

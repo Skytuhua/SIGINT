@@ -14,7 +14,7 @@ import type {
 import { CATEGORY_COLORS } from "../../config/newsConfig";
 import { normalizeCountryCode } from "../../lib/news/countryCode";
 import type { GeoMarker } from "../../lib/news/types";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import CountryDetailModal from "./CountryDetailModal";
 import MapDotDetailPanel, { type DotDetailData } from "./MapDotDetailPanel";
 import HotspotDetailCard, {
@@ -250,18 +250,18 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
   const mountedLayersRef = useRef<Set<string>>(new Set());
   const layerDataRef = useRef<Map<string, LayerFeatureCollection>>(new Map());
 
-  const markers = useWorldViewStore((s) => s.news.markers);
-  const feedItems = useWorldViewStore((s) => s.news.feedItems);
-  const selectedCountry = useWorldViewStore((s) => s.news.selectedCountry);
-  const layerToggles = useWorldViewStore((s) => s.news.layerToggles);
-  const layerHealth = useWorldViewStore((s) => s.news.layerHealth);
-  const setSelectedCountry = useWorldViewStore((s) => s.setSelectedCountry);
-  const setNewsLayerToggle = useWorldViewStore((s) => s.setNewsLayerToggle);
-  const setNewsLayerHealth = useWorldViewStore((s) => s.setNewsLayerHealth);
-  const setNewsCameraBounds = useWorldViewStore((s) => s.setNewsCameraBounds);
-  const conflictFilters = useWorldViewStore((s) => s.news.conflictFilters);
-  const setConflictFilters = useWorldViewStore((s) => s.setConflictFilters);
-  const cameraBounds = useWorldViewStore((s) => s.news.cameraBounds);
+  const markers = useSIGINTStore((s) => s.news.markers);
+  const feedItems = useSIGINTStore((s) => s.news.feedItems);
+  const selectedCountry = useSIGINTStore((s) => s.news.selectedCountry);
+  const layerToggles = useSIGINTStore((s) => s.news.layerToggles);
+  const layerHealth = useSIGINTStore((s) => s.news.layerHealth);
+  const setSelectedCountry = useSIGINTStore((s) => s.setSelectedCountry);
+  const setNewsLayerToggle = useSIGINTStore((s) => s.setNewsLayerToggle);
+  const setNewsLayerHealth = useSIGINTStore((s) => s.setNewsLayerHealth);
+  const setNewsCameraBounds = useSIGINTStore((s) => s.setNewsCameraBounds);
+  const conflictFilters = useSIGINTStore((s) => s.news.conflictFilters);
+  const setConflictFilters = useSIGINTStore((s) => s.setConflictFilters);
+  const cameraBounds = useSIGINTStore((s) => s.news.cameraBounds);
   const setSelectedCountryRef = useRef(setSelectedCountry);
   const selectedCountryRef = useRef<string | null>(selectedCountry);
 
@@ -442,7 +442,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
         fields: [
           ...fields,
           { label: "LOC", value: `${lat.toFixed(3)}, ${lon.toFixed(3)}` },
-          { label: "SOURCE", value: "WorldView Military Bases snapshot" },
+          { label: "SOURCE", value: "SIGINT Military Bases snapshot" },
         ],
         lat,
         lon,
@@ -1553,25 +1553,25 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
       mapRef.current = map;
       registerLeafletForMap(map, L);
       map.attributionControl.setPrefix("");
-      if (!map.getPane("wv-country-fill")) {
-        const pane = map.createPane("wv-country-fill");
+      if (!map.getPane("si-country-fill")) {
+        const pane = map.createPane("si-country-fill");
         pane.style.zIndex = "420";
       }
-      if (!map.getPane("wv-country-labels")) {
-        const pane = map.createPane("wv-country-labels");
+      if (!map.getPane("si-country-labels")) {
+        const pane = map.createPane("si-country-labels");
         pane.style.zIndex = "1000";
       }
-      if (!map.getPane("wv-news-layers")) {
-        const pane = map.createPane("wv-news-layers");
+      if (!map.getPane("si-news-layers")) {
+        const pane = map.createPane("si-news-layers");
         // Keep news overlays above country labels so they are never obscured.
         pane.style.zIndex = "1100";
       }
-      if (!map.getPane("wv-popup-pane")) {
-        const pane = map.createPane("wv-popup-pane");
+      if (!map.getPane("si-popup-pane")) {
+        const pane = map.createPane("si-popup-pane");
         pane.style.zIndex = "2000";
       }
-      if (!map.getPane("wv-tooltip-pane")) {
-        const pane = map.createPane("wv-tooltip-pane");
+      if (!map.getPane("si-tooltip-pane")) {
+        const pane = map.createPane("si-tooltip-pane");
         pane.style.zIndex = "2000";
       }
 
@@ -1627,7 +1627,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
           style: () => COUNTRY_BASE_STYLE,
           interactive: true,
           bubblingMouseEvents: false,
-          pane: "wv-country-fill",
+          pane: "si-country-fill",
           onEachFeature: (feature, layer) => {
             const props = (feature as { properties?: CountryFeatureProps } | undefined)?.properties;
             if (!props) return;
@@ -1839,14 +1839,14 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
             if (!icon) {
               icon = L.divIcon({
                 className: "",
-                html: `<div class="wv-news-map-country-label"><span>${entry.name}</span></div>`,
+                html: `<div class="si-news-map-country-label"><span>${entry.name}</span></div>`,
                 iconSize: undefined,
                 iconAnchor: [0, 0],
               });
               labelIconCache.set(entry.name, icon);
             }
             const marker = L.marker([entry.lat, entry.lon], {
-              pane: "wv-country-labels",
+              pane: "si-country-labels",
               icon,
               interactive: false,
               keyboard: false,
@@ -1938,27 +1938,6 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
       }
 
       const resizeObserver = new ResizeObserver(() => {
-        // #region agent log
-        fetch("http://127.0.0.1:7928/ingest/ab57ee12-70c0-4122-8628-c84847906424", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Debug-Session-Id": "163a8e",
-          },
-          body: JSON.stringify({
-            sessionId: "163a8e",
-            runId: "pre-fix",
-            hypothesisId: "H2",
-            location: "src/components/news/NewsWorldMap.tsx:1754",
-            message: "NewsWorldMap resize observer fired",
-            data: {
-              hasMap: Boolean(mapRef.current),
-            },
-            timestamp: Date.now(),
-          }),
-        }).catch(() => {});
-        // #endregion
-
         map.invalidateSize({ pan: false, animate: false });
         syncMinZoomToViewport();
       });
@@ -2067,14 +2046,14 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
   const mapErrorBody = "Unable to load OpenStreetMap/CARTO tiles right now. Check network connectivity and retry.";
 
   return (
-    <div ref={mapContainerRef} className="wv-news-map-container">
-      <div className="wv-news-map-layout">
-        <aside className="wv-news-layers-panel" aria-label="News map layers">
-          <div className="wv-news-layers-title">LAYERS</div>
-          <div className="wv-news-layers-scroll">
+    <div ref={mapContainerRef} className="si-news-map-container">
+      <div className="si-news-map-layout">
+        <aside className="si-news-layers-panel" aria-label="News map layers">
+          <div className="si-news-layers-title">LAYERS</div>
+          <div className="si-news-layers-scroll">
             {groupedLayers.map(([category, layers]) => (
-              <div key={category} className="wv-news-layers-group">
-                <div className="wv-news-layers-group-label">{category.toUpperCase()}</div>
+              <div key={category} className="si-news-layers-group">
+                <div className="si-news-layers-group-label">{category.toUpperCase()}</div>
                 {layers.map((layer) => {
                   const enabled = layerToggles[layer.id] ?? layer.defaultEnabled;
                   const health = layerHealth[layer.id];
@@ -2086,7 +2065,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
                   const showArmedSignalsToggle = isArmed && enabled;
                   const showConflictControls = isConflict && enabled;
                   return (
-                    <div key={layer.id} className="wv-news-layer-row" data-cat={layer.category}>
+                    <div key={layer.id} className="si-news-layer-row" data-cat={layer.category}>
                       <Toggle
                         checked={enabled}
                         onChange={(checked) => setNewsLayerToggle(layer.id, checked)}
@@ -2095,7 +2074,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
                       {showTimeWindow ? (
                         isIntel ? (
                           <select
-                            className="wv-hotspot-layer-window"
+                            className="si-hotspot-layer-window"
                             value={intelTimeWindow}
                             onChange={(event) => {
                               const next = event.target.value as HotspotTimeWindow;
@@ -2116,7 +2095,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
                           </select>
                         ) : isArmed ? (
                           <select
-                            className="wv-hotspot-layer-window"
+                            className="si-hotspot-layer-window"
                             value={armedTimeWindow}
                             onChange={(event) => {
                               const next = event.target.value as HotspotTimeWindow;
@@ -2138,7 +2117,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
                         ) : isConflict ? (
                           <>
                             <select
-                              className="wv-hotspot-layer-window"
+                              className="si-hotspot-layer-window"
                               value={conflictTimeWindow}
                               onChange={(event) => {
                                 const next = event.target.value as typeof conflictTimeWindow;
@@ -2159,7 +2138,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
                             </select>
                             <button
                               type="button"
-                              className="wv-hotspot-layer-window"
+                              className="si-hotspot-layer-window"
                               onClick={() => {
                                 const next = conflictMode === "strict" ? "broad" : "strict";
                                 setConflictMode(next);
@@ -2178,7 +2157,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
                       {showArmedSignalsToggle ? (
                         <button
                           type="button"
-                          className="wv-hotspot-layer-window"
+                          className="si-hotspot-layer-window"
                           onClick={() => {
                             const next = !armedIncludeBroader;
                             setArmedIncludeBroader(next);
@@ -2197,17 +2176,17 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
                           {armedIncludeBroader ? "Signals +" : "Strict"}
                         </button>
                       ) : null}
-                      <span className={`wv-panel-health is-${toLayerHealthUi(status)}`} title={status} />
+                      <span className={`si-panel-health is-${toLayerHealthUi(status)}`} title={status} />
                     </div>
                   );
                 })}
               </div>
             ))}
             {layerToggles["conflict-zones"] && conflictFilters ? (
-              <div className="wv-news-layers-group">
-                <div className="wv-news-layers-group-label">CONFLICT ZONE FILTERS</div>
-                <div className="wv-news-layer-row">
-                  <label className="wv-news-nuclear-viewport">
+              <div className="si-news-layers-group">
+                <div className="si-news-layers-group-label">CONFLICT ZONE FILTERS</div>
+                <div className="si-news-layer-row">
+                  <label className="si-news-nuclear-viewport">
                     <input
                       type="checkbox"
                       checked={Boolean(conflictFilters.inViewportOnly)}
@@ -2223,17 +2202,17 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
           </div>
         </aside>
 
-        <div className="wv-news-map-canvas-wrap">
-          <div ref={mapCanvasRef} className="wv-news-map-canvas" />
+        <div className="si-news-map-canvas-wrap">
+          <div ref={mapCanvasRef} className="si-news-map-canvas" />
 
           {showMapError ? (
-            <div className="wv-news-map-overlay-error" role="status" aria-live="polite">
-              <strong className="wv-news-map-overlay-error-title">{mapErrorTitle}</strong>
-              <span className="wv-news-map-overlay-error-text">{mapErrorBody}</span>
+            <div className="si-news-map-overlay-error" role="status" aria-live="polite">
+              <strong className="si-news-map-overlay-error-title">{mapErrorTitle}</strong>
+              <span className="si-news-map-overlay-error-text">{mapErrorBody}</span>
             </div>
           ) : null}
 
-          <div className="wv-news-map-zoom">
+          <div className="si-news-map-zoom">
             <button type="button" onClick={handleZoomIn} aria-label="Zoom in">
               +
             </button>

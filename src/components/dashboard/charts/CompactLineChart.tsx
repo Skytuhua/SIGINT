@@ -36,7 +36,7 @@ export default function CompactLineChart({
   const stepX = maxLen <= 1 ? width : width / (maxLen - 1);
 
   return (
-    <div className="wv-compact-line-chart">
+    <div className="si-compact-line-chart">
       <svg
         width={responsive ? "100%" : width}
         height={height}
@@ -45,8 +45,8 @@ export default function CompactLineChart({
         role="img"
         aria-label="trend chart"
       >
-        <line x1={0} y1={height - 1} x2={width} y2={height - 1} className="wv-chart-axis" />
-        <line x1={0} y1={0} x2={0} y2={height} className="wv-chart-axis" />
+        <line x1={0} y1={height - 1} x2={width} y2={height - 1} className="si-chart-axis" />
+        <line x1={0} y1={0} x2={0} y2={height} className="si-chart-axis" />
         {series.map((item) => {
           const points = item.values
             .map((value, index) => {
@@ -59,7 +59,7 @@ export default function CompactLineChart({
           return <polyline key={item.label} points={points} fill="none" stroke={item.color} strokeWidth="1.4" />;
         })}
       </svg>
-      <div className="wv-chart-legend">
+      <div className="si-chart-legend">
         {series.map((item) => (
           <span key={item.label} style={{ color: item.color }}>
             {item.label}

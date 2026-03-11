@@ -1,7 +1,7 @@
 "use client";
 
 import type { HTMLAttributes } from "react";
-import { useWorldViewStore } from "../../../store";
+import { useSIGINTStore } from "../../../store";
 
 interface PanelProps extends HTMLAttributes<HTMLElement> {
   panelId?: string;
@@ -18,13 +18,13 @@ export default function Panel({
   onPointerDown,
   ...rest
 }: PanelProps) {
-  const focused = useWorldViewStore((s) =>
+  const focused = useSIGINTStore((s) =>
     workspace === "news" ? s.news.panelFocusId === panelId : s.dashboard.panelFocusId === panelId
   );
-  const setPanelFocus = useWorldViewStore((s) =>
+  const setPanelFocus = useSIGINTStore((s) =>
     workspace === "news" ? s.setNewsPanelFocus : s.setPanelFocus
   );
-  const bringPanelToFront = useWorldViewStore((s) =>
+  const bringPanelToFront = useSIGINTStore((s) =>
     workspace === "news" ? s.bringNewsPanelToFront : s.bringPanelToFront
   );
 
@@ -37,7 +37,7 @@ export default function Panel({
 
   return (
     <section
-      className={`wv-panel ${focused ? "is-focused" : ""} ${className}`.trim()}
+      className={`si-panel ${focused ? "is-focused" : ""} ${className}`.trim()}
       data-panel-focusable="true"
       data-panel-id={panelId}
       tabIndex={0}

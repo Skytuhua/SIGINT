@@ -260,7 +260,7 @@ export async function fetchUsgsSignals(
     request: async () => {
       const json = await fetchJsonOrThrow<{ features?: Array<{ id: string; geometry: { coordinates: [number, number, number] }; properties: { mag?: number; time?: number; place?: string; url?: string } }> }>(
         url.toString(),
-        { headers: { "User-Agent": "WorldView/0.1 (intel-hotspots)" } },
+        { headers: { "User-Agent": "SIGINT/0.1 (intel-hotspots)" } },
         USGS_POLICY.timeoutMs
       );
       return json;
@@ -297,7 +297,7 @@ export async function fetchEonetSignals(
     request: async () => {
       const json = await fetchJsonOrThrow<{ events?: Array<{ id: string; title?: string; geometry?: Array<{ date?: string; coordinates?: [number, number] }>; categories?: Array<{ title?: string }>; sources?: Array<{ url?: string }> }> }>(
         url,
-        { headers: { "User-Agent": "WorldView/0.1 (intel-hotspots)" } },
+        { headers: { "User-Agent": "SIGINT/0.1 (intel-hotspots)" } },
         EONET_POLICY.timeoutMs
       );
       return json;
@@ -347,7 +347,7 @@ export async function fetchNwsSignals(): Promise<{ signals: HotspotSignal[]; cac
     request: async () => {
       const json = await fetchJsonOrThrow<{ features?: Array<{ id?: string; geometry?: { type: string; coordinates: unknown }; properties?: { event?: string; severity?: string; headline?: string; sent?: string; webUrl?: string } }> }>(
         url,
-        { headers: { "User-Agent": "(WorldView/0.1, educational)", Accept: "application/geo+json, application/json" } },
+        { headers: { "User-Agent": "(SIGINT/0.1, educational)", Accept: "application/geo+json, application/json" } },
         NWS_POLICY.timeoutMs
       );
       return json;
@@ -404,7 +404,7 @@ export async function fetchFaaSignals(): Promise<{ signals: HotspotSignal[]; cac
       fallbackValue: null,
       request: async () => {
         const res = await fetch(url, {
-          headers: { "User-Agent": "WorldView/0.1 (educational)" },
+          headers: { "User-Agent": "SIGINT/0.1 (educational)" },
           signal: AbortSignal.timeout(FAA_POLICY.timeoutMs),
         });
         if (!res.ok) throw new Error(`FAA returned ${res.status}`);

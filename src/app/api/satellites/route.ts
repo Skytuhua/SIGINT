@@ -167,7 +167,7 @@ async function fetchFromUpstreams(): Promise<Satellite[]> {
   for (const url of SATELLITE_FEED_URLS) {
     try {
       const res = await fetch(url, {
-        headers: { 'User-Agent': 'WorldView/0.1 (educational/research use)' },
+        headers: { 'User-Agent': 'SIGINT/0.1 (educational/research use)' },
       });
 
       if (!res.ok) {

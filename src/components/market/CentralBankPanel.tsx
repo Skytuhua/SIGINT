@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Term from "./shared/Term";
 
 interface CbRow {
   bank: string;
@@ -41,7 +42,7 @@ const TREND_LABEL: Record<string, string> = {
 
 const TREND_COLOR: Record<string, string> = {
   hiking: "#ff5a5f",
-  holding: "var(--wv-text-muted)",
+  holding: "var(--si-text-muted)",
   cutting: "#36b37e",
 };
 
@@ -51,14 +52,14 @@ interface Props {
 
 export default function CentralBankPanel({ style }: Props) {
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Central Banks</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)" }}>Policy Rates</span>
-        <span className="wv-market-panel-badge is-live">CURATED</span>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Central Banks</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)" }}><Term id="CB_RATE">Policy Rates</Term></span>
+        <span className="si-market-panel-badge is-live">CURATED</span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
-        <div className="wv-cb-header-row">
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
+        <div className="si-cb-header-row">
           <span>CB</span>
           <span>COUNTRY</span>
           <span>RATE</span>
@@ -71,14 +72,14 @@ export default function CentralBankPanel({ style }: Props) {
         {CENTRAL_BANKS.map((cb) => {
           const delta = cb.rate - cb.prev;
           const deltaStr = Math.abs(delta) < 0.001 ? "—" : `${delta > 0 ? "+" : ""}${(delta * 100).toFixed(0)}bp`;
-          const deltaColor = delta > 0 ? "#ff5a5f" : delta < 0 ? "#36b37e" : "var(--wv-text-muted)";
+          const deltaColor = delta > 0 ? "#ff5a5f" : delta < 0 ? "#36b37e" : "var(--si-text-muted)";
           const realRate = cb.rate - cb.cpi;
           const realColor = realRate > 0 ? "#36b37e" : realRate < -1 ? "#ff5a5f" : "#ffab40";
           return (
-            <div key={cb.bank} className="wv-cb-row">
+            <div key={cb.bank} className="si-cb-row">
               <span style={{ color: "#89e5ff", fontWeight: 700 }}>{cb.bank}</span>
-              <span style={{ color: "var(--wv-text-muted)", fontSize: 9, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cb.country}</span>
-              <span style={{ color: "var(--wv-text)", fontWeight: 600 }}>{cb.rate.toFixed(2)}%</span>
+              <span style={{ color: "var(--si-text-muted)", fontSize: 9, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cb.country}</span>
+              <span style={{ color: "var(--si-text)", fontWeight: 600 }}>{cb.rate.toFixed(2)}%</span>
               <span style={{ textAlign: "right", fontFamily: "monospace", fontSize: 9, color: realColor }}>
                 {realRate > 0 ? "+" : ""}{realRate.toFixed(1)}%
               </span>
@@ -94,14 +95,14 @@ export default function CentralBankPanel({ style }: Props) {
                 padding: "1px 5px",
                 borderRadius: 2,
               }}>
-                {cb.stance.toUpperCase()}
+                {cb.stance === "hawkish" ? <Term id="HAWKISH">HAWKISH</Term> : cb.stance === "dovish" ? <Term id="DOVISH">DOVISH</Term> : "NEUTRAL"}
               </span>
-              <span style={{ color: "var(--wv-text-muted)" }}>{cb.nextMtg}</span>
+              <span style={{ color: "var(--si-text-muted)" }}>{cb.nextMtg}</span>
             </div>
           );
         })}
       </div>
-      <div className="wv-market-panel-footer">BIS · central bank websites · Mar 2026</div>
+      <div className="si-market-panel-footer">BIS · central bank websites · Mar 2026</div>
     </div>
   );
 }

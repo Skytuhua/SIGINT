@@ -6,7 +6,7 @@ import PanelBody from "../dashboard/panel/PanelBody";
 import PanelFooter from "../dashboard/panel/PanelFooter";
 import PanelHeader from "../dashboard/panel/PanelHeader";
 import PanelControls from "../dashboard/panel/PanelControls";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 import type { SanctionsEntity, SanctionsSourceStatusMap } from "../../lib/server/news/sanctions/types";
 import ComplianceDataStatusPanel from "./ComplianceDataStatusPanel";
 
@@ -53,7 +53,7 @@ export default function CompliancePanel({ lockHeaderProps }: CompliancePanelProp
   const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const setNewsLayerToggle = useWorldViewStore((s) => s.setNewsLayerToggle);
+  const setNewsLayerToggle = useSIGINTStore((s) => s.setNewsLayerToggle);
 
   const fetchEntities = useCallback(async () => {
     abortRef.current?.abort();
@@ -151,7 +151,7 @@ export default function CompliancePanel({ lockHeaderProps }: CompliancePanelProp
           </div>
         }
       />
-      <PanelBody noPadding className="wv-compliance-panel-body">
+      <PanelBody noPadding className="si-compliance-panel-body">
         <div style={{ padding: "4px 8px", display: "flex", flexWrap: "wrap", gap: 4, alignItems: "center", borderBottom: "1px solid #333" }}>
           <input
             type="text"

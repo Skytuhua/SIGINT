@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useState } from "react";
-import { useWorldViewStore } from "../store";
+import { useSIGINTStore } from "../store";
 import { flyToScene, DEFAULT_HOME_VIEW } from "../lib/cesium/viewer";
 import {
   renderSatellites,
@@ -24,6 +24,10 @@ import {
   renderAirspaceAnomalies,
   renderDisappearedFlights,
   setFlightVectorsVisible,
+  renderVolcanoes,
+  renderNuclearSites,
+  renderMilitaryBases,
+  renderCountryBorders,
 } from "../lib/cesium/layers";
 import {
   AirspaceBaselineTracker,
@@ -78,7 +82,9 @@ function sampleCctvForGlobe(
   cameras: CctvCamera[],
   brokenIds: Record<string, boolean>
 ): CctvCamera[] {
-  const healthy = cameras.filter((cam) => cam.snapshotUrl && !brokenIds[cam.id]);
+  const healthy = cameras.filter(
+    (cam) => !brokenIds[cam.id] && !(cam.lat === 0 && cam.lon === 0),
+  );
   const otc: CctvCamera[] = [];
   const nonOtc: CctvCamera[] = [];
 
@@ -213,6 +219,10 @@ export default function CesiumGlobe({
   const currentSatsRef = useRef<PropagatedSat[]>([]);
   const currentFlightsRef = useRef<Flight[]>([]);
   const currentDisastersRef = useRef<DisasterAlert[]>([]);
+  const volcanoDataRef = useRef<Array<{ id?: string; geometry: { type: string; coordinates: [number, number] }; properties: Record<string, unknown> }>>([]);
+  const nuclearSitesDataRef = useRef<Array<{ id?: string; geometry: { type: string; coordinates: [number, number] }; properties: Record<string, unknown> }>>([]);
+  const militaryBasesDataRef = useRef<Array<{ id?: string; geometry: { type: string; coordinates: [number, number] }; properties: Record<string, unknown> }>>([]);
+  const countryBordersDataRef = useRef<Array<{ id?: string; geometry: { type: string; coordinates: number[][][] | number[][][][] }; properties: Record<string, unknown> }>>([]);
   const airspaceTrackerRef = useRef(new AirspaceBaselineTracker());
   const gpsInterferenceTrackerRef = useRef(new GpsInterferenceTracker());
   const previousMilitaryMapRef = useRef<Map<string, Flight>>(new Map());
@@ -231,7 +241,6 @@ export default function CesiumGlobe({
   const flightBlendRef = useRef<Map<string, BlendEntry>>(new Map());
   const lastTleSignatureRef = useRef("");
   const cesiumRef = useRef<typeof import("cesium") | null>(null);
-  const googleMapsNavRef = useRef<import("../lib/cesium/googleMapsNav").GoogleMapsNav | null>(null);
   const [cameraSnapshot, setCameraSnapshot] = useState<CameraSnapshot | null>(
     null
   );
@@ -249,7 +258,7 @@ export default function CesiumGlobe({
     source: string;
     publishedAt: number;
   } | null>(null);
-  const store = useWorldViewStore;
+  const store = useSIGINTStore;
 
   const releaseOrbitFocus = useCallback(() => {
     followTrackedFlightRef.current = false;
@@ -1384,6 +1393,20 @@ export default function CesiumGlobe({
         )
       );
 
+      // Live CCTV data updates (cameras list or broken status changed)
+      subs.push(
+        store.subscribe(
+          (s) => ({ cameras: s.cctv.cameras, brokenIds: s.cctv.brokenIds }),
+          ({ cameras, brokenIds }) => {
+            if (!store.getState().layers.cctv) return;
+            const camerasForGlobe = sampleCctvForGlobe(cameras, brokenIds);
+            const { calibrations } = store.getState().cctv;
+            renderCctv(viewer, camerasForGlobe, calibrations);
+          },
+          { equalityFn: (a, b) => a.cameras === b.cameras && a.brokenIds === b.brokenIds }
+        )
+      );
+
       // Trade Routes layer toggle
       subs.push(
         store.subscribe(
@@ -1401,6 +1424,50 @@ export default function CesiumGlobe({
                 hoveredNodeId: sel.hoveredNodeId,
               });
             }
+          }
+        )
+      );
+
+      // Volcanoes layer toggle
+      subs.push(
+        store.subscribe(
+          (s) => s.layers.volcanoes,
+          (enabled) => {
+            if (!enabled) clearLayer(viewer, 'volcanoes');
+            else if (volcanoDataRef.current.length) renderVolcanoes(viewer, volcanoDataRef.current);
+          }
+        )
+      );
+
+      // Nuclear Sites layer toggle
+      subs.push(
+        store.subscribe(
+          (s) => s.layers.nuclearSites,
+          (enabled) => {
+            if (!enabled) clearLayer(viewer, 'nuclear_sites');
+            else if (nuclearSitesDataRef.current.length) renderNuclearSites(viewer, nuclearSitesDataRef.current);
+          }
+        )
+      );
+
+      // Military Bases layer toggle
+      subs.push(
+        store.subscribe(
+          (s) => s.layers.militaryBases,
+          (enabled) => {
+            if (!enabled) clearLayer(viewer, 'military_bases');
+            else if (militaryBasesDataRef.current.length) renderMilitaryBases(viewer, militaryBasesDataRef.current);
+          }
+        )
+      );
+
+      // Country Borders layer toggle
+      subs.push(
+        store.subscribe(
+          (s) => s.layers.countryBorders,
+          (enabled) => {
+            if (!enabled) clearLayer(viewer, 'country_borders');
+            else if (countryBordersDataRef.current.length) renderCountryBorders(viewer, countryBordersDataRef.current);
           }
         )
       );
@@ -1664,6 +1731,27 @@ export default function CesiumGlobe({
         // CCTV data optional
       }
 
+      // Load static GeoJSON layers (volcanoes, nuclear sites, military bases, country borders)
+      try {
+        const [volcGeo, nukeGeo, milBaseGeo, borderGeo] = await Promise.all([
+          fetch('/data/news-layers/volcanoes.geojson').then(r => r.json()),
+          fetch('/data/news-layers/nuclear-sites.geojson').then(r => r.json()),
+          fetch('/data/news-layers/military-bases.geojson').then(r => r.json()),
+          fetch('/data/news-layers/country-borders.geojson').then(r => r.json()),
+        ]);
+        volcanoDataRef.current = volcGeo.features ?? [];
+        nuclearSitesDataRef.current = nukeGeo.features ?? [];
+        militaryBasesDataRef.current = milBaseGeo.features ?? [];
+        countryBordersDataRef.current = borderGeo.features ?? [];
+        const currentLayers = store.getState().layers;
+        if (currentLayers.volcanoes) await renderVolcanoes(viewer, volcanoDataRef.current);
+        if (currentLayers.nuclearSites) await renderNuclearSites(viewer, nuclearSitesDataRef.current);
+        if (currentLayers.militaryBases) await renderMilitaryBases(viewer, militaryBasesDataRef.current);
+        if (currentLayers.countryBorders) await renderCountryBorders(viewer, countryBordersDataRef.current);
+      } catch (err) {
+        console.warn("[globe] static GeoJSON layer load error:", err);
+      }
+
       // 闁冲厜鍋撻柍鍏夊亾 Load scenes 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
       try {
         const scenes = await fetchJsonWithPolicy<Scene[]>("/data/scenes.json", {
@@ -1701,45 +1789,6 @@ export default function CesiumGlobe({
       // 闁冲厜鍋撻柍鍏夊亾 Flight camera tracking (postRender for smooth 60fps follow) 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
       const CesiumMod = await import("cesium");
       cesiumRef.current = CesiumMod;
-
-      // ── Google Maps–style navigation ─────────────────────────────────────
-      if (!destroyed) {
-        const { GoogleMapsNav } = await import("../lib/cesium/googleMapsNav");
-        const nav = new GoogleMapsNav(viewer, CesiumMod, {
-          disableZoom,
-          getOrbitTarget: () => {
-            const t = focusTargetRef.current;
-            if (!t) return null;
-            if (t.type === "flight") {
-              const interp = getInterpolatedPosition(t.id);
-              if (interp)
-                return CesiumMod.Cartesian3.fromDegrees(
-                  interp.lon,
-                  interp.lat,
-                  interp.altM + 500
-                );
-              const f = currentFlightsRef.current.find((x) => x.icao === t.id);
-              if (f)
-                return CesiumMod.Cartesian3.fromDegrees(
-                  f.lon,
-                  f.lat,
-                  (f.altM ?? 0) + 500
-                );
-              return null;
-            }
-            const sat = currentSatsRef.current.find((s) => s.noradId === t.id);
-            if (sat)
-              return CesiumMod.Cartesian3.fromDegrees(
-                sat.lon,
-                sat.lat,
-                Math.max(0, sat.altKm) * 1000
-              );
-            return null;
-          },
-        });
-        nav.enable();
-        googleMapsNavRef.current = nav;
-      }
 
       // Update flight and highlight positions before each frame (sync in preRender so they are visible)
       let tradeRouteFrame = 0;
@@ -1899,8 +1948,6 @@ export default function CesiumGlobe({
       trackFetchAbortRef.current?.abort();
       trackFetchAbortRef.current = null;
       satWorkerRef.current?.terminate();
-      googleMapsNavRef.current?.destroy();
-      googleMapsNavRef.current = null;
       if (viewerRef.current && !viewerRef.current.isDestroyed()) {
         viewerRef.current.destroy();
       }

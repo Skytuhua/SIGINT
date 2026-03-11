@@ -211,21 +211,21 @@ export default function EconomicCenterDetailCard({ detail, onClose }: Props) {
   if (!mounted) return null;
 
   return createPortal(
-    <div className="wv-hotspot-card" role="dialog" aria-label="Economic center detail">
+    <div className="si-hotspot-card" role="dialog" aria-label="Economic center detail">
 
       {/* ── Header ── */}
-      <div className="wv-hotspot-card-hdr">
-        <div className="wv-hotspot-card-headline">
-          <div className="wv-hotspot-name">
+      <div className="si-hotspot-card-hdr">
+        <div className="si-hotspot-card-headline">
+          <div className="si-hotspot-name">
             {detail.name.toUpperCase()}
           </div>
-          <span className={`wv-hotspot-tier tier-${tier.toLowerCase()}`}>
+          <span className={`si-hotspot-tier tier-${tier.toLowerCase()}`}>
             {detail.rank > 0 ? `RANK #${detail.rank}` : tierLabel(tier)} · {tierLabel(tier)}
           </span>
         </div>
         <button
           type="button"
-          className="wv-hotspot-close"
+          className="si-hotspot-close"
           onClick={onClose}
           aria-label="Close economic center details"
         >
@@ -235,11 +235,11 @@ export default function EconomicCenterDetailCard({ detail, onClose }: Props) {
 
       {/* Tags row */}
       {tags.length > 0 && (
-        <div className="wv-hotspot-tags">{tags.join(" / ")}</div>
+        <div className="si-hotspot-tags">{tags.join(" / ")}</div>
       )}
 
       {/* Location sub-line */}
-      <div style={{ marginTop: 2, color: "var(--wv-text-muted)", fontSize: 9 }}>
+      <div style={{ marginTop: 2, color: "var(--si-text-muted)", fontSize: 9 }}>
         {[detail.admin1, detail.country].filter(Boolean).join(", ")}
         {" · "}
         {formatLatLon(detail.lat, detail.lon)}
@@ -250,16 +250,16 @@ export default function EconomicCenterDetailCard({ detail, onClose }: Props) {
       </div>
 
       {/* ── Economic Score ── */}
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">ECONOMIC WEIGHT</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">ECONOMIC WEIGHT</div>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-          <div className="wv-hotspot-score">{detail.scoreTotal}<span style={{ fontSize: 11, fontWeight: 400 }}>/100</span></div>
-          <div className="wv-hotspot-trend">
+          <div className="si-hotspot-score">{detail.scoreTotal}<span style={{ fontSize: 11, fontWeight: 400 }}>/100</span></div>
+          <div className="si-hotspot-trend">
             {tier === "HIGH" ? "▲ GLOBAL TIER" : tier === "MED" ? "● MAJOR HUB" : "▼ REGIONAL"}
           </div>
         </div>
         {/* Score breakdown grid */}
-        <div className="wv-hotspot-subscores" style={{ marginTop: 6 }}>
+        <div className="si-hotspot-subscores" style={{ marginTop: 6 }}>
           <div>
             <div style={{ color: "#f4a261", fontWeight: 600, fontSize: 9, marginBottom: 1 }}>FINANCE</div>
             <ScoreBar value={detail.scoreBreakdown.finance} color="#f4a261" />
@@ -292,9 +292,9 @@ export default function EconomicCenterDetailCard({ detail, onClose }: Props) {
       </div>
 
       {/* ── Key Infrastructure ── */}
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">KEY INFRASTRUCTURE</div>
-        <ul className="wv-hotspot-drivers">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">KEY INFRASTRUCTURE</div>
+        <ul className="si-hotspot-drivers">
           {detail.keyAssets.exchanges.length > 0 && (
             <li>
               <span style={{ color: "#f4a261" }}>EXCHANGES</span>{" — "}
@@ -305,7 +305,7 @@ export default function EconomicCenterDetailCard({ detail, onClose }: Props) {
                     href={`https://www.wikidata.org/wiki/${e.wikidataQid}`}
                     target="_blank"
                     rel="noreferrer"
-                    style={{ color: "var(--wv-text)", textDecoration: "underline" }}
+                    style={{ color: "var(--si-text)", textDecoration: "underline" }}
                   >
                     {e.name}
                   </a>
@@ -323,7 +323,7 @@ export default function EconomicCenterDetailCard({ detail, onClose }: Props) {
                     href={`https://www.wikidata.org/wiki/${p.wikidataQid}`}
                     target="_blank"
                     rel="noreferrer"
-                    style={{ color: "var(--wv-text)", textDecoration: "underline" }}
+                    style={{ color: "var(--si-text)", textDecoration: "underline" }}
                   >
                     {p.name}
                   </a>
@@ -341,7 +341,7 @@ export default function EconomicCenterDetailCard({ detail, onClose }: Props) {
                     href={`https://www.wikidata.org/wiki/${a.wikidataQid}`}
                     target="_blank"
                     rel="noreferrer"
-                    style={{ color: "var(--wv-text)", textDecoration: "underline" }}
+                    style={{ color: "var(--si-text)", textDecoration: "underline" }}
                   >
                     {a.name}
                   </a>
@@ -358,29 +358,29 @@ export default function EconomicCenterDetailCard({ detail, onClose }: Props) {
           {detail.keyAssets.exchanges.length === 0 &&
             detail.keyAssets.ports.length === 0 &&
             detail.keyAssets.airports.length === 0 && (
-              <li style={{ color: "var(--wv-text-muted)" }}>No major assets identified</li>
+              <li style={{ color: "var(--si-text-muted)" }}>No major assets identified</li>
             )}
         </ul>
       </div>
 
       {/* ── Why It Matters ── */}
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">WHY IT MATTERS</div>
-        <div className="wv-hotspot-summary">{whyItMatters}</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">WHY IT MATTERS</div>
+        <div className="si-hotspot-summary">{whyItMatters}</div>
       </div>
 
       {/* ── World Bank Indicators ── */}
       {detail.sourceTrace && detail.sourceTrace.worldBankIndicators.length > 0 && (
-        <div className="wv-hotspot-section">
-          <div className="wv-hotspot-kicker">WORLD BANK INDICATORS</div>
-          <ul className="wv-hotspot-drivers">
+        <div className="si-hotspot-section">
+          <div className="si-hotspot-kicker">WORLD BANK INDICATORS</div>
+          <ul className="si-hotspot-drivers">
             {detail.sourceTrace.worldBankIndicators.map((ind) => (
               <li key={ind}>
                 <a
                   href={`https://data.worldbank.org/indicator/${encodeURIComponent(ind)}`}
                   target="_blank"
                   rel="noreferrer"
-                  style={{ color: "var(--wv-text)", textDecoration: "underline" }}
+                  style={{ color: "var(--si-text)", textDecoration: "underline" }}
                 >
                   {ind}
                 </a>
@@ -391,16 +391,16 @@ export default function EconomicCenterDetailCard({ detail, onClose }: Props) {
       )}
 
       {/* ── External References ── */}
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">EXTERNAL REFERENCES</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">EXTERNAL REFERENCES</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 2 }}>
           {wikidataUrl && (
             <a
               href={wikidataUrl}
               target="_blank"
               rel="noreferrer"
-              className="wv-hotspot-status"
-              style={{ textDecoration: "none", color: "var(--wv-text-muted)", cursor: "pointer" }}
+              className="si-hotspot-status"
+              style={{ textDecoration: "none", color: "var(--si-text-muted)", cursor: "pointer" }}
             >
               WIKIDATA
             </a>
@@ -409,8 +409,8 @@ export default function EconomicCenterDetailCard({ detail, onClose }: Props) {
             href={wikiUrl}
             target="_blank"
             rel="noreferrer"
-            className="wv-hotspot-status"
-            style={{ textDecoration: "none", color: "var(--wv-text-muted)", cursor: "pointer" }}
+            className="si-hotspot-status"
+            style={{ textDecoration: "none", color: "var(--si-text-muted)", cursor: "pointer" }}
           >
             WIKIPEDIA
           </a>
@@ -418,8 +418,8 @@ export default function EconomicCenterDetailCard({ detail, onClose }: Props) {
             href={worldBankUrl}
             target="_blank"
             rel="noreferrer"
-            className="wv-hotspot-status"
-            style={{ textDecoration: "none", color: "var(--wv-text-muted)", cursor: "pointer" }}
+            className="si-hotspot-status"
+            style={{ textDecoration: "none", color: "var(--si-text-muted)", cursor: "pointer" }}
           >
             WORLD BANK
           </a>
@@ -427,8 +427,8 @@ export default function EconomicCenterDetailCard({ detail, onClose }: Props) {
             href={osmUrl}
             target="_blank"
             rel="noreferrer"
-            className="wv-hotspot-status"
-            style={{ textDecoration: "none", color: "var(--wv-text-muted)", cursor: "pointer" }}
+            className="si-hotspot-status"
+            style={{ textDecoration: "none", color: "var(--si-text-muted)", cursor: "pointer" }}
           >
             OPENSTREETMAP
           </a>
@@ -436,28 +436,28 @@ export default function EconomicCenterDetailCard({ detail, onClose }: Props) {
       </div>
 
       {/* ── Pipeline Status ── */}
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">PIPELINE STATUS</div>
-        <div className="wv-hotspot-status-row">
-          <span className={`wv-hotspot-status ${sourceStatusClass(wdStatus)}`}>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">PIPELINE STATUS</div>
+        <div className="si-hotspot-status-row">
+          <span className={`si-hotspot-status ${sourceStatusClass(wdStatus)}`}>
             wikidata:{wdStatus}
           </span>
-          <span className={`wv-hotspot-status ${sourceStatusClass(osmStatus)}`}>
+          <span className={`si-hotspot-status ${sourceStatusClass(osmStatus)}`}>
             overpass:{osmStatus}
           </span>
-          <span className={`wv-hotspot-status ${sourceStatusClass(wbStatus)}`}>
+          <span className={`si-hotspot-status ${sourceStatusClass(wbStatus)}`}>
             worldbank:{wbStatus}
           </span>
         </div>
         {detail.sourceTrace && (
-          <details className="wv-hotspot-trace" style={{ marginTop: 4 }}>
+          <details className="si-hotspot-trace" style={{ marginTop: 4 }}>
             <summary>Source timestamps</summary>
             <div>WD: {formatAge(detail.sourceTrace.lastUpdated.wikidata)}</div>
             <div>OSM: {formatAge(detail.sourceTrace.lastUpdated.overpass)}</div>
             <div>WB: {formatAge(detail.sourceTrace.lastUpdated.worldbank)}</div>
           </details>
         )}
-        <div className="wv-hotspot-updated">Last refresh: {updatedLabel}</div>
+        <div className="si-hotspot-updated">Last refresh: {updatedLabel}</div>
       </div>
 
     </div>,

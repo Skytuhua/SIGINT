@@ -18,7 +18,7 @@ export default function IconButton({
   return (
     <button
       type="button"
-      className={`wv-icon-button ${active ? "is-active" : ""}`}
+      className={`si-icon-button ${active ? "is-active" : ""}`}
       onClick={onClick}
       disabled={disabled}
       aria-label={label}

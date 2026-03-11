@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Term from "./shared/Term";
 
 interface InsiderTrade {
   date: string;
@@ -39,35 +40,35 @@ export default function InsiderFlowPanel({ style, onTickerClick }: Props) {
   const netSells = TRADES.filter((t) => t.type === "Sell").length;
 
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Insider Transactions</span>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title"><Term id="INSIDER">Insider Transactions</Term></span>
         <span style={{ fontSize: 9, color: "#36b37e" }}>{netBuys}B</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)" }}> / </span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)" }}> / </span>
         <span style={{ fontSize: 9, color: "#ff5a5f" }}>{netSells}S</span>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+        <span className="si-market-panel-badge is-reference">REFERENCE</span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
-        <div className="wv-insider-header">
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
+        <div className="si-insider-header">
           <span>DATE</span><span>SYM</span><span>INSIDER</span><span>ROLE</span>
           <span style={{ textAlign: "center" }}>TYPE</span>
           <span style={{ textAlign: "right" }}>SHARES</span><span style={{ textAlign: "right" }}>VALUE</span>
         </div>
         {TRADES.map((t, i) => (
-          <div key={i} className="wv-insider-row" onClick={() => onTickerClick?.(t.sym)} style={{ cursor: onTickerClick ? "pointer" : "default" }}>
-            <span style={{ color: "var(--wv-text-muted)" }}>{t.date}</span>
+          <div key={i} className="si-insider-row" onClick={() => onTickerClick?.(t.sym)} style={{ cursor: onTickerClick ? "pointer" : "default" }}>
+            <span style={{ color: "var(--si-text-muted)" }}>{t.date}</span>
             <span style={{ color: "#89e5ff", fontWeight: 700 }}>{t.sym}</span>
-            <span style={{ color: "var(--wv-text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.insider}</span>
-            <span style={{ color: "var(--wv-text-muted)" }}>{t.role}</span>
+            <span style={{ color: "var(--si-text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.insider}</span>
+            <span style={{ color: "var(--si-text-muted)" }}>{t.role}</span>
             <span style={{ textAlign: "center" }}>
-              <span className={`wv-insider-badge ${t.type === "Buy" ? "buy" : "sell"}`}>{t.type}</span>
+              <span className={`si-insider-badge ${t.type === "Buy" ? "buy" : "sell"}`}>{t.type}</span>
             </span>
-            <span style={{ textAlign: "right", color: "var(--wv-text)" }}>{t.shares}</span>
+            <span style={{ textAlign: "right", color: "var(--si-text)" }}>{t.shares}</span>
             <span style={{ textAlign: "right", fontWeight: 600, color: t.type === "Buy" ? "#36b37e" : "#ff5a5f" }}>{t.value}</span>
           </div>
         ))}
       </div>
-      <div className="wv-market-panel-footer">SEC Form 4 · placeholder data</div>
+      <div className="si-market-panel-footer"><Term id="SEC_FORM4">SEC Form 4</Term> · Curated reference data</div>
     </div>
   );
 }

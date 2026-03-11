@@ -60,36 +60,13 @@ function ensureRootLayer(layer: LayerRegistryEntry, map: LeafletMapLike): Leafle
       urlTemplate
     );
 
-    // #region agent log
-    fetch("http://127.0.0.1:7928/ingest/ab57ee12-70c0-4122-8628-c84847906424", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Debug-Session-Id": "163a8e",
-      },
-      body: JSON.stringify({
-        sessionId: "163a8e",
-        runId: hasUnsupportedTokens ? "pre-fix-skip" : "pre-fix",
-        hypothesisId: "H1",
-        location: "src/lib/newsLayers/renderers/leafletRenderer.ts:57",
-        message: "mount rasterTiles layer",
-        data: {
-          layerId: layer.id,
-          urlTemplate,
-          hasUnsupportedTokens,
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
-
     if (hasUnsupportedTokens) {
       // Fallback: create an empty group for unsupported WMTS-style templates to avoid runtime errors.
       root = L.layerGroup();
     } else {
       root = L.tileLayer(urlTemplate, {
         opacity: layer.style.rasterAlpha ?? 0.45,
-        pane: "wv-news-layers",
+        pane: "si-news-layers",
       });
     }
   } else {
@@ -239,7 +216,7 @@ export const leafletRenderer: LayerRenderer<LeafletMapLike> = {
             parts.push(`<div>Time: ${timeLabel}</div>`);
             parts.push(`<div>Source: GDELT Geo 2.0</div>`);
             parts.push(`<div>Location: ${locationLabel}</div>`);
-            anyLayer.bindPopup(`<div>${parts.join("")}</div>`, { pane: "wv-popup-pane" });
+            anyLayer.bindPopup(`<div>${parts.join("")}</div>`, { pane: "si-popup-pane" });
             anyLayer.on("click", (e: any) => L.DomEvent.stopPropagation(e));
           }
         : isNuclearLayer && willBindPopupForNuclear
@@ -255,7 +232,7 @@ export const leafletRenderer: LayerRenderer<LeafletMapLike> = {
                 ? String(props.operator)
                 : null;
             const capacity = props.capacity != null ? String(props.capacity) : null;
-            const source = String(props.source ?? "WorldView infrastructure snapshot");
+            const source = String(props.source ?? "SIGINT infrastructure snapshot");
             const tsRaw = props.ts ?? props.time ?? props.timestamp ?? props.updatedAt;
             const tsMs =
               typeof tsRaw === "number"
@@ -286,7 +263,7 @@ export const leafletRenderer: LayerRenderer<LeafletMapLike> = {
             parts.push(`<div>Source: ${source}</div>`);
             parts.push(`<div>Location: ${locationLabel}</div>`);
             parts.push(`<div>Updated: ${timeLabel}</div>`);
-            anyLayer.bindPopup(`<div>${parts.join("")}</div>`, { pane: "wv-popup-pane" });
+            anyLayer.bindPopup(`<div>${parts.join("")}</div>`, { pane: "si-popup-pane" });
             anyLayer.on("click", (e: any) => L.DomEvent.stopPropagation(e));
           }
         : undefined;
@@ -342,7 +319,7 @@ export const leafletRenderer: LayerRenderer<LeafletMapLike> = {
               });
               const marker = L.marker(latlng, {
                 icon,
-                pane: "wv-news-layers",
+                pane: "si-news-layers",
                 interactive: true,
               });
 
@@ -352,7 +329,7 @@ export const leafletRenderer: LayerRenderer<LeafletMapLike> = {
                 if (headline) {
                   marker.bindTooltip(
                     `<strong>${escapeHtml(headline)}</strong><br/>${escapeHtml(sevLabel)}`,
-                    { pane: "wv-tooltip-pane", direction: "top", offset: [0, -radius] }
+                    { pane: "si-tooltip-pane", direction: "top", offset: [0, -radius] }
                   );
                 }
               }
@@ -368,7 +345,7 @@ export const leafletRenderer: LayerRenderer<LeafletMapLike> = {
                 }
                 if (!isConflictLayer && !isNuclearLayer && !isArmedConflict) {
                   const html = buildGenericPopupHtml(layer, feature);
-                  marker.bindPopup(html, { pane: "wv-popup-pane" }).openPopup();
+                  marker.bindPopup(html, { pane: "si-popup-pane" }).openPopup();
                 }
               });
 
@@ -376,7 +353,7 @@ export const leafletRenderer: LayerRenderer<LeafletMapLike> = {
             }
           : undefined,
       onEachFeature,
-      pane: "wv-news-layers",
+      pane: "si-news-layers",
     });
 
     geoJson.addTo(group);

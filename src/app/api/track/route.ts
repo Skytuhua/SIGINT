@@ -35,7 +35,7 @@ function normalizeAdsbTrace(data: { trace?: unknown[] }): TrackPoint[] {
 
 async function fetchAdsbTrace(base: string, icao: string): Promise<TrackPoint[]> {
   const res = await fetchWithTimeout(`${base}/trace/${icao}`, {
-    headers: { 'User-Agent': 'WorldView/0.1 (educational/research use)' },
+    headers: { 'User-Agent': 'SIGINT/0.1 (educational/research use)' },
     cache: 'no-store',
   });
   if (!res.ok) throw new Error(`ADSB trace ${base} returned ${res.status}`);
@@ -49,7 +49,7 @@ async function fetchOpenSkyTrack(icao: string): Promise<TrackPoint[]> {
   const username = process.env.OPENSKY_USERNAME;
   const password = process.env.OPENSKY_PASSWORD;
   const headers: Record<string, string> = {
-    'User-Agent': 'WorldView/0.1 (educational/research use)',
+    'User-Agent': 'SIGINT/0.1 (educational/research use)',
   };
   if (username && password) {
     headers['Authorization'] = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;

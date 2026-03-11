@@ -67,26 +67,26 @@ export default function PredictionMarketsPanel({ panelId, lockHeaderProps }: Pre
         controls={<PanelControls onRefresh={() => void fetchMarkets()} loading={loading} />}
       />
       <PanelBody>
-        <div className="wv-pm-list">
+        <div className="si-pm-list">
           {markets.map((market) => {
             const { yesPct, noPct } = normalizeMarketSplit(market.yesPrice, market.noPrice);
             return (
-              <article key={market.id} className="wv-pm-card">
+              <article key={market.id} className="si-pm-card">
                 <a
                   href={`https://polymarket.com/event/${market.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="wv-pm-question"
+                  className="si-pm-question"
                   title={market.question}
                 >
-                  {market.question} <span className="wv-pm-link">-&gt;</span>
+                  {market.question} <span className="si-pm-link">-&gt;</span>
                 </a>
-                <div className="wv-pm-meta">Vol: {formatVolume(market.volume)}</div>
-                <div className="wv-pm-bar" role="img" aria-label={`Yes ${yesPct} percent, No ${noPct} percent`}>
-                  <span className="wv-pm-yes" style={{ width: `${yesPct}%` }}>
+                <div className="si-pm-meta">Vol: {formatVolume(market.volume)}</div>
+                <div className="si-pm-bar" role="img" aria-label={`Yes ${yesPct} percent, No ${noPct} percent`}>
+                  <span className="si-pm-yes" style={{ width: `${yesPct}%` }}>
                     Yes {yesPct}%
                   </span>
-                  <span className="wv-pm-no" style={{ width: `${noPct}%` }}>
+                  <span className="si-pm-no" style={{ width: `${noPct}%` }}>
                     No {noPct}%
                   </span>
                 </div>
@@ -95,13 +95,13 @@ export default function PredictionMarketsPanel({ panelId, lockHeaderProps }: Pre
           })}
 
           {!markets.length && loading && !error ? (
-            <div className="wv-pm-empty">Loading...</div>
+            <div className="si-pm-empty">Loading...</div>
           ) : null}
           {!markets.length && !loading && error ? (
-            <div className="wv-pm-empty">{error}</div>
+            <div className="si-pm-empty">{error}</div>
           ) : null}
           {!markets.length && !loading && !error ? (
-            <div className="wv-pm-empty">No active prediction markets found.</div>
+            <div className="si-pm-empty">No active prediction markets found.</div>
           ) : null}
         </div>
       </PanelBody>

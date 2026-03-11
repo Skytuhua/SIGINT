@@ -2,6 +2,7 @@
 
 import React from "react";
 import { MiniSparkline } from "./shared/MiniSparkline";
+import Term from "./shared/Term";
 
 interface SpreadRow {
   id: string;
@@ -74,14 +75,14 @@ interface Props {
 
 export default function CreditSpreadPanel({ style }: Props) {
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Credit Spreads</span>
-        <span style={{ fontSize: 9, color: "var(--wv-text-muted)" }}>OAS / bps</span>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Credit Spreads</span>
+        <span style={{ fontSize: 9, color: "var(--si-text-muted)" }}><Term id="OAS">OAS</Term> / <Term id="BP">bps</Term></span>
+        <span className="si-market-panel-badge is-reference">REFERENCE</span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
-        <div className="wv-credit-header">
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
+        <div className="si-credit-header">
           <span>INDEX</span>
           <span style={{ textAlign: "right" }}>SPREAD</span>
           <span style={{ textAlign: "right" }}>1D</span>
@@ -92,17 +93,26 @@ export default function CreditSpreadPanel({ style }: Props) {
           <span>SIGNAL</span>
         </div>
         {SPREADS.map((s) => (
-          <div key={s.id} className="wv-credit-row" title={s.desc}>
-            <span style={{ color: "#89e5ff", fontWeight: 700 }}>{s.label}</span>
-            <span style={{ textAlign: "right", fontWeight: 600, color: "var(--wv-text)" }}>{s.spread}</span>
+          <div key={s.id} className="si-credit-row" title={s.desc}>
+            <span style={{ color: "#89e5ff", fontWeight: 700 }}>
+              {s.id === "cdx-ig" ? <Term id="CDX_IG">{s.label}</Term> :
+               s.id === "cdx-hy" ? <Term id="CDX_HY">{s.label}</Term> :
+               s.id === "embig"  ? <Term id="EMBIG">{s.label}</Term> :
+               s.id === "ig-oas" ? <Term id="IG">{s.label}</Term> :
+               s.id === "hy-oas" ? <Term id="HY">{s.label}</Term> :
+               s.id === "tib-ois"? <Term id="LIBOR_OIS">{s.label}</Term> :
+               s.id === "ted"   ? <Term id="TED_SPREAD">{s.label}</Term> :
+               s.label}
+            </span>
+            <span style={{ textAlign: "right", fontWeight: 600, color: "var(--si-text)" }}>{s.spread}</span>
             <span style={{ textAlign: "right", color: s.chg1d <= 0 ? "#36b37e" : "#ff5a5f" }}>
               {s.chg1d > 0 ? "+" : ""}{s.chg1d}
             </span>
             <span style={{ textAlign: "right", color: s.chg1w <= 0 ? "#36b37e" : "#ff5a5f" }}>
               {s.chg1w > 0 ? "+" : ""}{s.chg1w}
             </span>
-            <span style={{ textAlign: "right", color: "var(--wv-text-muted)", fontSize: 9 }}>{s.hi1y}</span>
-            <span style={{ textAlign: "right", color: "var(--wv-text-muted)", fontSize: 9 }}>{s.lo1y}</span>
+            <span style={{ textAlign: "right", color: "var(--si-text-muted)", fontSize: 9 }}>{s.hi1y}</span>
+            <span style={{ textAlign: "right", color: "var(--si-text-muted)", fontSize: 9 }}>{s.lo1y}</span>
             <span>
               <MiniSparkline prices={s.hist} up={s.hist[s.hist.length - 1] <= s.hist[0]} width={38} height={12} />
             </span>
@@ -110,7 +120,7 @@ export default function CreditSpreadPanel({ style }: Props) {
           </div>
         ))}
       </div>
-      <div className="wv-market-panel-footer">Markit CDX · BAML MOVE · placeholder data</div>
+      <div className="si-market-panel-footer">Markit CDX · BAML MOVE · Curated reference data</div>
     </div>
   );
 }

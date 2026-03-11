@@ -11,7 +11,7 @@ async function fetchWikipediaSummary(name: string): Promise<{ extract: string; p
     // Search for the best matching article title
     const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name)}&srlimit=1&format=json&origin=*`;
     const searchRes = await fetch(searchUrl, {
-      headers: { "User-Agent": "WorldView/0.1 (research tool)" },
+      headers: { "User-Agent": "SIGINT/0.1 (research tool)" },
       signal: AbortSignal.timeout(8_000),
     });
     if (!searchRes.ok) return null;
@@ -21,7 +21,7 @@ async function fetchWikipediaSummary(name: string): Promise<{ extract: string; p
 
     const encoded = encodeURIComponent(title.replace(/\s+/g, "_"));
     const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encoded}`, {
-      headers: { "User-Agent": "WorldView/0.1 (research tool)" },
+      headers: { "User-Agent": "SIGINT/0.1 (research tool)" },
       signal: AbortSignal.timeout(8_000),
     });
     if (!summaryRes.ok) return null;
@@ -60,7 +60,7 @@ async function fetchOpenSanctionsProfile(name: string, entityType: string): Prom
 
     const url = `https://api.opensanctions.org/search/default?q=${encodeURIComponent(name)}&schema=${schema}&limit=1`;
     const res = await fetch(url, {
-      headers: { "User-Agent": "WorldView/0.1 (research tool)", Accept: "application/json" },
+      headers: { "User-Agent": "SIGINT/0.1 (research tool)", Accept: "application/json" },
       signal: AbortSignal.timeout(10_000),
     });
     if (!res.ok) return null;

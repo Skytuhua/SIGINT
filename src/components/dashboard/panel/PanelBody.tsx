@@ -14,7 +14,7 @@ const PanelBody = forwardRef<HTMLDivElement, PanelBodyProps>(function PanelBody(
   return (
     <div
       ref={ref}
-      className={`wv-panel-body ${noPadding ? "is-tight" : ""} ${className}`.trim()}
+      className={`si-panel-body ${noPadding ? "is-tight" : ""} ${className}`.trim()}
       {...rest}
     />
   );

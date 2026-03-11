@@ -49,12 +49,7 @@ import AiDataCenterSummaryPanel, {
 import UcdpSummaryPanel, { type UcdpSummaryMeta } from "./UcdpSummaryPanel";
 import { aggregateUcdpStats, type UcdpAggregatedStats } from "../../lib/ucdp/aggregation";
 import { generateUcdpSummary, type UcdpSummaryInput } from "../../lib/ucdp/summarizer";
-import DisplacementFlowDetailCard, {
-  type DisplacementFlowDetailData,
-  propsToDisplacementFlowDetail,
-} from "./DisplacementFlowDetailCard";
-import DisplacementFlowSummaryPanel from "./DisplacementFlowSummaryPanel";
-import { useWorldViewStore, type ArmsEmbargoFilters, type ConflictFilters, type UcdpFilters, type EconomicCenterFilters, type DisplacementFlowFilters } from "../../store";
+import { useSIGINTStore, type ArmsEmbargoFilters, type ConflictFilters, type UcdpFilters, type EconomicCenterFilters } from "../../store";
 import Toggle from "../dashboard/controls/Toggle";
 import { applyConflictZoneFilters } from "../../lib/newsLayers/conflictZoneFilters";
 import { NEWS_LAYER_REGISTRY, NEWS_LAYER_REGISTRY_BY_ID } from "../../lib/newsLayers/registry";
@@ -318,42 +313,6 @@ function applyEconomicCenterFilters(
   return { type: "FeatureCollection", features: filtered };
 }
 
-function applyDisplacementFlowFilters(
-  data: LayerFeatureCollection,
-  filters: DisplacementFlowFilters | null | undefined,
-  cameraBounds: NewsCameraBounds | null
-): LayerFeatureCollection {
-  if (!filters) return data;
-  const filtered = data.features.filter((feature) => {
-    const props = feature.properties as Record<string, unknown>;
-    if (filters.mode !== "all") {
-      if (String(props.flowType ?? "") !== filters.mode) return false;
-    }
-    if (filters.minVolume > 0) {
-      if (Number(props.value ?? 0) < filters.minVolume) return false;
-    }
-    if (filters.cause.length > 0) {
-      if (!filters.cause.includes(String(props.cause ?? ""))) return false;
-    }
-    if (filters.viewportOnly && cameraBounds) {
-      const originLat = Number(props.originLat ?? NaN);
-      const originLon = Number(props.originLon ?? NaN);
-      if (
-        !Number.isFinite(originLat) ||
-        !Number.isFinite(originLon) ||
-        originLon < cameraBounds.west ||
-        originLon > cameraBounds.east ||
-        originLat < cameraBounds.south ||
-        originLat > cameraBounds.north
-      ) {
-        return false;
-      }
-    }
-    return true;
-  });
-  return { type: "FeatureCollection", features: filtered };
-}
-
 function buildMilitaryBaseDetail(
   feature: GeoJSON.Feature,
   event: any
@@ -390,7 +349,7 @@ function buildMilitaryBaseDetail(
     fields.push({ label: "PROFILE", value: summaryRaw.trim() });
   }
   fields.push({ label: "LOC", value: `${lat.toFixed(3)}, ${lon.toFixed(3)}` });
-  fields.push({ label: "SOURCE", value: "WorldView Military Bases snapshot" });
+  fields.push({ label: "SOURCE", value: "SIGINT Military Bases snapshot" });
 
   return {
     layerId: "military-bases",
@@ -405,12 +364,9 @@ function buildMilitaryBaseDetail(
 
 /** Returns all MapLibre GL layer IDs that maplibreRenderer creates for a given registry layer. */
 function getMaplibreLayerIds(layerId: string, type: LayerRegistryEntry["type"]): string[] {
-  const prefix = `wv-news-layer-${layerId}`;
+  const prefix = `si-news-layer-${layerId}`;
   if (layerId === "trade-routes") {
     return [`${prefix}-glow`, `${prefix}-line`, `${prefix}-label`];
-  }
-  if (layerId === "displacement-flows") {
-    return [`${prefix}-glow`, `${prefix}-line`, `${prefix}-label`, `${prefix}-hit`, `${prefix}-origins`];
   }
   if (layerId === "trade-route-nodes") {
     return [`${prefix}-hub`, `${prefix}-choke`, `${prefix}-label`];
@@ -515,39 +471,33 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
    const nuclearDetailRef = useRef<NuclearSiteDetailData | null>(null);
   const economicCenterDetailRef = useRef<EconomicCenterDetailData | null>(null);
   const aiDataCenterDetailRef = useRef<AiDataCenterDetailData | null>(null);
-  const displacementFlowDetailRef = useRef<DisplacementFlowDetailData | null>(null);
   const suppressCountryClickRef = useRef(false);
 
-  const markers = useWorldViewStore((s) => s.news.markers);
-  const feedItems = useWorldViewStore((s) => s.news.feedItems);
-  const selectedCountry = useWorldViewStore((s) => s.news.selectedCountry);
-  const layerToggles = useWorldViewStore((s) => s.news.layerToggles);
-  const layerHealth = useWorldViewStore((s) => s.news.layerHealth);
-  const nuclearFilters = useWorldViewStore((s) => s.news.nuclearFilters);
-  const armsEmbargoFilters = useWorldViewStore((s) => s.news.armsEmbargoFilters);
-  const ucdpFilters = useWorldViewStore((s) => s.news.ucdpFilters);
-  const conflictFilters = useWorldViewStore((s) => s.news.conflictFilters);
-  const economicCenterFilters = useWorldViewStore((s) => s.news.economicCenterFilters);
-  const displacementFlowFilters = useWorldViewStore((s) => s.news.displacementFlowFilters);
-  const cameraBounds = useWorldViewStore((s) => s.news.cameraBounds);
+  const markers = useSIGINTStore((s) => s.news.markers);
+  const feedItems = useSIGINTStore((s) => s.news.feedItems);
+  const selectedCountry = useSIGINTStore((s) => s.news.selectedCountry);
+  const layerToggles = useSIGINTStore((s) => s.news.layerToggles);
+  const layerHealth = useSIGINTStore((s) => s.news.layerHealth);
+  const nuclearFilters = useSIGINTStore((s) => s.news.nuclearFilters);
+  const armsEmbargoFilters = useSIGINTStore((s) => s.news.armsEmbargoFilters);
+  const ucdpFilters = useSIGINTStore((s) => s.news.ucdpFilters);
+  const conflictFilters = useSIGINTStore((s) => s.news.conflictFilters);
+  const economicCenterFilters = useSIGINTStore((s) => s.news.economicCenterFilters);
+  const cameraBounds = useSIGINTStore((s) => s.news.cameraBounds);
   const nuclearLayerEnabled = layerToggles["nuclear-sites"] ?? false;
   const armsEmbargoLayerEnabled = layerToggles["arms-embargo-zones"] ?? false;
   const conflictZoneLayerEnabled = layerToggles["conflict-zones"] ?? false;
   const ucdpLayerEnabled = layerToggles["ucdp-events"] ?? false;
   const economicCenterLayerEnabled = layerToggles["economic-centers"] ?? false;
-  const displacementFlowLayerEnabled = layerToggles["displacement-flows"] ?? false;
-
-  const setSelectedCountry = useWorldViewStore((s) => s.setSelectedCountry);
-  const setNewsLayerToggle = useWorldViewStore((s) => s.setNewsLayerToggle);
-  const setNewsLayerHealth = useWorldViewStore((s) => s.setNewsLayerHealth);
-  const setNewsCameraBounds = useWorldViewStore((s) => s.setNewsCameraBounds);
-  const setNuclearFilters = useWorldViewStore((s) => s.setNuclearFilters);
-  const setArmsEmbargoFilters = useWorldViewStore((s) => s.setArmsEmbargoFilters);
-  const setUcdpFilters = useWorldViewStore((s) => s.setUcdpFilters);
-  const setConflictFilters = useWorldViewStore((s) => s.setConflictFilters);
-  const setEconomicCenterFilters = useWorldViewStore((s) => s.setEconomicCenterFilters);
-  const setDisplacementFlowFilters = useWorldViewStore((s) => s.setDisplacementFlowFilters);
-
+  const setSelectedCountry = useSIGINTStore((s) => s.setSelectedCountry);
+  const setNewsLayerToggle = useSIGINTStore((s) => s.setNewsLayerToggle);
+  const setNewsLayerHealth = useSIGINTStore((s) => s.setNewsLayerHealth);
+  const setNewsCameraBounds = useSIGINTStore((s) => s.setNewsCameraBounds);
+  const setNuclearFilters = useSIGINTStore((s) => s.setNuclearFilters);
+  const setArmsEmbargoFilters = useSIGINTStore((s) => s.setArmsEmbargoFilters);
+  const setUcdpFilters = useSIGINTStore((s) => s.setUcdpFilters);
+  const setConflictFilters = useSIGINTStore((s) => s.setConflictFilters);
+  const setEconomicCenterFilters = useSIGINTStore((s) => s.setEconomicCenterFilters);
   const [mapReady, setMapReady] = useState(false);
   const [dockSide, setDockSide] = useState<"left" | "right">("left");
   const [dotDetail, setDotDetail] = useState<DotDetailData | null>(null);
@@ -565,8 +515,6 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
   const [criticalMineralDetail, setCriticalMineralDetail] = useState<CriticalMineralDetailData | null>(null);
   const [economicCenterDetail, setEconomicCenterDetail] = useState<EconomicCenterDetailData | null>(null);
   const [aiDataCenterDetail, setAiDataCenterDetail] = useState<AiDataCenterDetailData | null>(null);
-  const [displacementFlowDetail, setDisplacementFlowDetail] = useState<DisplacementFlowDetailData | null>(null);
-  const [displacementFlowData, setDisplacementFlowData] = useState<LayerFeatureCollection | null>(null);
   const [ucdpStats, setUcdpStats] = useState<UcdpAggregatedStats | null>(null);
   const [ucdpMeta, setUcdpMeta] = useState<UcdpSummaryMeta | null>(null);
   const [ucdpHeatmap, setUcdpHeatmap] = useState(false);
@@ -582,6 +530,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
   const [conflictZoneSourceStatus, setConflictZoneSourceStatus] = useState<
     Record<string, "live" | "cached" | "degraded" | "unavailable"> | null
   >(null);
+  const [layerSearchQuery, setLayerSearchQuery] = useState("");
   const [intelTimeWindow, setIntelTimeWindow] = useState<HotspotTimeWindow>("24h");
   const [conflictTimeWindow, setConflictTimeWindow] = useState<"6h" | "24h" | "7d" | "30d" | "90d">("7d");
   const [conflictMode, setConflictMode] = useState<"strict" | "broad">("strict");
@@ -595,7 +544,6 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
   const ucdpFiltersRef = useRef<typeof ucdpFilters | null>(null);
   const conflictFiltersRef = useRef<typeof conflictFilters | null>(null);
   const economicCenterFiltersRef = useRef<typeof economicCenterFilters | null>(null);
-  const displacementFlowFiltersRef = useRef<typeof displacementFlowFilters | null>(null);
   const cameraBoundsRef = useRef<typeof cameraBounds | null>(null);
 
   const countryByArticleId = useMemo(() => {
@@ -714,10 +662,6 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
   useEffect(() => {
     economicCenterFiltersRef.current = economicCenterFilters ?? null;
   }, [economicCenterFilters]);
-
-  useEffect(() => {
-    displacementFlowFiltersRef.current = displacementFlowFilters ?? null;
-  }, [displacementFlowFilters]);
 
   useEffect(() => {
     if (!ucdpLayerEnabled) return;
@@ -1158,10 +1102,6 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
             try { setUcdpStats(aggregateUcdpStats(toRender)); } catch { /* ignore */ }
           } else if (layerId === "economic-centers") {
             toRender = applyEconomicCenterFilters(data, ecFilters as EconomicCenterFilters | undefined, bounds);
-          } else if (layerId === "displacement-flows") {
-            const dfFilters = displacementFlowFiltersRef.current ?? undefined;
-            toRender = applyDisplacementFlowFilters(data, dfFilters as DisplacementFlowFilters | undefined, bounds);
-            try { setDisplacementFlowData(toRender as LayerFeatureCollection); } catch { /* ignore */ }
           }
 
           maplibreRenderer.updateData(layer, liveMap, toRender);
@@ -1180,16 +1120,16 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
           // Start with an empty source so layers exist immediately (no rendering stall).
           // The pre-fetched GeoJSON will be applied asynchronously below.
           const emptyFc: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
-          m.addSource("wv-country-src", {
+          m.addSource("si-country-src", {
             type: "geojson",
             data: emptyFc,
             generateId: true,
           });
 
           m.addLayer({
-            id: "wv-country-fill",
+            id: "si-country-fill",
             type: "fill",
-            source: "wv-country-src",
+            source: "si-country-src",
             paint: {
               "fill-color": "#142139",
               "fill-opacity": 0.18,
@@ -1197,9 +1137,9 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
           });
 
           m.addLayer({
-            id: "wv-country-border",
+            id: "si-country-border",
             type: "line",
-            source: "wv-country-src",
+            source: "si-country-src",
             paint: {
               "line-color": "#4e5c71",
               "line-width": 0.9,
@@ -1208,9 +1148,9 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
           });
 
           m.addLayer({
-            id: "wv-country-highlight",
+            id: "si-country-highlight",
             type: "line",
-            source: "wv-country-src",
+            source: "si-country-src",
             filter: ["==", ["get", "ISO_A2"], ""],
             paint: {
               "line-color": "#a9bfdc",
@@ -1221,19 +1161,19 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
           // Apply pre-fetched country data once it arrives (non-blocking).
           countryDataPromise.then((geoJson) => {
             if (cancelled || !geoJson) return;
-            const src = m.getSource("wv-country-src") as { setData?: (d: GeoJSON.FeatureCollection) => void } | undefined;
+            const src = m.getSource("si-country-src") as { setData?: (d: GeoJSON.FeatureCollection) => void } | undefined;
             src?.setData?.(geoJson);
           });
 
-          m.addSource("wv-news-markers", {
+          m.addSource("si-news-markers", {
             type: "geojson",
             data: markerGeoJson,
           });
 
           m.addLayer({
-            id: "wv-news-markers-layer",
+            id: "si-news-markers-layer",
             type: "circle",
-            source: "wv-news-markers",
+            source: "si-news-markers",
             paint: {
               "circle-color": ["get", "color"],
               "circle-radius": ["get", "radius"],
@@ -1242,24 +1182,24 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
             },
           });
 
-          m.on("mousemove", "wv-country-fill", (event) => {
+          m.on("mousemove", "si-country-fill", (event) => {
             const feature = event.features?.[0] as GeoJSON.Feature | undefined;
             const code = countryCodeFromProps((feature?.properties ?? {}) as Record<string, unknown>);
-            m.setFilter("wv-country-highlight", ["==", ["get", "ISO_A2"], code ?? ""]);
+            m.setFilter("si-country-highlight", ["==", ["get", "ISO_A2"], code ?? ""]);
             m.getCanvas().style.cursor = code ? "pointer" : "";
           });
 
-          m.on("mouseleave", "wv-country-fill", () => {
-            m.setFilter("wv-country-highlight", ["==", ["get", "ISO_A2"], ""]);
+          m.on("mouseleave", "si-country-fill", () => {
+            m.setFilter("si-country-highlight", ["==", ["get", "ISO_A2"], ""]);
             m.getCanvas().style.cursor = "";
           });
 
-          const intelCircleLayerId = "wv-news-layer-intel-hotspots-circle";
-          const intelClusterLayerId = "wv-news-layer-intel-hotspots-cluster";
-          const intelClusterCountLayerId = "wv-news-layer-intel-hotspots-cluster-count";
-          const conflictZoneFillLayerId = "wv-news-layer-conflict-zones-fill";
-          const nuclearCircleLayerId = "wv-news-layer-nuclear-sites-circle";
-          const nuclearClusterLayerId = "wv-news-layer-nuclear-sites-cluster";
+          const intelCircleLayerId = "si-news-layer-intel-hotspots-circle";
+          const intelClusterLayerId = "si-news-layer-intel-hotspots-cluster";
+          const intelClusterCountLayerId = "si-news-layer-intel-hotspots-cluster-count";
+          const conflictZoneFillLayerId = "si-news-layer-conflict-zones-fill";
+          const nuclearCircleLayerId = "si-news-layer-nuclear-sites-circle";
+          const nuclearClusterLayerId = "si-news-layer-nuclear-sites-cluster";
 
           const tryOpenNewsLayerPopupAtPoint = (event: any, directFeature?: GeoJSON.Feature): boolean => {
             if (!maplibreRef.current) return false;
@@ -1650,33 +1590,33 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
             // These layers already have dedicated popup / panel handlers — skip them here.
             const dedicatedLayerIds = new Set([
               intelCircleLayerId, intelClusterLayerId, intelClusterCountLayerId,
-              "wv-news-layer-conflict-zones-circle", "wv-news-layer-conflict-zones-cluster", "wv-news-layer-conflict-zones-cluster-count",
+              "si-news-layer-conflict-zones-circle", "si-news-layer-conflict-zones-cluster", "si-news-layer-conflict-zones-cluster-count",
               nuclearCircleLayerId, nuclearClusterLayerId,
-              "wv-news-markers-layer",
-              "wv-news-layer-military-activity-circle",
-              "wv-news-layer-military-activity-cluster",
-              "wv-news-layer-military-activity-cluster-count",
-              "wv-news-layer-trade-route-nodes-hub",
-              "wv-news-layer-trade-route-nodes-choke",
-              "wv-news-layer-trade-route-nodes-label",
-              "wv-news-layer-ai-data-centers-halo",
-              "wv-news-layer-ai-data-centers-circle",
-              "wv-news-layer-ai-data-centers-label",
-              "wv-news-layer-ai-data-centers-cluster",
-              "wv-news-layer-ai-data-centers-cluster-count",
-              "wv-news-layer-critical-minerals-circle",
-              "wv-news-layer-critical-minerals-cluster",
-              "wv-news-layer-critical-minerals-cluster-count",
-              "wv-news-layer-sanctions-entities-circle",
-              "wv-news-layer-sanctions-entities-cluster",
-              "wv-news-layer-sanctions-entities-cluster-count",
-              "wv-news-layer-economic-centers-halo",
-              "wv-news-layer-economic-centers-circle",
-              "wv-news-layer-economic-centers-cluster",
-              "wv-news-layer-economic-centers-cluster-count",
-              "wv-news-layer-ucdp-events-circle",
-              "wv-news-layer-ucdp-events-cluster",
-              "wv-news-layer-ucdp-events-cluster-count",
+              "si-news-markers-layer",
+              "si-news-layer-military-activity-circle",
+              "si-news-layer-military-activity-cluster",
+              "si-news-layer-military-activity-cluster-count",
+              "si-news-layer-trade-route-nodes-hub",
+              "si-news-layer-trade-route-nodes-choke",
+              "si-news-layer-trade-route-nodes-label",
+              "si-news-layer-ai-data-centers-halo",
+              "si-news-layer-ai-data-centers-circle",
+              "si-news-layer-ai-data-centers-label",
+              "si-news-layer-ai-data-centers-cluster",
+              "si-news-layer-ai-data-centers-cluster-count",
+              "si-news-layer-critical-minerals-circle",
+              "si-news-layer-critical-minerals-cluster",
+              "si-news-layer-critical-minerals-cluster-count",
+              "si-news-layer-sanctions-entities-circle",
+              "si-news-layer-sanctions-entities-cluster",
+              "si-news-layer-sanctions-entities-cluster-count",
+              "si-news-layer-economic-centers-halo",
+              "si-news-layer-economic-centers-circle",
+              "si-news-layer-economic-centers-cluster",
+              "si-news-layer-economic-centers-cluster-count",
+              "si-news-layer-ucdp-events-circle",
+              "si-news-layer-ucdp-events-cluster",
+              "si-news-layer-ucdp-events-cluster-count",
             ]);
 
             const candidateLayers = Array.from(mountedLayersRef.current).flatMap((lid) => {
@@ -1714,7 +1654,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
             // Derive the registry layer from the MapLibre layer ID
             const mlLayerId = (feature as any).layer?.id as string | undefined;
             const registryId = mlLayerId
-              ?.replace(/^wv-news-layer-/, "")
+              ?.replace(/^si-news-layer-/, "")
               .replace(/-(halo|circle|label|cluster|cluster-count)$/, "");
             const registryEntry = registryId ? NEWS_LAYER_REGISTRY_BY_ID.get(registryId) : null;
             const layerLabel = registryEntry?.label ?? registryId ?? "Feature";
@@ -1762,9 +1702,9 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
           };
 
           const getPointFeaturePriority = (mlLayerId: string): number => {
-            if (mlLayerId === "wv-news-markers-layer") return 4;
+            if (mlLayerId === "si-news-markers-layer") return 4;
             const registryId = mlLayerId
-              ?.replace(/^wv-news-layer-/, "")
+              ?.replace(/^si-news-layer-/, "")
               .replace(/-(halo|circle|cluster|cluster-count)$/, "");
             if (!registryId) return 10;
             if (registryId === "military-bases") return 0;
@@ -1789,7 +1729,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                 : event.point;
 
             const candidateLayers = [
-              "wv-news-markers-layer",
+              "si-news-markers-layer",
               ...Array.from(mountedLayersRef.current).flatMap((lid) => {
                 const entry = NEWS_LAYER_REGISTRY_BY_ID.get(lid);
                 if (!entry) return [];
@@ -1829,11 +1769,11 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
             if (!bestFeature || !Number.isFinite(bestPriority)) return false;
 
             let registryId: string | null = null;
-            if (bestLayerId === "wv-news-markers-layer") {
+            if (bestLayerId === "si-news-markers-layer") {
               registryId = "markers";
-            } else if (bestLayerId.startsWith("wv-news-layer-")) {
+            } else if (bestLayerId.startsWith("si-news-layer-")) {
               registryId = bestLayerId
-                .replace(/^wv-news-layer-/, "")
+                .replace(/^si-news-layer-/, "")
                 .replace(/-(halo|circle|label|cluster|cluster-count)$/, "");
               // Fix special layer ID suffixes for trade-route-nodes
               if (
@@ -2156,7 +2096,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
             try {
               features =
                 (anyMap.queryRenderedFeatures?.(event.point as any, {
-                  layers: ["wv-country-fill"],
+                  layers: ["si-country-fill"],
                 }) as any[]) ?? [];
             } catch {
               features = [];
@@ -2183,7 +2123,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
           const handleConflictZonePolygonClick = (event: any): boolean => {
             const anyMap = map as any;
             if (!event?.point) return false;
-            const fillLayerId = "wv-news-layer-conflict-zones-fill";
+            const fillLayerId = "si-news-layer-conflict-zones-fill";
             if (!anyMap.getLayer?.(fillLayerId)) return false;
             if (!mountedLayersRef.current.has("conflict-zones")) return false;
 
@@ -2219,7 +2159,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
           const handleEmbargoPolygonClick = (event: any): boolean => {
             const anyMap = map as any;
             if (!event?.point) return false;
-            const fillLayerId = "wv-news-layer-arms-embargo-zones-fill";
+            const fillLayerId = "si-news-layer-arms-embargo-zones-fill";
             if (!anyMap.getLayer?.(fillLayerId)) return false;
             if (!mountedLayersRef.current.has("arms-embargo-zones")) return false;
 
@@ -2261,8 +2201,8 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
             if (!event?.point) return false;
             if (!mountedLayersRef.current.has("trade-routes")) return false;
 
-            const lineLayerId = "wv-news-layer-trade-routes-line";
-            const glowLayerId = "wv-news-layer-trade-routes-glow";
+            const lineLayerId = "si-news-layer-trade-routes-line";
+            const glowLayerId = "si-news-layer-trade-routes-glow";
             const lineLayers = [lineLayerId, glowLayerId].filter((id) => Boolean(anyMap.getLayer?.(id)));
             if (lineLayers.length === 0) return false;
 
@@ -2327,9 +2267,9 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
             if (!event?.point) return false;
             const anyM = m as any;
             const aiLayers = [
-              "wv-news-layer-ai-data-centers-halo",
-              "wv-news-layer-ai-data-centers-circle",
-              "wv-news-layer-ai-data-centers-label",
+              "si-news-layer-ai-data-centers-halo",
+              "si-news-layer-ai-data-centers-circle",
+              "si-news-layer-ai-data-centers-label",
             ].filter((id) => Boolean(anyM.getLayer?.(id)));
             if (aiLayers.length === 0) return false;
 
@@ -2455,7 +2395,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
 
           // Bring the built-in news markers layer and ALL mounted overlay layers to the front
           // so they visually render above the country-fill polygon on land areas.
-          bringLayerToFront("wv-news-markers-layer");
+          bringLayerToFront("si-news-markers-layer");
           for (const lid of Array.from(mountedLayersRef.current)) {
             const entry = NEWS_LAYER_REGISTRY_BY_ID.get(lid);
             if (!entry) continue;
@@ -2521,8 +2461,8 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.getSource("wv-news-markers")) return;
-    const source = map.getSource("wv-news-markers") as unknown as { setData?: (data: GeoJSON.FeatureCollection) => void };
+    if (!map || !map.getSource("si-news-markers")) return;
+    const source = map.getSource("si-news-markers") as unknown as { setData?: (data: GeoJSON.FeatureCollection) => void };
     source.setData?.(markerGeoJson);
   }, [markerGeoJson]);
 
@@ -2534,7 +2474,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
       void syncLayerMountedState(layer.id, enabled);
     }
 
-    bringLayerToFront("wv-news-markers-layer");
+    bringLayerToFront("si-news-markers-layer");
     for (const lid of Array.from(mountedLayersRef.current)) {
       const entry = NEWS_LAYER_REGISTRY_BY_ID.get(lid);
       if (!entry) continue;
@@ -2620,84 +2560,6 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
     maplibreRenderer.updateData(layer, map as any, filtered);
   }, [mapReady, sortedLayers, economicCenterFilters]);
 
-  // ── Displacement flows: auto-heal stale layer mount ──────────────────
-  // Detects two stale-mount conditions:
-  //  1. Missing -hit layer → layer was mounted by old 3-sublayer code
-  //  2. Legacy bare layer (wv-news-layer-displacement-flows) present → mounted before
-  //     the custom renderer existed; the new renderer will remove and replace it.
-  useEffect(() => {
-    const map = mapRef.current as MapInstance | null;
-    if (!map || !mapReady || !displacementFlowLayerEnabled) return;
-    const layer = sortedLayers.find((e) => e.id === "displacement-flows");
-    if (!layer) return;
-    const destMissing = !map.getLayer("wv-news-layer-displacement-flows-destinations");
-    const legacyPresent = !!map.getLayer("wv-news-layer-displacement-flows");
-    if (destMissing || legacyPresent) {
-      mountedLayersRef.current.delete("displacement-flows");
-      void syncLayerMountedState("displacement-flows", true);
-    }
-  }, [mapReady, displacementFlowLayerEnabled, sortedLayers, syncLayerMountedState]);
-
-  // ── Displacement flows filter ────────────────────────────────────────
-  useEffect(() => {
-    const map = mapRef.current as MapInstance | null;
-    if (!map || !mapReady || !(map as any).isStyleLoaded?.()) return;
-
-    const layer = sortedLayers.find((entry) => entry.id === "displacement-flows");
-    const raw = layerDataRef.current.get("displacement-flows");
-    if (!layer || !raw || !mountedLayersRef.current.has("displacement-flows")) return;
-
-    const dff = displacementFlowFiltersRef.current ?? undefined;
-    const bounds = cameraBoundsRef.current ?? null;
-    const filtered = applyDisplacementFlowFilters(raw, dff as DisplacementFlowFilters | undefined, bounds);
-    maplibreRenderer.updateData(layer, map as any, filtered);
-    try { setDisplacementFlowData(filtered as LayerFeatureCollection); } catch { /* ignore */ }
-  }, [mapReady, sortedLayers, displacementFlowFilters]);
-
-  // ── Displacement flows click + cursor handlers ────────────────────────
-  useEffect(() => {
-    const map = mapRef.current as MapInstance | null;
-    if (!map || !mapReady || !(map as any).isStyleLoaded?.()) return;
-
-    // Try preferred wide hit-target first, then origin dots, then fall back to the
-    // visible line itself so clicking always works regardless of layer mount timing.
-    const candidates = [
-      "wv-news-layer-displacement-flows-hit",
-      "wv-news-layer-displacement-flows-origins",
-      "wv-news-layer-displacement-flows-destinations",
-      "wv-news-layer-displacement-flows-line",
-    ];
-    const active = candidates.filter((id) => !!map.getLayer(id));
-    if (active.length === 0) return;
-
-    const handleFlowClick = (event: any) => {
-      const feature = event.features?.[0] as GeoJSON.Feature | undefined;
-      if (!feature) return;
-      const props = (feature.properties ?? {}) as Record<string, unknown>;
-      const detail = propsToDisplacementFlowDetail(props);
-      displacementFlowDetailRef.current = detail;
-      setDisplacementFlowDetail(detail);
-    };
-    const setPointer   = () => { map.getCanvas().style.cursor = "pointer"; };
-    const resetPointer = () => { map.getCanvas().style.cursor = ""; };
-
-    for (const id of active) {
-      map.on("click",      id, handleFlowClick);
-      map.on("mouseenter", id, setPointer);
-      map.on("mouseleave", id, resetPointer);
-    }
-
-    return () => {
-      const m = map as any;
-      if (!m.off) return;
-      for (const id of candidates) {
-        m.off("click",      id, handleFlowClick);
-        m.off("mouseenter", id, setPointer);
-        m.off("mouseleave", id, resetPointer);
-      }
-    };
-  }, [mapReady, displacementFlowLayerEnabled]);
-
   // ── Viewport-only re-filter on camera move ──────────────────────────
   // Only re-apply filters when the camera actually moves AND at least one
   // layer has viewport-only filtering enabled. This avoids 5 redundant
@@ -2756,16 +2618,6 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
       }
     }
 
-    const dff = displacementFlowFiltersRef.current;
-    if ((dff as DisplacementFlowFilters)?.viewportOnly) {
-      const layer = sortedLayers.find((e) => e.id === "displacement-flows");
-      const raw = layerDataRef.current.get("displacement-flows");
-      if (layer && raw && mountedLayersRef.current.has("displacement-flows")) {
-        const filteredDf = applyDisplacementFlowFilters(raw, dff as DisplacementFlowFilters, bounds);
-        maplibreRenderer.updateData(layer, map as any, filteredDf);
-        try { setDisplacementFlowData(filteredDf as LayerFeatureCollection); } catch { /* ignore */ }
-      }
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapReady, cameraBounds]);
 
@@ -2773,8 +2625,8 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
     const map = mapRef.current as MapInstance | null;
     if (!map || !mapReady || !(map as any).isStyleLoaded?.()) return;
 
-    const srcId = "wv-news-src-ucdp-events";
-    const heatId = "wv-news-layer-ucdp-events-heatmap";
+    const srcId = "si-news-src-ucdp-events";
+    const heatId = "si-news-layer-ucdp-events-heatmap";
     const anyMap = map as any;
 
     if (ucdpHeatmap && ucdpLayerEnabled) {
@@ -2808,7 +2660,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
     const map = mapRef.current as MapInstance | null;
     if (!map || !mapReady || !(map as any).isStyleLoaded?.()) return;
 
-          const circleLayerId = "wv-news-layer-military-bases-circle";
+          const circleLayerId = "si-news-layer-military-bases-circle";
 
           const handleBaseClick = (event: any) => {
             const feature = event.features?.[0] as GeoJSON.Feature | undefined;
@@ -2851,14 +2703,30 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
   }, [sortedLayers]);
 
   return (
-    <div className="wv-news-map-container">
-      <div className="wv-news-map-layout">
-        <aside className="wv-news-layers-panel" aria-label="News map layers">
-          <div className="wv-news-layers-title">LAYERS</div>
-          <div className="wv-news-layers-scroll">
-            {grouped.map(([category, layers]) => (
-              <div key={category} className="wv-news-layers-group">
-                <div className="wv-news-layers-group-label">{category.toUpperCase()}</div>
+    <div className="si-news-map-container">
+      <div className="si-news-map-layout">
+        <aside className="si-news-layers-panel" aria-label="News map layers">
+          <div className="si-news-layers-title">LAYERS</div>
+          <input
+            type="text"
+            className="si-news-layer-search"
+            placeholder="Filter layers..."
+            value={layerSearchQuery}
+            onChange={(e) => setLayerSearchQuery(e.target.value)}
+          />
+          <div className="si-news-layers-scroll">
+            {grouped.map(([category, layers]) => {
+              const lq = layerSearchQuery.toLowerCase();
+              const filtered = lq
+                ? layers.filter((l) => l.label.toLowerCase().includes(lq) || l.id.toLowerCase().includes(lq))
+                : layers;
+              if (filtered.length === 0) return null;
+              return [category, filtered] as const;
+            }).filter(Boolean).map((entry) => {
+              const [category, layers] = entry as [string, typeof sortedLayers];
+              return (
+              <div key={category} className="si-news-layers-group">
+                <div className="si-news-layers-group-label">{category.toUpperCase()}</div>
                 {layers.map((layer) => {
                   const enabled = layerToggles[layer.id] ?? layer.defaultEnabled;
                   const health = layerHealth[layer.id];
@@ -2866,7 +2734,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                   const showIntelTimeWindow = layer.id === "intel-hotspots" && enabled;
                   const showConflictControls = layer.id === "conflict-zones" && enabled;
                   return (
-                    <div key={layer.id} className="wv-news-layer-row" data-cat={layer.category}>
+                    <div key={layer.id} className="si-news-layer-row" data-cat={layer.category}>
                       <Toggle
                         checked={enabled}
                         onChange={(checked) => setNewsLayerToggle(layer.id, checked)}
@@ -2874,7 +2742,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                       />
                       {showIntelTimeWindow ? (
                         <select
-                          className="wv-hotspot-layer-window"
+                          className="si-hotspot-layer-window"
                           value={intelTimeWindow}
                           onChange={(event) => {
                             const next = event.target.value as HotspotTimeWindow;
@@ -2897,7 +2765,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                       {showConflictControls ? (
                         <>
                           <select
-                            className="wv-hotspot-layer-window"
+                            className="si-hotspot-layer-window"
                             value={conflictTimeWindow}
                             onChange={(event) => {
                               const next = event.target.value as typeof conflictTimeWindow;
@@ -2918,7 +2786,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                           </select>
                           <button
                             type="button"
-                            className="wv-hotspot-layer-window"
+                            className="si-hotspot-layer-window"
                             onClick={() => {
                               const next = conflictMode === "strict" ? "broad" : "strict";
                               setConflictMode(next);
@@ -2933,22 +2801,23 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                           </button>
                         </>
                       ) : null}
-                      <span className={`wv-panel-health is-${toLayerHealthUi(status)}`} title={status} />
+                      <span className={`si-panel-health is-${toLayerHealthUi(status)}`} title={status} />
                     </div>
                   );
                 })}
               </div>
-            ))}
+            );
+            })}
             {nuclearLayerEnabled && nuclearFilters ? (
-              <div className="wv-news-layers-group">
-                <div className="wv-news-layers-group-label">NUCLEAR FILTERS</div>
-                <div className="wv-news-layer-row">
-                  <div className="wv-news-nuclear-chips">
+              <div className="si-news-layers-group">
+                <div className="si-news-layers-group-label">NUCLEAR FILTERS</div>
+                <div className="si-news-layer-row">
+                  <div className="si-news-nuclear-chips">
                     {(nuclearFilters.types ?? []).map((t) => (
                       <button
                         key={t}
                         type="button"
-                        className={`wv-hotspot-window-btn ${
+                        className={`si-hotspot-window-btn ${
                           nuclearFilters.types?.includes(t) ? "is-active" : ""
                         }`}
                         onClick={() => {
@@ -2965,13 +2834,13 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                     ))}
                   </div>
                 </div>
-                <div className="wv-news-layer-row">
-                  <div className="wv-news-nuclear-chips">
+                <div className="si-news-layer-row">
+                  <div className="si-news-nuclear-chips">
                     {(nuclearFilters.statuses ?? []).map((s) => (
                       <button
                         key={s}
                         type="button"
-                        className={`wv-hotspot-window-btn ${
+                        className={`si-hotspot-window-btn ${
                           nuclearFilters.statuses?.includes(s) ? "is-active" : ""
                         }`}
                         onClick={() => {
@@ -2988,8 +2857,8 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                     ))}
                   </div>
                 </div>
-                <div className="wv-news-layer-row">
-                  <label className="wv-news-nuclear-viewport">
+                <div className="si-news-layer-row">
+                  <label className="si-news-nuclear-viewport">
                     <input
                       type="checkbox"
                       checked={Boolean(nuclearFilters.inViewportOnly)}
@@ -3000,10 +2869,10 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                     Show only within viewport
                   </label>
                 </div>
-                <div className="wv-news-layer-row">
+                <div className="si-news-layer-row">
                   <input
                     type="text"
-                    className="wv-hotspot-layer-window"
+                    className="si-hotspot-layer-window"
                     placeholder="Search name / operator / country"
                     value={nuclearFilters.searchText}
                     onChange={(e) =>
@@ -3014,10 +2883,10 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
               </div>
             ) : null}
             {economicCenterLayerEnabled && economicCenterFilters ? (
-              <div className="wv-news-layers-group">
-                <div className="wv-news-layers-group-label">ECONOMIC CENTERS</div>
-                <div className="wv-news-layer-row">
-                  <label style={{ fontSize: 10, color: "var(--wv-text-muted,#6b7280)" }}>
+              <div className="si-news-layers-group">
+                <div className="si-news-layers-group-label">ECONOMIC CENTERS</div>
+                <div className="si-news-layer-row">
+                  <label style={{ fontSize: 10, color: "var(--si-text-muted,#6b7280)" }}>
                     Score threshold: {economicCenterFilters.scoreThreshold}
                   </label>
                   <input
@@ -3032,13 +2901,13 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                     style={{ width: "100%" }}
                   />
                 </div>
-                <div className="wv-news-layer-row">
-                  <div className="wv-news-nuclear-chips">
+                <div className="si-news-layer-row">
+                  <div className="si-news-nuclear-chips">
                     {(["balanced", "finance", "trade"] as const).map((m) => (
                       <button
                         key={m}
                         type="button"
-                        className={`wv-hotspot-window-btn ${economicCenterFilters.mode === m ? "is-active" : ""}`}
+                        className={`si-hotspot-window-btn ${economicCenterFilters.mode === m ? "is-active" : ""}`}
                         onClick={() => setEconomicCenterFilters({ mode: m })}
                       >
                         {m}
@@ -3046,8 +2915,8 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                     ))}
                   </div>
                 </div>
-                <div className="wv-news-layer-row">
-                  <label className="wv-news-nuclear-viewport">
+                <div className="si-news-layer-row">
+                  <label className="si-news-nuclear-viewport">
                     <input
                       type="checkbox"
                       checked={Boolean(economicCenterFilters.viewportOnly)}
@@ -3058,10 +2927,10 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                     Show only within viewport
                   </label>
                 </div>
-                <div className="wv-news-layer-row">
+                <div className="si-news-layer-row">
                   <input
                     type="text"
-                    className="wv-hotspot-layer-window"
+                    className="si-hotspot-layer-window"
                     placeholder="Search city / country"
                     value={economicCenterFilters.searchText}
                     onChange={(e) =>
@@ -3072,15 +2941,15 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
               </div>
             ) : null}
             {armsEmbargoLayerEnabled && armsEmbargoFilters ? (
-              <div className="wv-news-layers-group">
-                <div className="wv-news-layers-group-label">EMBARGO FILTERS</div>
-                <div className="wv-news-layer-row">
-                  <div className="wv-news-nuclear-chips">
+              <div className="si-news-layers-group">
+                <div className="si-news-layers-group-label">EMBARGO FILTERS</div>
+                <div className="si-news-layer-row">
+                  <div className="si-news-nuclear-chips">
                     {["UNSC", "EU", "UK", "US", "Other"].map((auth) => (
                       <button
                         key={auth}
                         type="button"
-                        className={`wv-hotspot-window-btn ${
+                        className={`si-hotspot-window-btn ${
                           armsEmbargoFilters.authorities.includes(auth) ? "is-active" : ""
                         }`}
                         onClick={() => {
@@ -3097,13 +2966,13 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                     ))}
                   </div>
                 </div>
-                <div className="wv-news-layer-row">
-                  <div className="wv-news-nuclear-chips">
+                <div className="si-news-layer-row">
+                  <div className="si-news-nuclear-chips">
                     {["Active", "Ended", "Unknown"].map((st) => (
                       <button
                         key={st}
                         type="button"
-                        className={`wv-hotspot-window-btn ${
+                        className={`si-hotspot-window-btn ${
                           armsEmbargoFilters.statuses.includes(st) ? "is-active" : ""
                         }`}
                         onClick={() => {
@@ -3120,13 +2989,13 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                     ))}
                   </div>
                 </div>
-                <div className="wv-news-layer-row">
-                  <div className="wv-news-nuclear-chips">
+                <div className="si-news-layer-row">
+                  <div className="si-news-nuclear-chips">
                     {["Full", "Partial", "Unknown"].map((sc) => (
                       <button
                         key={sc}
                         type="button"
-                        className={`wv-hotspot-window-btn ${
+                        className={`si-hotspot-window-btn ${
                           armsEmbargoFilters.scopes.includes(sc) ? "is-active" : ""
                         }`}
                         onClick={() => {
@@ -3143,8 +3012,8 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                     ))}
                   </div>
                 </div>
-                <div className="wv-news-layer-row">
-                  <label className="wv-news-nuclear-viewport">
+                <div className="si-news-layer-row">
+                  <label className="si-news-nuclear-viewport">
                     <input
                       type="checkbox"
                       checked={Boolean(armsEmbargoFilters.inViewportOnly)}
@@ -3155,10 +3024,10 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                     Show only within viewport
                   </label>
                 </div>
-                <div className="wv-news-layer-row">
+                <div className="si-news-layer-row">
                   <input
                     type="text"
-                    className="wv-hotspot-layer-window"
+                    className="si-hotspot-layer-window"
                     placeholder="Search country / programme / legal basis"
                     value={armsEmbargoFilters.searchText}
                     onChange={(e) =>
@@ -3169,10 +3038,10 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
               </div>
             ) : null}
             {conflictZoneLayerEnabled && conflictFilters ? (
-              <div className="wv-news-layers-group">
-                <div className="wv-news-layers-group-label">CONFLICT ZONE FILTERS</div>
-                <div className="wv-news-layer-row">
-                  <label className="wv-news-nuclear-viewport">
+              <div className="si-news-layers-group">
+                <div className="si-news-layers-group-label">CONFLICT ZONE FILTERS</div>
+                <div className="si-news-layer-row">
+                  <label className="si-news-nuclear-viewport">
                     <input
                       type="checkbox"
                       checked={Boolean(conflictFilters.inViewportOnly)}
@@ -3184,7 +3053,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                   </label>
                 </div>
                 {conflictZoneSourceStatus && Object.keys(conflictZoneSourceStatus).length > 0 ? (
-                  <div className="wv-news-layer-row" style={{ fontSize: 10, opacity: 0.8 }}>
+                  <div className="si-news-layer-row" style={{ fontSize: 10, opacity: 0.8 }}>
                     Data: {Object.entries(conflictZoneSourceStatus).map(([k, v]) => `${k}=${v}`).join(", ")}
                   </div>
                 ) : null}
@@ -3199,17 +3068,11 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                 degraded={ucdpBriefingDegraded}
               />
             ) : null}
-            {displacementFlowLayerEnabled ? (
-              <DisplacementFlowSummaryPanel
-                flows={displacementFlowData}
-                health={null}
-              />
-            ) : null}
             {ucdpLayerEnabled && ucdpFilters ? (
-              <div className="wv-news-layers-group">
-                <div className="wv-news-layers-group-label">UCDP FILTERS</div>
-                <div className="wv-news-layer-row">
-                  <div className="wv-news-nuclear-chips">
+              <div className="si-news-layers-group">
+                <div className="si-news-layers-group-label">UCDP FILTERS</div>
+                <div className="si-news-layer-row">
+                  <div className="si-news-nuclear-chips">
                     {(
                       [
                         ["state-based", "State-based"],
@@ -3220,7 +3083,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                       <button
                         key={val}
                         type="button"
-                        className={`wv-hotspot-window-btn ${
+                        className={`si-hotspot-window-btn ${
                           ucdpFilters.violenceTypes.includes(val) ? "is-active" : ""
                         }`}
                         onClick={() => {
@@ -3237,13 +3100,13 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                     ))}
                   </div>
                 </div>
-                <div className="wv-news-layer-row" style={{ gap: 6, alignItems: "center" }}>
+                <div className="si-news-layer-row" style={{ gap: 6, alignItems: "center" }}>
                   <span style={{ fontSize: 11, opacity: 0.7, whiteSpace: "nowrap" }}>Min fatalities</span>
                   <input
                     type="number"
                     min={1}
                     max={500}
-                    className="wv-hotspot-layer-window"
+                    className="si-hotspot-layer-window"
                     style={{ width: 60, textAlign: "center" }}
                     value={ucdpFilters.minFatalities}
                     onChange={(e) =>
@@ -3253,13 +3116,13 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                     }
                   />
                 </div>
-                <div className="wv-news-layer-row" style={{ gap: 6, alignItems: "center" }}>
+                <div className="si-news-layer-row" style={{ gap: 6, alignItems: "center" }}>
                   <span style={{ fontSize: 11, opacity: 0.7, whiteSpace: "nowrap" }}>Year</span>
                   <input
                     type="number"
                     min={1989}
                     max={new Date().getFullYear()}
-                    className="wv-hotspot-layer-window"
+                    className="si-hotspot-layer-window"
                     style={{ width: 70, textAlign: "center" }}
                     value={ucdpFilters.yearRange[0]}
                     onChange={(e) => {
@@ -3268,8 +3131,8 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                     }}
                   />
                 </div>
-                <div className="wv-news-layer-row">
-                  <label className="wv-news-nuclear-viewport">
+                <div className="si-news-layer-row">
+                  <label className="si-news-nuclear-viewport">
                     <input
                       type="checkbox"
                       checked={Boolean(ucdpFilters.inViewportOnly)}
@@ -3280,8 +3143,8 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                     Show only within viewport
                   </label>
                 </div>
-                <div className="wv-news-layer-row">
-                  <label className="wv-news-nuclear-viewport">
+                <div className="si-news-layer-row">
+                  <label className="si-news-nuclear-viewport">
                     <input
                       type="checkbox"
                       checked={ucdpHeatmap}
@@ -3292,96 +3155,11 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                 </div>
               </div>
             ) : null}
-            {displacementFlowLayerEnabled && displacementFlowFilters ? (
-              <div className="wv-news-layers-group">
-                <div className="wv-news-layers-group-label">DISPLACEMENT FILTERS</div>
-                <div className="wv-news-layer-row">
-                  <div className="wv-news-nuclear-chips">
-                    {(
-                      [
-                        ["all", "All"],
-                        ["refugee", "Refugees"],
-                        ["idp", "IDPs"],
-                      ] as const
-                    ).map(([val, label]) => (
-                      <button
-                        key={val}
-                        type="button"
-                        className={`wv-hotspot-window-btn ${
-                          displacementFlowFilters.mode === val ? "is-active" : ""
-                        }`}
-                        onClick={() => setDisplacementFlowFilters({ mode: val })}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="wv-news-layer-row">
-                  <div className="wv-news-nuclear-chips">
-                    {(
-                      [
-                        ["conflict", "Conflict"],
-                        ["disaster", "Disaster"],
-                        ["other", "Other"],
-                      ] as const
-                    ).map(([val, label]) => (
-                      <button
-                        key={val}
-                        type="button"
-                        className={`wv-hotspot-window-btn ${
-                          displacementFlowFilters.cause.includes(val) ? "is-active" : ""
-                        }`}
-                        onClick={() => {
-                          const current = displacementFlowFilters.cause;
-                          const active = current.includes(val);
-                          setDisplacementFlowFilters({
-                            cause: active ? current.filter((c) => c !== val) : [...current, val],
-                          });
-                        }}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="wv-news-layer-row" style={{ gap: 6, alignItems: "center" }}>
-                  <span style={{ fontSize: 11, opacity: 0.7, whiteSpace: "nowrap" }}>Min volume</span>
-                  <select
-                    className="wv-hotspot-layer-window"
-                    style={{ fontSize: 11 }}
-                    value={displacementFlowFilters.minVolume}
-                    onChange={(e) =>
-                      setDisplacementFlowFilters({ minVolume: parseInt(e.target.value, 10) || 0 })
-                    }
-                  >
-                    <option value={0}>Any</option>
-                    <option value={10000}>10K+</option>
-                    <option value={50000}>50K+</option>
-                    <option value={100000}>100K+</option>
-                    <option value={500000}>500K+</option>
-                    <option value={1000000}>1M+</option>
-                  </select>
-                </div>
-                <div className="wv-news-layer-row">
-                  <label className="wv-news-nuclear-viewport">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(displacementFlowFilters.viewportOnly)}
-                      onChange={(e) =>
-                        setDisplacementFlowFilters({ viewportOnly: e.target.checked })
-                      }
-                    />
-                    Show only within viewport
-                  </label>
-                </div>
-              </div>
-            ) : null}
           </div>
         </aside>
 
-        <div className="wv-news-map-canvas-wrap">
-          <div ref={containerRef} className="wv-news-map-canvas" />
+        <div className="si-news-map-canvas-wrap">
+          <div ref={containerRef} className="si-news-map-canvas" />
           {dotDetail ? (
             <MapDotDetailPanel
               detail={dotDetail}
@@ -3464,15 +3242,6 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
               onClose={() => {
                 ucdpDetailRef.current = null;
                 setUcdpDetail(null);
-              }}
-            />
-          ) : null}
-          {displacementFlowDetail ? (
-            <DisplacementFlowDetailCard
-              detail={displacementFlowDetail}
-              onClose={() => {
-                displacementFlowDetailRef.current = null;
-                setDisplacementFlowDetail(null);
               }}
             />
           ) : null}

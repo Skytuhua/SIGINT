@@ -200,7 +200,7 @@ async function fetchFeed(feed: RssFeedSource): Promise<NewsArticle[]> {
     const response = await fetch(feed.url, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "WorldView/0.1 (rss-ingestion)",
+        "User-Agent": "SIGINT/0.1 (rss-ingestion)",
         Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
       },
       cache: "no-store",

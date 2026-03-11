@@ -5,6 +5,7 @@ import React from "react";
 import { useMarketData } from "../../hooks/useMarketData";
 import type { MoversResponse, MoverRow } from "../../lib/server/news/providers/marketTypes";
 import { SCREENER_UNIVERSE } from "./shared/screenerData";
+import Term from "./shared/Term";
 
 /* ── Static FX data (Yahoo doesn't provide FX movers easily) ───── */
 const FX_GAINERS: MoverRow[] = [
@@ -72,35 +73,35 @@ export default function TopMoversPanel({ filter = "equity", style, onTickerClick
   const live = isFx ? false : isLive;
 
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">Top Movers</span>
-        <div className="wv-market-movers-tabs">
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title">Top Movers</span>
+        <div className="si-market-movers-tabs">
           {(["GAINERS", "LOSERS"] as TabType[]).map((t) => (
             <button
               key={t}
-              className={`wv-market-movers-tab${tab === t ? " is-active" : ""}`}
+              className={`si-market-movers-tab${tab === t ? " is-active" : ""}`}
               onClick={() => setTab(t)}
             >
               {t}
             </button>
           ))}
         </div>
-        <span className={`wv-market-panel-badge ${live ? "is-live" : "is-static"}`}>
+        <span className={`si-market-panel-badge ${live ? "is-live" : "is-static"}`}>
           {live ? "LIVE" : "STATIC"}
         </span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
-        <div className={`wv-market-movers-col-header ${isFx ? "is-fx" : ""}`}>
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
+        <div className={`si-market-movers-col-header ${isFx ? "is-fx" : ""}`}>
           <span>SYM</span>
           <span>NAME</span>
           <span style={{ textAlign: "right" }}>PRICE</span>
           <span style={{ textAlign: "right" }}>CHG%</span>
-          {!isFx && <span style={{ textAlign: "right" }}>MCAP</span>}
-          {!isFx && <span style={{ textAlign: "right" }}>VOL</span>}
+          {!isFx && <span style={{ textAlign: "right" }}><Term id="MKTCAP">MCAP</Term></span>}
+          {!isFx && <span style={{ textAlign: "right" }}><Term id="VOLMULT">VOL</Term></span>}
         </div>
         {rows.length === 0 && (
-          <div style={{ padding: "16px 10px", fontSize: 10, color: "var(--wv-text-muted)", textAlign: "center" }}>
+          <div style={{ padding: "16px 10px", fontSize: 10, color: "var(--si-text-muted)", textAlign: "center" }}>
             Waiting for data…
           </div>
         )}
@@ -108,21 +109,21 @@ export default function TopMoversPanel({ filter = "equity", style, onTickerClick
           const chgClass = row.pct > 0 ? "is-up" : "is-down";
           const sign = row.pct > 0 ? "+" : "";
           return (
-            <div key={row.sym} className={`wv-market-movers-row ${isFx ? "is-fx" : ""}`} style={{ cursor: onTickerClick ? "pointer" : "default" }} onClick={() => onTickerClick?.(row.sym)}>
-              <span className="wv-market-movers-sym">{row.sym}</span>
-              <span className="wv-market-movers-name-col">
-                <span className="wv-market-movers-name" title={row.name}>{row.name}</span>
-                {row.reason && <span className="wv-market-movers-reason">{row.reason}</span>}
+            <div key={row.sym} className={`si-market-movers-row ${isFx ? "is-fx" : ""}`} style={{ cursor: onTickerClick ? "pointer" : "default" }} onClick={() => onTickerClick?.(row.sym)}>
+              <span className="si-market-movers-sym">{row.sym}</span>
+              <span className="si-market-movers-name-col">
+                <span className="si-market-movers-name" title={row.name}>{row.name}</span>
+                {row.reason && <span className="si-market-movers-reason">{row.reason}</span>}
               </span>
-              <span className="wv-market-movers-price">{row.price || "—"}</span>
-              <span className={`wv-market-movers-pct ${chgClass}`}>{sign}{row.pct.toFixed(2)}%</span>
-              {!isFx && <span className="wv-market-movers-mcap">{fmtMcap(row.mcapB)}</span>}
-              {!isFx && <span className="wv-market-movers-vol">{row.volMult}</span>}
+              <span className="si-market-movers-price">{row.price || "—"}</span>
+              <span className={`si-market-movers-pct ${chgClass}`}>{sign}{row.pct.toFixed(2)}%</span>
+              {!isFx && <span className="si-market-movers-mcap">{fmtMcap(row.mcapB)}</span>}
+              {!isFx && <span className="si-market-movers-vol">{row.volMult}</span>}
             </div>
           );
         })}
       </div>
-      <div className="wv-market-panel-footer">
+      <div className="si-market-panel-footer">
         {live ? "Yahoo Finance · 2min refresh" : isFx ? "FX static data" : "Waiting for data…"}
       </div>
     </div>

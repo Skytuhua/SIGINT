@@ -210,26 +210,26 @@ export default function HotspotDetailCard({ detail, timeWindow, onTimeWindowChan
   if (!mounted) return null;
 
   return createPortal(
-    <div className="wv-hotspot-card" role="dialog" aria-label="Intel hotspot detail">
-      <div className="wv-hotspot-card-hdr">
-        <div className="wv-hotspot-card-headline">
-          <div className="wv-hotspot-name">{active.name.toUpperCase()}</div>
-          <span className={`wv-hotspot-tier tier-${active.tier.toLowerCase()}`}>{active.tier}</span>
+    <div className="si-hotspot-card" role="dialog" aria-label="Intel hotspot detail">
+      <div className="si-hotspot-card-hdr">
+        <div className="si-hotspot-card-headline">
+          <div className="si-hotspot-name">{active.name.toUpperCase()}</div>
+          <span className={`si-hotspot-tier tier-${active.tier.toLowerCase()}`}>{active.tier}</span>
         </div>
-        <button type="button" className="wv-hotspot-close" onClick={onClose} aria-label="Close hotspot details">
+        <button type="button" className="si-hotspot-close" onClick={onClose} aria-label="Close hotspot details">
           ×
         </button>
       </div>
 
-      <div className="wv-hotspot-tags">{active.tags.join("/")}</div>
-      <div className="wv-hotspot-summary">{active.summary}</div>
+      <div className="si-hotspot-tags">{active.tags.join("/")}</div>
+      <div className="si-hotspot-summary">{active.summary}</div>
 
-      <div className="wv-hotspot-window">
+      <div className="si-hotspot-window">
         {(["6h", "24h", "7d"] as HotspotTimeWindow[]).map((w) => (
           <button
             key={w}
             type="button"
-            className={`wv-hotspot-window-btn ${timeWindow === w ? "is-active" : ""}`}
+            className={`si-hotspot-window-btn ${timeWindow === w ? "is-active" : ""}`}
             onClick={() => onTimeWindowChange(w)}
           >
             {w}
@@ -237,12 +237,12 @@ export default function HotspotDetailCard({ detail, timeWindow, onTimeWindowChan
         ))}
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">ESCALATION ASSESSMENT</div>
-        <div className="wv-hotspot-score">{active.currentScore.toFixed(1)}/5</div>
-        <div className="wv-hotspot-trend">{active.trend}</div>
-        <div className="wv-hotspot-baseline">Baseline: {active.baselineScore}/5</div>
-        <div className="wv-hotspot-subscores">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">ESCALATION ASSESSMENT</div>
+        <div className="si-hotspot-score">{active.currentScore.toFixed(1)}/5</div>
+        <div className="si-hotspot-trend">{active.trend}</div>
+        <div className="si-hotspot-baseline">Baseline: {active.baselineScore}/5</div>
+        <div className="si-hotspot-subscores">
           <div>News {active.subScores.news}</div>
           <div>CII {active.subScores.cii}</div>
           <div>Geo {active.subScores.geo}</div>
@@ -250,13 +250,13 @@ export default function HotspotDetailCard({ detail, timeWindow, onTimeWindowChan
         </div>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">DRIVERS</div>
-        <ul className="wv-hotspot-drivers">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">DRIVERS</div>
+        <ul className="si-hotspot-drivers">
           {active.drivers.map((driver, idx) => (
             <li key={`${driver.text}-${idx}`}>
               {driver.text}
-              <details className="wv-hotspot-trace">
+              <details className="si-hotspot-trace">
                 <summary>Source Trace</summary>
                 <div>{driver.trace.sourceName}</div>
                 <div>{formatAge(driver.trace.timestamp)}</div>
@@ -271,21 +271,21 @@ export default function HotspotDetailCard({ detail, timeWindow, onTimeWindowChan
         </ul>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">LOCATION</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">LOCATION</div>
         <div>{active.location.countries.join(", ")}</div>
         <div>Coordinates {formatLatLon(active.location.coordinates.lat, active.location.coordinates.lon)}</div>
         <div>Status {active.location.status}</div>
         <div>Local {dayNight}</div>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">WHY IT MATTERS</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">WHY IT MATTERS</div>
         <div>{active.whyItMatters}</div>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">HISTORICAL CONTEXT</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">HISTORICAL CONTEXT</div>
         <div>
           Last Major Event: {active.historicalContext.lastMajorEvent.label} ({active.historicalContext.lastMajorEvent.date})
         </div>
@@ -293,21 +293,21 @@ export default function HotspotDetailCard({ detail, timeWindow, onTimeWindowChan
         <div>Cyclical Pattern: {active.historicalContext.cyclicalPattern}</div>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">KEY ENTITIES</div>
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">KEY ENTITIES</div>
         <div>{active.keyEntities.join(", ")}</div>
       </div>
 
-      <div className="wv-hotspot-section">
-        <div className="wv-hotspot-kicker">PIPELINE STATUS</div>
-        <div className="wv-hotspot-status-row">
+      <div className="si-hotspot-section">
+        <div className="si-hotspot-kicker">PIPELINE STATUS</div>
+        <div className="si-hotspot-status-row">
           {Object.entries(active.sourceStatus).map(([source, status]) => (
-            <span key={source} className={`wv-hotspot-status ${statusClass(status)}`}>
+            <span key={source} className={`si-hotspot-status ${statusClass(status)}`}>
               {source}:{status}
             </span>
           ))}
         </div>
-        <div className="wv-hotspot-updated">Updated: {new Date(active.lastUpdated).toUTCString()}</div>
+        <div className="si-hotspot-updated">Updated: {new Date(active.lastUpdated).toUTCString()}</div>
       </div>
     </div>,
     document.body

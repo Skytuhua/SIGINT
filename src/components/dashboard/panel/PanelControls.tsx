@@ -43,7 +43,7 @@ export default function PanelControls({
   }
 
   return (
-    <div className="wv-panel-controls" aria-label="panel controls">
+    <div className="si-panel-controls" aria-label="panel controls">
       {viewModes && viewMode && onViewModeChange ? (
         <DenseSelect
           value={viewMode}

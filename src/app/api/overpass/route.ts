@@ -46,7 +46,7 @@ export async function GET() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'WorldView/0.1 (educational/research use)',
+        'User-Agent': 'SIGINT/0.1 (educational/research use)',
       },
       body: `data=${encodeURIComponent(OVERPASS_QUERY)}`,
     });

@@ -91,8 +91,8 @@ export default function AiDataCenterSummaryPanel({ clusters, loading, degraded }
   }, [clusters]);
 
   return (
-    <div className="wv-news-layers-group">
-      <div className="wv-news-layers-group-label">
+    <div className="si-news-layers-group">
+      <div className="si-news-layers-group-label">
         AI DATA CENTERS SUMMARY
         {loading && <span style={{ marginLeft: 6, opacity: 0.5, fontSize: 9 }}>(loading\u2026)</span>}
         {degraded && <span style={{ marginLeft: 6, opacity: 0.5, fontSize: 9 }}>(snapshot)</span>}

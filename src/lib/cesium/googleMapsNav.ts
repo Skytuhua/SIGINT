@@ -70,6 +70,7 @@ interface SavedControllerState {
   inertiaTranslate:    number;
   inertiaZoom:         number;
   enableTilt:          boolean;
+  enableRotate:        boolean;
   maximumMovementRatio: number;
 }
 
@@ -99,6 +100,17 @@ export class GoogleMapsNav {
   private _pendingZoom  = 0;
   private _zoomAnchor: import('cesium').Cartesian3 | null = null;  // screen-centre globe point
 
+  // Left-drag pan state (grab-the-globe)
+  private _isPanning     = false;
+  private _panGrabPoint: Cartesian3 | null = null;  // globe point grabbed at mousedown (null when started on sky)
+  private _panLastScreenX = 0;  // last cursor clientX — used for pixel-delta fallback
+  private _panLastScreenY = 0;  // last cursor clientY — used for pixel-delta fallback
+  private _panDocMove:   EventListener | null = null;
+  private _panDocUp:     EventListener | null = null;
+  // Pan inertia: rotation axis + angular velocity (rad/frame), decayed each rAF tick
+  private _panInertiaAxis:  Cartesian3 | null = null;
+  private _panInertiaSpeed  = 0;
+
   // Right-drag orbit state (also used for left-drag orbit when getOrbitTarget is set)
   private _isTilting    = false;
   private _isLeftOrbit  = false;  // true when orbit was started with left button around selected icon
@@ -115,6 +127,9 @@ export class GoogleMapsNav {
   private readonly _s2:  Cartesian2;
   private readonly _s3:  Cartesian3;
   private readonly _s3b: Cartesian3;
+  private readonly _s3c: Cartesian3;
+  private readonly _scratchQuat: import('cesium').Quaternion;
+  private readonly _scratchMat3: import('cesium').Matrix3;
 
   constructor(viewer: Viewer, Cesium: CesiumType, opts: GoogleMapsNavOptions = {}) {
     this.viewer = viewer;
@@ -125,6 +140,9 @@ export class GoogleMapsNav {
     this._s2  = new Cesium.Cartesian2();
     this._s3  = new Cesium.Cartesian3();
     this._s3b = new Cesium.Cartesian3();
+    this._s3c = new Cesium.Cartesian3();
+    this._scratchQuat = new Cesium.Quaternion();
+    this._scratchMat3 = new Cesium.Matrix3();
   }
 
   // ── Public API ───────────────────────────────────────────────────────────────
@@ -147,13 +165,14 @@ export class GoogleMapsNav {
       inertiaTranslate:    ctrl.inertiaTranslate,
       inertiaZoom:         ctrl.inertiaZoom,
       enableTilt:          ctrl.enableTilt,
+      enableRotate:        ctrl.enableRotate,
       maximumMovementRatio: ctrl.maximumMovementRatio,
     };
 
     // ── Remap Cesium's built-in controller ───────────────────────────────
-    // In 3D globe mode, rotateEventTypes IS the ground-following pan.
-    // translateEventTypes is only meaningful in 2D/Columbus view — we leave it alone.
-    ctrl.rotateEventTypes = [C.CameraEventType.LEFT_DRAG];
+    // We own LEFT_DRAG ourselves (custom pole-safe pan via _onPanDown).
+    // Cesium's built-in rotate suffers from gimbal lock near the poles.
+    ctrl.rotateEventTypes = [];
 
     // We own RIGHT_DRAG ourselves (custom pitch-clamped orbit via _onMouseDown).
     // Keep SHIFT+LEFT_DRAG and PINCH for Cesium's built-in tilt as a secondary path.
@@ -182,10 +201,16 @@ export class GoogleMapsNav {
       this._on('wheel',    this._onWheel    as EventListener);
       this._on('dblclick', this._onDblClick as EventListener);
     }
-    this._on('mousedown',   this._onMouseDown   as EventListener);
+    // Left-drag: custom pan (or orbit around a selected target when available).
+    // Always register _onPanDown; if getOrbitTarget is set, also register
+    // _onLeftMouseDown in the capture phase so it gets first crack at left-clicks
+    // — when it finds an orbit target it stops propagation, otherwise _onPanDown runs.
+    this._on('pointerdown', this._onPanDown as EventListener);
     if (this.opts.getOrbitTarget) {
-      this._onCapture('mousedown', this._onLeftMouseDown as EventListener);
+      this._onCapture('pointerdown', this._onLeftMouseDown as EventListener);
     }
+    // Right-drag: orbit
+    this._on('pointerdown', this._onMouseDown   as EventListener);
     this._on('contextmenu', this._onContextMenu as EventListener);
 
     // ── Start the smooth-zoom rAF loop ───────────────────────────────────
@@ -212,7 +237,8 @@ export class GoogleMapsNav {
     }
     this._canvasCaptureListeners = [];
 
-    // Clean up any in-progress right-drag
+    // Clean up any in-progress drags
+    this._endPan();
     this._endTilt(/* restoreEnableTilt */ false);
 
     // Restore saved ScreenSpaceCameraController state
@@ -233,6 +259,7 @@ export class GoogleMapsNav {
       ctrl.inertiaTranslate    = s.inertiaTranslate;
       ctrl.inertiaZoom         = s.inertiaZoom;
       ctrl.enableTilt          = s.enableTilt;
+      ctrl.enableRotate        = s.enableRotate;
       ctrl.maximumMovementRatio = s.maximumMovementRatio;
       this.savedState = null;
     }
@@ -313,13 +340,15 @@ export class GoogleMapsNav {
     });
   };
 
-  /** Left mousedown (capture): when getOrbitTarget is set, orbit around that target instead of pan. */
-  private _onLeftMouseDown = (e: MouseEvent): void => {
+  /** Left pointerdown (capture): when getOrbitTarget is set, orbit around that target instead of pan. */
+  private _onLeftMouseDown = (e: PointerEvent): void => {
     if (e.button !== 0) return;
     const getTarget = this.opts.getOrbitTarget;
     if (!getTarget) return;
     const anchor = getTarget();
     if (!anchor) return;
+    // Release Cesium's pointer capture so our document-level listeners fire
+    try { this.canvas.releasePointerCapture(e.pointerId); } catch { /* ignore */ }
     e.preventDefault();
     e.stopPropagation();
     this._tiltAnchor  = this.C.Cartesian3.clone(anchor);
@@ -328,16 +357,18 @@ export class GoogleMapsNav {
     this._isTilting   = true;
     this._isLeftOrbit = true;
     this.viewer.scene.screenSpaceCameraController.enableTilt = false;
-    const onMove: EventListener = (ev) => this._onTiltMove(ev as MouseEvent);
+    const onMove: EventListener = (ev) => this._onTiltMove(ev as PointerEvent);
     const onUp:   EventListener = ()   => this._endTilt(true);
     this._tiltDocMove = onMove;
     this._tiltDocUp   = onUp;
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup',   onUp);
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup',   onUp);
   };
 
-  private _onMouseDown = (e: MouseEvent): void => {
+  private _onMouseDown = (e: PointerEvent): void => {
     if (e.button !== 2) return; // right-button only
+    // Release Cesium's pointer capture so our document-level listeners fire
+    try { this.canvas.releasePointerCapture(e.pointerId); } catch { /* ignore */ }
     e.preventDefault();
     this._isLeftOrbit = false;
 
@@ -351,17 +382,154 @@ export class GoogleMapsNav {
     this.viewer.scene.screenSpaceCameraController.enableTilt = false;
 
     // Attach to document so the drag continues past the canvas edge
-    const onMove: EventListener = (ev) => this._onTiltMove(ev as MouseEvent);
+    const onMove: EventListener = (ev) => this._onTiltMove(ev as PointerEvent);
     const onUp:   EventListener = ()   => this._endTilt(true);
     this._tiltDocMove = onMove;
     this._tiltDocUp   = onUp;
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup',   onUp);
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup',   onUp);
   };
 
   private _onContextMenu = (e: Event): void => {
     e.preventDefault();
   };
+
+  // ── Left-drag pan (grab the globe) ──────────────────────────────────────
+
+  private _onPanDown = (e: PointerEvent): void => {
+    if (e.button !== 0) return;              // left-button only
+    if (e.shiftKey || e.altKey) return;      // let Cesium handle modified drags
+
+    // Release Cesium's pointer capture so our document-level listeners fire
+    try { this.canvas.releasePointerCapture(e.pointerId); } catch { /* ignore */ }
+
+    const grabPoint = this._pickGlobe(this._toC2(e.offsetX, e.offsetY));
+
+    e.preventDefault();
+    this._isPanning    = true;
+    this._panGrabPoint = grabPoint ? this.C.Cartesian3.clone(grabPoint) : null;
+    this._panLastScreenX = e.clientX;
+    this._panLastScreenY = e.clientY;
+    // Kill any residual inertia when the user grabs the globe
+    this._panInertiaSpeed = 0;
+
+    // Disable Cesium's built-in interactions during our drag
+    this.viewer.scene.screenSpaceCameraController.enableRotate = false;
+
+    const onMove: EventListener = (ev) => this._onPanMove(ev as PointerEvent);
+    const onUp:   EventListener = ()   => this._endPan();
+    this._panDocMove = onMove;
+    this._panDocUp   = onUp;
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup',   onUp);
+  };
+
+  /** Camera latitude clamp — prevents the camera from reaching the poles. */
+  private static readonly _MAX_CAM_LAT = 80 * Math.PI / 180; // ~1.396 rad
+
+  private _onPanMove(e: MouseEvent): void {
+    if (!this._isPanning) return;
+
+    const C      = this.C;
+    const camera = this.viewer.camera;
+
+    // Ensure camera transform is IDENTITY so positionWC === position
+    if (!C.Matrix4.equals(camera.transform, C.Matrix4.IDENTITY)) {
+      camera.lookAtTransform(C.Matrix4.IDENTITY);
+    }
+
+    // Pixel delta (always tracked for the off-globe fallback)
+    const pxDx = e.clientX - this._panLastScreenX;
+    const pxDy = e.clientY - this._panLastScreenY;
+    this._panLastScreenX = e.clientX;
+    this._panLastScreenY = e.clientY;
+
+    // Where does the cursor point on the globe NOW?
+    const rect = this.canvas.getBoundingClientRect();
+    const ox   = e.clientX - rect.left;
+    const oy   = e.clientY - rect.top;
+    const currentPoint = this._pickGlobe(this._toC2(ox, oy));
+
+    let axis:  import('cesium').Cartesian3;
+    let angle: number;
+
+    if (currentPoint && this._panGrabPoint) {
+      // ── On-globe: arbitrary-axis rotation (Google Earth style) ──────
+      const grabDir    = C.Cartesian3.normalize(this._panGrabPoint, this._s3);
+      const currentDir = C.Cartesian3.normalize(currentPoint, this._s3b);
+
+      const cross   = C.Cartesian3.cross(currentDir, grabDir, this._s3c);
+      const crossMag = C.Cartesian3.magnitude(cross);
+      if (crossMag < 1e-10) return;
+      axis = C.Cartesian3.divideByScalar(cross, crossMag, this._s3c);
+
+      const dot = Math.max(-1, Math.min(1, C.Cartesian3.dot(currentDir, grabDir)));
+      angle = Math.acos(dot);
+      if (angle < 1e-8) return;
+    } else {
+      // ── Off-globe fallback: convert pixel movement to rotation ──────
+      if (pxDx === 0 && pxDy === 0) return;
+      const factor = this._getAltitudeScaleFactor();
+      const sens   = NAV_CONFIG.ROTATE_SENSITIVITY * factor;
+
+      // Horizontal: rotate around the surface normal at camera position
+      // Vertical: rotate around the camera's right axis
+      const ellipsoid = this.viewer.scene.globe.ellipsoid;
+      const camUp   = ellipsoid.geodeticSurfaceNormal(camera.positionWC, this._s3c);
+      const camRight = C.Cartesian3.normalize(camera.rightWC, this._s3);
+
+      // Combine: weighted sum of camUp (for dx) and camRight (for dy)
+      const hAxis = C.Cartesian3.multiplyByScalar(camUp,    pxDx * sens, this._s3b);
+      const vAxis = C.Cartesian3.multiplyByScalar(camRight, -pxDy * sens, this._s3);
+      const combined = C.Cartesian3.add(hAxis, vAxis, this._s3b);
+      angle = C.Cartesian3.magnitude(combined);
+      if (angle < 1e-8) return;
+      axis = C.Cartesian3.normalize(combined, this._s3c);
+    }
+
+    // Store inertia BEFORE scratch objects get overwritten
+    this._panInertiaAxis  = C.Cartesian3.clone(axis, this._panInertiaAxis ?? undefined);
+    this._panInertiaSpeed = angle;
+
+    // Build rotation and compute new camera state
+    const quat = C.Quaternion.fromAxisAngle(axis, angle, this._scratchQuat);
+    const mat  = C.Matrix3.fromQuaternion(quat, this._scratchMat3);
+
+    const newPos = C.Matrix3.multiplyByVector(mat, camera.positionWC, this._s3);
+    const newDir = C.Matrix3.multiplyByVector(mat, camera.directionWC, this._s3b);
+    const newUp  = C.Matrix3.multiplyByVector(mat, camera.upWC, this._s3c);
+
+    // ── Latitude clamp: reject moves that push camera past ±80° ──────
+    const newCarto = C.Cartographic.fromCartesian(newPos);
+    if (Math.abs(newCarto.latitude) > GoogleMapsNav._MAX_CAM_LAT) return;
+
+    camera.setView({
+      destination: C.Cartesian3.clone(newPos),
+      orientation: {
+        direction: C.Cartesian3.clone(newDir),
+        up:        C.Cartesian3.clone(newUp),
+      },
+    });
+  }
+
+  private _endPan(): void {
+    this._isPanning    = false;
+    this._panGrabPoint = null;
+
+    if (this._panDocMove) {
+      document.removeEventListener('pointermove', this._panDocMove);
+      this._panDocMove = null;
+    }
+    if (this._panDocUp) {
+      document.removeEventListener('pointerup', this._panDocUp);
+      this._panDocUp = null;
+    }
+
+    if (!this.viewer.isDestroyed()) {
+      this.viewer.scene.screenSpaceCameraController.enableRotate = true;
+    }
+    // _panInertiaAxis + _panInertiaSpeed are intentionally kept — the rAF loop decays them
+  }
 
   /** Scale factor in (0, 1]: 1 at low altitude, smaller when zoomed out to reduce sensitivity. */
   private _getAltitudeScaleFactor(): number {
@@ -397,21 +565,70 @@ export class GoogleMapsNav {
     const tiltSens = NAV_CONFIG.TILT_SENSITIVITY * factor;
 
     if (anchor) {
-      // ── Orbit around anchor using HeadingPitchRange ─────────────────
-      // heading: clockwise from North — drag right (+dx) → heading increases
-      const newHeading   = camera.heading + dx * rotSens;
-      // pitch: negative = looking down — drag down (+dy) → more horizontal → pitch increases
-      const currentPitch = C.Math.toDegrees(camera.pitch);
-      const rawPitch     = currentPitch + C.Math.toDegrees(dy * tiltSens);
-      const clampedPitch = Math.max(NAV_CONFIG.MIN_PITCH_DEG, Math.min(NAV_CONFIG.MAX_PITCH_DEG, rawPitch));
+      // ── Axis-angle orbit (no gimbal lock at poles) ──────────────────
+      // Instead of HeadingPitchRange (which uses heading — degenerate at
+      // poles), rotate the camera position around the anchor using the
+      // anchor's surface normal (horizontal) and the camera's right axis
+      // (vertical).  This is the approach Google Earth uses.
 
-      const dist = C.Cartesian3.distance(camera.positionWC, anchor);
+      const ellipsoid = this.viewer.scene.globe.ellipsoid;
 
-      // camera.lookAt with HeadingPitchRange orbits the camera around anchor
-      // at a fixed distance while looking at it — exactly Google Maps orbit behaviour.
-      camera.lookAt(
-        anchor,
-        new C.HeadingPitchRange(newHeading, C.Math.toRadians(clampedPitch), dist)
+      // Vector from anchor to camera (the "arm" we rotate)
+      const arm = C.Cartesian3.subtract(camera.positionWC, anchor, this._s3);
+      const dist = C.Cartesian3.magnitude(arm);
+      if (dist < 1) return;
+
+      // Anchor's surface normal — well-defined everywhere including poles
+      const anchorUp = ellipsoid.geodeticSurfaceNormal(anchor, this._s3c);
+
+      // ── Horizontal rotation (dx): spin around anchorUp ──────────────
+      const hAngle = -dx * rotSens;
+      const hQuat  = C.Quaternion.fromAxisAngle(anchorUp, hAngle, this._scratchQuat);
+      const hMat   = C.Matrix3.fromQuaternion(hQuat, this._scratchMat3);
+      let rotatedArm = C.Matrix3.multiplyByVector(hMat, arm, this._s3b);
+
+      // ── Vertical rotation (dy): tilt around the right axis ──────────
+      // Compute current elevation angle (camera above anchor's horizon)
+      const armNorm = C.Cartesian3.normalize(rotatedArm, this._s3);
+      const sinElev = C.Cartesian3.dot(armNorm, anchorUp);
+      const currentElevDeg = C.Math.toDegrees(Math.asin(Math.max(-1, Math.min(1, sinElev))));
+
+      // Map pitch limits to elevation: elev = 90 + pitch
+      const minElevDeg = 90 + NAV_CONFIG.MIN_PITCH_DEG; // ~1 deg (nearly straight down)
+      const maxElevDeg = 90 + NAV_CONFIG.MAX_PITCH_DEG;  // ~85 deg (near horizon)
+
+      let vAngleDeg = C.Math.toDegrees(dy * tiltSens);
+      const newElevDeg = currentElevDeg + vAngleDeg;
+      if (newElevDeg < minElevDeg) vAngleDeg = minElevDeg - currentElevDeg;
+      if (newElevDeg > maxElevDeg) vAngleDeg = maxElevDeg - currentElevDeg;
+
+      if (Math.abs(vAngleDeg) > 0.001) {
+        // Right axis = anchorUp × arm (perpendicular to both)
+        const rightAxis = C.Cartesian3.cross(anchorUp, rotatedArm, this._s3);
+        const rightMag  = C.Cartesian3.magnitude(rightAxis);
+        if (rightMag > 0.001) {
+          C.Cartesian3.divideByScalar(rightAxis, rightMag, rightAxis);
+          const vAngle = C.Math.toRadians(vAngleDeg);
+          const vQuat  = C.Quaternion.fromAxisAngle(rightAxis, vAngle, this._scratchQuat);
+          const vMat   = C.Matrix3.fromQuaternion(vQuat, this._scratchMat3);
+          rotatedArm   = C.Matrix3.multiplyByVector(vMat, rotatedArm, this._s3b);
+        }
+      }
+
+      // ── Apply new camera position and look at anchor ────────────────
+      const newPos = C.Cartesian3.add(anchor, rotatedArm, this._s3);
+      camera.position = newPos;
+      camera.direction = C.Cartesian3.normalize(
+        C.Cartesian3.subtract(anchor, newPos, this._s3b), this._s3b
+      );
+      // Align "up" with the surface normal at the new position to prevent roll drift
+      camera.up = ellipsoid.geodeticSurfaceNormal(newPos, this._s3c);
+      // Re-orthogonalize the camera frame
+      camera.right = C.Cartesian3.normalize(
+        C.Cartesian3.cross(camera.direction, camera.up, this._s3), this._s3
+      );
+      camera.up = C.Cartesian3.normalize(
+        C.Cartesian3.cross(camera.right, camera.direction, this._s3c), this._s3c
       );
     } else {
       // Fallback when anchor not available (e.g. clicked on sky)
@@ -433,11 +650,11 @@ export class GoogleMapsNav {
     this._tiltAnchor = null;
 
     if (this._tiltDocMove) {
-      document.removeEventListener('mousemove', this._tiltDocMove);
+      document.removeEventListener('pointermove', this._tiltDocMove);
       this._tiltDocMove = null;
     }
     if (this._tiltDocUp) {
-      document.removeEventListener('mouseup', this._tiltDocUp);
+      document.removeEventListener('pointerup', this._tiltDocUp);
       this._tiltDocUp = null;
     }
 
@@ -458,6 +675,7 @@ export class GoogleMapsNav {
     const tick = () => {
       if (!this.enabled) return;
       this._applySmoothedZoom();
+      this._applyPanInertia();
       this._rafId = requestAnimationFrame(tick);
     };
     this._rafId = requestAnimationFrame(tick);
@@ -525,6 +743,43 @@ export class GoogleMapsNav {
     }
 
     camera.position = C.Cartesian3.clone(newPos);
+  }
+
+  /** Decay pan momentum after mouse-up — gives the globe a "throw" feel. */
+  private _applyPanInertia(): void {
+    if (this._isPanning || !this._panInertiaAxis || this._panInertiaSpeed < 1e-6) return;
+    if (this.viewer.isDestroyed()) return;
+
+    const C      = this.C;
+    const camera = this.viewer.camera;
+
+    const quat = C.Quaternion.fromAxisAngle(this._panInertiaAxis, this._panInertiaSpeed, this._scratchQuat);
+    const mat  = C.Matrix3.fromQuaternion(quat, this._scratchMat3);
+
+    const newPos = C.Matrix3.multiplyByVector(mat, camera.positionWC, this._s3);
+    const newDir = C.Matrix3.multiplyByVector(mat, camera.directionWC, this._s3b);
+    const newUp  = C.Matrix3.multiplyByVector(mat, camera.upWC, this._s3c);
+
+    // Latitude clamp: kill inertia if it pushes camera past ±80°
+    const newCarto = C.Cartographic.fromCartesian(newPos);
+    if (Math.abs(newCarto.latitude) > GoogleMapsNav._MAX_CAM_LAT) {
+      this._panInertiaSpeed = 0;
+      return;
+    }
+
+    camera.setView({
+      destination: C.Cartesian3.clone(newPos),
+      orientation: {
+        direction: C.Cartesian3.clone(newDir),
+        up:        C.Cartesian3.clone(newUp),
+      },
+    });
+
+    // Exponential decay
+    this._panInertiaSpeed *= NAV_CONFIG.PAN_INERTIA;
+    if (this._panInertiaSpeed < 1e-6) {
+      this._panInertiaSpeed = 0;
+    }
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────

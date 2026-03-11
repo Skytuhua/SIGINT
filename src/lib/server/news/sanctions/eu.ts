@@ -55,7 +55,7 @@ export async function fetchEuEntities(): Promise<{
   try {
     const res = await fetch(EU_CSV_URL, {
       signal: controller.signal,
-      headers: { "User-Agent": "WorldView/1.0 (sanctions-layer)" },
+      headers: { "User-Agent": "SIGINT/1.0 (sanctions-layer)" },
       cache: "no-store",
     });
 

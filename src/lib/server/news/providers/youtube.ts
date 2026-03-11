@@ -108,6 +108,10 @@ interface YtVideosResponse {
     };
     contentDetails?: {
       duration?: string;
+      regionRestriction?: {
+        allowed?: string[];
+        blocked?: string[];
+      };
     };
     liveStreamingDetails?: {
       actualStartTime?: string;
@@ -277,7 +281,7 @@ async function discoverFromDataApi(
 
       const channelsResp = await fetchJsonOrThrow<YtChannelsResponse>(
         channelsUrl.toString(),
-        { headers: { "User-Agent": "WorldView/0.1 (news-video-data-api)" } },
+        { headers: { "User-Agent": "SIGINT/0.1 (news-video-data-api)" } },
         DATA_API_POLICY.timeoutMs
       );
 
@@ -304,7 +308,7 @@ async function discoverFromDataApi(
         try {
           const playlistResp = await fetchJsonOrThrow<YtPlaylistItemsResponse>(
             playlistUrl.toString(),
-            { headers: { "User-Agent": "WorldView/0.1 (news-video-data-api)" } },
+            { headers: { "User-Agent": "SIGINT/0.1 (news-video-data-api)" } },
             DATA_API_POLICY.timeoutMs
           );
           for (const row of playlistResp.items ?? []) {
@@ -344,7 +348,7 @@ async function discoverFromDataApi(
         try {
           const videosResp = await fetchJsonOrThrow<YtVideosResponse>(
             videosUrl.toString(),
-            { headers: { "User-Agent": "WorldView/0.1 (news-video-data-api)" } },
+            { headers: { "User-Agent": "SIGINT/0.1 (news-video-data-api)" } },
             DATA_API_POLICY.timeoutMs
           );
           for (const item of videosResp.items ?? []) {
@@ -372,6 +376,12 @@ async function discoverFromDataApi(
         // Skip Shorts / Reels (< 90 s) — only for non-live videos
         const duration = parseDurationSec(meta?.contentDetails?.duration);
         if (!isLive && duration !== undefined && duration < MIN_VIDEO_DURATION_SEC) continue;
+        // Skip geo-restricted videos (blocked in US)
+        const restriction = meta?.contentDetails?.regionRestriction;
+        if (restriction) {
+          if (restriction.allowed && !restriction.allowed.includes("US")) continue;
+          if (restriction.blocked?.includes("US")) continue;
+        }
 
         const channelId = snippet?.channelId?.trim() || candidate.channelId;
         const channelName =
@@ -470,6 +480,8 @@ async function discoverFromRssHybrid(
           if (!v.liveNow && v.lengthSeconds > 0 && v.lengthSeconds < MIN_VIDEO_DURATION_SEC) return false;
           // Skip finished livestream replays
           if (!v.liveNow && v.actualEndTime) return false;
+          // Skip geo-restricted videos (blocked in US)
+          if (v.regionBlocked) return false;
           return true;
         })
         .map(enrichedVideoToYouTubeLive);
@@ -494,7 +506,7 @@ async function fetchRssChannelItems(channel: ResolvedChannel): Promise<YouTubeLi
     const response = await fetch(rssUrl, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "WorldView/0.1 (news-video-rss)",
+        "User-Agent": "SIGINT/0.1 (news-video-rss)",
         Accept: "application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
       },
       cache: "no-store",

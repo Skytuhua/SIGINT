@@ -186,7 +186,7 @@ export async function getGdeltArticles(params: GdeltDocParams): Promise<CachedFe
     request: async () => {
       const json = await fetchJsonOrThrow<{ articles?: GdeltArticle[] }>(
         url.toString(),
-        { headers: { "User-Agent": "WorldView/0.1 (research)" } },
+        { headers: { "User-Agent": "SIGINT/0.1 (research)" } },
         DOC_POLICY.timeoutMs
       );
       return json.articles ?? [];
@@ -214,7 +214,7 @@ export async function getGdeltGeo(params: GdeltGeoParams): Promise<
     request: async () => {
       const json = await fetchJsonOrThrow<Record<string, unknown>>(
         url.toString(),
-        { headers: { "User-Agent": "WorldView/0.1 (research)" } },
+        { headers: { "User-Agent": "SIGINT/0.1 (research)" } },
         GEO_POLICY.timeoutMs
       );
       const rowsRaw = Array.isArray(json.map)
@@ -260,7 +260,7 @@ export async function getGdeltContext(query: string): Promise<CachedFetchResult<
     request: async () => {
       const json = await fetchJsonOrThrow<{ articles?: GdeltArticle[] }>(
         url.toString(),
-        { headers: { "User-Agent": "WorldView/0.1 (research)" } },
+        { headers: { "User-Agent": "SIGINT/0.1 (research)" } },
         CONTEXT_POLICY.timeoutMs
       );
       return json.articles ?? [];
@@ -285,7 +285,7 @@ export async function getGdeltTimeline(
     request: async () => {
       const json = await fetchJsonOrThrow<{ timeline?: Array<{ date: string; value: number }> }>(
         url.toString(),
-        { headers: { "User-Agent": "WorldView/0.1 (research)" } },
+        { headers: { "User-Agent": "SIGINT/0.1 (research)" } },
         TIMELINE_POLICY.timeoutMs
       );
       return (json.timeline ?? []).map((point) => ({

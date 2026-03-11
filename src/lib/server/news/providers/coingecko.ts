@@ -72,7 +72,7 @@ export async function getCoinGeckoTrending(): Promise<CachedFetchResult<CoinTren
     request: async () => {
       const json = await fetchJsonOrThrow<TrendingResponse>(
         `${CG_BASE}/search/trending`,
-        { headers: { "User-Agent": "WorldView/0.1" } },
+        { headers: { "User-Agent": "SIGINT/0.1" } },
         POLICY.timeoutMs,
       );
       return (json.coins ?? []).map((c) => ({
@@ -97,7 +97,7 @@ export async function getCoinGeckoMarkets(limit = 20): Promise<CachedFetchResult
       const url = `${CG_BASE}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${limit}&page=1&sparkline=true&price_change_percentage=24h`;
       const items = await fetchJsonOrThrow<MarketItem[]>(
         url,
-        { headers: { "User-Agent": "WorldView/0.1" } },
+        { headers: { "User-Agent": "SIGINT/0.1" } },
         POLICY.timeoutMs,
       );
       return items.map((c) => ({

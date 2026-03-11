@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useWorldViewStore } from "../../store";
+import { useSIGINTStore } from "../../store";
 
 interface CoinMarket {
   id: string;
@@ -66,7 +66,7 @@ function MiniSparkline({ prices }: { prices: number[] }) {
 }
 
 export default function MarketsPanel() {
-  const marketsEnabled = useWorldViewStore((s) => s.layers.markets);
+  const marketsEnabled = useSIGINTStore((s) => (s.layers as unknown as Record<string, boolean>).markets);
   const [coins, setCoins] = useState<CoinMarket[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

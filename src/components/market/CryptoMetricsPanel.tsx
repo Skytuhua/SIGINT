@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Term from "./shared/Term";
 
 interface MetricRow {
   label: string;
@@ -43,30 +44,30 @@ export default function CryptoMetricsPanel({ style }: Props) {
   const caution = METRICS.filter(m => m.signal === "Caution").length;
 
   return (
-    <div className="wv-market-panel" style={style}>
-      <div className="wv-market-panel-header">
-        <span className="wv-market-panel-title">On-Chain Metrics</span>
+    <div className="si-market-panel" style={style}>
+      <div className="si-market-panel-header">
+        <span className="si-market-panel-title"><Term id="ONCHAIN">On-Chain</Term> Metrics</span>
         <span style={{ fontSize: 9 }}>
           <span style={{ color: "#36b37e" }}>{bullish}B</span>
-          <span style={{ color: "var(--wv-text-muted)" }}> / </span>
+          <span style={{ color: "var(--si-text-muted)" }}> / </span>
           <span style={{ color: "#f97316" }}>{caution}C</span>
-          <span style={{ color: "var(--wv-text-muted)" }}> / </span>
+          <span style={{ color: "var(--si-text-muted)" }}> / </span>
           <span style={{ color: "#ff5a5f" }}>{bearish}S</span>
         </span>
-        <span className="wv-market-panel-badge is-static">STATIC</span>
+        <span className="si-market-panel-badge is-reference">REFERENCE</span>
       </div>
-      <div className="wv-market-panel-body" style={{ padding: 0 }}>
-        <div className="wv-onchain-header">
+      <div className="si-market-panel-body" style={{ padding: 0 }}>
+        <div className="si-onchain-header">
           <span>METRIC</span>
           <span style={{ textAlign: "right" }}>VALUE</span>
           <span style={{ textAlign: "right" }}>CHG</span>
           <span>SIGNAL</span>
         </div>
         {METRICS.map((m) => (
-          <div key={m.label} className="wv-onchain-row" title={m.desc}>
-            <span style={{ color: "var(--wv-text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.label}</span>
-            <span style={{ textAlign: "right", color: "var(--wv-text)", fontWeight: 600 }}>{m.value}</span>
-            <span style={{ textAlign: "right", color: m.chgDir === "up" ? "#36b37e" : m.chgDir === "down" ? "#ff5a5f" : "var(--wv-text-muted)" }}>
+          <div key={m.label} className="si-onchain-row" title={m.desc}>
+            <span style={{ color: "var(--si-text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.label}</span>
+            <span style={{ textAlign: "right", color: "var(--si-text)", fontWeight: 600 }}>{m.value}</span>
+            <span style={{ textAlign: "right", color: m.chgDir === "up" ? "#36b37e" : m.chgDir === "down" ? "#ff5a5f" : "var(--si-text-muted)" }}>
               {m.chg}
             </span>
             <span>
@@ -75,7 +76,7 @@ export default function CryptoMetricsPanel({ style }: Props) {
           </div>
         ))}
       </div>
-      <div className="wv-market-panel-footer">Glassnode · Dune Analytics · placeholder data</div>
+      <div className="si-market-panel-footer">Glassnode · Dune Analytics · Curated reference data</div>
     </div>
   );
 }

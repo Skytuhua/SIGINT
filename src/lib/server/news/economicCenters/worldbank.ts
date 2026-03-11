@@ -39,7 +39,7 @@ async function fetchBulkPage(page: number): Promise<WBBulkPage> {
     `?format=json&per_page=500&mrv=1&page=${page}`;
   return fetchJsonOrThrow<WBBulkPage>(
     url,
-    { headers: { "User-Agent": "WorldView/0.1" } },
+    { headers: { "User-Agent": "SIGINT/0.1" } },
     WB_POLICY.timeoutMs,
   );
 }

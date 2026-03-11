@@ -22,7 +22,7 @@ export default function RingSummary({ data, size = 132, thickness = 18, centerLa
   let running = 0;
 
   return (
-    <div className="wv-ring-summary">
+    <div className="si-ring-summary">
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label="ring summary">
         <g transform={`translate(${size / 2}, ${size / 2}) rotate(-90)`}>
           {data.map((item) => {
@@ -47,14 +47,14 @@ export default function RingSummary({ data, size = 132, thickness = 18, centerLa
             );
           })}
         </g>
-        <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="wv-ring-center">
+        <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="si-ring-center">
           {centerLabel ?? String(total)}
         </text>
       </svg>
-      <ul className="wv-ring-legend">
+      <ul className="si-ring-legend">
         {data.map((item) => (
           <li key={item.id}>
-            <span className="wv-ring-dot" style={{ background: item.color }} />
+            <span className="si-ring-dot" style={{ background: item.color }} />
             <span>{item.label}</span>
             <span>{item.value}</span>
           </li>

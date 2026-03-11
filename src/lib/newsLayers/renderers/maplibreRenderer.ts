@@ -24,11 +24,11 @@ function isMapLike(map: unknown): map is MapLike {
 }
 
 function sourceId(layerId: string): string {
-  return `wv-news-src-${layerId}`;
+  return `si-news-src-${layerId}`;
 }
 
 function layerIds(layer: LayerRegistryEntry): string[] {
-  const base = `wv-news-layer-${layer.id}`;
+  const base = `si-news-layer-${layer.id}`;
   if (layer.id === "trade-routes") {
     return [`${base}-glow`, `${base}-line`, `${base}-label`];
   }
@@ -180,7 +180,7 @@ function ensureGeoJsonLayer(layer: LayerRegistryEntry, map: MapLike): void {
       });
     }
     const badgeProp = layer.style.badgeProperty;
-    const badgeId = `wv-news-layer-${layer.id}-badge`;
+    const badgeId = `si-news-layer-${layer.id}-badge`;
     if (badgeProp && !map.getLayer(badgeId)) {
       map.addLayer({
         id: badgeId,
@@ -1180,6 +1180,5 @@ export const maplibreRenderer: LayerRenderer<MapLike> = {
     }
     const srcId = sourceId(layer.id);
     if (map.getSource(srcId)) map.removeSource(srcId);
-    // No separate origin source — origin Points are co-located in the main source.
   },
 };
