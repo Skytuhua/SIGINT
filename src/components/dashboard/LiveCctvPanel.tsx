@@ -21,8 +21,8 @@ const REGIONS = [
 ];
 
 const DISPLAY_COUNT = 4;
-const BROKEN_THRESHOLD = 3; // failures before hiding a camera
-const BROKEN_RESET_MS = 60_000; // reset broken counters every 60s
+const BROKEN_THRESHOLD = 1; // skip camera after first failure (server pre-validates)
+const BROKEN_RESET_MS = 120_000; // reset broken counters every 2 min
 
 interface LiveCctvPanelProps {
   panelId: string;
