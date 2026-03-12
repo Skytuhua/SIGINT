@@ -214,10 +214,13 @@ export async function enrichWithLiveStatus(
   apiKey: string | undefined
 ): Promise<EnrichedVideo[]> {
   if (!apiKey || rssVideos.length === 0) {
-    // No API key — return all as non-live
+    // No API key — use heuristic live detection from RSS title keywords.
+    // News channels that stream 24/7 typically include "LIVE", "24/7",
+    // "Breaking", or "LIVESTREAM" in their video titles.
+    const LIVE_TITLE_RE = /\bLIVE\b|24\/7|\bBreaking\b|\bLIVESTREAM\b/i;
     return rssVideos.map((v) => ({
       ...v,
-      liveNow: false,
+      liveNow: LIVE_TITLE_RE.test(v.title ?? ""),
       lengthSeconds: 0,
       viewerCount: undefined,
       actualStartTime: undefined,

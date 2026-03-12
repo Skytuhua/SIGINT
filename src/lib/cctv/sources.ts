@@ -28,7 +28,10 @@ function inferStreamFormat(
     url?.endsWith(".png")
   )
     return "JPEG";
-  return "UNKNOWN";
+  // Most traffic cameras serve JPEG snapshots even without file extensions
+  // (e.g., DOT cameras use query-string URLs like /camera?id=xxx).
+  // Default to JPEG so they get proxied and displayed.
+  return "JPEG";
 }
 
 function slugify(state: string, city: string, idx: number): string {
