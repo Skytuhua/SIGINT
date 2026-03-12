@@ -14,6 +14,8 @@ Three workspaces &mdash; OPS, NEWS, MARKET &mdash; unified in a single console f
 [![React](https://img.shields.io/badge/React-18.3-61dafb?logo=react)](https://react.dev/)
 <br/>
 [![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE)
+[![Build](https://img.shields.io/github/actions/workflow/status/Skytuhua/SIGINT/ci.yml?branch=main&logo=github)](https://github.com/Skytuhua/SIGINT/actions)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue)](package.json)
 [![GitHub stars](https://img.shields.io/github/stars/Skytuhua/SIGINT?style=social)](https://github.com/Skytuhua/SIGINT/stargazers)
 [![Last Commit](https://img.shields.io/github/last-commit/Skytuhua/SIGINT)](https://github.com/Skytuhua/SIGINT/commits)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Skytuhua/SIGINT/pulls)
