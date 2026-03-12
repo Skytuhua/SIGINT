@@ -53,6 +53,11 @@ function flattenOtcData(data: OtcData): CctvCamera[] {
         const fmt = inferStreamFormat(cam.format, cam.url);
         const isImage = fmt === "JPEG" || fmt === "IMAGE_STREAM";
 
+        // Proxy snapshot URLs through our API to bypass CORS/mixed-content
+        const proxiedSnapshot = isImage
+          ? `/api/cctv/insecam/proxy?url=${encodeURIComponent(cam.url)}`
+          : "";
+
         cameras.push({
           id: slugify(state, city, i),
           city,
@@ -60,7 +65,7 @@ function flattenOtcData(data: OtcData): CctvCamera[] {
           name: cam.description || `${city} Camera ${i + 1}`,
           lat: cam.latitude,
           lon: cam.longitude,
-          snapshotUrl: isImage ? cam.url : "",
+          snapshotUrl: proxiedSnapshot,
           streamUrl: cam.url,
           streamFormat: fmt,
           direction: cam.direction,

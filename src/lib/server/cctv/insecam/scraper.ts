@@ -2,9 +2,20 @@ import type { CctvCamera } from "../../../providers/types";
 import { lookupCameraCoords } from "./cityCoords";
 import { countryCodeToRegion } from "./regionMap";
 
-const INSECAM_BASE = "http://www.insecam.org";
+const INSECAM_BASES = [
+  "https://www.insecam.org",
+  "http://www.insecam.org",
+] as const;
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+const BROWSER_HEADERS: Record<string, string> = {
+  "User-Agent": USER_AGENT,
+  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+  "Accept-Language": "en-US,en;q=0.9",
+  Referer: "https://www.insecam.org/",
+  DNT: "1",
+  "Upgrade-Insecure-Requests": "1",
+};
 
 interface InsecamRawCamera {
   id: string;
@@ -15,23 +26,23 @@ interface InsecamRawCamera {
   manufacturer: string;
 }
 
-// Countries to scrape for regional diversity (~6 cameras per country page)
+// Countries to scrape — trimmed for serverless reliability
 const COUNTRIES_TO_SCRAPE = [
   // Americas
-  "US", "CA", "BR", "MX", "AR",
+  "US", "CA", "BR", "MX",
   // Europe
-  "DE", "IT", "FR", "GB", "RU", "NL", "CZ", "UA", "ES", "NO", "SE", "PL", "CH", "AT", "RO",
+  "DE", "IT", "FR", "GB", "RU", "NL", "CZ", "ES", "NO", "PL", "CH",
   // Asia
-  "JP", "KR", "TW", "IN", "ID", "TH", "VN", "CN",
+  "JP", "KR", "TW", "IN", "TH",
   // Mideast
-  "TR", "IL", "IR",
+  "TR", "IL",
   // Africa
-  "ZA", "EG",
+  "ZA",
   // Oceania
-  "AU", "NZ",
+  "AU",
 ];
 
-const BATCH_SIZE = 5;
+const BATCH_SIZE = 3;
 
 /**
  * Scrape a single insecam listing page (any URL) and extract camera entries.
@@ -64,20 +75,26 @@ function parseInsecamHtml(html: string): InsecamRawCamera[] {
 }
 
 async function fetchInsecamUrl(url: string): Promise<InsecamRawCamera[]> {
-  try {
-    const resp = await fetch(url, {
-      headers: { "User-Agent": USER_AGENT },
-    });
-    if (!resp.ok) return [];
-    const html = await resp.text();
-    return parseInsecamHtml(html);
-  } catch {
-    return [];
+  // Try HTTPS first (some hosts block plain HTTP from datacenters), then HTTP
+  for (const base of INSECAM_BASES) {
+    const resolvedUrl = url.replace(/^https?:\/\/www\.insecam\.org/, base);
+    try {
+      const resp = await fetch(resolvedUrl, {
+        headers: BROWSER_HEADERS,
+      });
+      if (!resp.ok) continue;
+      const html = await resp.text();
+      const cameras = parseInsecamHtml(html);
+      if (cameras.length > 0) return cameras;
+    } catch {
+      // Try next base URL
+    }
   }
+  return [];
 }
 
 export async function scrapeInsecamPage(page: number): Promise<InsecamRawCamera[]> {
-  return fetchInsecamUrl(`${INSECAM_BASE}/en/byrating/?page=${page}`);
+  return fetchInsecamUrl(`${INSECAM_BASES[0]}/en/byrating/?page=${page}`);
 }
 
 // Country name → ISO code lookup (covers insecam's most common countries)
@@ -116,10 +133,10 @@ function resolveCountryCode(country: string): string {
 export async function scrapeInsecamCameras(): Promise<CctvCamera[]> {
   // Build list of URLs: page 1 of each country + 3 top-rated pages
   const urls = COUNTRIES_TO_SCRAPE.map(
-    (cc) => `${INSECAM_BASE}/en/bycountry/${cc}/?page=1`,
+    (cc) => `${INSECAM_BASES[0]}/en/bycountry/${cc}/?page=1`,
   );
   for (let p = 1; p <= 3; p++) {
-    urls.push(`${INSECAM_BASE}/en/byrating/?page=${p}`);
+    urls.push(`${INSECAM_BASES[0]}/en/byrating/?page=${p}`);
   }
 
   // Scrape in parallel batches
@@ -171,7 +188,7 @@ export async function searchInsecamByCity(query: string): Promise<CctvCamera[]> 
   if (!trimmed) return [];
 
   const citySlug = encodeURIComponent(trimmed);
-  const raw = await fetchInsecamUrl(`${INSECAM_BASE}/en/bycity/${citySlug}/?page=1`);
+  const raw = await fetchInsecamUrl(`${INSECAM_BASES[0]}/en/bycity/${citySlug}/?page=1`);
 
   // Dedup
   const seen = new Set<string>();

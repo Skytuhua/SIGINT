@@ -1539,18 +1539,28 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       return { cfg, panelState: ps, orderedCandidates: ordered, currentValid };
     });
 
-    // Cross-panel deduplication: collect videoIds already held by panels with
-    // valid selections, then skip those when auto-picking for other panels.
+    // Cross-panel deduplication: collect videoIds held by panels that have a
+    // valid *live* selection. Panels showing "recent" videos are re-evaluated
+    // so live streams always take priority.
     const claimed = new Set<string>();
     for (const p of panels) {
-      if (p.currentValid && p.panelState.selectedVideoId) {
+      if (!p.currentValid || !p.panelState.selectedVideoId) continue;
+      const currentStream = p.orderedCandidates.find(
+        (s) => s.videoId === p.panelState.selectedVideoId,
+      );
+      if (currentStream?.status === "live") {
         claimed.add(p.panelState.selectedVideoId);
       }
     }
 
     for (const p of panels) {
-      if (p.currentValid) continue;
+      // Keep panels that already show a live stream
+      const currentStream = p.currentValid
+        ? p.orderedCandidates.find((s) => s.videoId === p.panelState.selectedVideoId)
+        : undefined;
+      if (p.currentValid && currentStream?.status === "live") continue;
 
+      // Auto-pick: prefer unclaimed live streams, then any unclaimed stream
       const liveId =
         p.orderedCandidates.find((s) => s.status === "live" && !claimed.has(s.videoId))?.videoId ?? null;
       const anyId =
