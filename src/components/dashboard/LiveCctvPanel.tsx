@@ -21,6 +21,8 @@ const REGIONS = [
 ];
 
 const DISPLAY_COUNT = 4;
+const BROKEN_THRESHOLD = 3; // failures before hiding a camera
+const BROKEN_RESET_MS = 60_000; // reset broken counters every 60s
 
 interface LiveCctvPanelProps {
   panelId: string;
@@ -39,6 +41,7 @@ export default function LiveCctvPanel({
 }: LiveCctvPanelProps) {
   const brokenIds = useSIGINTStore((s) => s.cctv.brokenIds);
   const markCctvBroken = useSIGINTStore((s) => s.markCctvBroken);
+  const resetCctvHealth = useSIGINTStore((s) => s.resetCctvHealth);
   const [selectedRegion, setSelectedRegion] = useState<"all" | CctvRegion>("all");
   const [viewMode, setViewMode] = useState<"grid" | "single">("grid");
   const [cycleIndex, setCycleIndex] = useState(0);
@@ -83,6 +86,12 @@ export default function LiveCctvPanel({
     };
   }, [searchQuery]);
 
+  // Periodically reset broken counters so cameras get another chance
+  useEffect(() => {
+    const id = setInterval(() => resetCctvHealth(), BROKEN_RESET_MS);
+    return () => clearInterval(id);
+  }, [resetCctvHealth]);
+
   const healthyCameras = useMemo(() => {
     const ALLOWED_FORMATS = new Set(["JPEG", "IMAGE_STREAM"]);
     const seenIds = new Set<string>();
@@ -90,7 +99,7 @@ export default function LiveCctvPanel({
 
     for (const cam of cameras) {
       if (!cam.snapshotUrl) continue;
-      if (brokenIds[cam.id]) continue;
+      if ((brokenIds[cam.id] ?? 0) >= BROKEN_THRESHOLD) continue;
       if (!ALLOWED_FORMATS.has(cam.streamFormat ?? "")) continue;
       // Only allow proxied cameras (snapshotUrl via /api/) to avoid raw HTTP
       // URLs that fail due to CORS/mixed-content

@@ -80,10 +80,10 @@ const MAX_OTC_CAMERAS_FOR_GLOBE = 1200;
 
 function sampleCctvForGlobe(
   cameras: CctvCamera[],
-  brokenIds: Record<string, boolean>
+  brokenIds: Record<string, number>
 ): CctvCamera[] {
   const healthy = cameras.filter(
-    (cam) => !brokenIds[cam.id] && !(cam.lat === 0 && cam.lon === 0),
+    (cam) => (brokenIds[cam.id] ?? 0) < 3 && !(cam.lat === 0 && cam.lon === 0),
   );
   const otc: CctvCamera[] = [];
   const nonOtc: CctvCamera[] = [];

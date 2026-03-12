@@ -95,8 +95,8 @@ interface CctvState {
   selectedCameraId: string | null;
   calibrations: Record<string, CameraCalibration>;
   floating: CctvFloatingState;
-  /** Cameras that have repeatedly failed snapshot/stream loads in this session. */
-  brokenIds: Record<string, boolean>;
+  /** Failure count per camera — cameras with 3+ failures are hidden. */
+  brokenIds: Record<string, number>;
 }
 
 interface DebugState {
@@ -1357,7 +1357,7 @@ export const useSIGINTStore = create<SIGINTStore>()(
           set((s) => ({
             cctv: {
               ...s.cctv,
-              brokenIds: { ...s.cctv.brokenIds, [id]: true },
+              brokenIds: { ...s.cctv.brokenIds, [id]: (s.cctv.brokenIds[id] ?? 0) + 1 },
             },
           })),
 

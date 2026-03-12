@@ -26,21 +26,9 @@ interface InsecamRawCamera {
   manufacturer: string;
 }
 
-// Countries to scrape — trimmed for serverless reliability
-const COUNTRIES_TO_SCRAPE = [
-  // Americas
-  "US", "CA", "BR", "MX",
-  // Europe
-  "DE", "IT", "FR", "GB", "RU", "NL", "CZ", "ES", "NO", "PL", "CH",
-  // Asia
-  "JP", "KR", "TW", "IN", "TH",
-  // Mideast
-  "TR", "IL",
-  // Africa
-  "ZA",
-  // Oceania
-  "AU",
-];
+// Minimal country set — only high-camera-count countries to avoid
+// rate-limiting on Vercel. Combined with top-rated pages = ~8 requests total.
+const COUNTRIES_TO_SCRAPE = ["US", "DE", "JP", "GB", "IT"];
 
 const BATCH_SIZE = 3;
 
