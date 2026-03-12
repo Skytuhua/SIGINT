@@ -50,7 +50,7 @@ export default function LiveCctvPanel({
   const [searching, setSearching] = useState(false);
   const searchAbort = useRef<AbortController | null>(null);
 
-  // Debounced remote search against insecam.org
+  // Debounced remote search against OTC dataset (server-side validated)
   useEffect(() => {
     const q = searchQuery.trim();
     if (q.length < 2) {
@@ -66,7 +66,8 @@ export default function LiveCctvPanel({
       searchAbort.current = ac;
 
       try {
-        const resp = await fetch(`/api/cctv/insecam/search?q=${encodeURIComponent(q)}`, {
+        // Search the full OTC dataset on the server (validates matching cameras)
+        const resp = await fetch(`/api/cctv/otc/search?q=${encodeURIComponent(q)}`, {
           signal: ac.signal,
         });
         if (resp.ok) {
