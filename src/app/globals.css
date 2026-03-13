@@ -9603,17 +9603,21 @@ body.si-resizing-globe {
 
   .si-main-frame {
     top: var(--si-header-height);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* --- Phase 3: OPS view — Globe full-height --- */
+  /* --- Phase 3: OPS view — scrollable globe + dashboard --- */
   .si-unified-scroll {
-    overflow-y: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .si-unified-globe-section {
-    flex-basis: calc(100vh - var(--si-header-height)) !important;
-    min-height: calc(100vh - var(--si-header-height));
-    max-height: none;
+    flex-basis: 50vh;
+    min-height: 200px;
+    max-height: 50vh;
+    flex-shrink: 0;
   }
 
   .si-globe-height-resizer {
@@ -9621,7 +9625,19 @@ body.si-resizing-globe {
   }
 
   .si-unified-dashboard-section {
-    display: none;
+    min-height: 300px;
+    flex-shrink: 0;
+  }
+
+  /* NEWS and MARKET views — enable scrolling */
+  .si-news-main-frame {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .si-market-main-frame {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Globe workspace: single column, side stack becomes bottom sheet */
