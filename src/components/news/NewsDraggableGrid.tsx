@@ -228,9 +228,18 @@ export default function NewsDraggableGrid({ panels, emptyCategoryPanelIds = [] }
   }, [layouts, panelLocks, panels]);
 
   if (isMobile) {
+    // Keep only the first news-video panel on mobile to save space + memory
+    let seenVideo = false;
+    const mobilePanels = panels.filter((p) => {
+      if (p.id.startsWith("news-video-")) {
+        if (seenVideo) return false;
+        seenVideo = true;
+      }
+      return true;
+    });
     return (
       <div className="si-mobile-dashboard-stack">
-        {panels.map((panel) => (
+        {mobilePanels.map((panel) => (
           <div key={panel.id} className="si-mobile-dashboard-panel">
             {panel.node}
           </div>

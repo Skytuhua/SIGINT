@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CctvCamera, CctvRegion } from "../../lib/providers/types";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import { useSIGINTStore } from "../../store";
 import CctvFeedView from "./inspector/CctvFeedView";
 import Panel from "./panel/Panel";
@@ -39,11 +40,13 @@ export default function LiveCctvPanel({
   onRefresh,
   loading,
 }: LiveCctvPanelProps) {
+  const isMobile = useIsMobile();
   const brokenIds = useSIGINTStore((s) => s.cctv.brokenIds);
   const markCctvBroken = useSIGINTStore((s) => s.markCctvBroken);
   const resetCctvHealth = useSIGINTStore((s) => s.resetCctvHealth);
   const [selectedRegion, setSelectedRegion] = useState<"all" | CctvRegion>("all");
   const [viewMode, setViewMode] = useState<"grid" | "single">("grid");
+  const effectiveViewMode = isMobile ? "single" : viewMode;
   const [cycleIndex, setCycleIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [remoteResults, setRemoteResults] = useState<CctvCamera[]>([]);
@@ -250,7 +253,7 @@ export default function LiveCctvPanel({
         {...lockHeaderProps}
         controls={
           <>
-            {viewModeControls}
+            {!isMobile && viewModeControls}
             <PanelControls
               onRefresh={handleNextSet}
               loading={loading}
@@ -270,7 +273,7 @@ export default function LiveCctvPanel({
               </svg>
               <span>{searching ? "Searching insecam.org..." : "No live streams for this region"}</span>
             </div>
-          ) : viewMode === "grid" ? (
+          ) : effectiveViewMode === "grid" ? (
             <div className="si-cctv-live-grid">
               {displayedCameras.map((cam) => (
                 <div key={cam.id} className="si-cctv-live-cell">

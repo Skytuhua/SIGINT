@@ -10028,5 +10028,27 @@ body.si-resizing-globe {
   .si-news-globe-cube {
     min-height: 300px;
   }
+
+  /* Round 4 Fix 1: Stack news map layout vertically — layers on top, map below */
+  .si-news-map-layout {
+    flex-direction: column;
+  }
+
+  .si-news-layers-panel {
+    width: 100%;
+    flex: 0 0 auto;
+    height: auto;
+    max-height: 40vh;
+    overflow-y: auto;
+  }
+
+  .si-news-map-canvas-wrap {
+    min-height: 300px;
+  }
+
+  /* Round 4 Fix 4: CCTV single view readable height */
+  .si-cctv-live-single {
+    min-height: 250px;
+  }
 }
 

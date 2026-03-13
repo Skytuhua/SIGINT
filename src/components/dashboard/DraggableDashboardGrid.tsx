@@ -87,9 +87,10 @@ export default function DraggableDashboardGrid({ panels }: DraggableDashboardGri
   }, [layouts, panelLocks, panels]);
 
   if (isMobile) {
+    const mobilePanels = panels.filter((p) => p.id !== "kpi");
     return (
       <div className="si-mobile-dashboard-stack">
-        {panels.map((panel) => (
+        {mobilePanels.map((panel) => (
           <div key={panel.id} className="si-mobile-dashboard-panel">
             {panel.node}
           </div>
