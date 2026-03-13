@@ -13,6 +13,7 @@ import MarketWorkspace from "./market/MarketWorkspace";
 import CctvFloatingPanel from "./dashboard/CctvFloatingPanel";
 import TradeRouteCard from "./dashboard/TradeRouteCard";
 import { formatUtc } from "../lib/dashboard/format";
+import { useIsMobile } from "../hooks/useIsMobile";
 
 function selectGlobalFreshness(lastUpdated: Record<string, number | null>): number | null {
   const values = Object.values(lastUpdated).filter((value): value is number => typeof value === "number");
@@ -27,6 +28,7 @@ const MAX_GLOBE_HEIGHT_VH = 72;
 
 export default function SIGINTApp() {
   useDashboardFeeds();
+  const isMobile = useIsMobile();
 
   const setDensity = useSIGINTStore((s) => s.setDensity);
   const activeView = useSIGINTStore((s) => s.dashboard.activeView);
@@ -312,7 +314,7 @@ export default function SIGINTApp() {
         </div>
 
         <div className="si-header-right">
-          {featureFlags.enablePanelHotkeys ? (
+          {!isMobile && featureFlags.enablePanelHotkeys ? (
             <Toggle checked={hotkeysEnabled} onChange={setHotkeysEnabled} label="Hotkeys" />
           ) : null}
           <button

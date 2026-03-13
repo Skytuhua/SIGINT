@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useCallback, useState } from "react";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import CesiumGlobe, { type GlobeControlApi, type CameraSnapshot } from "../CesiumGlobe";
 import { useSIGINTStore } from "../../store";
 import Panel from "./panel/Panel";
@@ -45,9 +46,12 @@ interface GlobeWorkspaceProps {
 }
 
 export default function GlobeWorkspace({ embedded = false, compact = false }: GlobeWorkspaceProps) {
+  const isMobile = useIsMobile();
   const [camera, setCamera] = useState<CameraSnapshot | null>(null);
   const [api, setApi] = useState<GlobeControlApi | null>(null);
   const [globeReady, setGlobeReady] = useState(false);
+  const [mobileSideOpen, setMobileSideOpen] = useState(false);
+  const toggleMobileSide = useCallback(() => setMobileSideOpen((prev) => !prev), []);
 
   const layerState = useSIGINTStore((s) => s.layers);
   const toggleLayer = useSIGINTStore((s) => s.toggleLayer);
@@ -113,8 +117,14 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
         />
       </Panel>
 
+      {isMobile && (
+        <button type="button" className="si-mobile-layers-toggle" onClick={toggleMobileSide}>
+          {mobileSideOpen ? "CLOSE" : "LAYERS"}
+        </button>
+      )}
+
       <div
-        className="si-globe-side-stack"
+        className={`si-globe-side-stack${isMobile && mobileSideOpen ? " is-mobile-open" : ""}`}
       >
         <Panel panelId="globe-layers" className="si-globe-side-panel">
           <PanelHeader

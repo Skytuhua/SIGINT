@@ -9,6 +9,7 @@ import {
 } from "react-grid-layout/legacy";
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { useSIGINTStore } from "../../store";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const GRID_BREAKPOINTS = { lg: 1680, md: 1320, sm: 980, xs: 0 } as const;
@@ -30,6 +31,7 @@ interface DraggableDashboardGridProps {
 }
 
 export default function DraggableDashboardGrid({ panels }: DraggableDashboardGridProps) {
+  const isMobile = useIsMobile();
   const [isInteracting, setIsInteracting] = useState(false);
   const layouts = useSIGINTStore((s) => s.dashboard.panelLayouts);
   const panelLocks = useSIGINTStore((s) => s.dashboard.panelLocks);
@@ -83,6 +85,18 @@ export default function DraggableDashboardGrid({ panels }: DraggableDashboardGri
 
     return next;
   }, [layouts, panelLocks, panels]);
+
+  if (isMobile) {
+    return (
+      <div className="si-mobile-dashboard-stack">
+        {panels.map((panel) => (
+          <div key={panel.id} className="si-mobile-dashboard-panel">
+            {panel.node}
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>

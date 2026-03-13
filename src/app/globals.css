@@ -9559,3 +9559,249 @@ body.si-resizing-globe {
   font-style: italic;
 }
 
+/* =====================================================
+   MOBILE RESPONSIVE — max-width: 768px
+   All rules below are gated behind this breakpoint.
+   Desktop (769px+) is completely unaffected.
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+  /* --- Phase 1: Foundation — CSS variable overrides --- */
+  .si-app {
+    --si-font-size: 14px;
+    --si-font-size-sm: 12px;
+    --si-header-height: 44px;
+    --si-control-height: 44px;
+    --si-row-height: 36px;
+    --si-panel-pad: 6px;
+  }
+
+  /* --- Phase 2: Header & Navigation --- */
+  .si-global-header {
+    grid-template-columns: 1fr auto;
+    height: auto;
+    min-height: var(--si-header-height);
+    padding: 4px 8px;
+    gap: 4px;
+  }
+
+  .si-header-center {
+    display: none;
+  }
+
+  .si-header-view-toggle button {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 13px;
+    padding: 0 12px;
+  }
+
+  .si-app-wordmark {
+    font-size: 12px;
+  }
+
+  .si-main-frame {
+    top: var(--si-header-height);
+  }
+
+  /* --- Phase 3: OPS view — Globe full-height --- */
+  .si-unified-scroll {
+    overflow-y: hidden;
+  }
+
+  .si-unified-globe-section {
+    flex-basis: calc(100vh - var(--si-header-height)) !important;
+    min-height: calc(100vh - var(--si-header-height));
+    max-height: none;
+  }
+
+  .si-globe-height-resizer {
+    display: none;
+  }
+
+  .si-unified-dashboard-section {
+    display: none;
+  }
+
+  /* Globe workspace: single column, side stack becomes bottom sheet */
+  .si-globe-workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
+
+  .si-globe-side-stack {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 55vh;
+    z-index: var(--si-z-inspector);
+    background: var(--si-bg);
+    border-top: 1px solid var(--si-line);
+    transform: translateY(100%);
+    transition: transform 0.25s ease;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px;
+  }
+
+  .si-globe-side-stack.is-mobile-open {
+    transform: translateY(0);
+  }
+
+  /* Floating toggle button for the bottom sheet */
+  .si-mobile-layers-toggle {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    z-index: calc(var(--si-z-inspector) - 1);
+    background: var(--si-bg-2);
+    border: 1px solid var(--si-line);
+    color: var(--si-accent);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .si-mobile-layers-toggle:active {
+    opacity: 0.7;
+  }
+
+  /* --- Phase 4: Dashboard stacked panels --- */
+  .si-mobile-dashboard-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+  }
+
+  .si-mobile-dashboard-panel {
+    min-height: 280px;
+    flex-shrink: 0;
+  }
+
+  .si-mobile-dashboard-panel > .si-panel {
+    height: 100%;
+  }
+
+  .si-dashboard-toolbar {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  /* --- Phase 5: Inspector --- */
+  .si-inspector,
+  .si-inspector.is-split {
+    width: 100vw;
+    max-width: none;
+    top: var(--si-header-height);
+    height: calc(100vh - var(--si-header-height));
+  }
+
+  .si-inspector-header {
+    padding: 8px 12px;
+  }
+
+  .si-inspector-row {
+    grid-template-columns: 120px 1fr;
+  }
+
+  /* --- Phase 5: CCTV panels --- */
+  .si-cctv-live-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+
+  .si-cctv-wall-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .si-cctv-live-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+  }
+
+  .si-cctv-live-tab {
+    min-height: 36px;
+    white-space: nowrap;
+  }
+
+  /* --- Phase 5: Data tables --- */
+  .si-data-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .si-data-header-cell,
+  .si-data-cell {
+    min-width: 80px;
+    padding: 8px 6px;
+  }
+
+  .si-data-search-main {
+    height: 44px;
+    font-size: 14px;
+  }
+
+  /* --- Phase 6: Touch & hover fixes --- */
+  .si-inline-action:active,
+  .si-toggle:active,
+  .si-segment:active,
+  .si-panel-tab:active,
+  .si-data-row:active,
+  .si-cctv-wall-cell:active,
+  .si-cctv-live-cell:active,
+  .si-nav-grid button:active,
+  .si-scene-grid button:active {
+    opacity: 0.7;
+    transition: opacity 0.05s;
+  }
+
+  /* Panel controls — larger touch targets */
+  .si-panel-drag-handle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .si-panel-controls button {
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  /* Range sliders */
+  .si-range-label input[type="range"] {
+    height: 36px;
+  }
+
+  /* Segmented controls */
+  .si-segment {
+    min-height: 36px;
+    padding: 0 10px;
+  }
+
+  /* Toggle controls */
+  .si-toggle {
+    min-height: 36px;
+  }
+
+  /* Nav grid buttons */
+  .si-nav-grid button {
+    min-height: 36px;
+    min-width: 36px;
+  }
+
+  /* Scene buttons */
+  .si-scene-grid button {
+    min-height: 36px;
+  }
+}
+
