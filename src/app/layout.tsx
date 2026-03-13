@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { ReactNode } from "react";
 import { Inter, Roboto_Mono } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const fontUi = Inter({
   subsets: ["latin"],
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         style={{ margin: 0, padding: 0, background: "#000", overflow: "hidden" }}
       >
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
