@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useSIGINTStore } from "../../store";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import DraggableDashboardGrid from "./DraggableDashboardGrid";
 import Panel from "./panel/Panel";
 import PanelBody from "./panel/PanelBody";
@@ -42,6 +43,7 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
   const openInspector = useSIGINTStore((s) => s.openInspector);
   const pinEntity = useSIGINTStore((s) => s.pinEntity);
   const resetPanelLayouts = useSIGINTStore((s) => s.resetPanelLayouts);
+  const isMobile = useIsMobile();
   const [showViewMenu, setShowViewMenu] = useState(false);
   const viewMenuRef = useRef<HTMLDivElement | null>(null);
 
@@ -665,35 +667,37 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
     <div className={`si-dashboard-workspace ${embedded ? "is-embedded" : ""}`.trim()}>
       <div className="si-dashboard-toolbar">
         <div className="si-toolbar-status">DASHBOARD MODE / ULTRA WORKSTATION GRID / FREEFORM WINDOW MOVE</div>
-        <div className="si-toolbar-actions">
-          <div className="si-view-menu-wrap" ref={viewMenuRef}>
-            <button
-              type="button"
-              className={`si-inline-action ${showViewMenu ? "is-active" : ""}`}
-              onClick={() => setShowViewMenu((open) => !open)}
-              aria-expanded={showViewMenu}
-            >
-              VIEW WINDOWS
+        {!isMobile && (
+          <div className="si-toolbar-actions">
+            <div className="si-view-menu-wrap" ref={viewMenuRef}>
+              <button
+                type="button"
+                className={`si-inline-action ${showViewMenu ? "is-active" : ""}`}
+                onClick={() => setShowViewMenu((open) => !open)}
+                aria-expanded={showViewMenu}
+              >
+                VIEW WINDOWS
+              </button>
+              {showViewMenu ? (
+                <div className="si-view-menu" role="menu" aria-label="Toggle dashboard windows">
+                  {panelCatalog.map((panel) => (
+                    <label key={panel.id} className="si-view-menu-item">
+                      <input
+                        type="checkbox"
+                        checked={panelVisibility[panel.id] !== false}
+                        onChange={(event) => setPanelVisibility(panel.id, event.target.checked)}
+                      />
+                      <span>{panel.label}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            <button type="button" className="si-inline-action" onClick={resetPanelLayouts}>
+              RESET LAYOUT
             </button>
-            {showViewMenu ? (
-              <div className="si-view-menu" role="menu" aria-label="Toggle dashboard windows">
-                {panelCatalog.map((panel) => (
-                  <label key={panel.id} className="si-view-menu-item">
-                    <input
-                      type="checkbox"
-                      checked={panelVisibility[panel.id] !== false}
-                      onChange={(event) => setPanelVisibility(panel.id, event.target.checked)}
-                    />
-                    <span>{panel.label}</span>
-                  </label>
-                ))}
-              </div>
-            ) : null}
           </div>
-          <button type="button" className="si-inline-action" onClick={resetPanelLayouts}>
-            RESET LAYOUT
-          </button>
-        </div>
+        )}
       </div>
       {panelNodes.length ? (
         <DraggableDashboardGrid panels={panelNodes} />

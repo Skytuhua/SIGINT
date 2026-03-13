@@ -40,6 +40,7 @@ import PanelHeader from "../dashboard/panel/PanelHeader";
 import dynamic from "next/dynamic";
 import NewsDraggableGrid from "./NewsDraggableGrid";
 import NewsPopupModal from "./NewsPopupModal";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 const NewsDailyBriefingModal = dynamic(() => import("./NewsDailyBriefingModal"), {
   ssr: false,
@@ -567,6 +568,7 @@ function SearchOverlayRow({
 export default function NewsWorkspace({ embedded = false }: { embedded?: boolean }) {
   perfMark("news:mount:start");
 
+  const isMobile = useIsMobile();
   const dashboardView = useSIGINTStore((s) => s.dashboard.activeView);
   const news = useSIGINTStore(
     (s) => ({
@@ -2152,36 +2154,44 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
               </div>
             ) : null}
           </div>
-          <button type="button" onClick={() => {
-            const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
-            const rows = filteredItems.map((i) => [i.publishedAt, q(i.headline ?? ""), q(i.source ?? ""), q(i.category ?? ""), q(i.url ?? ""), i.score ?? ""].join(","));
-            const csv = ["publishedAt,headline,source,category,url,score", ...rows].join("\n");
-            const blob = new Blob([csv], { type: "text/csv" });
-            const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `news-export-${Date.now()}.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
-          }}>EXPORT</button>
+          {!isMobile && (
+            <button type="button" onClick={() => {
+              const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
+              const rows = filteredItems.map((i) => [i.publishedAt, q(i.headline ?? ""), q(i.source ?? ""), q(i.category ?? ""), q(i.url ?? ""), i.score ?? ""].join(","));
+              const csv = ["publishedAt,headline,source,category,url,score", ...rows].join("\n");
+              const blob = new Blob([csv], { type: "text/csv" });
+              const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `news-export-${Date.now()}.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
+            }}>EXPORT</button>
+          )}
           <button type="button" onClick={() => setShowStats((p) => !p)}>{showStats ? "HIDE STATS" : "STATS"}</button>
-          <button type="button" onClick={() => resetNewsLayout()}>RESET LAYOUT</button>
-          <button type="button" onClick={() => setNewsUiState({ showHelpHints: !news.ui.showHelpHints })}>
-            {news.ui.showHelpHints ? "HIDE HINTS" : "SHOW HINTS"}
-          </button>
-          <div className="si-news-toolbar-panels">
-            <button type="button" onClick={() => setPanelMenuOpen((prev) => !prev)}>PANELS</button>
-            {panelMenuOpen ? (
-              <div className="si-news-panel-popover">
-                {Object.keys(news.panelVisibility).map((panelId) => (
-                  <label key={panelId}>
-                    <input
-                      type="checkbox"
-                      checked={news.panelVisibility[panelId] !== false}
-                      onChange={(event) => setNewsPanelVisibility(panelId, event.target.checked)}
-                    />
-                    {panelId.replace("news-", "")}
-                  </label>
-                ))}
-              </div>
-            ) : null}
-          </div>
-          {news.ui.showHelpHints ? (
+          {!isMobile && (
+            <button type="button" onClick={() => resetNewsLayout()}>RESET LAYOUT</button>
+          )}
+          {!isMobile && (
+            <button type="button" onClick={() => setNewsUiState({ showHelpHints: !news.ui.showHelpHints })}>
+              {news.ui.showHelpHints ? "HIDE HINTS" : "SHOW HINTS"}
+            </button>
+          )}
+          {!isMobile && (
+            <div className="si-news-toolbar-panels">
+              <button type="button" onClick={() => setPanelMenuOpen((prev) => !prev)}>PANELS</button>
+              {panelMenuOpen ? (
+                <div className="si-news-panel-popover">
+                  {Object.keys(news.panelVisibility).map((panelId) => (
+                    <label key={panelId}>
+                      <input
+                        type="checkbox"
+                        checked={news.panelVisibility[panelId] !== false}
+                        onChange={(event) => setNewsPanelVisibility(panelId, event.target.checked)}
+                      />
+                      {panelId.replace("news-", "")}
+                    </label>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          )}
+          {!isMobile && news.ui.showHelpHints ? (
             <span className="si-news-hotkeys" title="Keyboard shortcuts (when not typing)">
               <kbd>/</kbd> focus search | <kbd>j</kbd>/<kbd>k</kbd> move | <kbd>Enter</kbd> open story | <kbd>g</kbd> globe | <kbd>v</kbd> video | <kbd>a</kbd> new alert
             </span>

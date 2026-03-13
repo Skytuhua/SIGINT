@@ -9819,5 +9819,165 @@ body.si-resizing-globe {
   .si-scene-grid button {
     min-height: 36px;
   }
+
+  /* ================================================================
+     PHASE A — Full mobile integration (375px+)
+     ================================================================ */
+
+  /* A1. Global overflow containment */
+  .si-app {
+    overflow-x: hidden;
+  }
+
+  /* A2. Market command bar + overview grids */
+  .si-market-command-bar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 30px;
+  }
+
+  .si-market-tab-row {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1 1 100%;
+  }
+
+  .si-market-tab {
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  .si-market-scenario-row {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-shrink: 0;
+  }
+
+  .si-market-briefing-btn {
+    min-height: 36px;
+    padding: 0 8px;
+  }
+
+  .si-overview-row-2col {
+    grid-template-columns: 1fr;
+  }
+
+  .si-overview-row-3col {
+    grid-template-columns: 1fr;
+  }
+
+  .si-market-workspace {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .si-market-ticker-bar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* A3. News toolbar + filter bar */
+  .si-news-toolbar {
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px 6px;
+    min-height: auto;
+  }
+
+  .si-news-toolbar .si-toolbar-status {
+    flex: 1 1 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 10px;
+  }
+
+  .si-news-toolbar .si-toolbar-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .si-news-hotkeys {
+    display: none;
+  }
+
+  .si-news-filter-bar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .si-news-stats-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .si-news-topbar .si-news-query-row {
+    flex-wrap: wrap;
+  }
+
+  .si-news-topbar .si-news-query-row input {
+    flex: 1 1 100%;
+    min-height: 36px;
+  }
+
+  /* A4. OPS dashboard toolbar */
+  .si-dashboard-toolbar .si-toolbar-status {
+    display: none;
+  }
+
+  .si-dashboard-toolbar .si-toolbar-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .si-mobile-dashboard-panel {
+    max-height: 70vh;
+    overflow: hidden;
+  }
+
+  /* A5. Data table refinements */
+  .si-data-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .si-data-header-cell,
+  .si-data-cell {
+    min-width: 70px;
+    font-size: 11px;
+    padding: 6px 4px;
+  }
+
+  .si-data-header-cell:first-child,
+  .si-data-cell:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--si-bg);
+  }
+
+  /* A6. Header refinements */
+  .si-app-wordmark {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .si-header-left {
+    gap: 4px;
+  }
+
+  .si-header-view-toggle {
+    display: flex;
+    flex: 1;
+  }
+
+  .si-header-view-toggle button {
+    flex: 1;
+    padding: 0 8px;
+    text-align: center;
+  }
 }
 

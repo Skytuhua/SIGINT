@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSIGINTStore } from "../../store";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import type { NewsArticle } from "../../lib/news/types";
 
 // ─── Sector definitions ────────────────────────────────────────────────────
@@ -181,6 +182,7 @@ interface Props {
 }
 
 export default function NewsDailyBriefingModal({ onClose }: Props) {
+  const isMobile = useIsMobile();
   const feedItems = useSIGINTStore((s) => s.news.feedItems);
   const [turnOff, setTurnOff] = useState(false);
   const [aiPage, setAiPage] = useState(0);
@@ -264,7 +266,7 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
 
   const twoCol: React.CSSProperties = {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
     ...divider,
   };
 
@@ -349,7 +351,7 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: 16,
+        padding: isMobile ? 4 : 16,
       }}
     >
       <div
@@ -358,7 +360,7 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
           background: "#020b12",
           border: "1px solid rgba(80,110,140,0.35)",
           width: "100%",
-          maxWidth: 920,
+          maxWidth: isMobile ? "100%" : 920,
           maxHeight: "90vh",
           overflowY: "auto",
         }}
@@ -445,7 +447,7 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
+              gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
               gap: 12,
               marginBottom: 12,
             }}
