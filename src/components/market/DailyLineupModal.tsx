@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useSIGINTStore } from "../../store";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import { MiniSparkline } from "./shared/MiniSparkline";
 import Term from "./shared/Term";
 
@@ -103,6 +104,7 @@ const IMPACT_DOT: Record<Impact, string> = { high: "#ff5a5f", med: "#ffab40", lo
 interface Props { onClose: () => void; }
 
 export default function DailyLineupModal({ onClose }: Props) {
+  const isMobile = useIsMobile();
   const feedItems = useSIGINTStore((s) => s.news.feedItems);
   const [turnOff, setTurnOff] = useState(false);
   const [aiPage, setAiPage]   = useState(0);
@@ -173,7 +175,7 @@ export default function DailyLineupModal({ onClose }: Props) {
 
   const twoCol: React.CSSProperties = {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
     ...divider,
   };
 
@@ -184,7 +186,7 @@ export default function DailyLineupModal({ onClose }: Props) {
         background: "rgba(0,4,10,0.9)",
         zIndex: 9000,
         display: "flex", alignItems: "center", justifyContent: "center",
-        padding: 16,
+        padding: isMobile ? 4 : 16,
       }}
     >
       <div
@@ -192,7 +194,7 @@ export default function DailyLineupModal({ onClose }: Props) {
           ...base,
           background: "#020b12",
           border: "1px solid rgba(80,110,140,0.35)",
-          width: "100%", maxWidth: 920,
+          width: "100%", maxWidth: isMobile ? "100%" : 920,
           maxHeight: "90vh", overflowY: "auto",
         }}
       >
@@ -214,7 +216,7 @@ export default function DailyLineupModal({ onClose }: Props) {
           <span style={{ fontSize: 10, color: "#7fa8c4", letterSpacing: 1 }}>◈ {utc} UTC</span>
           <button
             onClick={handleClose}
-            style={{ background: "none", border: "none", color: "#5f7488", fontSize: 14, cursor: "pointer", lineHeight: 1, padding: "0 2px" }}
+            style={{ background: "none", border: "none", color: "#5f7488", fontSize: isMobile ? 18 : 14, cursor: "pointer", lineHeight: 1, padding: isMobile ? "8px 12px" : "0 2px", minWidth: isMobile ? 44 : undefined, minHeight: isMobile ? 44 : undefined }}
             title="Close Daily Lineup"
           >✕</button>
         </div>
@@ -222,7 +224,7 @@ export default function DailyLineupModal({ onClose }: Props) {
         {/* ── WORLD MARKETS STRIP ── */}
         <div style={{ padding: "10px 14px", ...divider }}>
           <div style={sectionTitle}>World Markets</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: isMobile ? 8 : 16 }}>
             {([
               { label: "North America", items: INDICES.northAmerica },
               { label: "Europe",        items: INDICES.europe        },

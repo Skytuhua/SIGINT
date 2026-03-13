@@ -317,13 +317,15 @@ export default function SIGINTApp() {
           {!isMobile && featureFlags.enablePanelHotkeys ? (
             <Toggle checked={hotkeysEnabled} onChange={setHotkeysEnabled} label="Hotkeys" />
           ) : null}
-          <button
-            type="button"
-            className="si-inline-action"
-            onClick={() => useSIGINTStore.getState().bumpRefreshTick()}
-          >
-            REFRESH
-          </button>
+          {!isMobile && (
+            <button
+              type="button"
+              className="si-inline-action"
+              onClick={() => useSIGINTStore.getState().bumpRefreshTick()}
+            >
+              REFRESH
+            </button>
+          )}
         </div>
       </header>
 

@@ -9979,5 +9979,54 @@ body.si-resizing-globe {
     padding: 0 8px;
     text-align: center;
   }
+
+  /* ================================================================
+     Round 3 — NEWS scroll fix, header, CCTV, empty panels, map
+     ================================================================ */
+
+  /* Fix 1: Break the height chain so NEWS section scrolls */
+  .si-news-section {
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
+  }
+
+  .si-news-workspace {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .si-news-grid-area {
+    overflow: visible;
+    flex: 0 0 auto;
+  }
+
+  /* Fix 2: Header — allow right section to shrink */
+  .si-header-right {
+    min-width: 0;
+  }
+
+  /* Fix 4: Reduce empty panel waste */
+  .si-mobile-dashboard-panel {
+    min-height: 200px;
+  }
+
+  .si-mobile-dashboard-panel:has(.si-panel-body:empty) {
+    display: none;
+  }
+
+  /* Fix 5: CCTV single column enforcement */
+  .si-cctv-live-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+    height: auto;
+  }
+
+  /* Fix 6: News map panel needs adequate height in stacked layout */
+  .si-news-globe-body,
+  .si-news-globe-cube {
+    min-height: 300px;
+  }
 }
 
