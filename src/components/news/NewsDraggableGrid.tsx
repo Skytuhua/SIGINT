@@ -10,6 +10,7 @@ import {
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { useSIGINTStore } from "../../store";
 import type { DashboardLayouts } from "../../lib/dashboard/types";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const GRID_BREAKPOINTS = { lg: 1680, md: 1320, sm: 980, xs: 0 } as const;
@@ -123,6 +124,7 @@ function reflowLayoutWithEmptyAtBottom(
 }
 
 export default function NewsDraggableGrid({ panels, emptyCategoryPanelIds = [] }: NewsDraggableGridProps) {
+  const isMobile = useIsMobile();
   const [isInteracting, setIsInteracting] = useState(false);
   const layouts = useSIGINTStore((s) => s.news.panelLayouts);
   const panelLocks = useSIGINTStore((s) => s.news.panelLocks);
@@ -224,6 +226,18 @@ export default function NewsDraggableGrid({ panels, emptyCategoryPanelIds = [] }
 
     return next;
   }, [layouts, panelLocks, panels]);
+
+  if (isMobile) {
+    return (
+      <div className="si-mobile-dashboard-stack">
+        {panels.map((panel) => (
+          <div key={panel.id} className="si-mobile-dashboard-panel">
+            {panel.node}
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <ResponsiveGridLayout
