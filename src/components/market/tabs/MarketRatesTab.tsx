@@ -10,8 +10,10 @@ import BreakevenInflationPanel from "../BreakevenInflationPanel";
 import MarketNewsTape from "../MarketNewsTape";
 import TradingViewWidget from "../shared/TradingViewWidget";
 import SectionLabel from "../shared/SectionLabel";
+import { useIsMobile } from "../../../hooks/useIsMobile";
 
 export default function MarketRatesTab() {
+  const isMobile = useIsMobile();
   return (
     <div className="si-overview-scroll">
 
@@ -39,7 +41,7 @@ export default function MarketRatesTab() {
                 style: "1",
                 allow_symbol_change: true,
                 hide_top_toolbar: false,
-                hide_side_toolbar: false,
+                hide_side_toolbar: isMobile,
                 withdateranges: true,
                 save_image: false,
                 details: true,

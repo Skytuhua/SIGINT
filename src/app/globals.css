@@ -10050,5 +10050,46 @@ body.si-resizing-globe {
   .si-cctv-live-single {
     min-height: 250px;
   }
+
+  /* ================================================================
+     Round 5 — Market panels, overlay, drag handles, focus borders
+     ================================================================ */
+
+  /* Fix 1: Override market panel inline minHeight on mobile */
+  .si-market-panel {
+    min-height: auto !important;
+  }
+
+  .si-market-panel .si-market-panel-body {
+    min-height: 0 !important;
+  }
+
+  .si-market-panel .tradingview-widget-container {
+    min-height: 220px !important;
+    max-height: 300px;
+  }
+
+  /* Fix 3: News map overlay — reset left offset (sidebar stacks above on mobile) */
+  .si-news-globe-overlay {
+    left: 8px;
+  }
+
+  /* Fix 4: Hide grid-layout drag/lock controls on mobile (no drag/resize) */
+  .si-panel-drag-handle,
+  .si-panel-lock-button {
+    display: none !important;
+  }
+
+  /* Fix 5: No focused-panel yellow highlight on mobile */
+  .si-panel.is-focused {
+    outline: none !important;
+  }
+
+  /* Fix 6: Widen market breadth table number columns */
+  .si-breadth-table-head,
+  .si-breadth-table-row {
+    grid-template-columns: 1fr 70px 80px;
+    font-size: 12px;
+  }
 }
 

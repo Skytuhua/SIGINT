@@ -15,12 +15,14 @@ import ShortInterestPanel from "../ShortInterestPanel";
 import SectionLabel from "../shared/SectionLabel";
 import EquityWatchlistPanel from "../EquityWatchlistPanel";
 import TradingViewWidget from "../shared/TradingViewWidget";
+import { useIsMobile } from "../../../hooks/useIsMobile";
 
 interface Props {
   onTickerClick?: (sym: string) => void;
 }
 
 export default function MarketEquitiesTab({ onTickerClick }: Props) {
+  const isMobile = useIsMobile();
   return (
     <div className="si-overview-scroll">
 
@@ -48,7 +50,7 @@ export default function MarketEquitiesTab({ onTickerClick }: Props) {
                 style: "1",
                 allow_symbol_change: true,
                 hide_top_toolbar: false,
-                hide_side_toolbar: false,
+                hide_side_toolbar: isMobile,
                 withdateranges: true,
                 save_image: false,
                 details: true,
