@@ -385,7 +385,7 @@ async function fetchWikipediaSummary(title: string): Promise<{
   const result = await cachedFetch({
     cacheKey: `title:${clean.toLowerCase()}`,
     policy: WIKIPEDIA_POLICY,
-    fallbackValue: null as { title: string; extract: string | null; content_urls?: { desktop?: { page?: string } } } | null,
+    fallbackValue: null as { title: string; extract?: string; content_urls?: { desktop?: { page?: string } } } | null,
     request: async () => {
       const url = `${WIKIPEDIA_SUMMARY}/${encodeURIComponent(clean.replace(/ /g, "_"))}`;
       return await fetchJsonOrThrow<{

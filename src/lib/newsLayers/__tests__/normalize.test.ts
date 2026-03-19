@@ -40,7 +40,7 @@ describe("newsLayers normalize", () => {
         properties: {},
         geometry: {
           type: "Point" as const,
-          coordinates: [idx % 20, idx % 10],
+          coordinates: [idx % 20, idx % 10] as [number, number],
         },
       })),
     };

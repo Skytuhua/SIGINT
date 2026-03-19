@@ -403,6 +403,7 @@ function normalizeOpenSky(raw: OpenSkyResponse): Flight[] {
       trackDeg:
         typeof state[10] === "number" && Number.isFinite(state[10]) ? state[10] : undefined,
       isMilitary: false,
+      isMock: false,
     });
   }
   return dedupeByIcao(flights);
@@ -511,6 +512,7 @@ function normalizeFr24(raw: Record<string, unknown>): Flight[] {
       }),
       source: "FR24",
       isMilitary: false,
+      isMock: false,
     });
   }
 

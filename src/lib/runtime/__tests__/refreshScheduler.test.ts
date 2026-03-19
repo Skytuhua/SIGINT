@@ -32,7 +32,7 @@ describe("RefreshScheduler", () => {
     await sleep(40);
     expect(runs).toBe(1);
 
-    release?.();
+    (release as (() => void) | null)?.();
     await sleep(20);
     scheduler.stop();
   });

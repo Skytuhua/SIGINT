@@ -2021,9 +2021,6 @@ export const useSIGINTStore = create<SIGINTStore>()(
                   byPanel: {
                     ...byPanel,
                     [panelId]: {
-                      selectedVideoId: null,
-                      selectedChannelFilter: null,
-                      manualUrl: "",
                       ...byPanel[panelId],
                       ...partial,
                     },

@@ -10,7 +10,8 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type CSSProperties,
 } from "react";
-import { List, useListRef } from "react-window";
+import { List } from "react-window";
+import type { ListImperativeAPI } from "react-window";
 import { useNewsStream } from "../../hooks/useNewsStream";
 import type {
   StreamItem,
@@ -280,7 +281,7 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const listRef = useListRef();
+  const listRef = useRef<ListImperativeAPI | null>(null);
 
   // Server-side SSE params — only time window matters; tabs/categories filter client-side
   // so switching tabs is instant and never triggers a reconnect.

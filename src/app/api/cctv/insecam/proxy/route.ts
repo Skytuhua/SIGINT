@@ -2,8 +2,12 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { isBlockedHost } from "../../../../../lib/server/ssrf";
+import { createRateLimiter, getClientIp, rateLimitGuard } from "../../../../../lib/server/rateLimit";
+
+const limiter = createRateLimiter({ windowMs: 60_000, maxRequests: 30 });
 
 const TIMEOUT_MS = 8_000;
+const MAX_BODY_BYTES = 10 * 1024 * 1024; // 10 MB
 
 /**
  * Proxy JPEG snapshots from IP cameras to bypass CORS and mixed-content
@@ -12,6 +16,9 @@ const TIMEOUT_MS = 8_000;
  * Usage: GET /api/cctv/insecam/proxy?url=<encoded camera URL>
  */
 export async function GET(req: NextRequest) {
+  const blocked = rateLimitGuard(limiter(getClientIp(req)));
+  if (blocked) return blocked;
+
   const url = req.nextUrl.searchParams.get("url");
   if (!url) {
     return NextResponse.json({ error: "Missing url parameter" }, { status: 400 });
@@ -39,6 +46,7 @@ export async function GET(req: NextRequest) {
 
     const resp = await fetch(url, {
       signal: controller.signal,
+      redirect: "manual",
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -48,6 +56,15 @@ export async function GET(req: NextRequest) {
     });
 
     clearTimeout(timeout);
+
+    // Reject redirects — camera snapshots should serve images directly.
+    // Following redirects opens SSRF bypass vectors (DNS rebinding).
+    if (resp.status >= 300 && resp.status < 400) {
+      return NextResponse.json(
+        { error: "Redirects not allowed" },
+        { status: 403 },
+      );
+    }
 
     if (!resp.ok) {
       return NextResponse.json(
@@ -66,12 +83,29 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Reject oversized responses before reading the full body
+    const contentLength = resp.headers.get("content-length");
+    if (contentLength && Number(contentLength) > MAX_BODY_BYTES) {
+      return NextResponse.json(
+        { error: "Response too large" },
+        { status: 502 },
+      );
+    }
+
     const body = await resp.arrayBuffer();
 
     // Reject empty responses
     if (body.byteLength === 0) {
       return NextResponse.json(
         { error: "Empty response from upstream" },
+        { status: 502 },
+      );
+    }
+
+    // Reject oversized bodies (Content-Length may have been missing or lying)
+    if (body.byteLength > MAX_BODY_BYTES) {
+      return NextResponse.json(
+        { error: "Response too large" },
         { status: 502 },
       );
     }

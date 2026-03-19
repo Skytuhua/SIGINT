@@ -56,7 +56,7 @@ for (const def of SECTOR_DEFS) {
     avgBeta: stocks.length ? stocks.reduce((a, s) => a + s.beta, 0) / stocks.length : 0,
     avgDiv: stocks.length ? stocks.reduce((a, s) => a + s.divYield, 0) / stocks.length : 0,
     mktCapB: stocks.reduce((a, s) => a + s.marketCapB, 0),
-    avgROE: stocks.length ? stocks.reduce((a, s) => a + s.roe, 0) / stocks.length : 0,
+    avgROE: stocks.length ? stocks.reduce((a, s) => a + (s.roe ?? 0), 0) / stocks.length : 0,
     avgNetMgn: stocks.length ? stocks.reduce((a, s) => a + s.netMarginPct, 0) / stocks.length : 0,
   };
 }

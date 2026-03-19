@@ -14,6 +14,7 @@ import CctvFloatingPanel from "./dashboard/CctvFloatingPanel";
 import TradeRouteCard from "./dashboard/TradeRouteCard";
 import { formatUtc } from "../lib/dashboard/format";
 import { useIsMobile } from "../hooks/useIsMobile";
+import WorkspaceErrorBoundary from "./ui/WorkspaceErrorBoundary";
 
 function selectGlobalFreshness(lastUpdated: Record<string, number | null>): number | null {
   const values = Object.values(lastUpdated).filter((value): value is number => typeof value === "number");
@@ -347,7 +348,9 @@ export default function SIGINTApp() {
           } : undefined}
         >
           <section className="si-unified-dashboard-section si-news-section">
-            <NewsWorkspace />
+            <WorkspaceErrorBoundary name="NEWS">
+              <NewsWorkspace />
+            </WorkspaceErrorBoundary>
           </section>
         </div>
 
@@ -362,7 +365,9 @@ export default function SIGINTApp() {
                 } as CSSProperties
               }
             >
-              <GlobeWorkspace embedded compact />
+              <WorkspaceErrorBoundary name="OPS">
+                <GlobeWorkspace embedded compact />
+              </WorkspaceErrorBoundary>
             </section>
             <div
               className="si-globe-height-resizer"
@@ -381,12 +386,16 @@ export default function SIGINTApp() {
               }}
             />
             <section className="si-unified-dashboard-section">
-              <DashboardWorkspace embedded />
+              <WorkspaceErrorBoundary name="OPS-DASHBOARD">
+                <DashboardWorkspace embedded />
+              </WorkspaceErrorBoundary>
             </section>
           </div>
         ) : activeView === "market" ? (
           <div className="si-market-main-frame" role="region" aria-label="Market workspace">
-            <MarketWorkspace />
+            <WorkspaceErrorBoundary name="MARKET">
+              <MarketWorkspace />
+            </WorkspaceErrorBoundary>
           </div>
         ) : null}
       </main>

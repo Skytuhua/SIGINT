@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { getArticleSummary } from "../../../../lib/server/news/providers/articleSummary";
+import { createRateLimiter, getClientIp, rateLimitGuard } from "../../../../lib/server/rateLimit";
+
+const limiter = createRateLimiter({ windowMs: 60_000, maxRequests: 20 });
 
 export async function GET(request: Request) {
+  const blocked = rateLimitGuard(limiter(getClientIp(request)));
+  if (blocked) return blocked;
+
   const cacheHeaders = {
     "Cache-Control": "private, max-age=45, stale-while-revalidate=120",
   };

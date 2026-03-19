@@ -8,8 +8,8 @@ export interface ScreenerRow {
   chg1w: number;
   pe: number | null;
   ps: number;
-  pb: number;
-  roe: number;
+  pb: number | null;
+  roe: number | null;
   grossMarginPct: number;
   netMarginPct: number;
   beta: number;

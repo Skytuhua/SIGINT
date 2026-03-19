@@ -161,30 +161,32 @@ async function yahooFetchJson<T>(
 
 /* ── Yahoo Finance v7 quote API ──────────────────────────────────────────── */
 
+interface YFQuoteItem {
+  symbol: string;
+  shortName?: string;
+  longName?: string;
+  regularMarketPrice?: number;
+  regularMarketChange?: number;
+  regularMarketChangePercent?: number;
+  regularMarketPreviousClose?: number;
+  regularMarketVolume?: number;
+  marketCap?: number;
+  regularMarketDayHigh?: number;
+  regularMarketDayLow?: number;
+  fiftyTwoWeekHigh?: number;
+  fiftyTwoWeekLow?: number;
+  ytdReturn?: number;
+  marketState?: string;
+}
+
 interface YFQuoteResponse {
   quoteResponse?: {
-    result?: Array<{
-      symbol: string;
-      shortName?: string;
-      longName?: string;
-      regularMarketPrice?: number;
-      regularMarketChange?: number;
-      regularMarketChangePercent?: number;
-      regularMarketPreviousClose?: number;
-      regularMarketVolume?: number;
-      marketCap?: number;
-      regularMarketDayHigh?: number;
-      regularMarketDayLow?: number;
-      fiftyTwoWeekHigh?: number;
-      fiftyTwoWeekLow?: number;
-      ytdReturn?: number;
-      marketState?: string;
-    }>;
+    result?: Array<YFQuoteItem>;
     error?: unknown;
   };
 }
 
-function mapQuote(raw: NonNullable<YFQuoteResponse["quoteResponse"]>["result"] extends Array<infer T> ? T : never): QuoteData {
+function mapQuote(raw: YFQuoteItem): QuoteData {
   return {
     symbol: raw.symbol ?? "",
     name: raw.shortName ?? raw.longName ?? raw.symbol ?? "",
@@ -296,7 +298,7 @@ export async function getMovers(): Promise<CachedFetchResult<{ gainers: MoverRow
         .filter((i) => i.regularMarketChangePercent != null)
         .map((i) => {
           const pct = i.regularMarketChangePercent ?? 0;
-          const avgVol = (i as Record<string, unknown>).averageDailyVolume3Month as number | undefined;
+          const avgVol = (i as unknown as Record<string, unknown>).averageDailyVolume3Month as number | undefined;
           const vol = i.regularMarketVolume ?? 0;
           const volMult = avgVol && avgVol > 0 ? (vol / avgVol).toFixed(1) + "x" : "—";
           return {
@@ -405,7 +407,7 @@ export async function getEarningsCalendar(): Promise<CachedFetchResult<{ upcomin
       const recent: EarningsEntry[] = [];
 
       for (const item of results) {
-        const raw = item as Record<string, unknown>;
+        const raw = item as unknown as Record<string, unknown>;
         const earningsTs = (raw.earningsTimestamp as number) ?? (raw.earningsTimestampStart as number);
         if (!earningsTs) continue;
 

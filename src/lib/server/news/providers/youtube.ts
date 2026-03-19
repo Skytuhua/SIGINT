@@ -624,7 +624,7 @@ export async function discoverYouTubeWebcamStreams(
       degraded: true,
       latencyMs: 0,
       cacheHit: "miss",
-      error: null,
+      error: undefined,
     };
   }
 

@@ -95,7 +95,7 @@ const TRADE_NODE_ENRICH_TTL_MS = 24 * 60 * 60_000;
 
 type TradeNodeStaticProps = Record<string, unknown>;
 let _tradeNodeGeoJsonCache: { features: { properties: TradeNodeStaticProps }[] } | null = null;
-let _tradeNodeGeoJsonFetchPromise: Promise<typeof _tradeNodeGeoJsonCache> | null = null;
+let _tradeNodeGeoJsonFetchPromise: Promise<{ features: { properties: TradeNodeStaticProps }[] } | null> | null = null;
 
 async function fetchTradeNodeGeoJson() {
   if (_tradeNodeGeoJsonCache) return _tradeNodeGeoJsonCache;

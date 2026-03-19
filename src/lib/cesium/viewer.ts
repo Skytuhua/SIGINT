@@ -1,4 +1,4 @@
-// viewer.ts 閳?Cesium Viewer initialization (browser-only, called inside useEffect)
+// viewer.ts — Cesium Viewer initialization (browser-only, called inside useEffect)
 // IMPORTANT: This file must only be imported dynamically or inside useEffect.
 // Never import at module top-level in a Next.js page/component.
 
@@ -86,9 +86,7 @@ export async function initViewer(container: HTMLElement): Promise<import('cesium
 
   // Dynamic import so Next.js never bundles this on the server
   const Cesium = await import('cesium');
-
-
-  Cesium.Ion.defaultAccessToken = process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN ?? '';
+  // Ion token is already set in preloadCesium() — no need to set it again.
 
   // Use a base imagery provider that works without Ion so the globe is never black.
   // When Ion token is valid, Cesium's default would use World Imagery; when missing or
@@ -115,12 +113,12 @@ export async function initViewer(container: HTMLElement): Promise<import('cesium
   } as Record<string, unknown>);
   configureCameraControls(viewer, Cesium);
 
-  // Hide default credit display 閳?we add our own attribution
+  // Hide default credit display — we add our own attribution
   if (viewer.cesiumWidget.creditContainer) {
     (viewer.cesiumWidget.creditContainer as HTMLElement).style.display = 'none';
   }
 
-  // 閳光偓閳光偓 Terrain 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
+  // ── Terrain ──
   try {
     const terrain = await Cesium.CesiumTerrainProvider.fromIonAssetId(1);
     viewer.terrainProvider = terrain;
@@ -129,7 +127,7 @@ export async function initViewer(container: HTMLElement): Promise<import('cesium
     viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider();
   }
 
-  // 閳光偓閳光偓 3D Tiles (Google Photorealistic 閳?OSM Buildings fallback) 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
+  // ── 3D Tiles (Google Photorealistic ?OSM Buildings fallback) ──
   try {
     const google3dTiles = await Cesium.Cesium3DTileset.fromIonAssetId(2275207);
     viewer.scene.primitives.add(google3dTiles);
@@ -139,16 +137,16 @@ export async function initViewer(container: HTMLElement): Promise<import('cesium
       const osmBuildings = await Cesium.createOsmBuildingsAsync();
       viewer.scene.primitives.add(osmBuildings);
     } catch {
-      console.warn('[viewer] OSM Buildings also unavailable 閳?plain globe only');
+      console.warn('[viewer] OSM Buildings also unavailable — plain globe only');
     }
   }
 
-  // 閳光偓閳光偓 Scene defaults 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
+  // ── Scene defaults ──
   viewer.scene.globe.enableLighting = true;
   viewer.scene.globe.atmosphereLightIntensity = 20.0;
   viewer.scene.highDynamicRange = false;
 
-  // 閳光偓閳光偓 Initial camera: looking at NYC from ~8 km altitude 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
+  // ── Initial camera: looking at NYC from ~8 km altitude ──
   viewer.camera.setView({
     destination: Cesium.Cartesian3.fromDegrees(
       DEFAULT_HOME_VIEW.lon,

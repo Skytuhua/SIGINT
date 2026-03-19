@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { getGdeltArticles } from "../../../../../lib/server/news/providers/gdelt";
 import { generateHostedSummary, isHostedLlmAvailable } from "../../../../../lib/llm/hostedClient";
+import { createRateLimiter, getClientIp, rateLimitGuard } from "../../../../../lib/server/rateLimit";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+const limiter = createRateLimiter({ windowMs: 60_000, maxRequests: 20 });
 
 // ── Wikipedia: search first, then fetch summary ─────────────────────────────
 async function fetchWikipediaSummary(name: string): Promise<{ extract: string; pageUrl: string } | null> {
@@ -95,6 +98,9 @@ async function fetchOpenSanctionsProfile(name: string, entityType: string): Prom
 }
 
 export async function GET(request: Request) {
+  const blocked = rateLimitGuard(limiter(getClientIp(request)));
+  if (blocked) return blocked;
+
   const { searchParams } = new URL(request.url);
   const name = searchParams.get("name")?.trim();
   const entityType = searchParams.get("entityType") ?? "";
