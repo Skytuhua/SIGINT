@@ -6,8 +6,10 @@ import {
 } from "../../../../lib/server/news/providers/sec";
 import type { SecFiling } from "../../../../lib/news/types";
 import type { CachedFetchResult } from "../../../../lib/server/news/upstream";
+import { STANDARD_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const ticker = searchParams.get("ticker")?.toUpperCase();
   const cik = searchParams.get("cik") ?? "";
@@ -57,3 +59,5 @@ export async function GET(request: Request) {
     { headers: { "Cache-Control": "public, max-age=3600" } }
   );
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

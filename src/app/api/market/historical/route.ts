@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getHistoricalCloses } from "../../../../lib/server/news/providers/yahooFinance";
+import { STANDARD_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
 const CORR_ASSETS = ["SPY", "TLT", "GLD", "USO", "BTC-USD", "UUP"];
 const CORR_LABELS = ["SPY", "TLT", "GLD", "OIL", "BTC", "DXY"];
@@ -25,7 +27,7 @@ function pearson(a: number[], b: number[]): number {
   return den === 0 ? 0 : parseFloat((num / den).toFixed(2));
 }
 
-export async function GET() {
+async function handler() {
   const results = await Promise.all(
     CORR_ASSETS.map((sym) => getHistoricalCloses(sym, "1mo", "1d")),
   );
@@ -67,3 +69,5 @@ export async function GET() {
     { headers: { "Cache-Control": "no-store, max-age=0" } },
   );
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

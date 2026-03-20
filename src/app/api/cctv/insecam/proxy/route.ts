@@ -2,9 +2,8 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { isBlockedHost } from "../../../../../lib/server/ssrf";
-import { createRateLimiter, getClientIp, rateLimitGuard } from "../../../../../lib/server/rateLimit";
-
-const limiter = createRateLimiter({ windowMs: 60_000, maxRequests: 30 });
+import { STRICT_LIMITER } from "../../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../../lib/server/withRateLimit";
 
 const TIMEOUT_MS = 8_000;
 const MAX_BODY_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -15,11 +14,8 @@ const MAX_BODY_BYTES = 10 * 1024 * 1024; // 10 MB
  *
  * Usage: GET /api/cctv/insecam/proxy?url=<encoded camera URL>
  */
-export async function GET(req: NextRequest) {
-  const blocked = rateLimitGuard(limiter(getClientIp(req)));
-  if (blocked) return blocked;
-
-  const url = req.nextUrl.searchParams.get("url");
+async function handler(req: Request) {
+  const url = new URL(req.url).searchParams.get("url");
   if (!url) {
     return NextResponse.json({ error: "Missing url parameter" }, { status: 400 });
   }
@@ -121,3 +117,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Proxy request failed" }, { status: 502 });
   }
 }
+
+export const GET = withRateLimit(STRICT_LIMITER, handler);

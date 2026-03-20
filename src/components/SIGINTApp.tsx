@@ -1,6 +1,7 @@
 "use client";
 
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { useSIGINTStore } from "../store";
 import { useDashboardFeeds } from "../hooks/useDashboardFeeds";
 import { featureFlags } from "../config/featureFlags";
@@ -9,7 +10,11 @@ import GlobeWorkspace from "./dashboard/GlobeWorkspace";
 import InspectorDrawer from "./dashboard/inspector/InspectorDrawer";
 import Toggle from "./dashboard/controls/Toggle";
 import NewsWorkspace from "./news/NewsWorkspace";
-import MarketWorkspace from "./market/MarketWorkspace";
+
+const MarketWorkspace = dynamic(() => import("./market/MarketWorkspace"), {
+  ssr: false,
+  loading: () => null,
+});
 import CctvFloatingPanel from "./dashboard/CctvFloatingPanel";
 import TradeRouteCard from "./dashboard/TradeRouteCard";
 import { formatUtc } from "../lib/dashboard/format";

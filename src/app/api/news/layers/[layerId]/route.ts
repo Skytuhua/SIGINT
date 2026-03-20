@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { STANDARD_LIMITER } from "../../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../../lib/server/withRateLimit";
 import crypto from "node:crypto";
 import type { Earthquake, Flight } from "../../../../../lib/providers/types";
 import type { FaaAirportStatus } from "../../../../api/faa/route";
@@ -760,7 +762,7 @@ async function getLayerPayload(layerId: string, origin: string, requestUrl: stri
   return loadSnapshot(layerId);
 }
 
-export async function GET(request: Request, { params }: { params: { layerId: string } }) {
+async function handler(request: Request, { params }: { params: { layerId: string } }) {
   const layerId = params.layerId;
 
   // Path traversal protection: only allow lowercase alphanumeric + hyphens
@@ -809,3 +811,5 @@ export async function GET(request: Request, { params }: { params: { layerId: str
     }
   }
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

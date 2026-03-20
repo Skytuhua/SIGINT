@@ -271,9 +271,10 @@ async function searchLiveWebcams(apiKey: string): Promise<CctvCamera[]> {
 async function discoverFromChannels(apiKey: string): Promise<CctvCamera[]> {
   if (WEBCAM_VIDEO_CHANNELS.length === 0) return [];
 
-  const channelIds = WEBCAM_VIDEO_CHANNELS.map((c) => c.channelId);
-  const channelLabelById = new Map(WEBCAM_VIDEO_CHANNELS.map((c) => [c.channelId, c.label]));
-  const regionByChannel = new Map(WEBCAM_VIDEO_CHANNELS.map((c) => [c.channelId, c.region]));
+  const withId = WEBCAM_VIDEO_CHANNELS.filter((c): c is typeof c & { channelId: string } => Boolean(c.channelId));
+  const channelIds = withId.map((c) => c.channelId);
+  const channelLabelById = new Map(withId.map((c) => [c.channelId, c.label]));
+  const regionByChannel = new Map(withId.map((c) => [c.channelId, c.region]));
 
   const channelsUrl = new URL(YT_CHANNELS_BASE);
   channelsUrl.searchParams.set("part", "contentDetails");
@@ -302,6 +303,7 @@ async function discoverFromChannels(apiKey: string): Promise<CctvCamera[]> {
   }> = [];
 
   for (const ch of WEBCAM_VIDEO_CHANNELS) {
+    if (!ch.channelId) continue;
     const uploadsId = uploadsByChannel.get(ch.channelId);
     if (!uploadsId) continue;
 
@@ -399,6 +401,7 @@ async function discoverFromRss(): Promise<CctvCamera[]> {
   }> = [];
 
   for (const ch of WEBCAM_VIDEO_CHANNELS) {
+    if (!ch.channelId) continue;
     const rssUrl = `${YT_RSS_BASE}?channel_id=${encodeURIComponent(ch.channelId)}`;
     try {
       const resp = await fetch(rssUrl, {
@@ -424,7 +427,7 @@ async function discoverFromRss(): Promise<CctvCamera[]> {
 
         allItems.push({
           videoId,
-          channelId: ch.channelId,
+          channelId: ch.channelId ?? "",
           channelTitle: ch.label,
           title,
           thumbnailUrl: thumbnailUrl || undefined,

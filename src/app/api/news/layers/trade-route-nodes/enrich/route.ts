@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { STRICT_LIMITER } from "../../../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../../../lib/server/withRateLimit";
 import { cachedFetch, fetchJsonOrThrow, type UpstreamPolicy } from "../../../../../../lib/server/news/upstream";
 
 const WIKIDATA_SPARQL = "https://query.wikidata.org/sparql";
@@ -180,7 +182,7 @@ async function fetchWikipediaSummary(title: string) {
   return { wikipedia: result.data, degraded: result.degraded, error: result.error };
 }
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const qidRaw = searchParams.get("wikidataId") ?? "";
   const qid = sanitizeQid(qidRaw);
@@ -234,3 +236,5 @@ export async function GET(request: Request) {
     { headers: { "Cache-Control": "public, max-age=86400, s-maxage=86400" } }
   );
 }
+
+export const GET = withRateLimit(STRICT_LIMITER, handler);

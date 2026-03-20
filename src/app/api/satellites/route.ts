@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { Satellite } from '../../../lib/providers/types';
+import { STANDARD_LIMITER } from '../../../lib/server/rateLimitPresets';
+import { withRateLimit } from '../../../lib/server/withRateLimit';
 
 const SATELLITE_FEED_URLS = [
   'https://db.satnogs.org/api/tle/?format=json',
@@ -188,7 +190,7 @@ async function fetchFromUpstreams(): Promise<Satellite[]> {
   return [];
 }
 
-export async function GET() {
+async function handler() {
   const now = Date.now();
   if (cache && cache.expires > now) {
     return NextResponse.json(cache.data, {
@@ -214,3 +216,5 @@ export async function GET() {
     return NextResponse.json(data, { status: 200 });
   }
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSanctionsData } from "../../../../../lib/server/news/sanctions";
 import type { SanctionsEntity } from "../../../../../lib/server/news/sanctions/types";
+import { STANDARD_LIMITER } from "../../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../../lib/server/withRateLimit";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +39,7 @@ function matchesFilter(entity: SanctionsEntity, key: string, value: string): boo
   }
 }
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   try {
     const url = new URL(request.url);
     const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10) || 1);
@@ -78,3 +80,5 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

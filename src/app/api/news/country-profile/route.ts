@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { STRICT_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 import { computeAcledInstabilityScore, getAcledCountryEvents } from "../../../../lib/server/news/providers/acled";
 import { searchPolymarketByCountry } from "../../../../lib/server/news/providers/polymarket";
 import { getCountryInfo, getGovernanceIndicators } from "../../../../lib/server/news/providers/worldbank";
@@ -23,7 +25,7 @@ const ISO2_TO_NAME: Record<string, string> = {
   GL: "Greenland", IS: "Iceland",
 };
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const countryCode = searchParams.get("country")?.toUpperCase();
 
@@ -113,3 +115,5 @@ export async function GET(request: Request) {
     { headers: { "Cache-Control": "no-store, max-age=0" } },
   );
 }
+
+export const GET = withRateLimit(STRICT_LIMITER, handler);

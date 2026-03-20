@@ -3,6 +3,7 @@
 import { useMemo, useCallback, useState } from "react";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import CesiumGlobe, { type GlobeControlApi, type CameraSnapshot } from "../CesiumGlobe";
+import WorkspaceErrorBoundary from "../ui/WorkspaceErrorBoundary";
 import { useSIGINTStore } from "../../store";
 import Panel from "./panel/Panel";
 import PanelBody from "./panel/PanelBody";
@@ -78,11 +79,13 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
         />
         <PanelBody noPadding className="si-globe-canvas-wrap">
           <div style={{ position: "relative", width: "100%", height: "100%" }}>
+            <WorkspaceErrorBoundary name="CESIUM">
             <CesiumGlobe
               onControlApi={setApi}
               onCameraSnapshot={setCamera}
               onReady={() => setGlobeReady(true)}
             />
+            </WorkspaceErrorBoundary>
             {!globeReady && (
               <div
                 style={{

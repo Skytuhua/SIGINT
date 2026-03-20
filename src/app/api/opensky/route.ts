@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import type { Flight } from "../../../lib/providers/types";
 import { inferFlightCountry } from "../../../lib/geo/country";
+import { fetchWithTimeout as _fetchWithTimeout } from "../../../lib/server/fetchWithTimeout";
+import { STANDARD_LIMITER } from "../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../lib/server/withRateLimit";
 
 export const dynamic = "force-dynamic";
 
@@ -520,13 +523,7 @@ function normalizeFr24(raw: Record<string, unknown>): Flight[] {
 }
 
 async function fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
-  try {
-    return await fetch(url, { ...options, signal: ctrl.signal });
-  } finally {
-    clearTimeout(timer);
-  }
+  return _fetchWithTimeout(url, options, FETCH_TIMEOUT_MS);
 }
 
 async function readJson<T>(res: Response, sourceLabel: string): Promise<T> {
@@ -682,7 +679,7 @@ async function fetchFr24(): Promise<Flight[]> {
   return balanceFlightsWorldwide(normalized, MAX_AIRCRAFT).flights;
 }
 
-export async function GET(_request: Request) {
+async function handler(_request: Request) {
   const now = Date.now();
 
   if (cache && cache.expires > now) {
@@ -755,3 +752,5 @@ export async function GET(_request: Request) {
   console.warn("[api/opensky] all sources failed, serving mock data");
   return NextResponse.json(MOCK_COMMERCIAL, { headers: { "Cache-Control": "no-store" } });
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

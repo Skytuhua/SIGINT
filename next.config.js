@@ -6,6 +6,21 @@ const fs = require('fs');
 const nextConfig = {
   // Security headers applied to all responses
   async headers() {
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://s3.tradingview.com blob:",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://*.basemaps.cartocdn.com https://api.maptiler.com https://*.maptiler.com https://i.ytimg.com https://*.googleusercontent.com https://tile.openstreetmap.org",
+      "font-src 'self' data:",
+      "connect-src 'self' https://*.basemaps.cartocdn.com https://api.maptiler.com https://*.maptiler.com https://api.gdeltproject.org https://*.googleapis.com https://*.opensanctions.org https://en.wikipedia.org https://*.wikidata.org https://api.coingecko.com https://*.tradingview.com https://earthquake.usgs.gov https://opensky-network.org https://*.opensky-network.org https://celestrak.org https://data.flightradar24.com https://api.airplanes.live https://api.adsb.lol wss: ws:",
+      "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://s.tradingview.com https://*.tradingview.com",
+      "worker-src 'self' blob:",
+      "child-src blob:",
+      "media-src 'self' blob:",
+      "object-src 'none'",
+      "base-uri 'self'",
+    ].join('; ');
+
     return [
       {
         source: '/(.*)',
@@ -15,6 +30,7 @@ const nextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'Content-Security-Policy-Report-Only', value: csp },
         ],
       },
     ];

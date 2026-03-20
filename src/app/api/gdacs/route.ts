@@ -3,6 +3,8 @@ import { XMLParser } from "fast-xml-parser";
 import type { DisasterAlert } from "../../../lib/providers/types";
 import { normalizeGdacsItems } from "../../../lib/runtime/ops/gdacsNormalizer";
 import type { GdacsRawItem } from "../../../lib/runtime/ops/types";
+import { STANDARD_LIMITER } from "../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../lib/server/withRateLimit";
 
 export const dynamic = "force-dynamic";
 
@@ -90,7 +92,7 @@ function toResponse(payload: GdacsRouteResponse): NextResponse<GdacsRouteRespons
   });
 }
 
-export async function GET(): Promise<NextResponse<GdacsRouteResponse>> {
+async function handler(): Promise<NextResponse<GdacsRouteResponse>> {
   const fresh = getFreshCache();
   if (fresh) {
     return toResponse({
@@ -197,3 +199,5 @@ export async function GET(): Promise<NextResponse<GdacsRouteResponse>> {
     });
   }
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

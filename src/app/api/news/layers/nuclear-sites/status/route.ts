@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { getNuclearSitesLayer, toLayerHealthFromSources } from "../../../../../../lib/server/news/nuclearSites";
+import { STANDARD_LIMITER } from "../../../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../../../lib/server/withRateLimit";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+async function handler() {
   try {
     const result = await getNuclearSitesLayer();
     const aggregated = toLayerHealthFromSources(result.sourceStatus);
@@ -30,4 +32,6 @@ export async function GET() {
     );
   }
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);
 

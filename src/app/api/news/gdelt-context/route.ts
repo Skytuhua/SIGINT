@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { STRICT_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 import { getGdeltContext } from "../../../../lib/server/news/providers/gdelt";
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = (searchParams.get("q") ?? "").trim();
   if (!q) {
@@ -22,4 +24,6 @@ export async function GET(request: Request) {
     { headers: { "Cache-Control": "public, max-age=600" } }
   );
 }
+
+export const GET = withRateLimit(STRICT_LIMITER, handler);
 

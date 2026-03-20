@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { Earthquake } from '../../../lib/providers/types';
+import { STANDARD_LIMITER } from '../../../lib/server/rateLimitPresets';
+import { withRateLimit } from '../../../lib/server/withRateLimit';
 
 const USGS_URL =
   'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson';
@@ -33,7 +35,7 @@ function normalizeUSGS(raw: { features?: UsgsFeature[] }): Earthquake[] {
   }));
 }
 
-export async function GET() {
+async function handler() {
   const now = Date.now();
   if (cache && cache.expires > now) {
     return NextResponse.json(cache.data, {
@@ -44,6 +46,7 @@ export async function GET() {
   try {
     const res = await fetch(USGS_URL, {
       headers: { 'User-Agent': 'SIGINT/0.1 (educational/research use)' },
+      signal: AbortSignal.timeout(15_000),
     });
     if (!res.ok) throw new Error(`USGS returned ${res.status}`);
 
@@ -57,6 +60,8 @@ export async function GET() {
   } catch (err) {
     console.error('[api/earthquakes] fetch error:', err);
     if (cache) return NextResponse.json(cache.data);
-    return NextResponse.json([], { status: 200 });
+    return NextResponse.json([], { status: 502 });
   }
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

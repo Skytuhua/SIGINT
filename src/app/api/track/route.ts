@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { STANDARD_LIMITER } from '../../../lib/server/rateLimitPresets';
+import { withRateLimit } from '../../../lib/server/withRateLimit';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,7 +80,7 @@ async function fetchOpenSkyTrack(icao: string): Promise<TrackPoint[]> {
 
 // 閳光偓閳光偓閳光偓 Route handler 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const icao = searchParams.get('icao')?.toLowerCase().trim();
 
@@ -107,3 +109,5 @@ export async function GET(request: Request) {
   // No historical data available 閳?return empty so the caller can still show live path
   return NextResponse.json([], { headers: { 'Cache-Control': 'no-store' } });
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

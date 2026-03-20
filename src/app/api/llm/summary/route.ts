@@ -2,17 +2,13 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { generateHostedSummary, isHostedLlmAvailable } from "../../../../lib/llm/hostedClient";
-import { createRateLimiter, getClientIp, rateLimitGuard } from "../../../../lib/server/rateLimit";
-
-const limiter = createRateLimiter({ windowMs: 60_000, maxRequests: 10 });
+import { STRICT_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
 const MAX_SYSTEM_LEN = 2000;
 const MAX_USER_LEN = 4000;
 
-export async function POST(req: NextRequest) {
-  const blocked = rateLimitGuard(limiter(getClientIp(req)));
-  if (blocked) return blocked;
-
+async function handler(req: NextRequest) {
   if (!isHostedLlmAvailable()) {
     return NextResponse.json(
       { error: "Hosted LLM not configured" },
@@ -48,3 +44,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withRateLimit(STRICT_LIMITER, handler);

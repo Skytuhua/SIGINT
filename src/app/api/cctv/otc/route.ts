@@ -10,6 +10,8 @@ import {
   toCctvCamera,
   validateBatch,
 } from "../../../../lib/server/cctv/otc";
+import { STANDARD_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
 const SAMPLE_SIZE = 200;
 const VALIDATE_BATCH_SIZE = 30;
@@ -17,7 +19,7 @@ const TTL_MS = 15 * 60 * 1000; // 15-minute cache
 
 let cache: { data: CctvCamera[]; expires: number } | null = null;
 
-export async function GET() {
+async function handler() {
   const now = Date.now();
   if (cache && cache.expires > now) {
     return NextResponse.json(cache.data, {
@@ -55,3 +57,5 @@ export async function GET() {
     return NextResponse.json([], { status: 502 });
   }
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

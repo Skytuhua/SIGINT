@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { RoadSegment } from '../../../lib/providers/types';
+import { STANDARD_LIMITER } from '../../../lib/server/rateLimitPresets';
+import { withRateLimit } from '../../../lib/server/withRateLimit';
 
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const TTL_MS = 5 * 60_000; // 5 minutes
@@ -42,7 +44,7 @@ function normalizeOverpass(raw: { elements?: OverpassElement[] }): RoadSegment[]
     }));
 }
 
-export async function GET(request: NextRequest) {
+async function handler(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const south = clampCoord(Number(params.get('south')) || DEFAULT_SOUTH, -90, 90);
   const west = clampCoord(Number(params.get('west')) || DEFAULT_WEST, -180, 180);
@@ -85,3 +87,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.json([], { status: 200 });
   }
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);
