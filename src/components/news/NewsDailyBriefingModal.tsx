@@ -351,7 +351,7 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: isMobile ? 4 : 16,
+        padding: isMobile ? 0 : 16,
       }}
     >
       <div
@@ -361,7 +361,8 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
           border: "1px solid rgba(80,110,140,0.35)",
           width: "100%",
           maxWidth: isMobile ? "100%" : 920,
-          maxHeight: "90vh",
+          height: isMobile ? "100dvh" : undefined,
+          maxHeight: isMobile ? "100dvh" : "90vh",
           overflowY: "auto",
         }}
       >
@@ -370,7 +371,7 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
           style={{
             background: "rgba(80,110,140,0.08)",
             borderBottom: "1px solid rgba(80,110,140,0.25)",
-            padding: "8px 14px",
+            padding: isMobile ? "calc(8px + env(safe-area-inset-top, 0px)) 14px 8px" : "8px 14px",
             display: "flex",
             alignItems: "center",
             gap: 10,

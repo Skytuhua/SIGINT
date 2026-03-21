@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsMobile } from "../../../hooks/useIsMobile";
 import FxMatrixPanel from "../FxMatrixPanel";
 import TopMoversPanel from "../TopMoversPanel";
 import FxCarryPanel from "../FxCarryPanel";
@@ -15,41 +16,48 @@ interface Props {
 }
 
 export default function MarketFxTab({ onTickerClick }: Props) {
+  const isMobile = useIsMobile();
+
   return (
     <div className="si-overview-scroll">
-
-      {/* ── 1: CROSS-RATE MATRIX ─────────────────────────────────── */}
-      <SectionLabel label="CROSS-RATE MATRIX" sub="Major pairs · G10 spot rates" />
+      <SectionLabel label="CROSS-RATE MATRIX" sub="Major pairs  G10 spot rates" />
       <div className="si-overview-row-2col">
         <FxMatrixPanel style={{ minHeight: 280 }} />
         <TopMoversPanel filter="fx" style={{ minHeight: 280 }} onTickerClick={onTickerClick} />
       </div>
 
-      {/* ── CURRENCY CONVERTER & HEAT MAP ────────────────────────── */}
-      <SectionLabel label="CURRENCY TOOLS" sub="Convert between currencies · Forex heat map" />
+      <SectionLabel label="CURRENCY TOOLS" sub="Convert between currencies  Forex heat map" />
       <div className="si-overview-row-2col">
         <CurrencyConverterPanel style={{ minHeight: 320 }} />
         <FxHeatmapPanel style={{ minHeight: 320 }} />
       </div>
 
-      {/* ── 2: EM CURRENCIES ─────────────────────────────────────── */}
-      <SectionLabel label="EMERGING MARKETS FX" sub="EM currencies · Spot · CB rates" />
+      <SectionLabel label="EMERGING MARKETS FX" sub="EM currencies  Spot  CB rates" />
       <div className="si-overview-row-full">
         <EmCurrenciesPanel style={{ minHeight: 340 }} />
       </div>
 
-      {/* ── 3: CARRY & CORRELATIONS ──────────────────────────────── */}
-      <SectionLabel label="CARRY TRADES & CROSS-ASSET CORRELATIONS" sub="Rate differentials · Carry Sharpe · Cross-asset correlations" />
+      <SectionLabel label="CARRY TRADES" sub="Rate differentials  Carry Sharpe" />
       <div className="si-overview-row-2col">
         <FxCarryPanel style={{ minHeight: 300 }} />
-        <CorrelationMatrixPanel style={{ minHeight: 280 }} />
+        {!isMobile ? <CorrelationMatrixPanel style={{ minHeight: 280 }} /> : null}
       </div>
 
-      {/* ── 4: NEWS ──────────────────────────────────────────────── */}
-      <SectionLabel label="FX NEWS" sub="Central bank commentary · Currency moves · Trade flows" />
-      <div className="si-overview-row-full">
-        <MarketNewsTape style={{ minHeight: 240 }} />
-      </div>
+      {isMobile ? (
+        <>
+          <SectionLabel label="FX NEWS" sub="Central bank commentary  Currency moves  Trade flows" />
+          <div className="si-overview-row-full">
+            <MarketNewsTape style={{ minHeight: 240 }} />
+          </div>
+        </>
+      ) : (
+        <>
+          <SectionLabel label="FX NEWS" sub="Central bank commentary  Currency moves  Trade flows" />
+          <div className="si-overview-row-full">
+            <MarketNewsTape style={{ minHeight: 240 }} />
+          </div>
+        </>
+      )}
 
       <div style={{ height: 24 }} />
     </div>

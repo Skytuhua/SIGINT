@@ -15,9 +15,12 @@ const SIGINTApp = dynamic(() => import("./SIGINTApp"), {
 // Kick off all preload tasks AND pre-warm heavy sub-bundles at module eval time
 // (before any React component mounts), so everything races in parallel.
 if (typeof window !== "undefined") {
-  startPreload();
-  void import("./news/MapLibreNewsMap");
-  void import("./news/NewsWorkspace");
+  const isPhoneViewport = window.matchMedia("(max-width: 767px)").matches;
+  startPreload({ deferMapWarmup: isPhoneViewport });
+  if (!isPhoneViewport) {
+    void import("./news/MapLibreNewsMap");
+    void import("./news/NewsWorkspace");
+  }
 }
 
 export default function PreloadGatedApp() {

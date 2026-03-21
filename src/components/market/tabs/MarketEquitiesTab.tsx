@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsMobile } from "../../../hooks/useIsMobile";
 import EarningsTracker from "../EarningsTracker";
 import TopMoversPanel from "../TopMoversPanel";
 import InsiderFlowPanel from "../InsiderFlowPanel";
@@ -15,7 +16,6 @@ import ShortInterestPanel from "../ShortInterestPanel";
 import SectionLabel from "../shared/SectionLabel";
 import EquityWatchlistPanel from "../EquityWatchlistPanel";
 import TradingViewWidget from "../shared/TradingViewWidget";
-import { useIsMobile } from "../../../hooks/useIsMobile";
 
 interface Props {
   onTickerClick?: (sym: string) => void;
@@ -23,18 +23,20 @@ interface Props {
 
 export default function MarketEquitiesTab({ onTickerClick }: Props) {
   const isMobile = useIsMobile();
+
   return (
     <div className="si-overview-scroll">
+      {!isMobile ? (
+        <>
+          <SectionLabel label="SECTOR ROTATION & FACTOR RETURNS" sub="Multi-timeframe relative performance  Momentum signals" />
+          <div className="si-overview-row-2col">
+            <SectorRotationPanel />
+            <FactorPerformancePanel />
+          </div>
+        </>
+      ) : null}
 
-      {/* ── 1: ROTATION & FACTORS ────────────────────────────────── */}
-      <SectionLabel label="SECTOR ROTATION & FACTOR RETURNS" sub="Multi-timeframe relative performance · Momentum signals" />
-      <div className="si-overview-row-2col">
-        <SectorRotationPanel />
-        <FactorPerformancePanel />
-      </div>
-
-      {/* ── LIVE CHART ───────────────────────────────────────────── */}
-      <SectionLabel label="EQUITY CHART" sub="Live TradingView chart · Change symbol with search" />
+      <SectionLabel label="EQUITY CHART" sub="Live TradingView chart  Change symbol with search" />
       <div className="si-overview-row-full">
         <div className="si-market-panel" style={{ minHeight: 420 }}>
           <div className="si-market-panel-header">
@@ -63,51 +65,52 @@ export default function MarketEquitiesTab({ onTickerClick }: Props) {
               style={{ minHeight: 360 }}
             />
           </div>
-          <div className="si-market-panel-footer">TradingView · Advanced Chart · real-time</div>
+          <div className="si-market-panel-footer">TradingView  Advanced Chart  real-time</div>
         </div>
       </div>
 
-      {/* ── WATCHLIST ──────────────────────────────────────────── */}
-      <SectionLabel label="WATCHLIST" sub="Your personal equity tracker · Add tickers to follow" />
+      <SectionLabel label="WATCHLIST" sub="Your personal equity tracker  Add tickers to follow" />
       <div className="si-overview-row-full">
         <EquityWatchlistPanel style={{ minHeight: 200 }} onTickerClick={onTickerClick} />
       </div>
 
-      {/* ── 2: MOVERS & BREADTH ──────────────────────────────────── */}
-      <SectionLabel label="MARKET INTERNALS" sub="Top movers · NYSE / Nasdaq breadth" />
+      <SectionLabel label="MARKET INTERNALS" sub="Top movers  NYSE / Nasdaq breadth" />
       <div className="si-overview-row-2col">
         <TopMoversPanel style={{ minHeight: 340 }} onTickerClick={onTickerClick} />
         <MarketBreadthPanel style={{ minHeight: 400 }} />
       </div>
 
-      {/* ── 3: OPTIONS & SHORT INTEREST ──────────────────────────── */}
-      <SectionLabel label="OPTIONS FLOW & SHORT INTEREST" sub="Unusual sweeps · Dark pool prints · Squeeze screener" />
-      <div className="si-overview-row-2col">
-        <OptionsFlowPanel />
-        <ShortInterestPanel onTickerClick={onTickerClick} />
-      </div>
+      {!isMobile ? (
+        <>
+          <SectionLabel label="OPTIONS FLOW & SHORT INTEREST" sub="Unusual sweeps  Dark pool prints  Squeeze screener" />
+          <div className="si-overview-row-2col">
+            <OptionsFlowPanel />
+            <ShortInterestPanel onTickerClick={onTickerClick} />
+          </div>
+        </>
+      ) : null}
 
-      {/* ── 4: EARNINGS ──────────────────────────────────────────── */}
-      <SectionLabel label="EARNINGS" sub="Calendar · Beat/miss tracker · EPS surprise" />
+      <SectionLabel label="EARNINGS" sub="Calendar  Beat/miss tracker  EPS surprise" />
       <div className="si-overview-row-full">
         <EarningsTracker style={{ minHeight: 340 }} onTickerClick={onTickerClick} />
       </div>
 
-      {/* ── 5: ANALYST ACTIVITY ──────────────────────────────────── */}
-      <SectionLabel label="ANALYST ACTIVITY" sub="Upgrades · Downgrades · Price targets · Insider filing" />
+      <SectionLabel label="ANALYST ACTIVITY" sub="Upgrades  Downgrades  Price targets  Insider filing" />
       <div className="si-overview-row-2col">
         <AnalystRatingsPanel style={{ minHeight: 380 }} onTickerClick={onTickerClick} />
         <InsiderFlowPanel style={{ minHeight: 380 }} onTickerClick={onTickerClick} />
       </div>
 
-      {/* ── 6: CORPORATE EVENTS ──────────────────────────────────── */}
-      <SectionLabel label="CORPORATE EVENTS" sub="Dividends · IPO pipeline" />
-      <div className="si-overview-row-2col">
-        <DividendCalendarPanel style={{ minHeight: 360 }} onTickerClick={onTickerClick} />
-        <IpoCalendarPanel style={{ minHeight: 300 }} />
-      </div>
+      {!isMobile ? (
+        <>
+          <SectionLabel label="CORPORATE EVENTS" sub="Dividends  IPO pipeline" />
+          <div className="si-overview-row-2col">
+            <DividendCalendarPanel style={{ minHeight: 360 }} onTickerClick={onTickerClick} />
+            <IpoCalendarPanel style={{ minHeight: 300 }} />
+          </div>
+        </>
+      ) : null}
 
-      {/* ── 7: NEWS ──────────────────────────────────────────────── */}
       <SectionLabel label="EQUITY NEWS" sub="Latest market headlines" />
       <div className="si-overview-row-full">
         <MarketNewsTape style={{ minHeight: 240 }} />

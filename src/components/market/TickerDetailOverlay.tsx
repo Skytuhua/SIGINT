@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import FundamentalsPanel from "./FundamentalsPanel";
 import OptionsChainPanel from "./OptionsChainPanel";
 import OrderTicketPanel from "./OrderTicketPanel";
@@ -66,6 +67,7 @@ interface Props {
 }
 
 export default function TickerDetailOverlay({ sym, onClose }: Props) {
+  const isMobile = useIsMobile();
   const [tab, setTab] = useState<OverlayTab>("CHART");
 
   // ESC to close
@@ -126,7 +128,7 @@ export default function TickerDetailOverlay({ sym, onClose }: Props) {
               backgroundColor: "rgba(10, 14, 20, 1)",
               gridColor: "rgba(30, 42, 56, 0.5)",
               withdateranges: true,
-              hide_side_toolbar: false,
+              hide_side_toolbar: isMobile,
               allow_symbol_change: true,
               save_image: false,
               details: true,
