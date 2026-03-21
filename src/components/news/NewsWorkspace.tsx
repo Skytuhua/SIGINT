@@ -2122,6 +2122,175 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     <div className={`si-news-workspace ${embedded ? "is-embedded" : ""}`.trim()}>
       {showBriefing && <NewsDailyBriefingModal onClose={() => setShowBriefing(false)} />}
       <NewsTickerBar />
+      {isMobile ? (
+        <div className="si-news-phone-search-card">
+          <div className="si-news-phone-search-status">
+            {loading ? "SEARCHING..." : `${filteredItems.length} STORIES`}
+            {news.ui.statusLine ? ` | ${news.ui.statusLine}` : ""}
+          </div>
+          <div className="si-news-phone-search-row">
+            <input
+              type="text"
+              className="si-news-search-input"
+              ref={searchInputRef}
+              value={searchInputDraft}
+              onChange={(event) => {
+                setSearchInputDraft(event.target.value);
+                setSuggestOpen(true);
+              }}
+              onFocus={() => setSuggestOpen(true)}
+              onBlur={() => setTimeout(() => setSuggestOpen(false), 100)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  executeSearch(searchInputDraft.trim());
+                  setSuggestOpen(false);
+                }
+              }}
+              placeholder="Search news, topic, company, place"
+            />
+            <button
+              type="button"
+              className="si-news-phone-search-submit"
+              onClick={() => {
+                executeSearch(searchInputDraft.trim());
+                setSuggestOpen(false);
+              }}
+            >
+              SEARCH
+            </button>
+          </div>
+          {suggestOpen && suggestions.length ? (
+            <div className="si-news-suggest-list">
+              {suggestions.map((entry) => (
+                <button
+                  key={`${entry.type}-${entry.value}`}
+                  type="button"
+                  onMouseDown={() => {
+                    setSearchInputDraft(entry.value);
+                    executeSearch(entry.value);
+                    setSuggestOpen(false);
+                  }}
+                >
+                  <span>{entry.label}</span>
+                  <span>{entry.type}</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+          <div className="si-news-phone-action-row">
+            <button type="button" onClick={() => setTopbarExpanded((prev) => !prev)}>
+              {topbarExpanded ? "LESS FILTERS" : "MORE FILTERS"}
+            </button>
+            <button type="button" onClick={() => setShowBriefing(true)}>DAILY BRIEFING</button>
+            <button type="button" onClick={() => setBookmarkPanelOpen((p) => !p)}>
+              SAVED {bookmarkedIds.size > 0 ? `(${bookmarkedIds.size})` : ""}
+            </button>
+          </div>
+          {bookmarkPanelOpen ? (
+            <div className="si-news-phone-saved-list">
+              {bookmarkedIds.size === 0 ? (
+                <div className="si-news-empty">No saved articles</div>
+              ) : (
+                Array.from(bookmarkedIds).map((id) => {
+                  const item = feedItems.find((f) => f.id === id);
+                  return (
+                    <div key={id} className="si-news-bookmark-row">
+                      <span
+                        className="si-news-bookmark-title"
+                        onClick={() => {
+                          if (item) {
+                            setStoryPopupArticle(item);
+                            setBookmarkPanelOpen(false);
+                          }
+                        }}
+                      >
+                        {item?.headline ?? id.slice(0, 30)}
+                      </span>
+                      <button type="button" onClick={() => toggleBookmark(id)} title="Remove">x</button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          ) : null}
+          {topbarExpanded ? (
+            <div className="si-news-phone-filter-drawer">
+              <div className="si-news-time-filters">
+                {(["1h", "6h", "24h", "7d"] as const).map((range) => (
+                  <button key={range} type="button" className={timeRange === range ? "is-active" : ""} onClick={() => setTimeRange(timeRange === range ? null : range)}>
+                    {range.toUpperCase()}
+                  </button>
+                ))}
+                <button type="button" onClick={() => setShowStats((p) => !p)}>
+                  {showStats ? "HIDE STATS" : "SHOW STATS"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    saveNewsSearch({
+                      id: `search-${Date.now().toString(36)}`,
+                      name: searchInputDraft.slice(0, 36) || "Saved Query",
+                      query: searchInputDraft.trim(),
+                      createdAt: Date.now(),
+                      alertEnabled: false,
+                    })
+                  }
+                >
+                  SAVE SEARCH
+                </button>
+              </div>
+              {showStats ? (
+                <div className="si-news-stats-bar">
+                  {Object.entries(
+                    filteredItems.reduce<Record<string, number>>((acc, item) => { acc[item.category] = (acc[item.category] ?? 0) + 1; return acc; }, {})
+                  ).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([cat, count]) => (
+                    <span key={cat} className="si-news-stat-badge" style={{ borderColor: CATEGORY_COLORS[cat] ?? "#89e5ff" }}>
+                      <span style={{ color: CATEGORY_COLORS[cat] ?? "#89e5ff" }}>{cat.toUpperCase()}</span> {count}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+              <div className="si-news-presets">
+                {PRESET_QUERIES.map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => {
+                      setSearchInputDraft(preset.query);
+                      executeSearch(preset.query);
+                    }}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+              <div className="si-news-query-hints">
+                {QUERY_HINT_ITEMS.map((item) => (
+                  <button
+                    key={item.chip}
+                    type="button"
+                    className="si-hint-chip"
+                    title={`${item.hint}. Click to add filter. Example: ${item.example}`}
+                    onClick={() => {
+                      setSearchInputDraft((prev) => {
+                        const trimmed = prev.trimEnd();
+                        if (trimmed.endsWith(item.chip)) return prev;
+                        return `${trimmed} ${item.chip}`.trimStart();
+                      });
+                      searchInputRef.current?.focus();
+                    }}
+                  >
+                    <span className="si-hint-chip-label">{item.hint}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+      {!isMobile ? (
+        <>
       <div className="si-news-toolbar">
         <div className="si-toolbar-status">
           {loading ? "SEARCHING..." : `${filteredItems.length} STORIES`}
@@ -2365,54 +2534,100 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
               ))}
             </div>
             <div className="si-news-search-overlay-body">
-              <div className="si-news-terminal-table-scroll">
-                <div className="si-news-terminal-table">
-                  <div className="si-news-terminal-row si-news-terminal-head" role="row">
-                    <span className="si-news-terminal-cell si-col-time">TIME</span>
-                    <span className="si-news-terminal-cell si-col-source">SOURCE</span>
-                    <span className="si-news-terminal-cell si-col-entity">ENTITY</span>
-                    <span className="si-news-terminal-cell si-col-region">REGION</span>
-                    <span className="si-news-terminal-cell si-col-headline">HEADLINE</span>
-                    <span className="si-news-terminal-cell si-col-score">SCORE</span>
+              {isMobile ? (
+                terminalItems.length > 0 ? (
+                  <div className="si-news-mobile-results-list">
+                    {terminalItems.map((item, idx) => {
+                      const marker = news.markers.find((m) => m.articleId === item.id);
+                      return (
+                        <div
+                          key={item.id}
+                          className={`si-news-mobile-result-card${item.id === selectedItem?.id ? " is-selected" : ""}`}
+                          onClick={() => {
+                            setSelectedRow(idx);
+                            setSelectedStory(item.id);
+                            setStoryPopupArticle(item);
+                            setHighlightMarker(marker?.id ?? null);
+                            setSearchResultsOpen(false);
+                          }}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <div className="si-news-mobile-result-top">
+                            <span style={{ color: CATEGORY_COLORS[item.category] ?? "#89e5ff" }}>
+                              {CATEGORY_LABELS[item.category as keyof typeof CATEGORY_LABELS] ?? item.category}
+                            </span>
+                            <span>{formatShortTime(item.publishedAt)}</span>
+                            <span>{item.source}</span>
+                          </div>
+                          <div className="si-news-mobile-result-headline">{item.headline}</div>
+                          <div className="si-news-mobile-result-meta">
+                            <span>{extractEntity(item)}</span>
+                            <span>{extractRegion(item)}</span>
+                            <span>SCORE {Math.round(item.score)}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                  {terminalItems.length > 0 ? (
-                    <List
-                      rowCount={terminalItems.length}
-                      rowHeight={28}
-                      overscanCount={15}
-                      rowComponent={SearchOverlayRow as any}
-                      rowProps={{
-                        items: terminalItems,
-                        selectedItemId: selectedItem?.id ?? null,
-                        markersRef: news.markers,
-                        onRowClick: (idx: number, item: NormalizedNewsItem, markerId: string | null) => {
-                          setSelectedRow(idx);
-                          setSelectedStory(item.id);
-                          setStoryPopupArticle(item);
-                          setHighlightMarker(markerId);
-                          setSearchResultsOpen(false);
-                        },
-                        onRowContextMenu: (item: NormalizedNewsItem, event: React.MouseEvent) => {
-                          const x = Math.min(event.clientX, window.innerWidth - 220);
-                          const y = Math.min(event.clientY, window.innerHeight - 140);
-                          setContextPos({ x, y });
-                          setContextItem(item);
-                        },
-                      }}
-                      style={{ height: "calc(100% - 28px)", overflow: "auto" }}
-                    />
-                  ) : (
-                    <div className="si-news-empty">
-                      {news.queryState.lastEmptyReason ?? "No results for current filters."}
-                      {backendIssueSummary ? ` (${backendIssueSummary})` : ""}
+                ) : (
+                  <div className="si-news-empty">
+                    {news.queryState.lastEmptyReason ?? "No results for current filters."}
+                    {backendIssueSummary ? ` (${backendIssueSummary})` : ""}
+                  </div>
+                )
+              ) : (
+                <div className="si-news-terminal-table-scroll">
+                  <div className="si-news-terminal-table">
+                    <div className="si-news-terminal-row si-news-terminal-head" role="row">
+                      <span className="si-news-terminal-cell si-col-time">TIME</span>
+                      <span className="si-news-terminal-cell si-col-source">SOURCE</span>
+                      <span className="si-news-terminal-cell si-col-entity">ENTITY</span>
+                      <span className="si-news-terminal-cell si-col-region">REGION</span>
+                      <span className="si-news-terminal-cell si-col-headline">HEADLINE</span>
+                      <span className="si-news-terminal-cell si-col-score">SCORE</span>
                     </div>
-                  )}
+                    {terminalItems.length > 0 ? (
+                      <List
+                        rowCount={terminalItems.length}
+                        rowHeight={28}
+                        overscanCount={15}
+                        rowComponent={SearchOverlayRow as any}
+                        rowProps={{
+                          items: terminalItems,
+                          selectedItemId: selectedItem?.id ?? null,
+                          markersRef: news.markers,
+                          onRowClick: (idx: number, item: NormalizedNewsItem, markerId: string | null) => {
+                            setSelectedRow(idx);
+                            setSelectedStory(item.id);
+                            setStoryPopupArticle(item);
+                            setHighlightMarker(markerId);
+                            setSearchResultsOpen(false);
+                          },
+                          onRowContextMenu: (item: NormalizedNewsItem, event: React.MouseEvent) => {
+                            const x = Math.min(event.clientX, window.innerWidth - 220);
+                            const y = Math.min(event.clientY, window.innerHeight - 140);
+                            setContextPos({ x, y });
+                            setContextItem(item);
+                          },
+                        }}
+                        style={{ height: "calc(100% - 28px)", overflow: "auto" }}
+                      />
+                    ) : (
+                      <div className="si-news-empty">
+                        {news.queryState.lastEmptyReason ?? "No results for current filters."}
+                        {backendIssueSummary ? ` (${backendIssueSummary})` : ""}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         ) : null}
       </div>
+        </>
+      ) : null}
 
       <div className="si-news-grid-area">
         <NewsDraggableGrid

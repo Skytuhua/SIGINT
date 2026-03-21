@@ -28,6 +28,7 @@ import Panel from "../dashboard/panel/Panel";
 import PanelBody from "../dashboard/panel/PanelBody";
 import PanelFooter from "../dashboard/panel/PanelFooter";
 import PanelHeader from "../dashboard/panel/PanelHeader";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -266,6 +267,7 @@ interface TerminalFeedPanelProps {
 }
 
 export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanelProps) {
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<TerminalTab>("TOP");
   const [density, setDensity] = useState<DensityMode>("medium");
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -440,144 +442,204 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
         title="TERMINAL FEED"
         subtitle={`${clockStr} | Flow: ${expectedFlowPerMin} items/min | ${connected ? "LIVE" : "RECONNECTING..."}`}
         {...lockHeaderProps}
-        controls={
+        controls={!isMobile ? (
           <div className="si-terminal-controls">
             <button type="button" className="si-terminal-density-btn" onClick={cycleDensity} title="Toggle density">
               {densityLabel}
             </button>
           </div>
-        }
+        ) : undefined}
       />
       <PanelBody ref={bodyRef} className="si-news-terminal-body">
-        {/* Tab bar */}
-        <div className="si-news-category-tabs">
-          {TERMINAL_TABS.map((tab, idx) => (
-            <button
-              key={tab}
-              type="button"
-              className={activeTab === tab ? "is-active" : ""}
-              onClick={() => { setActiveTab(tab); setSelectedIdx(0); }}
-              title={`${tab} (${idx + 1})`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Filter bar */}
-        <div className="si-terminal-filterbar">
-          <div className="si-terminal-filterbar-row">
-            {TIME_WINDOW_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                className={timeWindow === opt.value ? "is-active" : ""}
-                onClick={() => setTimeWindow(opt.value)}
-              >
-                {opt.label}
-              </button>
-            ))}
-            <span className="si-terminal-filterbar-sep">|</span>
-            <label className="si-terminal-filterbar-importance">
-              Min Imp:
-              <input
-                type="range"
-                min={0}
-                max={80}
-                step={5}
-                value={minImportance}
-                onChange={(e) => setMinImportance(Number(e.target.value))}
-              />
-              <span>{minImportance}</span>
-            </label>
-            <span className="si-terminal-filterbar-sep">|</span>
-            <button type="button" onClick={() => setFiltersOpen(!filtersOpen)}>
-              {filtersOpen ? "Hide Filters" : "Filters"}
-            </button>
-            {watchlists.length > 0 && (
-              <>
-                <span className="si-terminal-filterbar-sep">|</span>
-                <select
-                  className="si-terminal-watchlist-select"
-                  value={activeWatchlistId ?? ""}
-                  onChange={(e) => setActiveWatchlistId(e.target.value || null)}
+        {isMobile ? (
+          <>
+            <div className="si-terminal-mobile-tabs">
+              {TERMINAL_TABS.map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  className={activeTab === tab ? "is-active" : ""}
+                  onClick={() => {
+                    setActiveTab(tab);
+                    setSelectedIdx(0);
+                  }}
                 >
-                  <option value="">No watchlist</option>
-                  {watchlists.map((wl) => (
-                    <option key={wl.id} value={wl.id}>{wl.name}</option>
-                  ))}
-                </select>
-              </>
-            )}
-            <button
-              type="button"
-              title="Save current filters as watchlist"
-              onClick={() => {
-                const name = prompt("Watchlist name:");
-                if (!name) return;
-                const id = `wl-${Date.now()}`;
-                setWatchlists((prev) => [...prev, { id, name, filters: { ...serverFilters } }]);
-              }}
-            >
-              + Watchlist
-            </button>
-          </div>
-        </div>
-
-        {/* Search overlay */}
-        {searchMode && (
-          <div className="si-terminal-search">
-            <input
-              ref={searchInputRef}
-              type="text"
-              className="si-terminal-search-input"
-              placeholder="Search buffer..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") { setSearchMode(false); setSearchQuery(""); }
-              }}
-              autoFocus
-            />
-            <span className="si-terminal-search-count">{displayItems.length} matches</span>
-          </div>
-        )}
-
-        {/* Feed rows */}
-        <div
-          className="si-news-terminal-table-scroll"
-          ref={containerRef}
-          onKeyDown={handleKeyDown}
-          tabIndex={0}
-          role="grid"
-        >
-          {displayItems.length > 0 ? (
-            <List
-              listRef={listRef}
-              rowCount={displayItems.length}
-              rowHeight={ROW_HEIGHT[density]}
-              overscanCount={20}
-              rowComponent={VirtualTerminalRow as any}
-              rowProps={{
-                items: displayItems,
-                selectedIdx,
-                density,
-                now,
-                onSelect: setSelectedIdx,
-                onOpen: setDetailItem,
-              }}
-              style={{ height: "100%", overflow: "auto" }}
-            />
-          ) : (
-            <div className="si-news-empty">
-              {connected ? "Waiting for items..." : "Connecting to stream..."}
+                  {tab}
+                </button>
+              ))}
             </div>
-          )}
-        </div>
+            <div className="si-terminal-mobile-filters">
+              {TIME_WINDOW_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={timeWindow === opt.value ? "is-active" : ""}
+                  onClick={() => setTimeWindow(opt.value)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <div className="si-terminal-mobile-list" role="list">
+              {displayItems.length > 0 ? (
+                displayItems.slice(0, 80).map((item, idx) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`si-terminal-mobile-card${idx === selectedIdx ? " is-selected" : ""}`}
+                    onClick={() => {
+                      setSelectedIdx(idx);
+                      setDetailItem(item);
+                    }}
+                    role="listitem"
+                  >
+                    <span className="si-terminal-mobile-card-top">
+                      <span style={{ color: catColor(item.category) }}>[{item.category.toUpperCase()}]</span>
+                      <span>{relativeAge(item.timestamp, now)}</span>
+                      <span>{item.sourceDomain}</span>
+                    </span>
+                    <span className="si-terminal-mobile-card-headline">{item.headline}</span>
+                    <span className="si-terminal-mobile-card-bottom">
+                      <span>{shortTime(item.timestamp)}</span>
+                      {item.tickers.length ? <span>{item.tickers.join(" ")}</span> : null}
+                      <span>IMP {item.importance}</span>
+                    </span>
+                  </button>
+                ))
+              ) : (
+                <div className="si-news-empty">
+                  {connected ? "Waiting for items..." : "Connecting to stream..."}
+                </div>
+              )}
+            </div>
+            {detailItem ? <DetailCard item={detailItem} onClose={() => setDetailItem(null)} /> : null}
+          </>
+        ) : (
+          <>
+            <div className="si-news-category-tabs">
+              {TERMINAL_TABS.map((tab, idx) => (
+                <button
+                  key={tab}
+                  type="button"
+                  className={activeTab === tab ? "is-active" : ""}
+                  onClick={() => { setActiveTab(tab); setSelectedIdx(0); }}
+                  title={`${tab} (${idx + 1})`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
 
-        {/* Detail card */}
-        {detailItem && (
-          <DetailCard item={detailItem} onClose={() => setDetailItem(null)} />
+            <div className="si-terminal-filterbar">
+              <div className="si-terminal-filterbar-row">
+                {TIME_WINDOW_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={timeWindow === opt.value ? "is-active" : ""}
+                    onClick={() => setTimeWindow(opt.value)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                <span className="si-terminal-filterbar-sep">|</span>
+                <label className="si-terminal-filterbar-importance">
+                  Min Imp:
+                  <input
+                    type="range"
+                    min={0}
+                    max={80}
+                    step={5}
+                    value={minImportance}
+                    onChange={(e) => setMinImportance(Number(e.target.value))}
+                  />
+                  <span>{minImportance}</span>
+                </label>
+                <span className="si-terminal-filterbar-sep">|</span>
+                <button type="button" onClick={() => setFiltersOpen(!filtersOpen)}>
+                  {filtersOpen ? "Hide Filters" : "Filters"}
+                </button>
+                {watchlists.length > 0 && (
+                  <>
+                    <span className="si-terminal-filterbar-sep">|</span>
+                    <select
+                      className="si-terminal-watchlist-select"
+                      value={activeWatchlistId ?? ""}
+                      onChange={(e) => setActiveWatchlistId(e.target.value || null)}
+                    >
+                      <option value="">No watchlist</option>
+                      {watchlists.map((wl) => (
+                        <option key={wl.id} value={wl.id}>{wl.name}</option>
+                      ))}
+                    </select>
+                  </>
+                )}
+                <button
+                  type="button"
+                  title="Save current filters as watchlist"
+                  onClick={() => {
+                    const name = prompt("Watchlist name:");
+                    if (!name) return;
+                    const id = `wl-${Date.now()}`;
+                    setWatchlists((prev) => [...prev, { id, name, filters: { ...serverFilters } }]);
+                  }}
+                >
+                  + Watchlist
+                </button>
+              </div>
+            </div>
+
+            {searchMode && (
+              <div className="si-terminal-search">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  className="si-terminal-search-input"
+                  placeholder="Search buffer..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") { setSearchMode(false); setSearchQuery(""); }
+                  }}
+                  autoFocus
+                />
+                <span className="si-terminal-search-count">{displayItems.length} matches</span>
+              </div>
+            )}
+
+            <div
+              className="si-news-terminal-table-scroll"
+              ref={containerRef}
+              onKeyDown={handleKeyDown}
+              tabIndex={0}
+              role="grid"
+            >
+              {displayItems.length > 0 ? (
+                <List
+                  listRef={listRef}
+                  rowCount={displayItems.length}
+                  rowHeight={ROW_HEIGHT[density]}
+                  overscanCount={20}
+                  rowComponent={VirtualTerminalRow as any}
+                  rowProps={{
+                    items: displayItems,
+                    selectedIdx,
+                    density,
+                    now,
+                    onSelect: setSelectedIdx,
+                    onOpen: setDetailItem,
+                  }}
+                  style={{ height: "100%", overflow: "auto" }}
+                />
+              ) : (
+                <div className="si-news-empty">
+                  {connected ? "Waiting for items..." : "Connecting to stream..."}
+                </div>
+              )}
+            </div>
+
+            {detailItem ? <DetailCard item={detailItem} onClose={() => setDetailItem(null)} /> : null}
+          </>
         )}
       </PanelBody>
       <PanelFooter
@@ -589,7 +651,10 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
       <SourceHealthBar health={sourceHealth} />
 
       {/* Keyboard hints */}
-      <div className="si-news-hotkeys" style={{ padding: "2px 6px", borderTop: "1px solid var(--si-line-2)" }}>
+      <div
+        className="si-news-hotkeys"
+        style={{ display: isMobile ? "none" : undefined, padding: "2px 6px", borderTop: "1px solid var(--si-line-2)" }}
+      >
         <kbd>j</kbd>/<kbd>k</kbd> nav &nbsp;
         <kbd>Enter</kbd> detail &nbsp;
         <kbd>o</kbd> open &nbsp;

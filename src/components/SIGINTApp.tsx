@@ -249,29 +249,48 @@ export default function SIGINTApp() {
     clearTradeRouteSelection();
   }, [clearTradeRouteSelection, closeCctvFloating, inspector.open, isMobile]);
 
-  const statusNode = (
-    <div className={`si-header-status ${isMobile ? "is-phone" : ""}`.trim()}>
-      <span
-        className={`si-live-dot ${
-          activeView === "market"
-            ? "is-ok"
-            : activeView === "news"
-              ? newsLoading
-                ? "is-loading"
-                : newsErrors
-                  ? "is-error"
-                  : "is-ok"
-              : feedLoading
-                ? "is-loading"
-                : feedErrors
-                  ? "is-error"
-                  : "is-ok"
-        }`}
-      />
+  const statusClassName =
+    activeView === "market"
+      ? "is-ok"
+      : activeView === "news"
+        ? newsLoading
+          ? "is-loading"
+          : newsErrors
+            ? "is-error"
+            : "is-ok"
+        : feedLoading
+          ? "is-loading"
+          : feedErrors
+            ? "is-error"
+            : "is-ok";
+
+  const phoneStatusText =
+    activeView === "market"
+      ? "MARKET READY"
+      : activeView === "news"
+        ? newsLoading
+          ? "NEWS SYNC"
+          : newsErrors
+            ? `${newsErrors} NEWS ERR`
+            : "NEWS OK"
+        : feedLoading
+          ? "OPS SYNC"
+          : feedErrors
+            ? `${feedErrors} FEED ERR`
+            : "OPS OK";
+
+  const statusNode = isMobile ? (
+    <div className="si-header-status-chip">
+      <span className={`si-live-dot ${statusClassName}`} />
+      <span>{phoneStatusText}</span>
+    </div>
+  ) : (
+    <div className="si-header-status">
+      <span className={`si-live-dot ${statusClassName}`} />
       {activeView === "market" ? (
         <>
           <span>MARKET READY</span>
-          <span>{isMobile ? "PHONE MODE" : "DATA SOURCE PENDING"}</span>
+          <span>DATA SOURCE PENDING</span>
         </>
       ) : activeView === "news" ? (
         <>
@@ -338,14 +357,14 @@ export default function SIGINTApp() {
         {isMobile ? (
           <>
             <div className="si-header-phone-top">
-              <div className="si-app-wordmark">SIGINT CONSOLE</div>
+              <div className="si-app-wordmark">SIGINT</div>
               {statusNode}
               <button
                 type="button"
-                className="si-inline-action"
+                className="si-inline-action si-inline-action-compact"
                 onClick={() => useSIGINTStore.getState().bumpRefreshTick()}
               >
-                REFRESH
+                SYNC
               </button>
             </div>
             <div className="si-header-phone-tabs">{viewToggle}</div>

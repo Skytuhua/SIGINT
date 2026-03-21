@@ -1,5 +1,7 @@
 "use client";
 
+import { useIsMobile } from "../../hooks/useIsMobile";
+
 interface TickerItem {
   sym: string;
   price: string;
@@ -28,6 +30,10 @@ const TICKER_ITEMS: TickerItem[] = [
 const DOUBLED = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
 export default function MarketTickerBar() {
+  const isMobile = useIsMobile();
+
+  if (isMobile) return null;
+
   return (
     <div className="si-market-ticker-bar">
       <div className="si-market-ticker-label">LIVE</div>

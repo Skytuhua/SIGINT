@@ -322,22 +322,48 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
             }
           />
           <PanelBody noPadding>
-            <DataTable
-              tableId="flight-table"
-              data={flightRows}
-              columns={flightColumns}
-              bodyHeight="100%"
-              stickyFirstColumn
-              getRowId={(row) => row.id}
-              onRowClick={(row) => openInspector(row.entity)}
-              rowActionColumnIndex={0}
-              onRowPin={(row) => pinEntity(row.entity)}
-              onRowOpenDetail={(row) => openInspector(row.entity, true)}
-              searchPlaceholder="Search callsign, country, type, speed, heading"
-              searchHelpText="Global search across all flight columns."
-              enableColumnFilters
-              emptyMessage="No live flight rows available"
-            />
+            {isMobile ? (
+              <div className="si-ops-mobile-list" role="list">
+                {flightRows.length ? (
+                  flightRows.slice(0, 40).map((row) => (
+                    <button
+                      key={row.id}
+                      type="button"
+                      className="si-ops-mobile-row"
+                      onClick={() => openInspector(row.entity)}
+                      role="listitem"
+                    >
+                      <span className="si-ops-mobile-row-title">{row.callsign}</span>
+                      <span className="si-ops-mobile-row-subtitle">{row.type} / {row.country}</span>
+                      <span className="si-ops-mobile-row-meta">
+                        <span>{row.speed}</span>
+                        <span>HDG {row.heading}</span>
+                        <span>{row.alt}</span>
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="si-ops-mobile-empty">No live flight rows available</div>
+                )}
+              </div>
+            ) : (
+              <DataTable
+                tableId="flight-table"
+                data={flightRows}
+                columns={flightColumns}
+                bodyHeight="100%"
+                stickyFirstColumn
+                getRowId={(row) => row.id}
+                onRowClick={(row) => openInspector(row.entity)}
+                rowActionColumnIndex={0}
+                onRowPin={(row) => pinEntity(row.entity)}
+                onRowOpenDetail={(row) => openInspector(row.entity, true)}
+                searchPlaceholder="Search callsign, country, type, speed, heading"
+                searchHelpText="Global search across all flight columns."
+                enableColumnFilters
+                emptyMessage="No live flight rows available"
+              />
+            )}
           </PanelBody>
           <PanelFooter
             source="OpenSky + ADS-B"
@@ -366,21 +392,45 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
             }
           />
           <PanelBody noPadding>
-            <DataTable
-              tableId="quake-table"
-              data={quakeRows}
-              columns={quakeColumns}
-              bodyHeight="100%"
-              stickyFirstColumn
-              getRowId={(row) => row.id}
-              onRowClick={(row) => openInspector(row.entity)}
-              rowActionColumnIndex={0}
-              onRowOpenDetail={(row) => openInspector(row.entity, true)}
-              searchPlaceholder="Search location, magnitude, depth, or timestamp"
-              searchHelpText="Global search across all earthquake columns."
-              enableColumnFilters
-              emptyMessage="No recent seismic activity"
-            />
+            {isMobile ? (
+              <div className="si-ops-mobile-list" role="list">
+                {quakeRows.length ? (
+                  quakeRows.slice(0, 40).map((row) => (
+                    <button
+                      key={row.id}
+                      type="button"
+                      className="si-ops-mobile-row"
+                      onClick={() => openInspector(row.entity)}
+                      role="listitem"
+                    >
+                      <span className="si-ops-mobile-row-title">{row.place}</span>
+                      <span className="si-ops-mobile-row-subtitle">M{row.mag.toFixed(1)} / {formatNumber(row.depthKm, 1)} km deep</span>
+                      <span className="si-ops-mobile-row-meta">
+                        <span>{formatUtc(row.ts)}</span>
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="si-ops-mobile-empty">No recent seismic activity</div>
+                )}
+              </div>
+            ) : (
+              <DataTable
+                tableId="quake-table"
+                data={quakeRows}
+                columns={quakeColumns}
+                bodyHeight="100%"
+                stickyFirstColumn
+                getRowId={(row) => row.id}
+                onRowClick={(row) => openInspector(row.entity)}
+                rowActionColumnIndex={0}
+                onRowOpenDetail={(row) => openInspector(row.entity, true)}
+                searchPlaceholder="Search location, magnitude, depth, or timestamp"
+                searchHelpText="Global search across all earthquake columns."
+                enableColumnFilters
+                emptyMessage="No recent seismic activity"
+              />
+            )}
           </PanelBody>
           <PanelFooter
             source="USGS"
@@ -409,21 +459,50 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
             }
           />
           <PanelBody noPadding>
-            <DataTable
-              tableId="sat-list"
-              data={satRows}
-              columns={satColumns}
-              bodyHeight="100%"
-              stickyFirstColumn
-              getRowId={(row) => row.id}
-              onRowClick={(row) => openInspector(row.entity)}
-              rowActionColumnIndex={0}
-              onRowOpenDetail={(row) => openInspector(row.entity, true)}
-              searchPlaceholder="Search object name, NORAD ID, country, orbit class"
-              searchHelpText="Catalog rows are merged with live propagated altitude when present."
-              enableColumnFilters
-              emptyMessage="No satellite catalog rows yet"
-            />
+            {isMobile ? (
+              <div className="si-ops-mobile-list" role="list">
+                {satRows.length ? (
+                  satRows.slice(0, 40).map((row) => (
+                    <button
+                      key={row.id}
+                      type="button"
+                      className="si-ops-mobile-row"
+                      onClick={() => openInspector(row.entity)}
+                      role="listitem"
+                    >
+                      <span className="si-ops-mobile-row-title">{row.name}</span>
+                      <span className="si-ops-mobile-row-subtitle">{row.orbitClass} / {row.country}</span>
+                      <span className="si-ops-mobile-row-meta">
+                        <span>NORAD {row.noradId}</span>
+                        <span>
+                          {typeof row.liveAltitudeKm === "number"
+                            ? `${formatNumber(row.liveAltitudeKm, 1)} km`
+                            : "Catalog altitude"}
+                        </span>
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="si-ops-mobile-empty">No satellite catalog rows yet</div>
+                )}
+              </div>
+            ) : (
+              <DataTable
+                tableId="sat-list"
+                data={satRows}
+                columns={satColumns}
+                bodyHeight="100%"
+                stickyFirstColumn
+                getRowId={(row) => row.id}
+                onRowClick={(row) => openInspector(row.entity)}
+                rowActionColumnIndex={0}
+                onRowOpenDetail={(row) => openInspector(row.entity, true)}
+                searchPlaceholder="Search object name, NORAD ID, country, orbit class"
+                searchHelpText="Catalog rows are merged with live propagated altitude when present."
+                enableColumnFilters
+                emptyMessage="No satellite catalog rows yet"
+              />
+            )}
           </PanelBody>
           <PanelFooter
             source="CelesTrak"
@@ -665,9 +744,9 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
 
   return (
     <div className={`si-dashboard-workspace ${embedded ? "is-embedded" : ""}`.trim()}>
-      <div className="si-dashboard-toolbar">
-        <div className="si-toolbar-status">DASHBOARD MODE / ULTRA WORKSTATION GRID / FREEFORM WINDOW MOVE</div>
-        {!isMobile && (
+      {!isMobile ? (
+        <div className="si-dashboard-toolbar">
+          <div className="si-toolbar-status">DASHBOARD MODE / ULTRA WORKSTATION GRID / FREEFORM WINDOW MOVE</div>
           <div className="si-toolbar-actions">
             <div className="si-view-menu-wrap" ref={viewMenuRef}>
               <button
@@ -697,8 +776,8 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
               RESET LAYOUT
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      ) : null}
       {panelNodes.length ? (
         <DraggableDashboardGrid panels={panelNodes} />
       ) : (

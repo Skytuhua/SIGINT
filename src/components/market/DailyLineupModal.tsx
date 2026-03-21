@@ -498,16 +498,25 @@ export default function DailyLineupModal({ onClose }: Props) {
           borderTop: "1px solid rgba(80,110,140,0.22)",
           background: "rgba(80,110,140,0.04)",
           position: "sticky", bottom: 0, zIndex: 2,
+          ...(isMobile
+            ? {
+                padding: "10px 14px calc(10px + env(safe-area-inset-bottom, 0px))",
+                flexDirection: "column" as const,
+                alignItems: "stretch" as const,
+                gap: 10,
+              }
+            : null),
         }}>
           <label style={{
             display: "flex", alignItems: "center", gap: 8,
             cursor: "pointer", color: "#6e849d", fontSize: 10, letterSpacing: 1,
+            ...(isMobile ? { fontSize: 12, lineHeight: 1.4 } : null),
           }}>
             <input
               type="checkbox"
               checked={turnOff}
               onChange={(e) => setTurnOff(e.target.checked)}
-              style={{ accentColor: "#8da3b8" }}
+              style={{ accentColor: "#8da3b8", width: isMobile ? 18 : undefined, height: isMobile ? 18 : undefined }}
             />
             Turn Off Daily Lineup
           </label>
@@ -517,10 +526,12 @@ export default function DailyLineupModal({ onClose }: Props) {
               background: "none",
               border: "1px solid rgba(80,110,140,0.4)",
               color: "#7fa8c4",
-              padding: "3px 14px",
+              padding: isMobile ? "10px 14px" : "3px 14px",
               fontSize: 10, letterSpacing: 1,
               cursor: "pointer",
               fontFamily: mono,
+              minHeight: isMobile ? 44 : undefined,
+              width: isMobile ? "100%" : undefined,
             }}
           >
             Close Daily Lineup

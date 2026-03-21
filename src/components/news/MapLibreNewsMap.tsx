@@ -57,6 +57,7 @@ import { validateLayerRegistry } from "../../lib/newsLayers/validation";
 import { NewsLayerRuntime } from "../../lib/newsLayers/runtime";
 import { maplibreRenderer } from "../../lib/newsLayers/renderers/maplibreRenderer";
 import type { LayerFeatureCollection, LayerHealthState, LayerRegistryEntry } from "../../lib/newsLayers/types";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 interface MapLibreNewsMapProps {
   onReady?: () => void;
@@ -457,6 +458,7 @@ function toLayerHealthUi(status: LayerHealthState["status"]): "ok" | "loading" |
 }
 
 export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsMapProps) {
+  const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapInstance | null>(null);
   const maplibreRef = useRef<MapLibreModule | null>(null);
@@ -499,6 +501,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
   const setConflictFilters = useSIGINTStore((s) => s.setConflictFilters);
   const setEconomicCenterFilters = useSIGINTStore((s) => s.setEconomicCenterFilters);
   const [mapReady, setMapReady] = useState(false);
+  const [mobileLayersOpen, setMobileLayersOpen] = useState(false);
   const [dockSide, setDockSide] = useState<"left" | "right">("left");
   const [dotDetail, setDotDetail] = useState<DotDetailData | null>(null);
   const [hotspotDetail, setHotspotDetail] = useState<HotspotDetailData | null>(null);
@@ -2704,9 +2707,23 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
 
   return (
     <div className="si-news-map-container">
-      <div className="si-news-map-layout">
-        <aside className="si-news-layers-panel" aria-label="News map layers">
-          <div className="si-news-layers-title">LAYERS</div>
+      <div className={`si-news-map-layout${isMobile ? " is-phone" : ""}`.trim()}>
+        <aside
+          className={`si-news-layers-panel${isMobile ? " is-phone" : ""}${isMobile && mobileLayersOpen ? " is-mobile-open" : ""}`.trim()}
+          aria-label="News map layers"
+        >
+          <div className="si-news-layers-header">
+            <div className="si-news-layers-title">LAYERS</div>
+            {isMobile ? (
+              <button
+                type="button"
+                className="si-news-map-mobile-toggle"
+                onClick={() => setMobileLayersOpen(false)}
+              >
+                CLOSE
+              </button>
+            ) : null}
+          </div>
           <input
             type="text"
             className="si-news-layer-search"
@@ -3159,6 +3176,17 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
         </aside>
 
         <div className="si-news-map-canvas-wrap">
+          {isMobile ? (
+            <div className="si-news-map-mobile-actions">
+              <button
+                type="button"
+                className="si-news-map-mobile-toggle"
+                onClick={() => setMobileLayersOpen((prev) => !prev)}
+              >
+                {mobileLayersOpen ? "HIDE LAYERS" : "LAYERS"}
+              </button>
+            </div>
+          ) : null}
           <div ref={containerRef} className="si-news-map-canvas" />
           {dotDetail ? (
             <MapDotDetailPanel

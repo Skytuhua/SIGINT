@@ -1,6 +1,7 @@
 "use client";
 
 import { useSIGINTStore } from "@/store";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 export const CATEGORY_COLORS: Record<string, string> = {
   world:        "#89e5ff",
@@ -26,9 +27,10 @@ export const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function NewsTickerBar() {
+  const isMobile = useIsMobile();
   const feedItems = useSIGINTStore((s) => s.news.feedItems);
 
-  if (!feedItems.length) return null;
+  if (isMobile || !feedItems.length) return null;
 
   // Top 24 by score for the ticker
   const top = [...feedItems]

@@ -723,10 +723,12 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
         {/* ── FOOTER ── */}
         <div
           style={{
-            padding: "8px 14px",
+            padding: isMobile ? "10px 14px calc(10px + env(safe-area-inset-bottom, 0px))" : "8px 14px",
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: isMobile ? "stretch" : "center",
+            flexDirection: isMobile ? "column" : "row",
+            gap: isMobile ? 10 : 0,
             borderTop: "1px solid rgba(80,110,140,0.22)",
             background: "rgba(80,110,140,0.04)",
             position: "sticky",
@@ -741,15 +743,16 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
               gap: 8,
               cursor: "pointer",
               color: "#6e849d",
-              fontSize: 10,
+              fontSize: isMobile ? 12 : 10,
               letterSpacing: 1,
+              lineHeight: isMobile ? 1.4 : undefined,
             }}
           >
             <input
               type="checkbox"
               checked={turnOff}
               onChange={(e) => setTurnOff(e.target.checked)}
-              style={{ accentColor: "#8da3b8" }}
+              style={{ accentColor: "#8da3b8", width: isMobile ? 18 : undefined, height: isMobile ? 18 : undefined }}
             />
             Turn Off Intelligence Briefing
           </label>
@@ -759,11 +762,13 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
               background: "none",
               border: "1px solid rgba(80,110,140,0.4)",
               color: "#7fa8c4",
-              padding: "3px 14px",
+              padding: isMobile ? "10px 14px" : "3px 14px",
               fontSize: 10,
               letterSpacing: 1,
               cursor: "pointer",
               fontFamily: mono,
+              width: isMobile ? "100%" : undefined,
+              minHeight: isMobile ? 44 : undefined,
             }}
           >
             Close Briefing
