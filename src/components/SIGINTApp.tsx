@@ -264,27 +264,7 @@ export default function SIGINTApp() {
             ? "is-error"
             : "is-ok";
 
-  const phoneStatusText =
-    activeView === "market"
-      ? "MARKET READY"
-      : activeView === "news"
-        ? newsLoading
-          ? "NEWS SYNC"
-          : newsErrors
-            ? `${newsErrors} NEWS ERR`
-            : "NEWS OK"
-        : feedLoading
-          ? "OPS SYNC"
-          : feedErrors
-            ? `${feedErrors} FEED ERR`
-            : "OPS OK";
-
-  const statusNode = isMobile ? (
-    <div className="si-header-status-chip">
-      <span className={`si-live-dot ${statusClassName}`} />
-      <span>{phoneStatusText}</span>
-    </div>
-  ) : (
+  const statusNode = (
     <div className="si-header-status">
       <span className={`si-live-dot ${statusClassName}`} />
       {activeView === "market" ? (
@@ -350,25 +330,12 @@ export default function SIGINTApp() {
         width: "100%",
         height: "100%",
         minHeight: "100dvh",
-        overflow: "hidden",
+        overflow: isMobile ? "clip" : "hidden",
       }}
     >
       <header className={`si-global-header ${isMobile ? "is-phone" : ""}`.trim()}>
         {isMobile ? (
-          <>
-            <div className="si-header-phone-top">
-              <div className="si-app-wordmark">SIGINT</div>
-              {statusNode}
-              <button
-                type="button"
-                className="si-inline-action si-inline-action-compact"
-                onClick={() => useSIGINTStore.getState().bumpRefreshTick()}
-              >
-                SYNC
-              </button>
-            </div>
-            <div className="si-header-phone-tabs">{viewToggle}</div>
-          </>
+          <div className="si-header-phone-tabs">{viewToggle}</div>
         ) : (
           <>
             <div className="si-header-left">

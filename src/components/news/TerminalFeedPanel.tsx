@@ -268,6 +268,7 @@ interface TerminalFeedPanelProps {
 
 export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanelProps) {
   const isMobile = useIsMobile();
+  const mobilePageSize = 12;
   const [activeTab, setActiveTab] = useState<TerminalTab>("TOP");
   const [density, setDensity] = useState<DensityMode>("medium");
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -278,6 +279,7 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
   const [timeWindow, setTimeWindow] = useState<StreamFilterParams["timeWindow"]>("24h");
   const [minImportance, setMinImportance] = useState(0);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [mobileVisibleCount, setMobileVisibleCount] = useState(mobilePageSize);
   const [watchlists, setWatchlists] = useState<Array<{ id: string; name: string; filters: StreamFilterParams }>>([]);
   const [activeWatchlistId, setActiveWatchlistId] = useState<string | null>(null);
   const bodyRef = useRef<HTMLDivElement | null>(null);
@@ -417,6 +419,11 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
   }, [activeTab, activeWatchlistId]);
 
   useEffect(() => {
+    if (!isMobile) return;
+    setMobileVisibleCount(mobilePageSize);
+  }, [isMobile, activeTab, timeWindow, activeWatchlistId, searchMode, searchQuery]);
+
+  useEffect(() => {
     if (selectedIdx >= 0 && selectedIdx < displayItems.length) {
       try {
         listRef.current?.scrollToRow({ index: selectedIdx, align: "smart", behavior: "smooth" });
@@ -482,7 +489,7 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
             </div>
             <div className="si-terminal-mobile-list" role="list">
               {displayItems.length > 0 ? (
-                displayItems.slice(0, 80).map((item, idx) => (
+                displayItems.slice(0, mobileVisibleCount).map((item, idx) => (
                   <button
                     key={item.id}
                     type="button"
@@ -512,6 +519,18 @@ export default function TerminalFeedPanel({ lockHeaderProps }: TerminalFeedPanel
                 </div>
               )}
             </div>
+            {displayItems.length > mobileVisibleCount ? (
+              <div style={{ padding: "0 8px 8px" }}>
+                <button
+                  type="button"
+                  className="si-news-phone-search-submit"
+                  style={{ width: "100%" }}
+                  onClick={() => setMobileVisibleCount((count) => Math.min(count + mobilePageSize, displayItems.length))}
+                >
+                  LOAD 12 MORE
+                </button>
+              </div>
+            ) : null}
             {detailItem ? <DetailCard item={detailItem} onClose={() => setDetailItem(null)} /> : null}
           </>
         ) : (

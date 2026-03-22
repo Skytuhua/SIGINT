@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useMarketData } from "../../hooks/useMarketData";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import type { NewsResponse, NewsHeadline } from "../../lib/server/news/providers/marketTypes";
 
 const STATIC_HEADLINES: NewsHeadline[] = [
@@ -34,11 +35,19 @@ interface Props {
 }
 
 export default function MarketNewsTape({ style }: Props) {
+  const isMobile = useIsMobile();
+  const [visibleCount, setVisibleCount] = useState(12);
   const { data, isLive } = useMarketData<NewsResponse>("/api/market/news?limit=20", 120_000, EMPTY);
   const headlines = useMemo(() => {
     const h = data.headlines;
     return (h && h.length > 0) ? h : STATIC_HEADLINES;
   }, [data.headlines]);
+  const visibleHeadlines = isMobile ? headlines.slice(0, visibleCount) : headlines;
+
+  useEffect(() => {
+    if (!isMobile) return;
+    setVisibleCount(12);
+  }, [isMobile, headlines.length]);
 
   return (
     <div className="si-market-panel" style={style}>
@@ -52,7 +61,7 @@ export default function MarketNewsTape({ style }: Props) {
         </span>
       </div>
       <div className="si-market-panel-body" style={{ padding: 0, overflowY: "auto" }}>
-        {headlines.map((item: NewsHeadline, i: number) => (
+        {visibleHeadlines.map((item: NewsHeadline, i: number) => (
           <div key={i} className="si-market-tape-item">
             <div className="si-market-tape-meta">
               <span className="si-market-tape-category" style={{ color: item.categoryColor }}>
@@ -79,6 +88,18 @@ export default function MarketNewsTape({ style }: Props) {
             </div>
           </div>
         ))}
+        {isMobile && headlines.length > visibleCount ? (
+          <div style={{ padding: 8 }}>
+            <button
+              type="button"
+              className="si-phone-overlay-action"
+              style={{ width: "100%", minHeight: 44 }}
+              onClick={() => setVisibleCount((count) => Math.min(count + 12, headlines.length))}
+            >
+              Load 12 More
+            </button>
+          </div>
+        ) : null}
       </div>
       <div className="si-market-panel-footer">
         {isLive ? "Yahoo Finance RSS · 2min refresh" : "Yahoo Finance RSS · static data"}

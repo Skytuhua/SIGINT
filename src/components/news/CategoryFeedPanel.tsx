@@ -6,6 +6,7 @@ import { CATEGORY_COLORS } from "../../config/newsConfig";
 import type { NewsArticle, NewsCategory } from "../../lib/news/types";
 import { fetchJsonWithPolicy, isAbortError } from "../../lib/runtime/fetchJson";
 import { useSIGINTStore } from "../../store";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 interface Props {
   config: CategoryPanelConfig;
@@ -56,9 +57,11 @@ function putDedicatedMemo(key: string, items: NewsArticle[]): void {
 }
 
 export default function CategoryFeedPanel({ config, liveCutoffMs }: Props) {
+  const isMobile = useIsMobile();
   const feedItems = useSIGINTStore((s) => s.news.feedItems);
   const [dedicatedItems, setDedicatedItems] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(12);
   const abortRef = useRef<AbortController | null>(null);
   const hasFetchedRef = useRef(false);
   const [mainFeedSettled, setMainFeedSettled] = useState(false);
@@ -96,6 +99,7 @@ export default function CategoryFeedPanel({ config, liveCutoffMs }: Props) {
   const sortedItems = [...displayItems]
     .sort((a, b) => b.publishedAt - a.publishedAt)
     .slice(0, 30);
+  const visibleItems = isMobile ? sortedItems.slice(0, visibleCount) : sortedItems;
 
   const fetchDedicated = useCallback(async () => {
     if (!config.dedicatedFeeds?.length && !config.apiEndpoint) return;
@@ -167,6 +171,11 @@ export default function CategoryFeedPanel({ config, liveCutoffMs }: Props) {
     }
   }, [config.id, loading, sortedItems.length]);
 
+  useEffect(() => {
+    if (!isMobile) return;
+    setVisibleCount(12);
+  }, [isMobile, config.id, sortedItems.length]);
+
   const catColor = config.categories
     ? "#78909c"
     : (CATEGORY_COLORS[config.category as NewsCategory] ?? "#4caf50");
@@ -180,7 +189,7 @@ export default function CategoryFeedPanel({ config, liveCutoffMs }: Props) {
         {loading && sortedItems.length === 0 && (
           <div className="si-catfeed-empty">Loading...</div>
         )}
-        {sortedItems.map((item) => (
+        {visibleItems.map((item) => (
           <button
             key={item.id}
             type="button"
@@ -201,6 +210,16 @@ export default function CategoryFeedPanel({ config, liveCutoffMs }: Props) {
             </div>
           </button>
         ))}
+        {isMobile && sortedItems.length > visibleCount ? (
+          <button
+            type="button"
+            className="si-news-phone-search-submit"
+            style={{ width: "100%", marginTop: 8 }}
+            onClick={() => setVisibleCount((count) => Math.min(count + 12, sortedItems.length))}
+          >
+            LOAD 12 MORE
+          </button>
+        ) : null}
       </div>
     </div>
   );

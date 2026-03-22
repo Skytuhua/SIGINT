@@ -55,28 +55,54 @@ export default function MarketOverviewTab({ scenario, onTickerClick }: Props) {
           <MarketHeatmapPanel style={{ minHeight: 440 }} onTickerClick={onTickerClick} />
         </div>
 
-        <SectionLabel label="EQUITY MARKETS" sub="Snapshot  Top movers" />
-        <div className="si-overview-row-2col">
+        <SectionLabel label="EQUITY MARKETS" sub="Snapshot  Top movers  Sector performance" />
+        <div className="si-overview-row-full">
           <GlobalSnapshotPanel
             scenario={scenario}
             style={{ minHeight: 320 }}
             onTickerClick={onTickerClick}
           />
-          <TopMoversPanel style={{ minHeight: 280 }} onTickerClick={onTickerClick} />
+        </div>
+        <div className="si-overview-row-full">
+          <TopMoversPanel style={{ minHeight: 320 }} onTickerClick={onTickerClick} />
+        </div>
+        <div className="si-overview-row-full">
+          <SectorRotationPanel style={{ minHeight: 300 }} onTickerClick={onTickerClick} />
         </div>
 
-        <SectionLabel label="SENTIMENT & BREADTH" sub="Regime  Volatility  Market internals" />
+        <SectionLabel label="SENTIMENT & BREADTH" sub="Regime  Volatility  Market internals  Correlations" />
         <div className="si-overview-row-full">
           <MarketRegimePanel style={{ minHeight: 260 }} />
         </div>
-        <div className="si-overview-row-2col">
+        <div className="si-overview-row-full">
           <VolatilityPanel style={{ minHeight: 240 }} />
+        </div>
+        <div className="si-overview-row-full">
           <MarketBreadthPanel style={{ minHeight: 260 }} />
         </div>
 
-        <SectionLabel label="RATES" sub="Yield curve" />
+        <SectionLabel label="RATES & MACRO" sub="Yield curve  Fed futures  Credit spreads" />
         <div className="si-overview-row-full">
           <YieldCurvePanel style={{ minHeight: 300 }} />
+        </div>
+        <div className="si-overview-row-full">
+          <FedFuturesPanel style={{ minHeight: 300 }} />
+        </div>
+        <div className="si-overview-row-full">
+          <CreditSpreadPanel style={{ minHeight: 280 }} />
+        </div>
+
+        <SectionLabel label="CENTRAL BANKS & CALENDAR" sub="Policy rates  Upcoming events" />
+        <div className="si-overview-row-full">
+          <CentralBankPanel style={{ minHeight: 300 }} />
+        </div>
+        <div className="si-overview-row-full">
+          <EconCalendarPanel style={{ minHeight: 320 }} />
+        </div>
+
+        <SectionLabel label="EARNINGS" sub="Calendar  Beat / miss tracker" />
+        <div className="si-overview-row-full">
+          <EarningsTracker style={{ minHeight: 320 }} onTickerClick={onTickerClick} />
         </div>
 
         <SectionLabel label="MARKET NEWS" sub="Headline tape" />

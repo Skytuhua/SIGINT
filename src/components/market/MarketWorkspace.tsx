@@ -83,9 +83,21 @@ export default function MarketWorkspace() {
 
   return (
     <div className="si-market-workspace">
-      {showLineup && <DailyLineupModal onClose={() => setShowLineup(false)} />}
+      {showLineup ? (
+        <DailyLineupModal
+          onClose={() => setShowLineup(false)}
+          onOpenGlossary={
+            isMobile
+              ? () => {
+                  setShowLineup(false);
+                  setShowGlossary(true);
+                }
+              : undefined
+          }
+        />
+      ) : null}
 
-      <MarketTickerBar />
+      {!isMobile ? <MarketTickerBar /> : null}
 
       <div className={`si-market-command-bar${isMobile ? " is-phone" : ""}`.trim()}>
         <div className="si-market-tab-row">
@@ -119,14 +131,6 @@ export default function MarketWorkspace() {
               title="Open daily market briefing"
             >
               DAILY BRIEFING
-            </button>
-            <button
-              type="button"
-              className="si-market-phone-utility-btn"
-              onClick={() => setShowGlossary(true)}
-              title="Open glossary look up financial terms"
-            >
-              GLOSSARY
             </button>
           </div>
         ) : (

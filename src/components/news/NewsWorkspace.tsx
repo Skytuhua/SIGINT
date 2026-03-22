@@ -2121,13 +2121,9 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   return (
     <div className={`si-news-workspace ${embedded ? "is-embedded" : ""}`.trim()}>
       {showBriefing && <NewsDailyBriefingModal onClose={() => setShowBriefing(false)} />}
-      <NewsTickerBar />
+      {!isMobile ? <NewsTickerBar /> : null}
       {isMobile ? (
         <div className="si-news-phone-search-card">
-          <div className="si-news-phone-search-status">
-            {loading ? "SEARCHING..." : `${filteredItems.length} STORIES`}
-            {news.ui.statusLine ? ` | ${news.ui.statusLine}` : ""}
-          </div>
           <div className="si-news-phone-search-row">
             <input
               type="text"
