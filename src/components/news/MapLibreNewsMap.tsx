@@ -58,6 +58,7 @@ import { NewsLayerRuntime } from "../../lib/newsLayers/runtime";
 import { maplibreRenderer } from "../../lib/newsLayers/renderers/maplibreRenderer";
 import type { LayerFeatureCollection, LayerHealthState, LayerRegistryEntry } from "../../lib/newsLayers/types";
 import { useIsMobile } from "../../hooks/useIsMobile";
+import usePhoneMapGestureLock from "./usePhoneMapGestureLock";
 
 interface MapLibreNewsMapProps {
   onReady?: () => void;
@@ -2704,6 +2705,8 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
     }
     return Array.from(byCat.entries());
   }, [sortedLayers]);
+
+  usePhoneMapGestureLock(containerRef, isMobile);
 
   return (
     <div className="si-news-map-container">

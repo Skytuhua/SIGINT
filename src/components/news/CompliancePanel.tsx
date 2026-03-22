@@ -208,27 +208,92 @@ export default function CompliancePanel({ lockHeaderProps }: CompliancePanelProp
     <div style={{ display: "grid", gap: 8 }}>
       {entitiesToRender.length ? (
         entitiesToRender.map((entity) => (
-          <button
-            key={entity.id}
-            type="button"
-            onClick={() => setSelectedId(selectedId === entity.id ? null : entity.id)}
-            style={{
-              display: "grid",
-              gap: 4,
-              width: "100%",
-              padding: 10,
-              border: selectedId === entity.id ? "1px solid rgba(137,229,255,0.45)" : "1px solid #243246",
-              background: selectedId === entity.id ? "rgba(137,229,255,0.06)" : "#0d1521",
-              color: "#d7e3ef",
-              textAlign: "left",
-            }}
-          >
-            <span style={{ fontSize: 12, lineHeight: 1.35 }}>{highlightMatch(entity.name, searchQuery)}</span>
-            <span style={{ fontSize: 10, color: "#8da3b8" }}>
-              {entity.authority} / {entity.entityType} / GEO {geoConfidenceLabel(entity)}
-            </span>
-            <span style={{ fontSize: 10, color: "#6e849d" }}>{entity.program || "No program label"}</span>
-          </button>
+          (() => {
+            const isSelected = selectedId === entity.id;
+            return (
+              <button
+                key={entity.id}
+                type="button"
+                onClick={() => setSelectedId(isSelected ? null : entity.id)}
+                style={{
+                  display: "grid",
+                  gap: 6,
+                  width: "100%",
+                  padding: 10,
+                  border: isSelected ? "1px solid rgba(137,229,255,0.45)" : "1px solid #243246",
+                  background: isSelected ? "rgba(137,229,255,0.06)" : "#0d1521",
+                  color: "#d7e3ef",
+                  textAlign: "left",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 12,
+                    lineHeight: 1.4,
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {highlightMatch(entity.name, searchQuery)}
+                </span>
+                <span style={{ display: "flex", flexWrap: "wrap", gap: 6, fontSize: 10, color: "#8da3b8" }}>
+                  <span>{entity.authority}</span>
+                  <span>{entity.entityType}</span>
+                  <span>GEO {geoConfidenceLabel(entity)}</span>
+                </span>
+                <span
+                  style={{
+                    fontSize: 10,
+                    color: "#6e849d",
+                    display: "-webkit-box",
+                    WebkitLineClamp: isSelected ? 3 : 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    lineHeight: 1.35,
+                  }}
+                >
+                  {entity.program || "No program label"}
+                </span>
+                {isSelected ? (
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: 4,
+                      paddingTop: 6,
+                      borderTop: "1px solid rgba(137,229,255,0.12)",
+                      fontSize: 10,
+                      color: "#8da3b8",
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    <span>ID {entity.id}</span>
+                    {entity.aliases?.length ? (
+                      <span
+                        style={{
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        Aliases: {entity.aliases.slice(0, 4).join(", ")}
+                      </span>
+                    ) : null}
+                    {entity.geo ? (
+                      <span>
+                        GEO {entity.jurisdictionCountry ?? entity.geo.placeName ?? "--"}
+                        {entity.geo.lat != null && entity.geo.lon != null
+                          ? ` / ${entity.geo.lat.toFixed(2)}, ${entity.geo.lon.toFixed(2)}`
+                          : ""}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
+              </button>
+            );
+          })()
         ))
       ) : (
         <div style={{ padding: "12px 0", textAlign: "center", color: "#6e849d", fontSize: 12 }}>

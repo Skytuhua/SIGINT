@@ -122,7 +122,8 @@ export default function MarketWorkspace() {
               className="si-market-phone-utility-btn"
               onClick={() => setShowScenarioSheet(true)}
             >
-              SCENARIO: {scenario}
+              <span className="si-market-phone-utility-label">Scenario</span>
+              <span className="si-market-phone-utility-value">{scenario}</span>
             </button>
             <button
               type="button"
@@ -130,7 +131,8 @@ export default function MarketWorkspace() {
               onClick={() => setShowLineup(true)}
               title="Open daily market briefing"
             >
-              DAILY BRIEFING
+              <span className="si-market-phone-utility-label">Daily</span>
+              <span className="si-market-phone-utility-value">Briefing</span>
             </button>
           </div>
         ) : (

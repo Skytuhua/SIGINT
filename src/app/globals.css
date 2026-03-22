@@ -10424,6 +10424,11 @@ body.si-resizing-globe {
     background: rgba(0, 6, 14, 0.92);
   }
 
+  html.si-phone-map-gesture-lock,
+  body.si-phone-map-gesture-lock {
+    overscroll-behavior: none;
+  }
+
   .si-phone-overlay-shell {
     position: absolute;
     inset: 0;
@@ -10536,11 +10541,13 @@ body.si-resizing-globe {
 
   .si-panel-subtitle {
     max-width: 100%;
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
     font-size: 10px;
     line-height: 1.25;
+    white-space: normal;
   }
 
   .si-panel-header-right {
@@ -10562,9 +10569,11 @@ body.si-resizing-globe {
   .si-panel-footer-message {
     flex: 1 1 100%;
     min-width: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
   }
 
   .si-mobile-dashboard-stack {
@@ -10603,21 +10612,29 @@ body.si-resizing-globe {
     cursor: pointer;
   }
 
+  .si-ops-mobile-row-static {
+    cursor: default;
+  }
+
   .si-ops-mobile-row-title {
     font-size: 14px;
     line-height: 1.2;
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
   }
 
   .si-ops-mobile-row-subtitle {
     font-size: 11px;
     line-height: 1.35;
     color: var(--si-text-muted);
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
   }
 
   .si-ops-mobile-row-meta {
@@ -10720,6 +10737,11 @@ body.si-resizing-globe {
   }
 
   .si-market-phone-utility-btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2px;
     min-height: 44px;
     padding: 8px 10px;
     border: 1px solid var(--si-line);
@@ -10728,10 +10750,21 @@ body.si-resizing-globe {
     font-size: 10px;
     letter-spacing: 0.05em;
     line-height: 1.25;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .si-market-phone-utility-label {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--si-text-dim);
+    text-transform: uppercase;
+  }
+
+  .si-market-phone-utility-value {
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--si-text);
   }
 
   .si-market-phone-sheet-backdrop {
@@ -10816,9 +10849,10 @@ body.si-resizing-globe {
   .si-market-panel-footer {
     padding: 5px 8px;
     line-height: 1.35;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: block;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
   }
 
   .si-overview-section-label {
@@ -10856,9 +10890,11 @@ body.si-resizing-globe {
     font-size: 10px;
     line-height: 1.3;
     color: var(--si-text-muted);
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
   }
 
   .si-news-phone-search-row {
@@ -11003,6 +11039,37 @@ body.si-resizing-globe {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  .si-feed-item {
+    grid-template-columns: 52px 72px minmax(0, 1fr);
+    align-items: start;
+    gap: 6px 8px;
+    padding: 6px 0;
+  }
+
+  .si-feed-item span:first-child {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .si-feed-item strong {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  .si-feed-item span:last-child {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: normal;
+    line-height: 1.35;
   }
 
   .si-terminal-mobile-tabs {
@@ -11198,6 +11265,26 @@ body.si-resizing-globe {
     right: 12px;
     bottom: 12px;
     z-index: 921;
+  }
+
+  .si-news-map-layout.is-phone .si-news-map-canvas {
+    touch-action: none;
+    overscroll-behavior: contain;
+  }
+
+  .si-news-map-layout.is-phone .maplibregl-canvas-container,
+  .si-news-map-layout.is-phone .maplibregl-canvas,
+  .si-news-map-layout.is-phone .leaflet-container,
+  .si-news-map-layout.is-phone .leaflet-pane,
+  .si-news-map-layout.is-phone .leaflet-map-pane,
+  .si-news-map-layout.is-phone .leaflet-tile-pane,
+  .si-news-map-layout.is-phone .leaflet-overlay-pane {
+    touch-action: none;
+    overscroll-behavior: contain;
+  }
+
+  .si-news-map-layout.is-phone .si-news-map-canvas-wrap {
+    overscroll-behavior: contain;
   }
 
   .si-news-map-layout.is-phone .si-news-map-zoom button {

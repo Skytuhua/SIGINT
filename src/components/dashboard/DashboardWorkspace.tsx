@@ -51,6 +51,53 @@ const MOBILE_PREVIEW_LIMITS = {
   "source-health": 8,
 } as const;
 
+interface MobileOpsRowProps {
+  title: string;
+  subtitle?: string;
+  meta?: string[];
+  onClick?: () => void;
+  staticRow?: boolean;
+}
+
+function MobileOpsRow({
+  title,
+  subtitle,
+  meta = [],
+  onClick,
+  staticRow = false,
+}: MobileOpsRowProps) {
+  const body = (
+    <>
+      <span className="si-ops-mobile-row-title">{title}</span>
+      {subtitle ? <span className="si-ops-mobile-row-subtitle">{subtitle}</span> : null}
+      {meta.length ? (
+        <div className="si-ops-mobile-row-meta">
+          {meta.map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
+      ) : null}
+    </>
+  );
+
+  if (staticRow || !onClick) {
+    return <div className="si-ops-mobile-row si-ops-mobile-row-static">{body}</div>;
+  }
+
+  return (
+    <button type="button" className="si-ops-mobile-row" onClick={onClick}>
+      {body}
+    </button>
+  );
+}
+
+function describeSourceHealthStatus(status: "live" | "cached" | "degraded" | "unavailable"): string {
+  if (status === "live") return "Live feed healthy";
+  if (status === "cached") return "Cached fallback active";
+  if (status === "degraded") return "Degraded feed / fallback active";
+  return "Feed unavailable";
+}
+
 export default function DashboardWorkspace({ embedded = false }: DashboardWorkspaceProps) {
   const liveData = useSIGINTStore((s) => s.liveData);
   const health = useSIGINTStore((s) => s.liveData.health);
@@ -286,6 +333,19 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
   const sourceHealthValues = Object.values(sourceHealth ?? {});
   const degradedCount = sourceHealthValues.filter((state) => state.status === "degraded").length;
   const unavailableCount = sourceHealthValues.filter((state) => state.status === "unavailable").length;
+  const mobileSourceHealthRows = useMemo(
+    () =>
+      Object.entries(sourceHealth ?? {}).map(([name, state]) => ({
+        id: name,
+        title: name.toUpperCase(),
+        subtitle: `${state.status.toUpperCase()} / ${describeSourceHealthStatus(state.status)}`,
+        meta: [
+          state.lastSuccessAt ? `LAST OK ${new Date(state.lastSuccessAt).toISOString().slice(11, 19)}Z` : "NO SUCCESS TS",
+          state.errorCode ? `CODE ${state.errorCode}` : "",
+        ].filter(Boolean),
+      })),
+    [sourceHealth]
+  );
   const opsFeedHealth: "ok" | "loading" | "stale" | "error" =
     unavailableCount > 0 ? "error" : degradedCount > 0 ? "stale" : anyLoading ? "loading" : "ok";
   const opsFeedMessage =
@@ -377,16 +437,13 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
               <div className="si-ops-mobile-list" role="list">
                 {flightRows.length ? (
                   flightRows.slice(0, MOBILE_PREVIEW_LIMITS["flight-table"]).map((row) => (
-                    <button
+                    <MobileOpsRow
                       key={row.id}
-                      type="button"
-                      className="si-ops-mobile-row"
+                      title={row.callsign}
+                      subtitle={`${row.type} / ${row.country}`}
+                      meta={[row.speed, `HDG ${row.heading}`, row.alt]}
                       onClick={() => openInspector(row.entity)}
-                      role="listitem"
-                    >
-                      <span className="si-ops-mobile-row-title">{row.callsign}</span>
-                      <span className="si-ops-mobile-row-subtitle">{row.type} / {row.country} / {row.speed} / HDG {row.heading} / {row.alt}</span>
-                    </button>
+                    />
                   ))
                 ) : (
                   <div className="si-ops-mobile-empty">No live flight rows available</div>
@@ -452,16 +509,13 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
               <div className="si-ops-mobile-list" role="list">
                 {quakeRows.length ? (
                   quakeRows.slice(0, MOBILE_PREVIEW_LIMITS["quake-table"]).map((row) => (
-                    <button
+                    <MobileOpsRow
                       key={row.id}
-                      type="button"
-                      className="si-ops-mobile-row"
+                      title={row.place}
+                      subtitle={`M${row.mag.toFixed(1)} / ${formatNumber(row.depthKm, 1)} km`}
+                      meta={[formatUtc(row.ts)]}
                       onClick={() => openInspector(row.entity)}
-                      role="listitem"
-                    >
-                      <span className="si-ops-mobile-row-title">{row.place}</span>
-                      <span className="si-ops-mobile-row-subtitle">M{row.mag.toFixed(1)} / {formatNumber(row.depthKm, 1)} km / {formatUtc(row.ts)}</span>
-                    </button>
+                    />
                   ))
                 ) : (
                   <div className="si-ops-mobile-empty">No recent seismic activity</div>
@@ -526,20 +580,18 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
               <div className="si-ops-mobile-list" role="list">
                 {satRows.length ? (
                   satRows.slice(0, MOBILE_PREVIEW_LIMITS["sat-list"]).map((row) => (
-                    <button
+                    <MobileOpsRow
                       key={row.id}
-                      type="button"
-                      className="si-ops-mobile-row"
-                      onClick={() => openInspector(row.entity)}
-                      role="listitem"
-                    >
-                      <span className="si-ops-mobile-row-title">{row.name}</span>
-                      <span className="si-ops-mobile-row-subtitle">
-                        {row.orbitClass} / {row.country} / NORAD {row.noradId} / {typeof row.liveAltitudeKm === "number"
+                      title={row.name}
+                      subtitle={`${row.orbitClass} / ${row.country}`}
+                      meta={[
+                        `NORAD ${row.noradId}`,
+                        typeof row.liveAltitudeKm === "number"
                           ? `${formatNumber(row.liveAltitudeKm, 1)} km`
-                          : "Catalog altitude"}
-                      </span>
-                    </button>
+                          : "Catalog altitude",
+                      ]}
+                      onClick={() => openInspector(row.entity)}
+                    />
                   ))
                 ) : (
                   <div className="si-ops-mobile-empty">No satellite catalog rows yet</div>
@@ -765,9 +817,24 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
             controls={<PanelControls onRefresh={bumpRefreshTick} refreshText="REFRESH" />}
           />
           <PanelBody>
-            <div className="si-feed-list" role="log" aria-label="Data sources health">
-              {Object.entries(sourceHealth ?? {}).length ? (
-                Object.entries(sourceHealth ?? {}).slice(0, isMobile ? MOBILE_PREVIEW_LIMITS["source-health"] : undefined).map(([name, state]) => {
+            {Object.entries(sourceHealth ?? {}).length ? (
+                isMobile ? (
+                  <div className="si-ops-mobile-list" role="list" aria-label="Data sources health">
+                    {mobileSourceHealthRows
+                      .slice(0, MOBILE_PREVIEW_LIMITS["source-health"])
+                      .map((row) => (
+                        <MobileOpsRow
+                          key={row.id}
+                          title={row.title}
+                          subtitle={row.subtitle}
+                          meta={row.meta}
+                          onClick={() => setMobileOverlayId("source-health")}
+                        />
+                      ))}
+                  </div>
+                ) : (
+                  <div className="si-feed-list" role="log" aria-label="Data sources health">
+                    {Object.entries(sourceHealth ?? {}).map(([name, state]) => {
                   const statusColor =
                     state.status === "live" ? "#69f0ae"
                     : state.status === "cached" ? "#4fc3f7"
@@ -790,15 +857,20 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
                       </span>
                     </div>
                   );
-                })
+                    })}
+                  </div>
+                )
+              ) : isMobile ? (
+                <div className="si-ops-mobile-empty">No source health data available yet.</div>
               ) : (
-                <div className="si-feed-item is-info">
-                  <span>--:--:--</span>
-                  <strong>INFO</strong>
-                  <span>No source health data available yet.</span>
+                <div className="si-feed-list" role="log" aria-label="Data sources health">
+                  <div className="si-feed-item is-info">
+                    <span>--:--:--</span>
+                    <strong>INFO</strong>
+                    <span>No source health data available yet.</span>
+                  </div>
                 </div>
               )}
-            </div>
             {isMobile && Object.entries(sourceHealth ?? {}).length > MOBILE_PREVIEW_LIMITS["source-health"] ? (
               <button
                 type="button"
@@ -888,19 +960,16 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
       <div className="si-ops-mobile-list" role="list">
         {overlayFlightRows.length ? (
           overlayFlightRows.map((row) => (
-            <button
+            <MobileOpsRow
               key={row.id}
-              type="button"
-              className="si-ops-mobile-row"
+              title={row.callsign}
+              subtitle={`${row.type} / ${row.country}`}
+              meta={[row.speed, `HDG ${row.heading}`, row.alt]}
               onClick={() => {
                 openInspector(row.entity);
                 setMobileOverlayId(null);
               }}
-              role="listitem"
-            >
-              <span className="si-ops-mobile-row-title">{row.callsign}</span>
-              <span className="si-ops-mobile-row-subtitle">{row.type} / {row.country} / {row.speed} / HDG {row.heading} / {row.alt}</span>
-            </button>
+            />
           ))
         ) : (
           <div className="si-ops-mobile-empty">No live flight rows available</div>
@@ -927,19 +996,16 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
       <div className="si-ops-mobile-list" role="list">
         {overlayQuakeRows.length ? (
           overlayQuakeRows.map((row) => (
-            <button
+            <MobileOpsRow
               key={row.id}
-              type="button"
-              className="si-ops-mobile-row"
+              title={row.place}
+              subtitle={`M${row.mag.toFixed(1)} / ${formatNumber(row.depthKm, 1)} km`}
+              meta={[formatUtc(row.ts)]}
               onClick={() => {
                 openInspector(row.entity);
                 setMobileOverlayId(null);
               }}
-              role="listitem"
-            >
-              <span className="si-ops-mobile-row-title">{row.place}</span>
-              <span className="si-ops-mobile-row-subtitle">M{row.mag.toFixed(1)} / {formatNumber(row.depthKm, 1)} km / {formatUtc(row.ts)}</span>
-            </button>
+            />
           ))
         ) : (
           <div className="si-ops-mobile-empty">No recent seismic activity</div>
@@ -966,23 +1032,21 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
       <div className="si-ops-mobile-list" role="list">
         {overlaySatRows.length ? (
           overlaySatRows.map((row) => (
-            <button
+            <MobileOpsRow
               key={row.id}
-              type="button"
-              className="si-ops-mobile-row"
+              title={row.name}
+              subtitle={`${row.orbitClass} / ${row.country}`}
+              meta={[
+                `NORAD ${row.noradId}`,
+                typeof row.liveAltitudeKm === "number"
+                  ? `${formatNumber(row.liveAltitudeKm, 1)} km`
+                  : "Catalog altitude",
+              ]}
               onClick={() => {
                 openInspector(row.entity);
                 setMobileOverlayId(null);
               }}
-              role="listitem"
-            >
-              <span className="si-ops-mobile-row-title">{row.name}</span>
-              <span className="si-ops-mobile-row-subtitle">
-                {row.orbitClass} / {row.country} / NORAD {row.noradId} / {typeof row.liveAltitudeKm === "number"
-                  ? `${formatNumber(row.liveAltitudeKm, 1)} km`
-                  : "Catalog altitude"}
-              </span>
-            </button>
+            />
           ))
         ) : (
           <div className="si-ops-mobile-empty">No satellite catalog rows yet</div>
@@ -1041,41 +1105,19 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
       )}
     </div>
   ) : mobileOverlayId === "source-health" ? (
-    <div className="si-feed-list" role="log" aria-label="Data sources health">
-      {Object.entries(sourceHealth ?? {}).length ? (
-        Object.entries(sourceHealth ?? {}).map(([name, state]) => {
-          const statusColor =
-            state.status === "live"
-              ? "#69f0ae"
-              : state.status === "cached"
-                ? "#4fc3f7"
-                : state.status === "degraded"
-                  ? "#ffc107"
-                  : "#ff5252";
-          const level =
-            state.status === "unavailable"
-              ? "error"
-              : state.status === "degraded"
-                ? "warn"
-                : "info";
-          return (
-            <div key={name} className={`si-feed-item is-${level}`}>
-              <span style={{ color: statusColor, fontWeight: 700 }}>{"\u25CF"}</span>
-              <strong>{name.toUpperCase()}</strong>
-              <span>
-                {state.status.toUpperCase()}
-                {state.lastSuccessAt ? ` - last ok ${new Date(state.lastSuccessAt).toISOString().slice(11, 19)}` : ""}
-                {state.errorCode ? ` [${state.errorCode}]` : ""}
-              </span>
-            </div>
-          );
-        })
+    <div className="si-ops-mobile-list" role="list">
+      {mobileSourceHealthRows.length ? (
+        mobileSourceHealthRows.map((row) => (
+          <MobileOpsRow
+            key={row.id}
+            title={row.title}
+            subtitle={row.subtitle}
+            meta={row.meta}
+            staticRow
+          />
+        ))
       ) : (
-        <div className="si-feed-item is-info">
-          <span>--:--:--</span>
-          <strong>INFO</strong>
-          <span>No source health data available yet.</span>
-        </div>
+        <div className="si-ops-mobile-empty">No source health data available yet.</div>
       )}
     </div>
   ) : null;

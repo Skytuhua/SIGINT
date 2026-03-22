@@ -56,6 +56,7 @@ import { applyConflictZoneFilters } from "../../lib/newsLayers/conflictZoneFilte
 import { setLayerClickHandler } from "../../lib/newsLayers/store";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { propsToConflictZoneDetail } from "../../lib/server/news/conflictZones/types";
+import usePhoneMapGestureLock from "./usePhoneMapGestureLock";
 
 const MAP_DEFAULT_CENTER: [number, number] = [20, 10];
 const MAP_DEFAULT_ZOOM = 2;
@@ -2047,6 +2048,8 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
   const showMapError = tileLoadError;
   const mapErrorTitle = "MAP TILES UNAVAILABLE";
   const mapErrorBody = "Unable to load OpenStreetMap/CARTO tiles right now. Check network connectivity and retry.";
+
+  usePhoneMapGestureLock(mapCanvasRef, isMobile);
 
   return (
     <div ref={mapContainerRef} className="si-news-map-container">
