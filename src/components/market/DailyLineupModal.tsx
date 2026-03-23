@@ -208,7 +208,7 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
             { label: "Asia", items: INDICES.asia },
           ] as const).map(({ label, items }) => (
             <div key={label}>
-              <div style={{ fontSize: isMobile ? 11 : 9, color: isMobile ? "#7fa8c4" : "#5f7488", letterSpacing: 1.5, marginBottom: isMobile ? 10 : 6, paddingBottom: isMobile ? 6 : 0, borderBottom: isMobile ? "1px solid rgba(80,100,125,0.15)" : "none" }}>{label}</div>
+              <div style={{ fontSize: isMobile ? 11 : 9, color: isMobile ? "#7fa8c4" : "#5f7488", letterSpacing: isMobile ? 1.5 : 1, marginBottom: isMobile ? 10 : 6, paddingBottom: isMobile ? 6 : 0, borderBottom: isMobile ? "1px solid rgba(80,100,125,0.15)" : "none" }}>{label}</div>
               {items.map((idx) => {
                 const up = idx.pct >= 0;
                 return (
