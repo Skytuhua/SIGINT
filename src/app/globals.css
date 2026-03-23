@@ -10194,7 +10194,7 @@ body.si-resizing-globe {
   .si-market-panel .si-market-panel-body {
     flex: 0 0 auto !important;
     min-height: unset !important;
-    overflow: visible;
+    overflow: visible !important;
   }
 
 
@@ -10203,6 +10203,8 @@ body.si-resizing-globe {
   /* Central Banks: show CB, Country, Rate only on mobile */
   .si-cb-header-row, .si-cb-row {
     grid-template-columns: 48px minmax(0, 1fr) 58px !important;
+    font-size: 11px !important;
+    padding: 4px 8px !important;
   }
   .si-cb-header-row > :nth-child(n+4),
   .si-cb-row > :nth-child(n+4) {
@@ -10212,6 +10214,8 @@ body.si-resizing-globe {
   /* Fed Funds: hide trend sparkline on mobile, tighten cols */
   .si-fed-header, .si-fed-row {
     grid-template-columns: 64px 52px 48px 48px 52px !important;
+    font-size: 11px !important;
+    padding: 4px 8px !important;
   }
   .si-fed-header > :nth-child(6),
   .si-fed-row > :nth-child(6) {
@@ -10237,19 +10241,27 @@ body.si-resizing-globe {
     height: auto;
   }
 
-  /* Credit Spreads: constrain INDEX column width */
-  .si-credit-header > :first-child,
-  .si-credit-row > :first-child {
-    max-width: 80px;
-    font-size: 10px;
-  }
+  /* Credit Spreads: show INDEX(80px), SPREAD, 1D, 1W, SIGNAL — hide 52H, 52L, TREND */
   .si-credit-header, .si-credit-row {
     grid-template-columns: 80px 50px 38px 38px 50px !important;
+    font-size: 11px;
+    padding: 6px 8px;
+    gap: 2px;
+  }
+  .si-credit-header > :nth-child(5),
+  .si-credit-header > :nth-child(6),
+  .si-credit-header > :nth-child(7),
+  .si-credit-row > :nth-child(5),
+  .si-credit-row > :nth-child(6),
+  .si-credit-row > :nth-child(7) {
+    display: none !important;
   }
 
   /* Top Movers: hide vol mult and reason columns on mobile */
   .si-market-movers-col-header, .si-market-movers-row {
     grid-template-columns: 40px minmax(0, 1fr) 56px 56px !important;
+    font-size: 11px !important;
+    padding: 4px 8px !important;
   }
   .si-market-movers-col-header > :nth-child(5),
   .si-market-movers-col-header > :nth-child(6),
@@ -10282,17 +10294,17 @@ body.si-resizing-globe {
   /* Fix 6: Widen market breadth table number columns */
   .si-breadth-table-head,
   .si-breadth-table-row {
-    grid-template-columns: 1fr 60px 70px;
-    font-size: 11px;
-    padding: 5px 0;
+    grid-template-columns: 1fr 60px 70px !important;
+    font-size: 11px !important;
+    padding: 5px 0 !important;
   }
 
 
   /* Earnings Tracker: constrain company name, readable font sizes */
   .si-market-earn-row {
-    grid-template-columns: 36px 8px 42px minmax(0, 1fr) auto;
-    font-size: 11px;
-    padding: 5px 8px;
+    grid-template-columns: 36px 8px 42px minmax(0, 1fr) auto !important;
+    font-size: 11px !important;
+    padding: 5px 8px !important;
   }
   .si-market-earn-section-label {
     font-size: 10px;
@@ -10312,29 +10324,14 @@ body.si-resizing-globe {
     font-size: 10px;
   }
 
-  /* Credit Spreads: hide 52H, 52L, TREND on mobile — keep INDEX, SPREAD, 1D, 1W, SIGNAL */
-  .si-credit-header,
-  .si-credit-row {
-    grid-template-columns: minmax(0, 1fr) 50px 38px 38px 50px;
-    font-size: 11px;
-    padding: 6px 8px;
-    gap: 2px;
-  }
-  .si-credit-header > :nth-child(5),
-  .si-credit-header > :nth-child(6),
-  .si-credit-header > :nth-child(7),
-  .si-credit-row > :nth-child(5),
-  .si-credit-row > :nth-child(6),
-  .si-credit-row > :nth-child(7) {
-    display: none;
-  }
+
 
   /* Volatility table: tighten columns for mobile */
   .si-market-vol-col-header,
   .si-market-vol-row {
-    grid-template-columns: 42px minmax(0, 1fr) 48px 50px 56px;
-    font-size: 11px;
-    padding: 5px 8px;
+    grid-template-columns: 42px minmax(0, 1fr) 48px 50px 56px !important;
+    font-size: 11px !important;
+    padding: 5px 8px !important;
     gap: 2px;
   }
   .si-market-vol-name {
@@ -10653,9 +10650,8 @@ body.si-resizing-globe {
   }
   .si-market-panel-body {
     min-width: 0;
-    max-width: 100%;
-    overflow-x: hidden;
-    overflow-y: visible;
+    max-width: 100% !important;
+    overflow: visible !important;
     word-break: break-word;
   }
 
