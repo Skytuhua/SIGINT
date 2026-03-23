@@ -10184,11 +10184,11 @@ body.si-resizing-globe {
      Round 5 — Market panels, overlay, drag handles, focus borders
      ================================================================ */
 
-  /* Fix 1: Market panels size-to-content on mobile */
+  /* Fix 1: Market panels size-to-content on mobile, contained horizontally */
   .si-market-panel {
     min-height: unset !important;
     height: auto !important;
-    overflow: visible;
+    overflow: hidden;
   }
 
   .si-market-panel .si-market-panel-body {
@@ -10222,14 +10222,40 @@ body.si-resizing-globe {
   /* Fix 6: Widen market breadth table number columns */
   .si-breadth-table-head,
   .si-breadth-table-row {
-    grid-template-columns: 1fr 70px 80px;
-    font-size: 12px;
+    grid-template-columns: 1fr 60px 70px;
+    font-size: 11px;
+    padding: 5px 0;
+  }
+
+
+  /* Earnings Tracker: constrain company name, readable font sizes */
+  .si-market-earn-row {
+    grid-template-columns: 36px 8px 42px minmax(0, 1fr) auto;
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+  .si-market-earn-section-label {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+  .si-market-earn-company {
+    font-size: 11px;
+    min-width: 0;
+  }
+  .si-market-earn-time {
+    font-size: 10px;
+  }
+  .si-market-earn-sym {
+    font-size: 11px;
+  }
+  .si-market-earn-eps-est {
+    font-size: 10px;
   }
 
   /* Credit Spreads: hide 52H, 52L, TREND on mobile — keep INDEX, SPREAD, 1D, 1W, SIGNAL */
   .si-credit-header,
   .si-credit-row {
-    grid-template-columns: 1fr 50px 38px 38px 50px;
+    grid-template-columns: minmax(0, 1fr) 50px 38px 38px 50px;
     font-size: 11px;
     padding: 6px 8px;
     gap: 2px;
@@ -10246,7 +10272,7 @@ body.si-resizing-globe {
   /* Volatility table: tighten columns for mobile */
   .si-market-vol-col-header,
   .si-market-vol-row {
-    grid-template-columns: 42px 1fr 48px 50px 56px;
+    grid-template-columns: 42px minmax(0, 1fr) 48px 50px 56px;
     font-size: 11px;
     padding: 5px 8px;
     gap: 2px;
@@ -10534,12 +10560,13 @@ body.si-resizing-globe {
   .si-phone-overlay-footer {
     position: sticky;
     bottom: 0;
-    z-index: 2;
+    z-index: 10;
     display: grid;
     gap: 10px;
     padding: 10px 12px calc(10px + var(--si-safe-bottom));
-    border-top: 1px solid rgba(80, 110, 140, 0.25);
+    border-top: 2px solid rgba(137, 229, 255, 0.2);
     background: #07111d;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.5);
   }
 
   .si-main-frame,
@@ -10557,10 +10584,11 @@ body.si-resizing-globe {
     overflow-x: hidden;
   }
 
-  /* Market panels get auto overflow so data tables can scroll horizontally */
+  /* Market panels: container clips, body scrolls tables horizontally */
   .si-market-panel {
     min-width: 0;
     max-width: 100%;
+    overflow-x: hidden;
   }
   .si-market-panel-body {
     min-width: 0;
@@ -10923,8 +10951,12 @@ body.si-resizing-globe {
   }
 
   .si-overview-section-sub {
+    font-size: 10px;
+    width: 100%;
     max-width: 100%;
-    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .si-overview-section-rule {
