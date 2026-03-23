@@ -10194,34 +10194,68 @@ body.si-resizing-globe {
   .si-market-panel .si-market-panel-body {
     flex: 0 0 auto !important;
     min-height: unset !important;
-    overflow-x: auto;
-    overflow-y: visible;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible;
   }
 
-  /* Force ALL grid-based data tables inside panel body to use intrinsic width.
-     This makes overflow-x: auto on the body create a scrollbar for wide tables. */
-  .si-cb-header-row, .si-cb-row,
-  .si-fed-header, .si-fed-row,
-  .si-crypto-header, .si-crypto-row,
-  .si-analyst-header, .si-analyst-row,
-  .si-div-header, .si-div-row,
-  .si-insider-header, .si-insider-row,
-  .si-ipo-header, .si-ipo-row,
-  .si-em-header, .si-em-row,
-  .si-carry-header, .si-carry-row,
-  .si-market-movers-col-header, .si-market-movers-row,
-  .si-market-snap-row,
-  .si-market-ecal-col-header, .si-market-ecal-row,
-  .si-shipping-header, .si-shipping-row,
-  .si-market-ob-header, .si-market-ob-row,
-  .si-port-table-header, .si-port-table-row {
-    min-width: max-content;
+
+
+
+  /* Central Banks: show CB, Country, Rate only on mobile */
+  .si-cb-header-row, .si-cb-row {
+    grid-template-columns: 48px minmax(0, 1fr) 58px !important;
+  }
+  .si-cb-header-row > :nth-child(n+4),
+  .si-cb-row > :nth-child(n+4) {
+    display: none;
   }
 
-  /* Catch inline-grid tables from React components (SSR renders style as attribute) */
-  .si-market-panel-body div[style*="grid-template"] {
-    min-width: max-content;
+  /* Fed Funds: hide trend sparkline on mobile, tighten cols */
+  .si-fed-header, .si-fed-row {
+    grid-template-columns: 64px 52px 48px 48px 52px !important;
+  }
+  .si-fed-header > :nth-child(6),
+  .si-fed-row > :nth-child(6) {
+    display: none;
+  }
+
+  /* News tape: ensure headlines truncate */
+  .si-market-news-headline {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  /* Section subtitles: smaller text, truncate */
+  .si-overview-section-sub {
+    font-size: 9px !important;
+  }
+
+  /* Yield curve SVG: constrain to panel width */
+  .si-market-panel-body svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Credit Spreads: constrain INDEX column width */
+  .si-credit-header > :first-child,
+  .si-credit-row > :first-child {
+    max-width: 80px;
+    font-size: 10px;
+  }
+  .si-credit-header, .si-credit-row {
+    grid-template-columns: 80px 50px 38px 38px 50px !important;
+  }
+
+  /* Top Movers: hide vol mult and reason columns on mobile */
+  .si-market-movers-col-header, .si-market-movers-row {
+    grid-template-columns: 40px minmax(0, 1fr) 56px 56px !important;
+  }
+  .si-market-movers-col-header > :nth-child(5),
+  .si-market-movers-col-header > :nth-child(6),
+  .si-market-movers-row > :nth-child(5),
+  .si-market-movers-row > :nth-child(6) {
+    display: none;
   }
 
   .si-market-panel .tradingview-widget-container {
@@ -10610,17 +10644,19 @@ body.si-resizing-globe {
     overflow-x: hidden;
   }
 
-  /* Market panels: container clips, body scrolls wide tables */
+  /* Market panels: contained within viewport */
   .si-market-panel {
     min-width: 0;
     max-width: 100%;
     overflow: hidden;
+    word-break: break-word;
   }
   .si-market-panel-body {
     min-width: 0;
     max-width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+    overflow-y: visible;
+    word-break: break-word;
   }
 
   .si-panel-header-main {
