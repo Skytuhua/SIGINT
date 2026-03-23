@@ -10184,7 +10184,7 @@ body.si-resizing-globe {
      Round 5 — Market panels, overlay, drag handles, focus borders
      ================================================================ */
 
-  /* Fix 1: Market panels size-to-content on mobile, contained horizontally */
+  /* Fix 1: Market panels size-to-content on mobile, body scrolls wide tables */
   .si-market-panel {
     min-height: unset !important;
     height: auto !important;
@@ -10194,8 +10194,34 @@ body.si-resizing-globe {
   .si-market-panel .si-market-panel-body {
     flex: 0 0 auto !important;
     min-height: unset !important;
-    overflow-y: visible;
     overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Force ALL grid-based data tables inside panel body to use intrinsic width.
+     This makes overflow-x: auto on the body create a scrollbar for wide tables. */
+  .si-cb-header-row, .si-cb-row,
+  .si-fed-header, .si-fed-row,
+  .si-crypto-header, .si-crypto-row,
+  .si-analyst-header, .si-analyst-row,
+  .si-div-header, .si-div-row,
+  .si-insider-header, .si-insider-row,
+  .si-ipo-header, .si-ipo-row,
+  .si-em-header, .si-em-row,
+  .si-carry-header, .si-carry-row,
+  .si-market-movers-col-header, .si-market-movers-row,
+  .si-market-snap-row,
+  .si-market-ecal-col-header, .si-market-ecal-row,
+  .si-shipping-header, .si-shipping-row,
+  .si-market-ob-header, .si-market-ob-row,
+  .si-port-table-header, .si-port-table-row {
+    min-width: max-content;
+  }
+
+  /* Catch inline-grid tables from React components (SSR renders style as attribute) */
+  .si-market-panel-body div[style*="grid-template"] {
+    min-width: max-content;
   }
 
   .si-market-panel .tradingview-widget-container {
@@ -10584,16 +10610,17 @@ body.si-resizing-globe {
     overflow-x: hidden;
   }
 
-  /* Market panels: container clips, body scrolls tables horizontally */
+  /* Market panels: container clips, body scrolls wide tables */
   .si-market-panel {
     min-width: 0;
     max-width: 100%;
-    overflow-x: hidden;
+    overflow: hidden;
   }
   .si-market-panel-body {
     min-width: 0;
     max-width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .si-panel-header-main {
