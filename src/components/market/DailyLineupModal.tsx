@@ -103,34 +103,37 @@ interface Props {
 
 const mono = 'var(--font-tech-mono), ui-monospace, Menlo, Monaco, "Courier New", monospace';
 
-function sectionTitleStyle(): React.CSSProperties {
+function sectionTitleStyle(mobile = false): React.CSSProperties {
   return {
-    fontSize: 9,
+    fontSize: mobile ? 11 : 9,
     letterSpacing: 2,
     color: "#7fa8c4",
     textTransform: "uppercase",
-    marginBottom: 8,
+    marginBottom: mobile ? 12 : 8,
   };
 }
 
-function sectionShellStyle(): React.CSSProperties {
+function sectionShellStyle(mobile = false): React.CSSProperties {
   return {
     border: "1px solid rgba(80,100,125,0.15)",
     background: "rgba(10,16,26,0.92)",
-    padding: 12,
+    padding: mobile ? 14 : 12,
+    borderRadius: mobile ? 4 : 0,
   };
 }
 
 function Section({
   title,
   children,
+  isMobile = false,
 }: {
   title: React.ReactNode;
   children: React.ReactNode;
+  isMobile?: boolean;
 }) {
   return (
-    <section style={sectionShellStyle()}>
-      <div style={sectionTitleStyle()}>{title}</div>
+    <section style={sectionShellStyle(isMobile)}>
+      <div style={sectionTitleStyle(isMobile)}>{title}</div>
       {children}
     </section>
   );
@@ -186,12 +189,12 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
   const baseText: React.CSSProperties = {
     fontFamily: mono,
     color: "#b9cde0",
-    fontSize: 11,
+    fontSize: isMobile ? 13 : 11,
   };
 
   const content = (
     <div style={{ display: "grid", gap: 12, ...baseText }}>
-      <Section title="World Markets">
+      <Section title="World Markets" isMobile={isMobile}>
         <div
           style={{
             display: "grid",
@@ -205,7 +208,7 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
             { label: "Asia", items: INDICES.asia },
           ] as const).map(({ label, items }) => (
             <div key={label}>
-              <div style={{ fontSize: 9, color: "#5f7488", letterSpacing: 1, marginBottom: 6 }}>{label}</div>
+              <div style={{ fontSize: isMobile ? 11 : 9, color: isMobile ? "#7fa8c4" : "#5f7488", letterSpacing: 1.5, marginBottom: isMobile ? 10 : 6, paddingBottom: isMobile ? 6 : 0, borderBottom: isMobile ? "1px solid rgba(80,100,125,0.15)" : "none" }}>{label}</div>
               {items.map((idx) => {
                 const up = idx.pct >= 0;
                 return (
@@ -216,12 +219,12 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
                       gridTemplateColumns: "auto 1fr auto auto",
                       gap: 6,
                       alignItems: "center",
-                      padding: "5px 0",
+                      padding: isMobile ? "8px 0" : "5px 0",
                       borderBottom: "1px solid rgba(80,100,125,0.08)",
                     }}
                   >
                     <span style={{ fontSize: 9, color: "#8da3b8", letterSpacing: 1, whiteSpace: "nowrap" }}>{idx.sym}</span>
-                    <MiniSparkline prices={idx.spark} up={up} width={44} height={14} strokeWidth={1.1} />
+                    <MiniSparkline prices={idx.spark} up={up} width={isMobile ? 56 : 44} height={isMobile ? 16 : 14} strokeWidth={1.1} />
                     <span style={{ fontSize: 10, color: "#b9cde0", textAlign: "right" }}>{idx.price.toLocaleString()}</span>
                     <span style={{ fontSize: 9, color: up ? "#36b37e" : "#ff5a5f", textAlign: "right", minWidth: 52 }}>
                       {up ? "+" : ""}{idx.pct.toFixed(2)}%
@@ -259,7 +262,7 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
       </Section>
 
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-        <Section title="Market Briefing">
+        <Section title="Market Briefing" isMobile={isMobile}>
           <p style={{ lineHeight: 1.7, color: "#8da3b8", margin: 0, fontSize: 11 }}>
             Equities regained footing as energy stabilized and leadership returned to large-cap growth. Yields eased,
             volatility compressed, and cross-asset behavior tilted back toward risk-on, but the market still looks
@@ -268,7 +271,7 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
           <div style={{ marginTop: 8, fontSize: 9, color: "#5f7488", letterSpacing: 1 }}>source / freshness / state</div>
         </Section>
 
-        <Section title="Analyst Activity">
+        <Section title="Analyst Activity" isMobile={isMobile}>
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 9, color: "#6e849d", letterSpacing: 1, marginBottom: 6 }}>
               <Term id="OW">Upgrades</Term>
@@ -321,7 +324,7 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-        <Section title="Economic Calendar">
+        <Section title="Economic Calendar" isMobile={isMobile}>
           <div style={{ display: "grid", gap: 8 }}>
             {ECON_EVENTS.map((event, index) => (
               <div
@@ -358,7 +361,7 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
           </div>
         </Section>
 
-        <Section title={<Term id="EPS">Earnings</Term>}>
+        <Section title={<Term id="EPS">Earnings</Term>} isMobile={isMobile}>
           <div style={{ display: "grid", gap: 8 }}>
             {EARNINGS.map((entry, index) => (
               <div
@@ -393,7 +396,7 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-        <Section title="Top Headlines">
+        <Section title="Top Headlines" isMobile={isMobile}>
           <div style={{ display: "grid", gap: 6 }}>
             {headlines.map((headline, index) => (
               <div
@@ -414,7 +417,7 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
           </div>
         </Section>
 
-        <Section title="AI Summaries">
+        <Section title="AI Summaries" isMobile={isMobile}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
             <span style={{ fontSize: 9, color: "#6e849d", letterSpacing: 1 }}>Daily Overview</span>
             <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
@@ -469,7 +472,7 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
           gap: 8,
           cursor: "pointer",
           color: "#6e849d",
-          fontSize: isMobile ? 12 : 10,
+          fontSize: isMobile ? 13 : 10,
           letterSpacing: 1,
           lineHeight: 1.4,
         }}

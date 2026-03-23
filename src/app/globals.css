@@ -10184,13 +10184,18 @@ body.si-resizing-globe {
      Round 5 — Market panels, overlay, drag handles, focus borders
      ================================================================ */
 
-  /* Fix 1: Override market panel inline minHeight on mobile */
+  /* Fix 1: Market panels size-to-content on mobile */
   .si-market-panel {
-    min-height: auto !important;
+    min-height: unset !important;
+    height: auto !important;
+    overflow: visible;
   }
 
   .si-market-panel .si-market-panel-body {
-    min-height: 0 !important;
+    flex: 0 0 auto !important;
+    min-height: unset !important;
+    overflow-y: visible;
+    overflow-x: auto;
   }
 
   .si-market-panel .tradingview-widget-container {
@@ -10219,6 +10224,41 @@ body.si-resizing-globe {
   .si-breadth-table-row {
     grid-template-columns: 1fr 70px 80px;
     font-size: 12px;
+  }
+
+  /* Credit Spreads: hide 52H, 52L, TREND on mobile — keep INDEX, SPREAD, 1D, 1W, SIGNAL */
+  .si-credit-header,
+  .si-credit-row {
+    grid-template-columns: 1fr 50px 38px 38px 50px;
+    font-size: 11px;
+    padding: 6px 8px;
+    gap: 2px;
+  }
+  .si-credit-header > :nth-child(5),
+  .si-credit-header > :nth-child(6),
+  .si-credit-header > :nth-child(7),
+  .si-credit-row > :nth-child(5),
+  .si-credit-row > :nth-child(6),
+  .si-credit-row > :nth-child(7) {
+    display: none;
+  }
+
+  /* Volatility table: tighten columns for mobile */
+  .si-market-vol-col-header,
+  .si-market-vol-row {
+    grid-template-columns: 42px 1fr 48px 50px 56px;
+    font-size: 11px;
+    padding: 5px 8px;
+    gap: 2px;
+  }
+  .si-market-vol-name {
+    font-size: 10px;
+  }
+  .si-market-vol-regime {
+    font-size: 10px;
+    padding: 6px 8px;
+    flex-wrap: wrap;
+    gap: 4px;
   }
 
   .si-market-tab-content,
@@ -10511,12 +10551,21 @@ body.si-resizing-globe {
   .si-market-tab-content,
   .si-overview-scroll,
   .si-panel,
-  .si-panel-body,
-  .si-market-panel,
-  .si-market-panel-body {
+  .si-panel-body {
     min-width: 0;
     max-width: 100%;
     overflow-x: hidden;
+  }
+
+  /* Market panels get auto overflow so data tables can scroll horizontally */
+  .si-market-panel {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .si-market-panel-body {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
   }
 
   .si-panel-header-main {
@@ -10841,14 +10890,25 @@ body.si-resizing-globe {
   }
 
   .si-market-panel-header {
-    min-height: 32px;
+    min-height: 36px;
     height: auto;
-    padding: 6px 8px;
+    padding: 6px 10px;
+    gap: 8px;
+  }
+
+  .si-market-panel-title {
+    font-size: 11px;
+  }
+
+  .si-market-panel-badge {
+    font-size: 10px;
+    padding: 2px 6px;
   }
 
   .si-market-panel-footer {
-    padding: 5px 8px;
-    line-height: 1.35;
+    padding: 6px 10px;
+    font-size: 10px;
+    line-height: 1.4;
     display: block;
     overflow-wrap: anywhere;
     word-break: break-word;
@@ -10858,6 +10918,8 @@ body.si-resizing-globe {
   .si-overview-section-label {
     flex-wrap: wrap;
     align-items: flex-start;
+    gap: 4px;
+    padding: 14px 8px 6px;
     gap: 6px;
   }
 
