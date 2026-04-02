@@ -189,13 +189,13 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
                 <PanelBody>
                   <SegmentedControl
                     value={ui.stylePreset}
-                    options={styleOptions as unknown as Array<{ value: typeof ui.stylePreset; label: string }>}
+                    options={styleOptions}
                     onChange={(value) => setStylePreset(value)}
                     ariaLabel="Style preset"
                   />
                   <SegmentedControl
                     value={ui.detectMode}
-                    options={detectOptions as unknown as Array<{ value: typeof ui.detectMode; label: string }>}
+                    options={detectOptions}
                     onChange={(value) => setDetectMode(value)}
                     ariaLabel="Detect mode"
                   />
@@ -283,6 +283,7 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
                     <span>Min Magnitude</span>
                     <input
                       type="range"
+                      aria-label="Min Magnitude"
                       min={0}
                       max={9}
                       step={0.1}
@@ -294,6 +295,7 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
                     <span>Max Altitude</span>
                     <input
                       type="range"
+                      aria-label="Max Altitude"
                       min={10000}
                       max={1200000}
                       step={10000}
@@ -363,13 +365,13 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
               <PanelBody>
                 <SegmentedControl
                   value={ui.stylePreset}
-                  options={styleOptions as unknown as Array<{ value: typeof ui.stylePreset; label: string }>}
+                  options={styleOptions}
                   onChange={(value) => setStylePreset(value)}
                   ariaLabel="Style preset"
                 />
                 <SegmentedControl
                   value={ui.detectMode}
-                  options={detectOptions as unknown as Array<{ value: typeof ui.detectMode; label: string }>}
+                  options={detectOptions}
                   onChange={(value) => setDetectMode(value)}
                   ariaLabel="Detect mode"
                 />

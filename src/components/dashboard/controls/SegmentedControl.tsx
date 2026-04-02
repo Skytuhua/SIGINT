@@ -2,7 +2,7 @@
 
 interface SegmentedControlProps<T extends string> {
   value: T;
-  options: Array<{ value: T; label: string }>;
+  options: ReadonlyArray<{ value: T; label: string }>;
   onChange: (value: T) => void;
   ariaLabel: string;
 }

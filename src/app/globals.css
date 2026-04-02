@@ -1507,7 +1507,7 @@ body.si-resizing-globe {
   top: var(--si-header-height);
   right: 0;
   width: 380px;
-  height: calc(100vh - var(--si-header-height));
+  height: calc(100dvh - var(--si-header-height));
   border-left: var(--si-border) solid var(--si-line);
   background: var(--si-bg-2);
   transform: translateX(100%);
@@ -1632,7 +1632,7 @@ body.si-resizing-globe {
     top: 84px;
     width: 100vw;
     max-width: none;
-    height: calc(100vh - 84px);
+    height: calc(100dvh - 84px);
   }
 }
 
@@ -2105,7 +2105,7 @@ body.si-resizing-globe {
 
 .si-news-popup {
   width: min(560px, calc(100vw - 32px));
-  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
   display: flex;
   flex-direction: column;
   background: var(--si-bg-2);
@@ -6186,7 +6186,7 @@ body.si-resizing-globe {
   bottom: 24px;
   right: 18px;
   width: min(380px, calc(100vw - 36px));
-  max-height: calc(100vh - 80px);
+  max-height: calc(100dvh - 80px);
   overflow-y: auto;
   background: rgba(4, 10, 18, 0.92);
   border: 1px solid rgba(79, 195, 247, 0.28);
@@ -11446,3 +11446,21 @@ body.si-resizing-globe {
   }
 }
 
+/* ── Landscape mobile ── */
+@media (max-width: 767px) and (orientation: landscape) {
+  .si-globe-side-stack {
+    max-height: 40dvh;
+  }
+  .si-phone-overlay-shell {
+    grid-template-rows: auto 1fr;
+  }
+}
+
+/* ── Focus-visible for keyboard a11y ── */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[role="tab"]:focus-visible {
+  outline: 1px solid var(--si-accent);
+  outline-offset: 1px;
+}

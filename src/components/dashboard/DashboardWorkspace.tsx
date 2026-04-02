@@ -15,6 +15,7 @@ import Sparkline from "./charts/Sparkline";
 import LiveCctvPanel from "./LiveCctvPanel";
 import MarketsPanel from "./MarketsPanel";
 import PhoneOverlayShell from "../ui/PhoneOverlayShell";
+import WorkspaceErrorBoundary from "../ui/WorkspaceErrorBoundary";
 import { formatNumber, formatUtc } from "../../lib/dashboard/format";
 import {
   selectFeedItems,
@@ -1158,11 +1159,13 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
           </div>
         </div>
       ) : null}
-      {panelNodes.length ? (
-        <DraggableDashboardGrid panels={panelNodes} />
-      ) : (
-        <div className="si-dashboard-empty">No windows enabled. Open VIEW WINDOWS to add panels.</div>
-      )}
+      <WorkspaceErrorBoundary name="DASHBOARD">
+        {panelNodes.length ? (
+          <DraggableDashboardGrid panels={panelNodes} />
+        ) : (
+          <div className="si-dashboard-empty">No windows enabled. Open VIEW WINDOWS to add panels.</div>
+        )}
+      </WorkspaceErrorBoundary>
       {isMobile && mobileOverlayId ? (
         <PhoneOverlayShell title={mobileOverlayTitle} onClose={() => setMobileOverlayId(null)}>
           {mobileOverlayBody}

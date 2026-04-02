@@ -464,7 +464,7 @@ export default function CesiumGlobe({
   const renderSatsIfEnabled = useCallback(
     async (sats: PropagatedSat[]) => {
       const { layers, ui } = store.getState();
-      if (!viewerRef.current || !layers.satellites) return;
+      if (!viewerRef.current || viewerRef.current.isDestroyed() || !layers.satellites) return;
       await renderSatellites(viewerRef.current, sats, ui.detectMode);
     },
     [store]
@@ -483,7 +483,7 @@ export default function CesiumGlobe({
   const renderFlightsIfEnabled = useCallback(
     async (flights: Flight[]) => {
       const { layers, filters } = store.getState();
-      if (!viewerRef.current) return;
+      if (!viewerRef.current || viewerRef.current.isDestroyed()) return;
 
       // Combine commercial + military based on toggles
       const visible = flights.filter(
@@ -506,7 +506,7 @@ export default function CesiumGlobe({
   const renderDisastersIfEnabled = useCallback(
     async (alerts: DisasterAlert[]) => {
       const { layers } = store.getState();
-      if (!viewerRef.current) return;
+      if (!viewerRef.current || viewerRef.current.isDestroyed()) return;
       if (!layers.disasters) {
         clearLayer(viewerRef.current, "disasters");
         return;
@@ -519,7 +519,7 @@ export default function CesiumGlobe({
   const renderGpsJamIfEnabled = useCallback(
     async (flights: Flight[], military?: Flight[]) => {
       const { layers } = store.getState();
-      if (!viewerRef.current) return;
+      if (!viewerRef.current || viewerRef.current.isDestroyed()) return;
       if (!layers.gpsJam) {
         clearLayer(viewerRef.current, 'gps_jam');
         for (let i = viewerRef.current.dataSources.length - 1; i >= 0; i--) {
@@ -553,7 +553,7 @@ export default function CesiumGlobe({
         tracker.pushSnapshot(civilianFlights, militaryFlights);
 
         const { layers } = store.getState();
-        if (!viewerRef.current) return;
+        if (!viewerRef.current || viewerRef.current.isDestroyed()) return;
         if (!layers.airspaceAnomaly) {
           clearLayer(viewerRef.current, 'airspace_anomaly');
           clearLayer(viewerRef.current, 'disappeared_flights');
@@ -1513,7 +1513,14 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => s.filters,
           () => renderFlightsIfEnabled(currentFlightsRef.current),
-          { equalityFn: (a, b) => JSON.stringify(a) === JSON.stringify(b) }
+          {
+            equalityFn: (a, b) =>
+              a.minMagnitude === b.minMagnitude &&
+              a.maxMagnitude === b.maxMagnitude &&
+              a.minAltM === b.minAltM &&
+              a.maxAltM === b.maxAltM &&
+              a.onGroundVisible === b.onGroundVisible,
+          }
         )
       );
 
@@ -1648,6 +1655,7 @@ export default function CesiumGlobe({
       satWorkerRef.current = satWorker;
 
       satWorker.onmessage = async (e: MessageEvent<SatWorkerOutMessage>) => {
+        if (viewer.isDestroyed()) return;
         if (e.data.type === "POSITIONS" && e.data.positions) {
           currentSatsRef.current = e.data.positions;
           store.getState().setLiveSatellites(e.data.positions);
@@ -1811,6 +1819,7 @@ export default function CesiumGlobe({
       const onPreRender = () => {
         const CesiumMod = cesiumRef.current;
         if (!CesiumMod) return;
+        if (viewer.isDestroyed()) return;
         const { layers } = store.getState();
         if ((layers.flights || layers.military) && flightSnapshotsRef.current.size > 0) {
           const now = performance.now();
@@ -1836,6 +1845,7 @@ export default function CesiumGlobe({
       });
 
       const onPostRenderTracking = () => {
+        if (viewer.isDestroyed()) return;
         const target = focusTargetRef.current;
         if (!target) return;
         if (!followTrackedFlightRef.current) return;

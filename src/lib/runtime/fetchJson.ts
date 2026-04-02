@@ -178,7 +178,16 @@ export async function fetchJsonWithPolicy<T>(
 
   const existing = inFlight.get(key) as Promise<T> | undefined;
   if (existing) {
-    return await awaitWithSignal(existing, policy.signal);
+    try {
+      return await awaitWithSignal(existing, policy.signal);
+    } catch (err) {
+      // If the shared promise was aborted by its original caller but OUR
+      // signal is still active, retry — the inFlight map is now clean.
+      if (isAbortError(err) && !policy.signal?.aborted) {
+        return fetchJsonWithPolicy<T>(url, policy);
+      }
+      throw err;
+    }
   }
 
   const run = (async (): Promise<T> => {
