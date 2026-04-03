@@ -104,8 +104,8 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  background: "rgba(3, 8, 14, 0.72)",
-                  color: "#d7e2ee",
+                  background: "var(--si-globe-init-bg, rgba(3, 8, 14, 0.72))",
+                  color: "var(--si-text-muted)",
                   fontSize: 11,
                   letterSpacing: 1,
                   textTransform: "uppercase",
@@ -113,7 +113,7 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
                   zIndex: 2,
                 }}
               >
-                INITIALIZING GLOBE...
+                <span className="si-pulse">INITIALIZING GLOBE...</span>
               </div>
             )}
           </div>

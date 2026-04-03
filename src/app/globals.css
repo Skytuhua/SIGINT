@@ -939,6 +939,10 @@ body.si-resizing-globe {
   padding: 0 4px;
 }
 
+.si-dense-select select:hover {
+  border-color: rgba(100, 140, 180, 0.5);
+}
+
 .si-inline-filter {
   width: 100%;
   height: 18px;
@@ -1660,6 +1664,11 @@ body.si-resizing-globe {
 
 .si-panel-tab:last-child {
   border-right: 0;
+}
+
+.si-panel-tab:not(.is-active):hover {
+  background: var(--si-bg-3);
+  color: var(--si-text);
 }
 
 .si-panel-tab.is-active {
@@ -9820,7 +9829,8 @@ body.si-resizing-globe {
   /* --- Phase 5: Inspector --- */
   .si-inspector,
   .si-inspector.is-split {
-    width: 100vw;
+    width: 100%;
+    box-sizing: border-box;
     max-width: none;
     top: var(--si-header-height);
     height: calc(100dvh - var(--si-header-height));
@@ -11463,4 +11473,14 @@ select:focus-visible,
 [role="tab"]:focus-visible {
   outline: 1px solid var(--si-accent);
   outline-offset: 1px;
+}
+
+/* ── Touch target sizing for coarse-pointer devices (tablets, touch screens) ── */
+@media (pointer: coarse) and (min-width: 768px) {
+  .si-inline-action,
+  .si-segment,
+  .si-panel-tab {
+    min-height: 32px;
+    min-width: 32px;
+  }
 }

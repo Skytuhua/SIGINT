@@ -134,8 +134,9 @@ interface CandidateVideo {
 /** Maximum age for a "recent" (non-live) video to be surfaced. */
 const RECENT_MAX_AGE_MS = 48 * 60 * 60 * 1000; // 48 hours
 
-/** Minimum video duration in seconds — anything shorter (Shorts / Reels) is excluded. */
-const MIN_VIDEO_DURATION_SEC = 90;
+/** Minimum video duration in seconds — anything shorter (Shorts / Reels) is excluded.
+ *  YouTube Shorts can now be up to 3 minutes (180s), so threshold is 181s. */
+const MIN_VIDEO_DURATION_SEC = 181;
 
 /** Parse an ISO 8601 duration (e.g. "PT1H2M30S") to total seconds. */
 function parseDurationSec(iso: string | undefined): number | undefined {
@@ -476,8 +477,9 @@ async function discoverFromRssHybrid(
       // Step 3: Filter and convert
       const allItems: YouTubeLive[] = enriched
         .filter((v) => {
-          // Skip Shorts (< 90s) unless live
-          if (!v.liveNow && v.lengthSeconds > 0 && v.lengthSeconds < MIN_VIDEO_DURATION_SEC) return false;
+          // Skip Shorts (< 181s) unless live. Also skip when lengthSeconds is 0
+          // (unknown — no API key path), since we can't confirm the video is long enough.
+          if (!v.liveNow && (v.lengthSeconds <= 0 || v.lengthSeconds < MIN_VIDEO_DURATION_SEC)) return false;
           // Skip finished livestream replays
           if (!v.liveNow && v.actualEndTime) return false;
           // Skip geo-restricted videos (blocked in US)
@@ -570,11 +572,15 @@ async function discoverFromRss(
         })
       );
       for (const list of results) allItems.push(...list);
-      const items = dedupeAndSort(allItems).filter(isRecent);
+      // In pure-RSS mode we have no duration info, so filter by title heuristic to
+      // exclude Shorts and surface only probable live streams / long-form news content.
+      const LIVE_TITLE_RE = /\bLIVE\b|24\/7|\bBreaking\b|\bLIVESTREAM\b|\bStream\b/i;
+      const liveItems = allItems.filter((item) => LIVE_TITLE_RE.test(item.title ?? ""));
+      const items = dedupeAndSort(liveItems).filter(isRecent);
       return {
         items,
         channelsChecked: channels.length,
-        liveCount: 0,
+        liveCount: items.filter((item) => item.status === "live").length,
         degraded: uniqueStrings(degradedChannels),
       };
     },

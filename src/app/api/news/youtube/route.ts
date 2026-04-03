@@ -10,7 +10,7 @@ async function handler() {
     ...(result.degraded ? ["youtube"] : []),
     ...(result.data.degraded ?? []),
   ];
-  const totalItems = result.data.items.length;
+  const totalItems = result.data.items?.length ?? 0;
   const upstreamError = Boolean(result.error);
   const zeroResults = !upstreamError && totalItems === 0;
 

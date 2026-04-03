@@ -348,7 +348,9 @@ function parseVideoId(input: string): string | null {
       const id = url.searchParams.get("v")?.trim();
       if (id && /^[A-Za-z0-9_-]{11}$/.test(id)) return id;
       const segments = url.pathname.split("/").filter(Boolean);
-      const idx = segments.findIndex((seg) => seg === "embed" || seg === "live" || seg === "shorts");
+      // Reject YouTube Shorts — they are vertical short-form content, not live streams
+      if (segments.includes("shorts")) return null;
+      const idx = segments.findIndex((seg) => seg === "embed" || seg === "live");
       if (idx >= 0 && segments[idx + 1] && /^[A-Za-z0-9_-]{11}$/.test(segments[idx + 1])) {
         return segments[idx + 1];
       }

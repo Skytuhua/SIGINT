@@ -656,7 +656,7 @@ export default function CesiumGlobe({
 
   const updateCameraSnapshot = useCallback(() => {
     const viewer = viewerRef.current;
-    if (!viewer) return;
+    if (!viewer || viewer.isDestroyed()) return;
     const cartographic = viewer.camera.positionCartographic;
     const next: CameraSnapshot = {
       lat: toDegrees(cartographic.latitude),
@@ -705,7 +705,7 @@ export default function CesiumGlobe({
   const nudgeCardinal = useCallback(
     async (dir: "N" | "S" | "E" | "W") => {
       const viewer = viewerRef.current;
-      if (!viewer) return;
+      if (!viewer || viewer.isDestroyed()) return;
       const cartographic = viewer.camera.positionCartographic;
       const lat = toDegrees(cartographic.latitude);
       const lon = toDegrees(cartographic.longitude);
@@ -741,7 +741,7 @@ export default function CesiumGlobe({
 
   const setNorthUp = useCallback(() => {
     const viewer = viewerRef.current;
-    if (!viewer) return;
+    if (!viewer || viewer.isDestroyed()) return;
     viewer.camera.flyTo({
       destination: viewer.camera.positionWC,
       orientation: {
@@ -755,7 +755,7 @@ export default function CesiumGlobe({
 
   const setTopDown = useCallback(() => {
     const viewer = viewerRef.current;
-    if (!viewer) return;
+    if (!viewer || viewer.isDestroyed()) return;
     viewer.camera.flyTo({
       destination: viewer.camera.positionWC,
       orientation: {
@@ -769,7 +769,7 @@ export default function CesiumGlobe({
 
   const setOblique = useCallback(() => {
     const viewer = viewerRef.current;
-    if (!viewer) return;
+    if (!viewer || viewer.isDestroyed()) return;
     viewer.camera.flyTo({
       destination: viewer.camera.positionWC,
       orientation: {
@@ -783,21 +783,21 @@ export default function CesiumGlobe({
 
   const zoomIn = useCallback(() => {
     const viewer = viewerRef.current;
-    if (!viewer) return;
+    if (!viewer || viewer.isDestroyed()) return;
     const amount = Math.max(80, viewer.camera.positionCartographic.height * 0.16);
     viewer.camera.zoomIn(amount);
   }, []);
 
   const zoomOut = useCallback(() => {
     const viewer = viewerRef.current;
-    if (!viewer) return;
+    if (!viewer || viewer.isDestroyed()) return;
     const amount = Math.max(80, viewer.camera.positionCartographic.height * 0.16);
     viewer.camera.zoomOut(amount);
   }, []);
 
   const gotoHome = useCallback(async () => {
     const viewer = viewerRef.current;
-    if (!viewer) return;
+    if (!viewer || viewer.isDestroyed()) return;
     const home = homeViewRef.current;
     await flyToScene(
       viewer,
@@ -1153,7 +1153,7 @@ export default function CesiumGlobe({
         }
       );
       const viewer = viewerRef.current;
-      if (!viewer || trackedFlightIdRef.current !== icao || track.length < 2) return;
+      if (!viewer || viewer.isDestroyed() || trackedFlightIdRef.current !== icao || track.length < 2) return;
       flightPathAccumRef.current = track;
       await renderFlightPath(viewer, track);
     } catch (error) {
@@ -1170,7 +1170,7 @@ export default function CesiumGlobe({
     await renderFlightsIfEnabled(flights);
 
     const trackedId = trackedFlightIdRef.current;
-    if (trackedId && viewerRef.current) {
+    if (trackedId && viewerRef.current && !viewerRef.current.isDestroyed()) {
       const tracked = flights.find((flight) => flight.icao === trackedId);
       if (tracked) {
         void renderFlightHighlight(viewerRef.current, tracked, getInterpolatedPosition);
@@ -1279,6 +1279,7 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => s.layers.satellites,
           (enabled) => {
+            if (viewer.isDestroyed()) return;
             if (!enabled) clearLayer(viewer, "satellites");
             else renderSatsIfEnabled(currentSatsRef.current);
           }
@@ -1290,6 +1291,7 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => ({ flights: s.layers.flights, military: s.layers.military }),
           ({ flights, military }) => {
+            if (viewer.isDestroyed()) return;
             if (!flights && !military) {
               // Full shutdown: clear all flight state
               clearLayer(viewer, "flights");
@@ -1325,6 +1327,7 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => s.layers.disasters,
           (enabled) => {
+            if (viewer.isDestroyed()) return;
             if (!enabled) clearLayer(viewer, "disasters");
             else renderDisastersIfEnabled(currentDisastersRef.current);
           }
@@ -1336,6 +1339,7 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => s.liveData.disasters,
           (disasters) => {
+            if (viewer.isDestroyed()) return;
             currentDisastersRef.current = disasters ?? [];
             renderDisastersIfEnabled(currentDisastersRef.current);
           }
@@ -1347,6 +1351,7 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => s.layers.gpsJam,
           (enabled) => {
+            if (viewer.isDestroyed()) return;
             if (!enabled) {
               clearLayer(viewer, 'gps_jam');
               // Remove any orphaned data sources from overlapping async renders
@@ -1369,6 +1374,7 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => s.layers.airspaceAnomaly,
           (enabled) => {
+            if (viewer.isDestroyed()) return;
             if (!enabled) {
               clearLayer(viewer, 'airspace_anomaly');
               clearLayer(viewer, 'disappeared_flights');

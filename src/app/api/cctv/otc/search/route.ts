@@ -58,7 +58,7 @@ async function handler(req: NextRequest) {
     const validated = await validateBatch(toValidate, VALIDATE_BATCH_SIZE);
     const cameras = validated.map(toCctvCamera);
 
-    console.log(`[otc/search] q="${q}" → ${matches.length} matches, ${cameras.length} validated`);
+    console.log(`[otc/search] → ${matches.length} matches, ${cameras.length} validated`);
 
     // Cache result
     evictOldest();
