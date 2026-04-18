@@ -1,4 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
+import { featureFlags } from "../../../../config/featureFlags";
 import { NEWS_VIDEO_CHANNELS } from "../../../../config/newsConfig";
 import { WEBCAM_VIDEO_CHANNELS } from "../../../../config/webcamConfig";
 import type { YouTubeLive } from "../../../news/types";
@@ -615,6 +616,26 @@ async function resolveWebcamChannels(apiKey: string | undefined): Promise<Resolv
 export async function discoverYouTubeWebcamStreams(
   apiKey: string | undefined
 ): Promise<CachedFetchResult<YouTubeLiveResult>> {
+  // When YouTube API is disabled, skip username resolution and use RSS fallback
+  if (featureFlags.disableYouTubeApi) {
+    const channels: ResolvedChannel[] = WEBCAM_VIDEO_CHANNELS
+      .filter((ch) => ch.channelId)
+      .map((ch) => ({ channelId: ch.channelId!, label: ch.label }));
+    const rssResult = await discoverFromRss(channels);
+    return {
+      data: {
+        ...rssResult.data,
+        keyMissing: false,
+        discoverySource: "youtube-rss",
+        fallbackActive: true,
+      },
+      degraded: false,
+      latencyMs: rssResult.latencyMs,
+      cacheHit: rssResult.cacheHit,
+      error: rssResult.error,
+    };
+  }
+
   const channels = await resolveWebcamChannels(apiKey);
   if (channels.length === 0) {
     return {
@@ -654,6 +675,23 @@ export async function discoverYouTubeLiveStreams(
   apiKey: string | undefined
 ): Promise<CachedFetchResult<YouTubeLiveResult>> {
   const channels = sortedChannels();
+
+  // When YouTube API is disabled, go straight to pure RSS fallback
+  if (featureFlags.disableYouTubeApi) {
+    const rssResult = await discoverFromRss(channels);
+    return {
+      data: {
+        ...rssResult.data,
+        keyMissing: false,
+        discoverySource: "youtube-rss",
+        fallbackActive: true,
+      },
+      degraded: false,
+      latencyMs: rssResult.latencyMs,
+      cacheHit: rssResult.cacheHit,
+      error: rssResult.error,
+    };
+  }
 
   // Primary: RSS hybrid (RSS feeds for video IDs + minimal videos.list for live status)
   // Cost: ~5-10 quota units instead of hundreds. RSS is free, videos.list = 1 unit per 50 vids.
