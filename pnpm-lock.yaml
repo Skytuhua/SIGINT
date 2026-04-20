@@ -38,6 +38,9 @@ importers:
       '@types/react-dom':
         specifier: 18.3.0
         version: 18.3.0
+      '@vercel/speed-insights':
+        specifier: ^2.0.0
+        version: 2.0.0(next@14.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       autoprefixer:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.4.41)
@@ -663,6 +666,32 @@ packages:
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
+
+  '@vercel/speed-insights@2.0.0':
+    resolution: {integrity: sha512-jwkNcrTeafWxjmWq4AHBaptSqZiJkYU5adLC9QBSqeim0GcqDMgN5Ievh8OG1rJ6W3A4l1oiP7qr9CWxGuzu3w==}
+    peerDependencies:
+      '@sveltejs/kit': ^1 || ^2
+      next: '>= 13'
+      nuxt: '>= 3'
+      react: ^18 || ^19 || ^19.0.0-rc
+      svelte: '>= 4'
+      vue: ^3
+      vue-router: ^4
+    peerDependenciesMeta:
+      '@sveltejs/kit':
+        optional: true
+      next:
+        optional: true
+      nuxt:
+        optional: true
+      react:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+      vue-router:
+        optional: true
 
   '@vitest/expect@4.0.18':
     resolution: {integrity: sha512-8sCWUyckXXYvx4opfzVY03EOiYVxyNrHS5QxX3DAIi5dpJAAkyJezHCP77VMX4HKA2LDT/Jpfo8i2r5BE3GnQQ==}
@@ -1877,6 +1906,11 @@ snapshots:
 
   '@types/trusted-types@2.0.7':
     optional: true
+
+  '@vercel/speed-insights@2.0.0(next@14.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+    optionalDependencies:
+      next: 14.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react: 18.3.1
 
   '@vitest/expect@4.0.18':
     dependencies:
