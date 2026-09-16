@@ -224,7 +224,7 @@ export async function fetchJsonOrThrow<T>(
   const merged: RequestInit = { ...init, cache: "no-store" as RequestCache };
   const response = await withTimeout(fetch(url, merged), timeoutMs);
   if (!response.ok) {
-    throw new UpstreamHttpError(response.status, `${url} returned ${response.status}`);
+    throw new UpstreamHttpError(response.status, `Upstream returned HTTP ${response.status}`);
   }
   return (await response.json()) as T;
 }
