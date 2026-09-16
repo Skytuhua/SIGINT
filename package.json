@@ -22,6 +22,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "postinstall": "node scripts/copy-cesium.js"
   },
   "dependencies": {
