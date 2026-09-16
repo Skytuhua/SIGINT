@@ -359,14 +359,18 @@ export class RefreshScheduler {
 
     await new Promise<void>((resolve, reject) => {
       const onAbort = () => {
-        signal.removeEventListener("abort", onAbort);
+        // Drop this waiter from the queue so a released slot cannot be
+        // consumed by an already-cancelled task.
+        const index = this.waiters.indexOf(waiter);
+        if (index !== -1) this.waiters.splice(index, 1);
         reject(new DOMException("Aborted", "AbortError"));
       };
-      signal.addEventListener("abort", onAbort, { once: true });
-      this.waiters.push(() => {
+      const waiter = () => {
         signal.removeEventListener("abort", onAbort);
         resolve();
-      });
+      };
+      signal.addEventListener("abort", onAbort, { once: true });
+      this.waiters.push(waiter);
     });
 
     if (signal.aborted) {
