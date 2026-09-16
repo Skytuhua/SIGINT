@@ -2197,7 +2197,13 @@ export const useSIGINTStore = create<SIGINTStore>()(
 
         return {
           ...current,
-          ...persisted,
+          // Only restore roots written by partialize below. Persisted snapshots
+          // must not replace live actions or revive unrelated runtime state.
+          filters: persisted.filters ?? current.filters,
+          ui: persisted.ui ?? current.ui,
+          savedScenes: persisted.savedScenes ?? current.savedScenes,
+          cctv: persisted.cctv ?? current.cctv,
+          tradeRouteSelection: persisted.tradeRouteSelection ?? current.tradeRouteSelection,
           layers: {
             ...current.layers,
             ...(persisted.layers ?? {}),
