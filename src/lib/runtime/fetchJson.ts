@@ -84,7 +84,7 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
     }, ms);
     const onAbort = () => {
       clearTimeout(timer);
-      reject(new DOMException("Aborted", "AbortError"));
+      reject(signal?.reason ?? new DOMException("Aborted", "AbortError"));
     };
     if (signal) {
       if (signal.aborted) {
@@ -102,7 +102,7 @@ function composeSignal(signal: AbortSignal | undefined, timeoutMs: number): Abor
     controller.abort(new DOMException(`Timeout after ${timeoutMs}ms`, "TimeoutError"));
   }, timeoutMs);
 
-  const onAbort = () => controller.abort(new DOMException("Aborted", "AbortError"));
+  const onAbort = () => controller.abort(signal?.reason ?? new DOMException("Aborted", "AbortError"));
   if (signal) {
     if (signal.aborted) onAbort();
     else signal.addEventListener("abort", onAbort, { once: true });
@@ -123,12 +123,12 @@ function composeSignal(signal: AbortSignal | undefined, timeoutMs: number): Abor
 async function awaitWithSignal<T>(promise: Promise<T>, signal?: AbortSignal): Promise<T> {
   if (!signal) return promise;
   if (signal.aborted) {
-    throw new DOMException("Aborted", "AbortError");
+    throw signal.reason ?? new DOMException("Aborted", "AbortError");
   }
   return await new Promise<T>((resolve, reject) => {
     const onAbort = () => {
       signal.removeEventListener("abort", onAbort);
-      reject(new DOMException("Aborted", "AbortError"));
+      reject(signal?.reason ?? new DOMException("Aborted", "AbortError"));
     };
     signal.addEventListener("abort", onAbort, { once: true });
     promise.then(
@@ -211,6 +211,7 @@ export async function fetchJsonWithPolicy<T>(
         negativeCache.delete(key);
         return payload;
       } catch (error) {
+        if (policy.signal?.aborted) throw policy.signal.reason ?? error;
         if (!isRetryable(error) || attempt >= retries) {
           maybeApplyNegativeCache(key, error, negativeTtlMs);
           throw error;

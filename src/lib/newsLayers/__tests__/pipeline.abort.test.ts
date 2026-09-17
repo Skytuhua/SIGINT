@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { runLayerPipeline } from "../pipeline";
+import { RefreshScheduler } from "../../runtime/refreshScheduler";
 import type { LayerRegistryEntry } from "../types";
 
 function makeLayer(): LayerRegistryEntry {
@@ -36,9 +37,50 @@ function initialHealth() {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 describe("runLayerPipeline abort handling", () => {
+  it.each(["deadline", "cancel"])("distinguishes scheduler %s through the real fetch adapter", async (mode) => {
+    vi.useFakeTimers();
+    const layer = makeLayer();
+    layer.dataSource.cacheKey = `scheduler-${mode}`;
+    layer.dataSource.timeoutMs = 5000;
+    layer.dataSource.maxRetries = 0;
+    const fetchMock = vi.fn((_url: unknown, init?: RequestInit) => new Promise<Response>((_resolve, reject) => {
+      const signal = init!.signal!;
+      signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+    let result: Awaited<ReturnType<typeof runLayerPipeline>> | undefined;
+    let failure: unknown;
+    const scheduler = new RefreshScheduler();
+    scheduler.registerTask({
+      key: mode, intervalMs: 60000, timeoutMs: 500, runOnStart: true,
+      run: async ({ signal }) => {
+        try { result = await runLayerPipeline(layer, signal, initialHealth()); }
+        catch (error) { failure = error; }
+      },
+    });
+    try {
+      scheduler.start();
+      await vi.advanceTimersByTimeAsync(10);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      if (mode === "cancel") scheduler.stop();
+      await vi.advanceTimersByTimeAsync(500);
+      if (mode === "deadline") {
+        expect(failure).toBeUndefined();
+        expect(result?.health.consecutiveFailures).toBe(1);
+        expect(result?.health.lastError).toContain("Timeout");
+      } else {
+        expect(result).toBeUndefined();
+        expect(failure).toMatchObject({ name: "AbortError" });
+      }
+    } finally {
+      scheduler.dispose();
+      await vi.advanceTimersByTimeAsync(0);
+    }
+  });
   it("rethrows cancellation aborts instead of counting them as failures", async () => {
     const layer = makeLayer();
     vi.stubGlobal(
