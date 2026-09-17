@@ -21,6 +21,7 @@ import {
   getUcdpMeta,
   getUcdpDefaultYear,
 } from "../../../../../lib/server/ucdp/ucdpGedStore";
+import { isValidUcdpYearRange } from "../../../../../lib/server/ucdp/yearRange";
 import { computeUcdpSeverity, severityLabel as ucdpSeverityLabel } from "../../../../../lib/server/ucdp/severity";
 import type { UcdpViolenceType } from "../../../../../lib/server/ucdp/types";
 
@@ -770,9 +771,16 @@ async function handler(request: Request, { params }: { params: { layerId: string
     return NextResponse.json({ error: "Invalid layer ID" }, { status: 400 });
   }
 
-  const origin = new URL(request.url).origin;
+  const url = new URL(request.url);
+  if (layerId === "ucdp-events" && !isValidUcdpYearRange(url.searchParams)) {
+    return NextResponse.json(
+      { error: "Invalid UCDP year range: use ordered four-digit years from 1989 through the current year" },
+      { status: 400, headers: { "Cache-Control": "no-store" } }
+    );
+  }
+  const origin = url.origin;
 
-  // Fresh cache hit — return immediately.
+  // Fresh cache hit
   if (isFresh(layerId)) {
     return NextResponse.json(getCached(layerId)!, {
       headers: { "Cache-Control": "no-store", "X-Cache": "hit" },
