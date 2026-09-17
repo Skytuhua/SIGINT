@@ -778,6 +778,19 @@ async function handler(request: Request, { params }: { params: { layerId: string
       { status: 400, headers: { "Cache-Control": "no-store" } }
     );
   }
+  // Resolve one-sided filters against the loaded dataset, not the empty-store fallback.
+  if (layerId === "ucdp-events" && url.searchParams.has("fromYear") !== url.searchParams.has("toYear")) {
+    await ensureUcdpLoaded();
+    const defaultYear = String(getUcdpDefaultYear());
+    if (!url.searchParams.has("fromYear")) url.searchParams.set("fromYear", defaultYear);
+    if (!url.searchParams.has("toYear")) url.searchParams.set("toYear", defaultYear);
+    if (!isValidUcdpYearRange(url.searchParams)) {
+      return NextResponse.json(
+        { error: "Invalid UCDP year range after applying the dataset default" },
+        { status: 400, headers: { "Cache-Control": "no-store" } }
+      );
+    }
+  }
   const origin = url.origin;
 
   // Fresh cache hit
@@ -791,7 +804,7 @@ async function handler(request: Request, { params }: { params: { layerId: string
   // This eliminates perceived latency on every refresh cycle after the first cold load.
   const stale = getCached(layerId);
   if (stale) {
-    void getLayerPayload(layerId, origin, request.url)
+    void getLayerPayload(layerId, origin, url.toString())
       .then((payload) => { if (payload.features.length > 0) setCache(layerId, payload); })
       .catch(() => { /* keep existing stale entry */ });
     return NextResponse.json(stale, {
@@ -801,7 +814,7 @@ async function handler(request: Request, { params }: { params: { layerId: string
 
   // Cold start: no cache — must fetch synchronously.
   try {
-    const payload = await getLayerPayload(layerId, origin, request.url);
+    const payload = await getLayerPayload(layerId, origin, url.toString());
     const shouldCache = payload.features.length > 0;
     if (shouldCache) setCache(layerId, payload);
     return NextResponse.json(payload, {

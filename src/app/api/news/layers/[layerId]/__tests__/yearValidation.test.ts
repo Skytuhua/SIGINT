@@ -35,12 +35,23 @@ describe("UCDP validation before cache and data loading", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it.each(["fromYear=2025", "toYear=2023"])("rejects inverted effective defaults: %s", async (query) => {
+    const response = await request(query);
+    expect(response.status).toBe(400);
+    expect(ensureUcdpLoaded).toHaveBeenCalled();
+    expect(loadAdditionalYear).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it("rejects invalid input even when valid data is cached", async () => {
     const valid = await request("fromYear=2024&toYear=2024");
     expect(valid.status).toBe(200);
     expect(valid.headers.get("X-Cache")).toBe("miss");
     const cached = await request("fromYear=2024&toYear=2024");
     expect(cached.headers.get("X-Cache")).toBe("hit");
+    expect((await request("fromYear=2025")).status).toBe(400);
+    expect((await request("fromYear=2024")).status).toBe(200);
+    expect((await request("toYear=2024")).status).toBe(200);
     vi.clearAllMocks();
     const invalid = await request("fromYear=2024&toYear=2023");
     expect(invalid.status).toBe(400);
