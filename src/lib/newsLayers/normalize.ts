@@ -103,9 +103,13 @@ export function capAndAggregateFeatures(
   maxFeatures: number
 ): LayerFeatureCollection {
   if (input.features.length <= maxFeatures) return input;
+  const preserved: LayerFeature[] = [];
   const buckets = new Map<string, LayerFeature[]>();
   for (const feature of input.features) {
-    if (feature.geometry.type !== "Point") continue;
+    if (feature.geometry.type !== "Point") {
+      preserved.push(feature);
+      continue;
+    }
     const coords = feature.geometry.coordinates as [number, number];
     const lon = coords[0];
     const lat = coords[1];
@@ -133,6 +137,7 @@ export function capAndAggregateFeatures(
   });
   return {
     type: "FeatureCollection",
-    features: aggregated.slice(0, maxFeatures),
+    // Keep area/line geometry intact; point clusters use the remaining budget.
+    features: [...preserved, ...aggregated].slice(0, maxFeatures),
   };
 }
