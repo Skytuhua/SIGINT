@@ -42,6 +42,8 @@ interface TaskState {
   nextDueAt: number;
   plannedDueAt: number;
   abortController: AbortController | null;
+  /** Set by trigger() while a run is in flight; the finishing run reschedules immediately. */
+  supersede: boolean;
 }
 
 const DEFAULT_JITTER = 0.12;
@@ -149,6 +151,7 @@ export class RefreshScheduler {
       nextDueAt: now,
       plannedDueAt: now,
       abortController: null,
+      supersede: false,
     });
 
     if (this.running) {
@@ -215,8 +218,15 @@ export class RefreshScheduler {
     const task = this.tasks.get(key);
     if (!task) return;
     // Abort stale run and retrigger immediately.
+    if (task.inFlight) {
+      // The in-flight run's finally block will cancel any timer we set here
+      // (via scheduleNext -> scheduleAt -> clearTimeout). Mark it instead so
+      // the finishing run reschedules immediately.
+      task.supersede = true;
+    } else {
+      this.scheduleAt(key, Date.now(), "interval");
+    }
     task.abortController?.abort();
-    this.scheduleAt(key, Date.now(), "interval");
   }
 
   private unregisterTask(key: string): void {
@@ -347,7 +357,12 @@ export class RefreshScheduler {
         task.abortController = null;
       }
       if (!this.running || this.disposed) return;
-      this.scheduleNext(key);
+      if (task.supersede) {
+        task.supersede = false;
+        this.scheduleAt(key, Date.now(), "interval");
+      } else {
+        this.scheduleNext(key);
+      }
     }
   }
 
