@@ -224,7 +224,9 @@ export async function fetchJsonOrThrow<T>(
   const merged: RequestInit = { ...init, cache: "no-store" as RequestCache };
   const response = await withTimeout(fetch(url, merged), timeoutMs);
   if (!response.ok) {
-    throw new UpstreamHttpError(response.status, `${url} returned ${response.status}`);
+    // Query strings, fragments and URL credentials must not reach logs or clients.
+    const endpoint = new URL(url);
+    throw new UpstreamHttpError(response.status, `${endpoint.origin}${endpoint.pathname} returned ${response.status}`);
   }
   return (await response.json()) as T;
 }
