@@ -76,14 +76,15 @@ export function dedupeArticles(items: NewsArticle[], threshold = 0.9): NewsArtic
   const sorted = [...normalized].sort(compareItems);
   const seenUrl = new Set<string>();
   const output: NewsArticle[] = [];
+  const byDomain = new Map<string, NewsArticle[]>();
 
   for (const item of sorted) {
     if (!item.canonicalUrl) continue;
     if (seenUrl.has(item.canonicalUrl)) continue;
 
-    const duplicate = output.some((existing) => {
-      if (existing.canonicalUrl === item.canonicalUrl) return true;
-      if (existing.domain !== item.domain) return false;
+    // URL uniqueness is global; headline candidates only share a domain.
+    const candidates = byDomain.get(item.domain) ?? [];
+    const duplicate = candidates.some((existing) => {
       if (Math.abs(existing.publishedAt - item.publishedAt) > 6 * 60 * 60_000) return false;
       return diceSimilarity(existing.headline, item.headline) >= threshold;
     });
@@ -91,6 +92,8 @@ export function dedupeArticles(items: NewsArticle[], threshold = 0.9): NewsArtic
 
     seenUrl.add(item.canonicalUrl);
     output.push(item);
+    candidates.push(item);
+    byDomain.set(item.domain, candidates);
   }
 
   return output.sort(compareItems);
