@@ -113,7 +113,8 @@ export default function CategoryFeedPanel({ config, liveCutoffMs }: Props) {
       return;
     }
 
-    if (abortRef.current) abortRef.current.abort();
+    // A poll must not cancel a search that is still within its timeout.
+    if (abortRef.current) return;
     const controller = new AbortController();
     abortRef.current = controller;
 
@@ -140,6 +141,7 @@ export default function CategoryFeedPanel({ config, liveCutoffMs }: Props) {
     } catch (err) {
       if (isAbortError(err)) return;
     } finally {
+      if (abortRef.current === controller) abortRef.current = null;
       if (!controller.signal.aborted) setLoading(false);
     }
   }, [config.category, config.categories, config.dedicatedFeeds, config.apiEndpoint, config.refreshMs]);

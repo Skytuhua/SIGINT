@@ -70,3 +70,49 @@ it.each(["failure", "empty"] as const)("recovers after an initial %s and stops p
   await advance(24_000);
   expect(mocks.fetch).toHaveBeenCalledTimes(2);
 });
+
+it("lets slow searches finish, resumes polling, and aborts active work on unmount", async () => {
+  const article: NewsArticle = {
+    id: "slow-markets", headline: "Slow recovered article", category: "markets",
+    url: "https://example.test/slow-story", canonicalUrl: "https://example.test/slow-story",
+    domain: "example.test", source: "Test", publishedAt: Date.now(), snippet: "",
+    language: "en", score: 1, backendSource: "rss",
+    provenance: { headlineSource: "rss", coordsSource: "none", entitySource: "none", confidence: 1 },
+  };
+  const signals: AbortSignal[] = [];
+  mocks.fetch.mockImplementation((_url: string, policy: { signal: AbortSignal }) => {
+    signals.push(policy.signal);
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => resolve({ items: [article] }), 11_000);
+      policy.signal.addEventListener("abort", () => {
+        clearTimeout(timer);
+        reject(new DOMException("Aborted", "AbortError"));
+      }, { once: true });
+    });
+  });
+
+  await act(async () => {
+    renderer = create(createElement(CategoryFeedPanel, {
+      config: { id: "retry-slow-markets", title: "Test", category: "markets", dedicatedFeeds: ["test"], refreshMs: 8_000 },
+    }));
+  });
+  await advance(3_500);
+  // Allow this panel's staggered first request to begin.
+  await advance(1_000);
+  expect(mocks.fetch).toHaveBeenCalledTimes(1);
+
+  await advance(8_000);
+  expect(signals[0].aborted).toBe(false);
+  expect(mocks.fetch).toHaveBeenCalledTimes(1);
+  await advance(3_000);
+  expect(renderer!.root.findByProps({ className: "si-catfeed-headline" }).children).toEqual(["Slow recovered article"]);
+
+  // The next poll can use the fresh memo; the following poll must fetch again.
+  await advance(13_000);
+  expect(mocks.fetch).toHaveBeenCalledTimes(2);
+  act(() => renderer?.unmount());
+  renderer = undefined;
+  expect(signals[1].aborted).toBe(true);
+  await advance(24_000);
+  expect(mocks.fetch).toHaveBeenCalledTimes(2);
+});
