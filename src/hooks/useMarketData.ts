@@ -14,7 +14,7 @@ interface UseMarketDataResult<T> {
 /**
  * Generic polling hook for market data.
  * Fetches from an API endpoint on mount and at `intervalMs` intervals.
- * Falls back to `staticFallback` if the fetch fails.
+ * Starts with `staticFallback` and retains the last response on fetch failure.
  */
 export function useMarketData<T>(
   endpoint: string,
@@ -61,11 +61,7 @@ export function useMarketData<T>(
 
       const msg = err instanceof Error ? err.message : "Unknown error";
       setError(msg);
-      // Keep existing data (could be live from a previous successful fetch)
-      // Only fall back to static if we never got live data
-      if (!isLive) {
-        setData(staticFallback);
-      }
+      // Preserve the last response; initial state already supplies the fallback.
       setIsLive(false);
       setLoading(false);
     }
