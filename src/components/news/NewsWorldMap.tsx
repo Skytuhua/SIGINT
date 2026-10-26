@@ -1,5 +1,7 @@
 "use client";
 
+import { readBrowserPreference, writeBrowserPreference } from "../../lib/browserStorage";
+
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { perfMark } from "../../lib/news/perf";
 import type {
@@ -251,6 +253,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
   const onReadyRef = useRef<(() => void) | undefined>(onReady);
   const runtimeRef = useRef<NewsLayerRuntime | null>(null);
   const mountedLayersRef = useRef<Set<string>>(new Set());
+  const layerSyncGenerationRef = useRef(new Map<string, number>());
   const layerDataRef = useRef<Map<string, LayerFeatureCollection>>(new Map());
 
   const markers = useSIGINTStore((s) => s.news.markers);
@@ -394,26 +397,26 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const storedIntel = window.localStorage.getItem("wv:intel-hotspots:timeWindow");
+    const storedIntel = readBrowserPreference("wv:intel-hotspots:timeWindow");
     const intelValue: HotspotTimeWindow =
       storedIntel === "6h" || storedIntel === "7d" ? storedIntel : "24h";
     setIntelTimeWindow(intelValue);
 
-    const storedArmed = window.localStorage.getItem("wv:armed-conflict:timeWindow");
+    const storedArmed = readBrowserPreference("wv:armed-conflict:timeWindow");
     const armedValue: HotspotTimeWindow =
       storedArmed === "6h" || storedArmed === "7d" ? storedArmed : "24h";
     setArmedTimeWindow(armedValue);
 
-    const storedBroad = window.localStorage.getItem("wv:armed-conflict:broader");
+    const storedBroad = readBrowserPreference("wv:armed-conflict:broader");
     setArmedIncludeBroader(storedBroad === "1" || storedBroad === "true");
 
-    const storedConflictTw = window.localStorage.getItem("wv:conflict-zones:timeWindow");
+    const storedConflictTw = readBrowserPreference("wv:conflict-zones:timeWindow");
     if (storedConflictTw === "6h" || storedConflictTw === "24h" || storedConflictTw === "7d" || storedConflictTw === "30d" || storedConflictTw === "90d") {
       setConflictTimeWindow(storedConflictTw);
     }
-    const storedConflictMode = window.localStorage.getItem("wv:conflict-zones:mode");
+    const storedConflictMode = readBrowserPreference("wv:conflict-zones:mode");
     if (storedConflictMode === "broad") setConflictMode("broad");
-    const storedConflictVerified = window.localStorage.getItem("wv:conflict-zones:verifiedOverlay");
+    const storedConflictVerified = readBrowserPreference("wv:conflict-zones:verifiedOverlay");
     setConflictVerifiedOverlay(storedConflictVerified === "1" || storedConflictVerified === "true");
   }, []);
 
@@ -1503,12 +1506,22 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
       const map = mapRef.current;
       const runtime = runtimeRef.current;
       if (!layer || !map || !runtime) return;
+      enabled = enabled && (useSIGINTStore.getState().news.layerToggles[layerId] ?? layer.defaultEnabled);
+      let generation = layerSyncGenerationRef.current.get(layerId) ?? 0;
+      if (!enabled || !mountedLayersRef.current.has(layerId)) {
+        generation += 1;
+        layerSyncGenerationRef.current.set(layerId, generation);
+      }
 
       if (enabled) {
         if (!mountedLayersRef.current.has(layerId)) {
           leafletRenderer.mount(layer, map);
           mountedLayersRef.current.add(layerId);
-          await runtime.primeFromCache(layerId);
+          const current = await runtime.primeFromCache(layerId);
+          if (!current || layerSyncGenerationRef.current.get(layerId) !== generation ||
+              runtimeRef.current !== runtime || mapRef.current !== map ||
+              !mountedLayersRef.current.has(layerId) ||
+              !(useSIGINTStore.getState().news.layerToggles[layerId] ?? layer.defaultEnabled)) return;
           runtime.enable(layerId);
         }
         const cachedData = layerDataRef.current.get(layerId);
@@ -1866,6 +1879,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
         countryLayersByIsoRef.current.clear();
         countryLabelCandidatesRef.current = [];
       }
+      if (cancelled || mapRef.current !== map) return;
 
       const worldBounds = L.latLngBounds(MAP_WORLD_BOUNDS);
       const syncMinZoomToViewport = () => {
@@ -1938,6 +1952,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
         const enabled = layerTogglesRef.current[layer.id] ?? layer.defaultEnabled;
         if (enabled) {
           await syncLayerMountedState(layer.id, true);
+          if (cancelled || mapRef.current !== map) return;
         }
       }
 
@@ -2101,7 +2116,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
                               if (next !== "6h" && next !== "24h" && next !== "7d") return;
                               setIntelTimeWindow(next);
                               try {
-                                window.localStorage.setItem("wv:intel-hotspots:timeWindow", next);
+                                writeBrowserPreference("wv:intel-hotspots:timeWindow", next);
                               } catch {
                                 // no-op
                               }
@@ -2122,7 +2137,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
                               if (next !== "6h" && next !== "24h" && next !== "7d") return;
                               setArmedTimeWindow(next);
                               try {
-                                window.localStorage.setItem("wv:armed-conflict:timeWindow", next);
+                                writeBrowserPreference("wv:armed-conflict:timeWindow", next);
                               } catch {
                                 // no-op
                               }
@@ -2144,7 +2159,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
                                 if (next !== "6h" && next !== "24h" && next !== "7d" && next !== "30d" && next !== "90d") return;
                                 setConflictTimeWindow(next);
                                 try {
-                                  window.localStorage.setItem("wv:conflict-zones:timeWindow", next);
+                                  writeBrowserPreference("wv:conflict-zones:timeWindow", next);
                                 } catch { /* no-op */ }
                                 runtimeRef.current?.refresh("conflict-zones");
                               }}
@@ -2163,7 +2178,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
                                 const next = conflictMode === "strict" ? "broad" : "strict";
                                 setConflictMode(next);
                                 try {
-                                  window.localStorage.setItem("wv:conflict-zones:mode", next);
+                                  writeBrowserPreference("wv:conflict-zones:mode", next);
                                 } catch { /* no-op */ }
                                 runtimeRef.current?.refresh("conflict-zones");
                               }}
@@ -2182,7 +2197,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
                             const next = !armedIncludeBroader;
                             setArmedIncludeBroader(next);
                             try {
-                              window.localStorage.setItem(
+                              writeBrowserPreference(
                                 "wv:armed-conflict:broader",
                                 next ? "1" : "0"
                               );
@@ -2279,7 +2294,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
               onTimeWindowChange={(next) => {
                 setIntelTimeWindow(next);
                 try {
-                  window.localStorage.setItem("wv:intel-hotspots:timeWindow", next);
+                  writeBrowserPreference("wv:intel-hotspots:timeWindow", next);
                 } catch {
                   // no-op
                 }

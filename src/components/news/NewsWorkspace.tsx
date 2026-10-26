@@ -758,7 +758,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     }
   }, []);
 
-  const mergeRollingItems = useCallback((incoming: NormalizedNewsItem[], contextKey: string) => {
+  const mergeRollingItems = useCallback((incoming: NormalizedNewsItem[], contextKey: string, cutoff = Date.now() - NEWS_RETENTION_MS, until = Infinity) => {
     const contextChanged = rollingFeedContextRef.current !== contextKey;
     const previous = contextChanged ? [] : rollingFeedRef.current;
     if (contextChanged) {
@@ -785,9 +785,8 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       }
     }
 
-    const cutoff = Date.now() - NEWS_RETENTION_MS;
     const merged = Array.from(byId.values())
-      .filter((item) => item.publishedAt >= cutoff)
+      .filter((item) => item.publishedAt >= cutoff && item.publishedAt <= until)
       .sort(compareNewsItems)
       .slice(0, NEWS_RETENTION_MAX_ITEMS);
     rollingFeedRef.current = merged;
@@ -894,14 +893,15 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     el.scrollTop = 0;
   }, [terminalVersion]);
 
+  const selectionItems = searchResultsOpen ? filteredItems : terminalItems;
   const selectedItem = useMemo(() => {
-    if (!terminalItems.length) return null;
+    if (!selectionItems.length) return null;
     if (news.selectedStoryId) {
-      const explicit = terminalItems.find((item) => item.id === news.selectedStoryId);
+      const explicit = selectionItems.find((item) => item.id === news.selectedStoryId);
       if (explicit) return explicit;
     }
-    return terminalItems[Math.min(Math.max(selectedRow, 0), terminalItems.length - 1)] ?? null;
-  }, [terminalItems, selectedRow, news.selectedStoryId]);
+    return selectionItems[Math.min(Math.max(selectedRow, 0), selectionItems.length - 1)] ?? null;
+  }, [selectionItems, selectedRow, news.selectedStoryId]);
 
   const activeMarker = useMemo<GeoMarker | null>(() => {
     if (!news.highlightedMarkerId) return null;
@@ -991,7 +991,16 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           const contextKey = `${payload.queryEcho?.normalized ?? queryForAst}|${attemptContext.mode}|${
             attemptContext.inView ? attemptContext.bbox ?? "inView" : "all"
           }`;
-          const { merged, newIds } = mergeRollingItems(nextItems, contextKey);
+          const queryAst = payload.queryEcho?.ast ?? parseQuery(queryForAst);
+          const retentionMs = queryAst.timespan === "30d" ? 30 * 86400_000 : queryAst.timespan === "7d" ? 7 * 86400_000 : NEWS_RETENTION_MS;
+          const fromDate = queryAst.fromDate ? Date.parse(`${queryAst.fromDate}T00:00:00.000Z`) : NaN;
+          const toDate = queryAst.toDate ? Date.parse(`${queryAst.toDate}T00:00:00.000Z`) + 86400_000 - 1 : NaN;
+          // Match the server: either calendar bound takes precedence over a
+          // relative span. To-only searches have no recent lower cutoff.
+          const hasCalendarBounds = Number.isFinite(fromDate) || Number.isFinite(toDate);
+          const cutoff = hasCalendarBounds ? (Number.isFinite(fromDate) ? fromDate : -Infinity) : Date.now() - retentionMs;
+          const until = Number.isFinite(toDate) ? toDate : Infinity;
+          const { merged, newIds } = mergeRollingItems(nextItems, contextKey, cutoff, until);
           const mergedIdSet = new Set(merged.map((item) => item.id));
           for (const marker of payload.markers ?? []) {
             if (!mergedIdSet.has(marker.articleId)) continue;
@@ -1246,6 +1255,24 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           }
         }
 
+        if (!appliedFromAttempt && parallelAttempts.length === 1) {
+          const { attempt, payload } = await runAttempt(parallelAttempts[0]);
+          if (requestId !== searchRequestIdRef.current) return;
+          lastPayload = payload;
+          lastAttemptContext = { inView: attempt.inView, bbox: attempt.bbox, mode: attempt.mode };
+          finalQuery = attempt.query;
+          const count = payload.items?.length ?? 0;
+          if (attempt.id === "primary" && count === 0) {
+            primaryPayload = payload;
+            primaryEmptyReason = payload.emptyReason ?? null;
+            primaryAttemptContext = lastAttemptContext;
+          }
+          if (count > 0) {
+            lastCount = applyPayload(payload, attempt.query, lastAttemptContext);
+            appliedFromAttempt = true;
+          }
+        }
+
         if (!appliedFromAttempt && sequentialAttempts.length > 0) {
           for (const attempt of sequentialAttempts) {
             if (requestId !== searchRequestIdRef.current) return;
@@ -1277,23 +1304,6 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           }
         }
 
-        if (!appliedFromAttempt && parallelAttempts.length === 1) {
-          const { attempt, payload } = await runAttempt(parallelAttempts[0]);
-          if (requestId !== searchRequestIdRef.current) return;
-          lastPayload = payload;
-          lastAttemptContext = { inView: attempt.inView, bbox: attempt.bbox, mode: attempt.mode };
-          finalQuery = attempt.query;
-          const count = payload.items?.length ?? 0;
-          if (attempt.id === "primary" && count === 0) {
-            primaryPayload = payload;
-            primaryEmptyReason = payload.emptyReason ?? null;
-            primaryAttemptContext = lastAttemptContext;
-          }
-          if (count > 0) {
-            lastCount = applyPayload(payload, attempt.query, lastAttemptContext);
-            appliedFromAttempt = true;
-          }
-        }
 
         if (lastPayload && !appliedFromAttempt) {
           const existingItems = useSIGINTStore.getState().news.feedItems;
@@ -1899,7 +1909,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       }
       if (event.key.toLowerCase() === "j") {
         event.preventDefault();
-        setSelectedRow((prev) => Math.min(prev + 1, Math.max(0, terminalItems.length - 1)));
+        setSelectedRow((prev) => Math.min(prev + 1, Math.max(0, selectionItems.length - 1)));
         return;
       }
       if (event.key.toLowerCase() === "k") {
@@ -1909,7 +1919,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
       }
       if (event.key === "Enter") {
         event.preventDefault();
-        const item = terminalItems[selectedRow];
+        const item = selectionItems[selectedRow];
         if (!item) return;
         setSelectedStory(item.id);
         setStoryPopupArticle(item);
@@ -1949,7 +1959,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [
     dashboardView,
-    terminalItems,
+    selectionItems,
     selectedRow,
     news.query,
     news.markers,
@@ -1961,13 +1971,13 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   ]);
 
   useEffect(() => {
-    const next = terminalItems[selectedRow];
+    const next = selectionItems[selectedRow];
     if (!next) return;
     if (news.selectedStoryId === next.id) return;
     setSelectedStory(next.id);
     const marker = news.markers.find((entry) => entry.articleId === next.id);
     setHighlightMarker(marker?.id ?? null);
-  }, [selectedRow, terminalItems.length, news.markers, news.selectedStoryId, setSelectedStory, setHighlightMarker]);
+  }, [selectedRow, selectionItems.length, news.markers, news.selectedStoryId, setSelectedStory, setHighlightMarker]);
 
   useEffect(() => {
     return () => {
@@ -2263,6 +2273,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           ) : null}
         </div>
       ) : null}
+      <div className="si-news-search-anchor" style={{ position: "relative" }}>
       {!isMobile ? (
         <>
       <div className="si-news-toolbar">
@@ -2475,11 +2486,16 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
             ) : null}
           </div>
         ) : null}
+
+      </div>
+        </>
+      ) : null}
+
         {searchResultsOpen ? (
-          <div className="si-news-search-overlay">
+          <div className="si-news-search-overlay" style={isMobile ? { width: "auto", marginTop: 0 } : undefined}>
             <div className="si-news-search-overlay-header">
               <span className="si-news-search-overlay-title">
-                SEARCH RESULTS  | {news.query || "all"}  | {terminalItems.length} stories
+                SEARCH RESULTS  | {news.query || "all"}  | {filteredItems.length} stories
               </span>
               <button type="button" onClick={() => setSearchResultsOpen(false)}>CLOSE</button>
             </div>
@@ -2495,20 +2511,26 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
             </div>
             <div className="si-news-search-overlay-body">
               {isMobile ? (
-                terminalItems.length > 0 ? (
+                filteredItems.length > 0 ? (
                   <div className="si-news-mobile-results-list">
-                    {terminalItems.map((item, idx) => {
+                    {filteredItems.map((item, idx) => {
                       const marker = news.markers.find((m) => m.articleId === item.id);
+                      const openResult = () => {
+                        setSelectedRow(idx);
+                        setSelectedStory(item.id);
+                        setStoryPopupArticle(item);
+                        setHighlightMarker(marker?.id ?? null);
+                        setSearchResultsOpen(false);
+                      };
                       return (
                         <div
                           key={item.id}
                           className={`si-news-mobile-result-card${item.id === selectedItem?.id ? " is-selected" : ""}`}
-                          onClick={() => {
-                            setSelectedRow(idx);
-                            setSelectedStory(item.id);
-                            setStoryPopupArticle(item);
-                            setHighlightMarker(marker?.id ?? null);
-                            setSearchResultsOpen(false);
+                          onClick={openResult}
+                          onKeyDown={(event) => {
+                            if (event.key !== "Enter" && event.key !== " ") return;
+                            event.preventDefault();
+                            openResult();
                           }}
                           role="button"
                           tabIndex={0}
@@ -2547,14 +2569,14 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
                       <span className="si-news-terminal-cell si-col-headline">HEADLINE</span>
                       <span className="si-news-terminal-cell si-col-score">SCORE</span>
                     </div>
-                    {terminalItems.length > 0 ? (
+                    {filteredItems.length > 0 ? (
                       <List
-                        rowCount={terminalItems.length}
+                        rowCount={filteredItems.length}
                         rowHeight={28}
                         overscanCount={15}
                         rowComponent={SearchOverlayRow as any}
                         rowProps={{
-                          items: terminalItems,
+                          items: filteredItems,
                           selectedItemId: selectedItem?.id ?? null,
                           markersRef: news.markers,
                           onRowClick: (idx: number, item: NormalizedNewsItem, markerId: string | null) => {
@@ -2586,8 +2608,6 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           </div>
         ) : null}
       </div>
-        </>
-      ) : null}
 
       {readingListWarning && !bookmarkPanelOpen ? <div className="si-news-reading-list-warning" role="status">{readingListWarning}</div> : null}
       <div className="si-news-grid-area">

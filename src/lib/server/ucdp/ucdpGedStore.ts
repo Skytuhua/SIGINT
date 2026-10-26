@@ -1,4 +1,5 @@
 import type { UcdpEvent, UcdpQueryParams, UcdpStoreMeta, UcdpViolenceType } from "./types";
+import { fetchWithTimeout } from "../fetchWithTimeout";
 
 const UCDP_API_BASE = "https://ucdpapi.pcr.uu.se/api/gedevents";
 const DEFAULT_VERSION = process.env.UCDP_GED_VERSION ?? "25.1";
@@ -50,6 +51,7 @@ interface UcdpApiRow {
 
 interface StoreState {
   events: UcdpEvent[];
+  loadedYears: Set<number>;
   byYear: Map<number, UcdpEvent[]>;
   byYearCountry: Map<string, UcdpEvent[]>;
   meta: UcdpStoreMeta;
@@ -59,6 +61,7 @@ interface StoreState {
 
 const store: StoreState = {
   events: [],
+  loadedYears: new Set(),
   byYear: new Map(),
   byYearCountry: new Map(),
   meta: {
@@ -112,16 +115,11 @@ async function fetchPage(
   page: number,
 ): Promise<{ rows: UcdpApiRow[]; totalPages: number }> {
   const url = `${UCDP_API_BASE}/${version}?pagesize=${PAGE_SIZE}&page=${page}&Year=${year}`;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-
   try {
-    const res = await fetch(url, {
-      signal: controller.signal,
+    const res = await fetchWithTimeout(url, {
       headers: { Accept: "application/json" },
       cache: "no-store",
-    });
-    clearTimeout(timer);
+    }, FETCH_TIMEOUT_MS);
     if (!res.ok) throw new Error(`UCDP API ${res.status}`);
     const json = (await res.json()) as {
       TotalCount?: number;
@@ -132,7 +130,6 @@ async function fetchPage(
     const totalPages = Math.ceil(total / PAGE_SIZE);
     return { rows, totalPages };
   } catch (err) {
-    clearTimeout(timer);
     throw err;
   }
 }
@@ -171,20 +168,26 @@ function buildIndices(events: UcdpEvent[]): void {
   }
 }
 
-async function loadDataset(): Promise<void> {
-  const version = DEFAULT_VERSION;
+function datasetDefaultYear(): number {
   // Derive the dataset's latest data year from the version string.
   // UCDP GED vXX.1 (e.g. "25.1") covers events through year 20XX-1 (e.g. 2024).
   // Using currentYear-1 would fetch a year not yet in the dataset when the app
   // runs in the year after the dataset release.
-  const versionMajor = parseInt(version.split(".")[0], 10);
-  const defaultYear = versionMajor > 0 ? versionMajor + 2000 - 1 : new Date().getFullYear() - 1;
+  const versionMajor = parseInt(DEFAULT_VERSION.split(".")[0], 10);
+  return versionMajor > 0 ? versionMajor + 2000 - 1 : new Date().getFullYear() - 1;
+}
+
+async function loadDataset(): Promise<void> {
+  const version = DEFAULT_VERSION;
+  const defaultYear = datasetDefaultYear();
 
   try {
     const events = await fetchYear(version, defaultYear);
 
     store.events = events;
     buildIndices(events);
+    store.loadedYears.clear();
+    store.loadedYears.add(defaultYear);
 
     const years = Array.from(store.byYear.keys()).sort((a, b) => a - b);
     store.meta = {
@@ -196,14 +199,15 @@ async function loadDataset(): Promise<void> {
       },
       lastRefreshedAt: Date.now(),
       totalEvents: events.length,
-      status: events.length > 0 ? "live" : "degraded",
+      // A successful empty dataset is available, even when no event matches.
+      status: "live",
     };
   } catch (err) {
     console.error("[ucdp-store] Failed to load dataset:", err);
-    if (store.events.length > 0) {
+    if (store.loadedYears.size > 0) {
       store.meta.status = "cached";
     } else {
-      store.meta.status = "degraded";
+      store.meta.status = "unavailable";
     }
   }
 }
@@ -212,7 +216,7 @@ export async function ensureUcdpLoaded(): Promise<void> {
   const now = Date.now();
   const stale = now - store.meta.lastRefreshedAt > REFRESH_INTERVAL_MS;
 
-  if (store.events.length > 0 && !stale) return;
+  if (store.loadedYears.has(datasetDefaultYear()) && !stale) return;
 
   if (store.loading && store.loadPromise) {
     await store.loadPromise;
@@ -228,11 +232,13 @@ export async function ensureUcdpLoaded(): Promise<void> {
   await store.loadPromise;
 }
 
-export async function loadAdditionalYear(year: number): Promise<void> {
-  if (store.byYear.has(year)) return;
+/** Report query-year availability independently from the number of events. */
+export async function loadAdditionalYear(year: number): Promise<boolean> {
+  if (store.loadedYears.has(year)) return true;
   const version = DEFAULT_VERSION;
   try {
     const events = await fetchYear(version, year);
+    store.loadedYears.add(year);
     store.events.push(...events);
     for (const ev of events) {
       const yearBucket = store.byYear.get(ev.year);
@@ -244,12 +250,17 @@ export async function loadAdditionalYear(year: number): Promise<void> {
       if (ycBucket) ycBucket.push(ev);
       else store.byYearCountry.set(ycKey, [ev]);
     }
+    // Availability includes successful empty years; event coverage must not.
     const years = Array.from(store.byYear.keys()).sort((a, b) => a - b);
     store.meta.coverage.fromYear = years[0] ?? store.meta.coverage.fromYear;
     store.meta.coverage.toYear = years[years.length - 1] ?? store.meta.coverage.toYear;
     store.meta.totalEvents = store.events.length;
+    if (store.meta.status === "unavailable") store.meta.status = "degraded";
+    return true;
   } catch (err) {
     console.error(`[ucdp-store] Failed to load year ${year}:`, err);
+    store.meta.status = store.loadedYears.size > 0 ? "degraded" : "unavailable";
+    return false;
   }
 }
 
@@ -299,5 +310,5 @@ export function getUcdpMeta(): UcdpStoreMeta {
 
 export function getUcdpDefaultYear(): number {
   if (store.meta.coverage.toYear > 0) return store.meta.coverage.toYear;
-  return new Date().getFullYear() - 1;
+  return datasetDefaultYear();
 }

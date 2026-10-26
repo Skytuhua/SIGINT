@@ -1,3 +1,4 @@
+import { fetchWithTimeout as fetchUpstream } from '../../../lib/server/fetchWithTimeout';
 import { NextResponse } from 'next/server';
 import { STANDARD_LIMITER } from '../../../lib/server/rateLimitPresets';
 import { withRateLimit } from '../../../lib/server/withRateLimit';
@@ -9,13 +10,7 @@ const FETCH_TIMEOUT = 10_000;
 type TrackPoint = [number, number, number]; // [lon, lat, altM]
 
 async function fetchWithTimeout(url: string, init: RequestInit = {}): Promise<Response> {
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT);
-  try {
-    return await fetch(url, { ...init, signal: ctrl.signal });
-  } finally {
-    clearTimeout(timer);
-  }
+  return fetchUpstream(url, init, FETCH_TIMEOUT);
 }
 
 // 閳光偓閳光偓閳光偓 ADSBx-style trace (airplanes.live / adsb.lol) 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓

@@ -1,16 +1,19 @@
 /**
- * In-memory sliding-window rate limiter.
+ * In-memory fixed-window rate limiter.
  *
  * Each limiter tracks request counts per key (typically client IP)
  * within a configurable time window. Expired entries are cleaned up
  * automatically every 5 minutes to prevent unbounded memory growth.
  */
+import net from "node:net";
 
 interface RateLimitConfig {
   /** Time window in milliseconds (e.g. 60_000 for 1 minute). */
   windowMs: number;
   /** Maximum requests allowed per window. */
   maxRequests: number;
+  /** Fail closed rather than evict active quotas when identity storage is full. */
+  maxEntries?: number;
 }
 
 interface RateLimitResult {
@@ -28,6 +31,7 @@ const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 
 export function createRateLimiter(config: RateLimitConfig) {
   const entries = new Map<string, Entry>();
+  const maxEntries = config.maxEntries ?? 10_000;
 
   // Periodic cleanup of expired entries
   const cleanup = setInterval(() => {
@@ -50,6 +54,14 @@ export function createRateLimiter(config: RateLimitConfig) {
 
     // If no entry or window expired, start fresh
     if (!existing || now - existing.windowStart >= config.windowMs) {
+      if (!existing && entries.size >= maxEntries) {
+        for (const [entryKey, entry] of entries) {
+          if (now - entry.windowStart >= config.windowMs) entries.delete(entryKey);
+        }
+        if (entries.size >= maxEntries) {
+          return { allowed: false, remaining: 0, retryAfterMs: config.windowMs };
+        }
+      }
       entries.set(key, { count: 1, windowStart: now });
       return { allowed: true, remaining: config.maxRequests - 1, retryAfterMs: 0 };
     }
@@ -74,11 +86,21 @@ export function createRateLimiter(config: RateLimitConfig) {
   };
 }
 
-/** Extract client IP from a Next.js request. */
+/** Trust a single-IP header only under the documented, explicit ingress contract. */
 export function getClientIp(req: Request): string {
-  const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
-  return "unknown";
+  const header = process.env.TRUSTED_CLIENT_IP_HEADER?.trim();
+  if (!header || !/^[a-z0-9!#$%&'*+.^_`|~-]+$/i.test(header)) return "unknown";
+  const address = req.headers.get(header)?.trim() ?? "";
+  const family = net.isIP(address);
+  if (!family) return "unknown";
+  if (family === 4) return address;
+  // Keep equivalent expanded/compressed IPv6 identities in one quota bucket.
+  const normalized = new URL(`http://[${address.split("%", 1)[0]}]/`).hostname.slice(1, -1);
+  if (normalized.startsWith("::ffff:")) {
+    const [high, low] = normalized.slice(7).split(":").map((part) => Number.parseInt(part, 16));
+    return [high >> 8, high & 255, low >> 8, low & 255].join(".");
+  }
+  return normalized;
 }
 
 /** Return a 429 NextResponse if rate limited, or null if allowed. */

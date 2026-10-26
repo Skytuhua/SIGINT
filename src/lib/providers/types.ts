@@ -77,7 +77,7 @@ export const FlightSchema = z.object({
   nacv: z.string().optional(),
   nicBaro: z.string().optional(),
   rcMeters: z.number().optional(),
-  details: z.record(z.unknown()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
 });
 export type Flight = z.infer<typeof FlightSchema>;
 
@@ -158,7 +158,7 @@ export const DisasterAlertSchema = z.object({
   startedAt: z.number().nullable().optional(),
   updatedAt: z.number(),
   link: z.string().optional(),
-  raw: z.record(z.unknown()).optional(),
+  raw: z.record(z.string(), z.unknown()).optional(),
 });
 export type DisasterAlert = z.infer<typeof DisasterAlertSchema>;
 

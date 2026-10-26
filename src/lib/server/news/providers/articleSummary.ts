@@ -1,5 +1,6 @@
 import { canonicalizeUrl } from "../../../news/engine/dedupe";
-import { isBlockedHost } from "../../ssrf";
+import { isBlockedHost, withPublicHttpResponse } from "../../ssrf";
+import { fetchWithTimeout, readResponseBytes, requestDeadline } from "../../fetchWithTimeout";
 import { cachedFetch, type UpstreamPolicy } from "../upstream";
 
 export type ArticleSummaryEngine = "openai" | "extractive" | "none";
@@ -38,6 +39,7 @@ export interface GetArticleSummaryParams {
   headline?: string;
   source?: string;
   backend?: string;
+  signal?: AbortSignal;
 }
 
 const SUMMARY_POLICY: UpstreamPolicy = {
@@ -54,7 +56,7 @@ const SUMMARY_POLICY: UpstreamPolicy = {
 
 const OPENAI_SUMMARY_URL = "https://api.openai.com/v1/chat/completions";
 const SUMMARY_FORMAT_VERSION = "single-paragraph-v2";
-const MAX_HTML_CHARS = 2_500_000;
+const MAX_HTML_BYTES = 2_500_000;
 const MAX_SOURCE_WORDS = 1_800;
 const MIN_SOURCE_WORDS = 55;
 const MIN_OPENAI_SOURCE_WORDS = 120;
@@ -475,89 +477,64 @@ function buildExtractiveSummary(articleText: string, headline: string): string |
   return summary;
 }
 
-async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number): Promise<Response> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, {
-      ...init,
-      signal: controller.signal,
-    });
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new Error(`fetch-timeout:${timeoutMs}`);
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-async function fetchArticleHtml(url: string): Promise<string> {
-  const deadline = Date.now() + 8_000;
+async function fetchArticleHtml(url: string, signal: AbortSignal): Promise<string> {
   let currentUrl = url;
-  let response: Response;
   for (let redirects = 0; ; redirects++) {
-    const remainingMs = deadline - Date.now();
-    if (remainingMs <= 0) throw new Error("fetch-timeout:8000");
-    response = await fetchWithTimeout(
+    signal.throwIfAborted();
+    const result = await withPublicHttpResponse(
       currentUrl,
       {
         method: "GET",
         redirect: "manual",
         cache: "no-store",
+        signal,
         headers: {
           "User-Agent": "SIGINT/0.1 (article-summary)",
           Accept: "text/html, application/xhtml+xml;q=0.9, */*;q=0.5",
         },
       },
-      remainingMs
+      async (response): Promise<{ redirect: string } | { html: string }> => {
+        if ([301, 302, 303, 307, 308].includes(response.status)) {
+          const location = response.headers.get("location");
+          if (redirects >= 5) throw new Error("fetch-redirect-limit");
+          if (!location) throw new Error("fetch-redirect-location");
+          let target;
+          try {
+            target = parseAndValidateUrl(new URL(location, currentUrl).toString());
+          } catch {
+            throw new Error("fetch-redirect-invalid");
+          }
+          if (!target) throw new Error("fetch-redirect-invalid");
+          const hostname = target.parsed.hostname.toLowerCase().replace(/\.$/, "");
+          if (
+            UNSUPPORTED_DOMAINS.some((domain) => domainMatches(hostname, domain)) ||
+            await isBlockedHost(hostname, signal)
+          ) {
+            throw new Error("fetch-redirect-blocked");
+          }
+          return { redirect: target.parsed.toString() };
+        }
+
+        if (!response.ok) throw new Error(`fetch-status:${response.status}`);
+        const contentType = (response.headers.get("content-type") ?? "").toLowerCase();
+        if (contentType && !contentType.includes("text/html") && !contentType.includes("application/xhtml+xml")) {
+          throw new Error(`fetch-non-html:${contentType}`);
+        }
+        const text = new TextDecoder().decode(await readResponseBytes(response, MAX_HTML_BYTES, signal));
+        if (!text.trim()) throw new Error("fetch-empty-body");
+        return { html: text };
+      }
     );
-    if (![301, 302, 303, 307, 308].includes(response.status)) break;
-
-    const location = response.headers.get("location");
-    await response.body?.cancel();
-    if (redirects >= 5) throw new Error("fetch-redirect-limit");
-    if (!location) throw new Error("fetch-redirect-location");
-    let target;
-    try {
-      target = parseAndValidateUrl(new URL(location, currentUrl).toString());
-    } catch {
-      throw new Error("fetch-redirect-invalid");
-    }
-    if (!target) throw new Error("fetch-redirect-invalid");
-    const hostname = target.parsed.hostname.toLowerCase().replace(/\.$/, "");
-    if (
-      UNSUPPORTED_DOMAINS.some((domain) => domainMatches(hostname, domain)) ||
-      await isBlockedHost(hostname)
-    ) {
-      throw new Error("fetch-redirect-blocked");
-    }
-    currentUrl = target.parsed.toString();
+    if ("html" in result) return result.html;
+    currentUrl = result.redirect;
   }
-
-  if (!response.ok) {
-    throw new Error(`fetch-status:${response.status}`);
-  }
-
-  const contentType = (response.headers.get("content-type") ?? "").toLowerCase();
-  if (contentType && !contentType.includes("text/html") && !contentType.includes("application/xhtml+xml")) {
-    throw new Error(`fetch-non-html:${contentType}`);
-  }
-
-  const text = await response.text();
-  if (!text.trim()) {
-    throw new Error("fetch-empty-body");
-  }
-
-  return text.length > MAX_HTML_CHARS ? text.slice(0, MAX_HTML_CHARS) : text;
 }
 
-async function getExtractedArticleText(cacheKey: string, url: string): Promise<string> {
+async function getExtractedArticleText(cacheKey: string, url: string, signal: AbortSignal): Promise<string> {
   const cached = getCachedExtractedText(cacheKey);
   if (cached != null) return cached;
 
-  const html = await fetchArticleHtml(url);
+  const html = await fetchArticleHtml(url, signal);
   const extracted = extractArticleText(html);
   putExtractedTextCache(cacheKey, extracted);
   return extracted;
@@ -571,7 +548,8 @@ function sanitizeAiSummary(value: string): string {
 async function summarizeWithOpenAI(
   articleText: string,
   headline: string,
-  timeoutMs = 9_000
+  timeoutMs = 9_000,
+  signal?: AbortSignal,
 ): Promise<{ summary: string; model: string }> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) {
@@ -586,6 +564,7 @@ async function summarizeWithOpenAI(
     {
       method: "POST",
       cache: "no-store",
+      signal,
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
@@ -670,7 +649,8 @@ export async function getArticleSummary(params: GetArticleSummaryParams): Promis
     );
   }
 
-  if (await isBlockedHost(hostname)) {
+  const articleSignal = requestDeadline(8_000, params.signal);
+  if (await isBlockedHost(hostname, articleSignal)) {
     return toResult(
       toUnavailable(parsedInput.canonicalUrl, "unsupported_url"),
       { degraded: false, cacheHit: "miss", latencyMs: 0 }
@@ -678,29 +658,36 @@ export async function getArticleSummary(params: GetArticleSummaryParams): Promis
   }
 
   const fallbackValue = toUnavailable(parsedInput.canonicalUrl, "fetch_failed");
+  const headline = normalizeSpaces(params.headline ?? "");
+  // Tracking-looking query values still reach the publisher and can affect its
+  // response. Cache by the URL actually fetched; fragments never reach HTTP.
+  parsedInput.parsed.hash = "";
+  const fetchUrl = parsedInput.parsed.toString();
   const cacheKey = JSON.stringify({
-    url: parsedInput.canonicalUrl,
+    url: fetchUrl,
     format: SUMMARY_FORMAT_VERSION,
+    headline,
   });
 
   const cached = await cachedFetch<ArticleSummaryPayload>({
     cacheKey,
     policy: SUMMARY_POLICY,
     fallbackValue,
-    request: async () => {
-      const extractCacheKey = `${parsedInput.canonicalUrl}::${SUMMARY_FORMAT_VERSION}`;
+    request: async (signal: AbortSignal) => {
+      const extractCacheKey = `${fetchUrl}::${SUMMARY_FORMAT_VERSION}`;
       const extractedText = await getExtractedArticleText(
         extractCacheKey,
-        parsedInput.parsed.toString()
+        fetchUrl,
+        AbortSignal.any([articleSignal, signal]),
       );
       if (countWords(extractedText) < MIN_SOURCE_WORDS) {
         return toUnavailable(parsedInput.canonicalUrl, "empty_content");
       }
-      if (!passesRelevanceGuard(extractedText, params.headline ?? "")) {
+      if (!passesRelevanceGuard(extractedText, headline)) {
         return toUnavailable(parsedInput.canonicalUrl, "low_relevance");
       }
 
-      const extractive = buildExtractiveSummary(extractedText, params.headline ?? "");
+      const extractive = buildExtractiveSummary(extractedText, headline);
       if (!extractive) {
         return toUnavailable(parsedInput.canonicalUrl, "empty_content");
       }
@@ -717,8 +704,9 @@ export async function getArticleSummary(params: GetArticleSummaryParams): Promis
       try {
         const ai = await summarizeWithOpenAI(
           extractedText,
-          params.headline ?? "",
-          AI_FAST_PATH_BUDGET_MS
+          headline,
+          AI_FAST_PATH_BUDGET_MS,
+          params.signal ? AbortSignal.any([signal, params.signal]) : signal,
         );
         return {
           summary: ai.summary,

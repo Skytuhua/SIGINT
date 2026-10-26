@@ -31,7 +31,7 @@ const baseQuery = "timeWindow=7d&mode=strict&verifiedOverlay=1&west=-20&south=-1
 
 function request(query: string) {
   return GET(new Request(`http://localhost/api/news/layers/conflict-zones?${query}`), {
-    params: { layerId: "conflict-zones" },
+    params: Promise.resolve({ layerId: "conflict-zones" }),
   });
 }
 

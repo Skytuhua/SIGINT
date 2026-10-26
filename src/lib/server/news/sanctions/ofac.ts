@@ -34,7 +34,8 @@ function parseOfacCsv(text: string): OfacRawRow[] {
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
-    const cols = splitCsvLine(trimmed);
+    // OFAC uses -0- for absent CSV values, including the non-individual type.
+    const cols = splitCsvLine(trimmed).map((value) => value.trim() === "-0-" ? "" : value.trim());
     if (cols.length < 12) continue;
     rows.push({
       uid: cols[0].trim(),
@@ -81,7 +82,7 @@ function extractCountryFromRemarks(remarks: string): string | null {
 }
 
 function extractIdFromRemarks(remarks: string, key: string): string | null {
-  const re = new RegExp(`${key}\\s*[:=]?\\s*([A-Za-z0-9-]+)`, "i");
+  const re = new RegExp(`\\b${key}\\b\\s*[:=]?\\s*([A-Za-z0-9-]+)`, "i");
   const m = remarks.match(re);
   return m ? m[1] : null;
 }
@@ -113,12 +114,9 @@ export async function fetchOfacEntities(): Promise<{
     for (const row of rows) {
       if (!row.uid || !row.name) continue;
 
-      const isVessel = row.sdnType === "-vessel-" || !!row.vesselType;
-      const isAircraft = row.sdnType === "-aircraft-";
-      const entityType = classifyEntityType(row.sdnType, {
-        isVessel,
-        isAircraft,
-      });
+      const entityType = row.sdnType
+        ? classifyEntityType(row.sdnType)
+        : classifyEntityType("organization", { isVessel: !!row.vesselType });
 
       const country = row.vesselFlag || extractCountryFromRemarks(row.remarks) || null;
       const geo = deriveGeo(null, country);

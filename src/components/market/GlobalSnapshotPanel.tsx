@@ -63,7 +63,7 @@ const GROUPS: SnapshotGroupDef[] = [
     col3Label: "1W Δ",
     isRate: true,
     rows: [
-      { sym: "2Y",   yfSym: "^IRX",     label: "US 2Y Treasury", highlight: ["RATES UP"] },
+      { sym: "3M",   yfSym: "^IRX",     label: "US 3M Treasury Bill", highlight: ["RATES UP"] },
       { sym: "5Y",   yfSym: "^FVX",     label: "US 5Y Treasury", highlight: ["RATES UP"] },
       { sym: "10Y",  yfSym: "^TNX",     label: "US 10Y Treasury", highlight: ["RATES UP"] },
       { sym: "30Y",  yfSym: "^TYX",     label: "US 30Y Treasury", highlight: ["RATES UP", "RISK-OFF"] },

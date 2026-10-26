@@ -45,7 +45,7 @@ export interface CircuitState {
 export interface CachedFetchOptions<T> {
   cacheKey: string;
   policy: UpstreamPolicy;
-  request: () => Promise<T>;
+  request: (signal: AbortSignal) => Promise<T>;
   fallbackValue?: T;
   /**
    * If a stale cache entry exists, return it immediately (default: true).
@@ -91,20 +91,20 @@ function cacheMapKey(policyKey: string, cacheKey: string): string {
   return `${policyKey}::${cacheKey}`;
 }
 
-function getFresh<T>(key: string): T | null {
+function getFresh<T>(key: string): CacheEntry<T> | undefined {
   const now = Date.now();
   const entry = cache.get(key) as CacheEntry<T> | undefined;
-  if (!entry) return null;
-  if (entry.expiresAt > now) return entry.value;
-  return null;
+  if (!entry) return undefined;
+  if (entry.expiresAt > now) return entry;
+  return undefined;
 }
 
-function getStale<T>(key: string): T | null {
+function getStale<T>(key: string): CacheEntry<T> | undefined {
   const now = Date.now();
   const entry = cache.get(key) as CacheEntry<T> | undefined;
-  if (!entry) return null;
-  if (entry.staleUntil > now) return entry.value;
-  return null;
+  if (!entry) return undefined;
+  if (entry.staleUntil > now) return entry;
+  return undefined;
 }
 
 function putCache<T>(key: string, value: T, ttlMs: number, staleTtlMs: number): void {
@@ -196,15 +196,18 @@ async function acquireToken(policy: UpstreamPolicy): Promise<void> {
   }
 }
 
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+async function withTimeout<T>(request: (signal: AbortSignal) => Promise<T>, timeoutMs: number): Promise<T> {
+  const controller = new AbortController();
   let timer: NodeJS.Timeout | null = null;
   try {
-    return await Promise.race([
-      promise,
-      new Promise<T>((_, reject) => {
-        timer = setTimeout(() => reject(new Error(`Timeout after ${timeoutMs}ms`)), timeoutMs);
-      }),
-    ]);
+    const deadline = new Promise<T>((_, reject) => {
+      timer = setTimeout(() => {
+        const error = new Error(`Timeout after ${timeoutMs}ms`);
+        controller.abort(error);
+        reject(error);
+      }, timeoutMs);
+    });
+    return await Promise.race([request(controller.signal), deadline]);
   } finally {
     if (timer) clearTimeout(timer);
   }
@@ -234,12 +237,18 @@ export async function fetchJsonOrThrow<T>(
   init: RequestInit,
   timeoutMs: number
 ): Promise<T> {
-  const merged: RequestInit = { ...init, cache: "no-store" as RequestCache };
-  const response = await withTimeout(fetch(url, merged), timeoutMs);
-  if (!response.ok) {
-    throw new UpstreamHttpError(response.status, `Upstream returned HTTP ${response.status}`);
-  }
-  return (await response.json()) as T;
+  return withTimeout(async (signal) => {
+    const merged: RequestInit = {
+      ...init,
+      cache: "no-store" as RequestCache,
+      signal: init.signal ? AbortSignal.any([init.signal, signal]) : signal,
+    };
+    const response = await fetch(url, merged);
+    if (!response.ok) {
+      throw new UpstreamHttpError(response.status, `Upstream returned HTTP ${response.status}`);
+    }
+    return (await response.json()) as T;
+  }, timeoutMs);
 }
 
 export async function cachedFetch<T>(options: CachedFetchOptions<T>): Promise<CachedFetchResult<T>> {
@@ -248,7 +257,7 @@ export async function cachedFetch<T>(options: CachedFetchOptions<T>): Promise<Ca
   const fresh = getFresh<T>(fullKey);
   if (fresh != null) {
     return {
-      data: fresh,
+      data: fresh.value,
       degraded: false,
       latencyMs: 0,
       cacheHit: "fresh",
@@ -263,7 +272,7 @@ export async function cachedFetch<T>(options: CachedFetchOptions<T>): Promise<Ca
     const stale = getStale<T>(fullKey);
     if (stale != null) {
       return {
-        data: stale,
+        data: stale.value,
         degraded: true,
         latencyMs: 0,
         cacheHit: "stale",
@@ -291,7 +300,7 @@ export async function cachedFetch<T>(options: CachedFetchOptions<T>): Promise<Ca
     while (attempt <= policy.maxRetries) {
       try {
         await acquireToken(policy);
-        const data = await withTimeout(request(), policy.timeoutMs);
+        const data = await withTimeout(request, policy.timeoutMs);
         putCache(fullKey, data, policy.ttlMs, staleTtlMs);
         recordSuccess(policy);
         return {
@@ -309,7 +318,7 @@ export async function cachedFetch<T>(options: CachedFetchOptions<T>): Promise<Ca
         if (!retryable || maxed) {
           if (stale != null) {
             return {
-              data: stale,
+              data: stale.value,
               degraded: true,
               latencyMs: performance.now() - started,
               cacheHit: "stale",
@@ -334,7 +343,7 @@ export async function cachedFetch<T>(options: CachedFetchOptions<T>): Promise<Ca
 
     if (stale != null) {
       return {
-        data: stale,
+        data: stale.value,
         degraded: true,
         latencyMs: performance.now() - started,
         cacheHit: "stale",
@@ -362,7 +371,7 @@ export async function cachedFetch<T>(options: CachedFetchOptions<T>): Promise<Ca
       if (!existing) {
         const runner = runNetwork()
           .catch((error) => ({
-            data: staleNow,
+            data: staleNow.value,
             degraded: true,
             latencyMs: 0,
             cacheHit: "stale",
@@ -376,7 +385,7 @@ export async function cachedFetch<T>(options: CachedFetchOptions<T>): Promise<Ca
     }
 
     return {
-      data: staleNow,
+      data: staleNow.value,
       degraded: true,
       latencyMs: 0,
       cacheHit: "stale",

@@ -50,9 +50,12 @@ export default function EarningsTracker({ style, onTickerClick }: Props) {
             <div className="si-market-earn-section-label" style={{ color: "#89e5ff" }}>
               UPCOMING
             </div>
-            {upcoming.map((e: EarningsEntry) => (
+            {upcoming.map((e: EarningsEntry, index) => (
+              <React.Fragment key={`${e.sym}-${e.date}`}>
+              {(index === 0 || upcoming[index - 1].date !== e.date) && (
+                <div className="si-market-earn-section-label"><time dateTime={e.date}>{e.date}</time></div>
+              )}
               <div
-                key={`${e.sym}-${e.date}`}
                 className="si-market-earn-row"
                 style={{ cursor: onTickerClick ? "pointer" : "default" }}
                 onClick={() => onTickerClick?.(e.sym)}
@@ -66,6 +69,7 @@ export default function EarningsTracker({ style, onTickerClick }: Props) {
                 <span className="si-market-earn-company" title={e.company}>{e.company}</span>
                 <span className="si-market-earn-eps-est"><Term id="EPS">EST</Term> {e.epsEst}</span>
               </div>
+              </React.Fragment>
             ))}
           </>
         )}

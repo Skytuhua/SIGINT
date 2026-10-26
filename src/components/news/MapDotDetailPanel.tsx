@@ -302,11 +302,11 @@ function buildMilitaryEnrichFields(payload: MilitaryBaseEnrichResponse | null, l
 
 export default function MapDotDetailPanel({ detail, onClose }: MapDotDetailPanelProps) {
   const [mounted, setMounted] = useState(false);
-  const [militaryEnrich, setMilitaryEnrich] = useState<MilitaryBaseEnrichResponse | null>(null);
+  const [militaryEnrich, setMilitaryEnrich] = useState<{ key: string; data: MilitaryBaseEnrichResponse } | null>(null);
   const [militaryEnrichLoading, setMilitaryEnrichLoading] = useState(false);
-  const [tradeNodeEnrich, setTradeNodeEnrich] = useState<TradeNodeEnrichResponse | null>(null);
+  const [tradeNodeEnrich, setTradeNodeEnrich] = useState<{ key: string; data: TradeNodeEnrichResponse } | null>(null);
   const [tradeNodeEnrichLoading, setTradeNodeEnrichLoading] = useState(false);
-  const [tradeNodeStaticFields, setTradeNodeStaticFields] = useState<DotDetailField[]>([]);
+  const [tradeNodeStaticFields, setTradeNodeStaticFields] = useState<{ key: string; fields: DotDetailField[] } | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -332,7 +332,7 @@ export default function MapDotDetailPanel({ detail, onClose }: MapDotDetailPanel
         (f) => String(f.properties?.name ?? "") === nodeName
       );
       if (feature?.properties) {
-        setTradeNodeStaticFields(buildTradeNodeStaticFields(feature.properties));
+        setTradeNodeStaticFields({ key: nodeName, fields: buildTradeNodeStaticFields(feature.properties) });
       }
     });
     return () => { cancelled = true; };
@@ -346,7 +346,8 @@ export default function MapDotDetailPanel({ detail, onClose }: MapDotDetailPanel
     const cached = militaryBaseEnrichCache.get(key);
     const now = Date.now();
     if (cached && cached.expiresAt > now) {
-      setMilitaryEnrich({ result: null, degraded: false });
+      setMilitaryEnrich({ key, data: { result: null, degraded: false } });
+      setMilitaryEnrichLoading(false);
       // Store fields in cache only; rebuild from cache below via memo.
       return;
     }
@@ -366,11 +367,13 @@ export default function MapDotDetailPanel({ detail, onClose }: MapDotDetailPanel
         if (!res.ok) throw new Error(`http-${res.status}`);
         const json = (await res.json()) as MilitaryBaseEnrichResponse;
         if (cancelled) return;
-        setMilitaryEnrich(json);
+        const fields = buildMilitaryEnrichFields(json, latLon.lat, latLon.lon);
+        if (fields.length > 0) militaryBaseEnrichCache.set(key, { fields, expiresAt: Date.now() + MILITARY_BASE_ENRICH_TTL_MS });
+        setMilitaryEnrich({ key, data: json });
       } catch (err) {
         if (cancelled) return;
         const message = err instanceof Error ? err.message : "fetch-failed";
-        setMilitaryEnrich({ error: message });
+        setMilitaryEnrich({ key, data: { error: message } });
       } finally {
         if (!cancelled) setMilitaryEnrichLoading(false);
       }
@@ -393,7 +396,8 @@ export default function MapDotDetailPanel({ detail, onClose }: MapDotDetailPanel
     const key = wikidataId;
     const cached = tradeNodeEnrichCache.get(key);
     if (cached && cached.expiresAt > Date.now()) {
-      setTradeNodeEnrich({ result: null });
+      setTradeNodeEnrich({ key, data: { result: null } });
+      setTradeNodeEnrichLoading(false);
       return;
     }
 
@@ -408,10 +412,12 @@ export default function MapDotDetailPanel({ detail, onClose }: MapDotDetailPanel
         if (!res.ok) throw new Error(`http-${res.status}`);
         const json = (await res.json()) as TradeNodeEnrichResponse;
         if (cancelled) return;
-        setTradeNodeEnrich(json);
+        const fields = buildTradeNodeEnrichFields(json);
+        if (fields.length > 0) tradeNodeEnrichCache.set(key, { fields, expiresAt: Date.now() + TRADE_NODE_ENRICH_TTL_MS });
+        setTradeNodeEnrich({ key, data: json });
       } catch (err) {
         if (cancelled) return;
-        setTradeNodeEnrich({ error: err instanceof Error ? err.message : "fetch-failed" });
+        setTradeNodeEnrich({ key, data: { error: err instanceof Error ? err.message : "fetch-failed" } });
       } finally {
         if (!cancelled) setTradeNodeEnrichLoading(false);
       }
@@ -431,11 +437,7 @@ export default function MapDotDetailPanel({ detail, onClose }: MapDotDetailPanel
     if (cached && cached.expiresAt > Date.now()) return cached.fields;
 
     if (tradeNodeEnrichLoading) return [{ label: "PUBLIC DATA", value: "Fetching Wikidata + Wikipedia…" }];
-    const fields = buildTradeNodeEnrichFields(tradeNodeEnrich);
-    if (fields.length > 0) {
-      tradeNodeEnrichCache.set(wikidataId, { fields, expiresAt: Date.now() + TRADE_NODE_ENRICH_TTL_MS });
-    }
-    return fields;
+    return buildTradeNodeEnrichFields(tradeNodeEnrich?.key === wikidataId ? tradeNodeEnrich.data : null);
   }, [detail.layerId, detail.fields, detail.uid, tradeNodeEnrich, tradeNodeEnrichLoading]);
 
   const militaryExtraFields = useMemo(() => {
@@ -448,11 +450,7 @@ export default function MapDotDetailPanel({ detail, onClose }: MapDotDetailPanel
     if (cached && cached.expiresAt > now) return cached.fields;
 
     if (militaryEnrichLoading) return [{ label: "PUBLIC", value: "Fetching public sources…" }];
-    const fields = buildMilitaryEnrichFields(militaryEnrich, latLon.lat, latLon.lon);
-    if (fields.length > 0) {
-      militaryBaseEnrichCache.set(key, { fields, expiresAt: Date.now() + MILITARY_BASE_ENRICH_TTL_MS });
-    }
-    return fields;
+    return buildMilitaryEnrichFields(militaryEnrich?.key === key ? militaryEnrich.data : null, latLon.lat, latLon.lon);
   }, [detail.layerId, latLon, militaryEnrich, militaryEnrichLoading]);
 
   const displayFields = useMemo(() => {
@@ -469,10 +467,10 @@ export default function MapDotDetailPanel({ detail, onClose }: MapDotDetailPanel
         (f) => !["ABOUT","THROUGHPUT","GLOBAL RANK","TOP EXPORTS","TOP IMPORTS",
                   "DAILY VESSELS","TRADE SHARE","MIN WIDTH","CONTROLLED BY","PRIMARY CARGO"].includes(f.label)
       );
-      return [...baseFields, ...tradeNodeStaticFields, ...tradeNodeExtraFields];
+      return [...baseFields, ...(tradeNodeStaticFields?.key === detail.title ? tradeNodeStaticFields.fields : []), ...tradeNodeExtraFields];
     }
     return visible;
-  }, [detail.fields, detail.layerId, militaryExtraFields, tradeNodeExtraFields, tradeNodeStaticFields]);
+  }, [detail.fields, detail.layerId, detail.title, militaryExtraFields, tradeNodeExtraFields, tradeNodeStaticFields]);
 
   if (!mounted) return null;
 

@@ -25,6 +25,7 @@ function buildUrl(timeWindow?: StreamFilterParams["timeWindow"], entityWatchlist
 }
 
 const MAX_CLIENT_ITEMS = 2_000;
+const WINDOW_MS = { "5m": 5 * 60_000, "30m": 30 * 60_000, "2h": 2 * 60 * 60_000, "24h": 24 * 60 * 60_000 };
 
 export function useNewsStream(filters: StreamFilterParams) {
   const [state, setState] = useState<NewsStreamState>({
@@ -42,6 +43,19 @@ export function useNewsStream(filters: StreamFilterParams) {
   // Only reconnect when the server-side params that actually change the stream change.
   const timeWindow = filters.timeWindow;
   const entityWatchlistKey = (filters.entityWatchlist ?? []).slice().sort().join(",");
+  const windowMs = timeWindow ? WINDOW_MS[timeWindow] : Infinity;
+
+  const pruneExpired = useCallback(() => {
+    const map = itemsRef.current;
+    if (!pruneMap(map, Date.now() - windowMs)) return;
+    setState((s) => ({ ...s, items: Array.from(map.values()).sort((a, b) => b.timestamp - a.timestamp) }));
+  }, [windowMs]);
+
+  useEffect(() => {
+    pruneExpired();
+    const timer = setInterval(pruneExpired, 15_000);
+    return () => clearInterval(timer);
+  }, [pruneExpired]);
 
   const connect = useCallback(() => {
     if (eventSourceRef.current) {
@@ -82,10 +96,12 @@ export function useNewsStream(filters: StreamFilterParams) {
       case "snapshot": {
         const map = new Map<string, StreamItem>();
         for (const item of event.items) map.set(item.id, item);
+        pruneMap(map, Date.now() - windowMs);
+        enforceCapacity(map);
         itemsRef.current = map;
         setState((s) => ({
           ...s,
-          items: event.items.slice().sort((a, b) => b.timestamp - a.timestamp),
+          items: Array.from(map.values()).sort((a, b) => b.timestamp - a.timestamp),
           sourceHealth: event.sourceHealth,
           expectedFlowPerMin: event.expectedFlowPerMin,
           connected: true,
@@ -98,6 +114,7 @@ export function useNewsStream(filters: StreamFilterParams) {
         for (const item of event.items) {
           map.set(item.id, item);
         }
+        pruneMap(map, Date.now() - windowMs);
         enforceCapacity(map);
         const sorted = Array.from(map.values()).sort((a, b) => b.timestamp - a.timestamp);
         itemsRef.current = map;
@@ -114,7 +131,7 @@ export function useNewsStream(filters: StreamFilterParams) {
             changed = true;
           }
         }
-        if (changed) {
+        if (pruneMap(map, Date.now() - windowMs) || changed) {
           const sorted = Array.from(map.values()).sort((a, b) => b.timestamp - a.timestamp);
           setState((s) => ({ ...s, items: sorted }));
         }
@@ -129,6 +146,7 @@ export function useNewsStream(filters: StreamFilterParams) {
         break;
       }
       case "heartbeat":
+        pruneExpired();
         break;
     }
   }
@@ -144,20 +162,29 @@ export function useNewsStream(filters: StreamFilterParams) {
   }, [connect]);
 
   const searchLocal = useCallback((query: string): StreamItem[] => {
-    if (!query) return Array.from(itemsRef.current.values()).sort((a, b) => b.timestamp - a.timestamp);
+    const currentItems = Array.from(itemsRef.current.values()).filter((item) => item.timestamp >= Date.now() - windowMs);
+    if (!query) return currentItems.sort((a, b) => b.timestamp - a.timestamp);
     const q = query.toLowerCase();
-    return Array.from(itemsRef.current.values())
+    return currentItems
       .filter((item) => {
         const text = `${item.headline} ${item.summary ?? ""} ${item.entities.map((e) => e.name).join(" ")} ${item.tickers.join(" ")} ${item.sourceDomain} ${item.geo?.placeName ?? ""}`.toLowerCase();
         return text.includes(q);
       })
       .sort((a, b) => b.timestamp - a.timestamp);
-  }, []);
+  }, [windowMs]);
 
   return {
     ...state,
     searchLocal,
   };
+}
+
+function pruneMap(map: Map<string, StreamItem>, cutoff: number): boolean {
+  let changed = false;
+  for (const [id, item] of map) {
+    if (item.timestamp < cutoff) { map.delete(id); changed = true; }
+  }
+  return changed;
 }
 
 function enforceCapacity(map: Map<string, StreamItem>) {

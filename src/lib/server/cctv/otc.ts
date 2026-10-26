@@ -3,7 +3,8 @@
  * validating, and converting US traffic cameras.
  */
 import type { CctvCamera } from "../../providers/types";
-import { isBlockedHost } from "../ssrf";
+import { withPublicHttpResponse } from "../ssrf";
+import { requestDeadline } from "../fetchWithTimeout";
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -103,37 +104,41 @@ export function flattenAndFilter(data: OtcData): OtcCandidate[] {
 /** Validate a camera URL via HEAD request (fast, no body download). */
 export async function validateCameraHead(url: string): Promise<boolean> {
   try {
-    const parsed = new URL(url);
-    if (await isBlockedHost(parsed.hostname)) return false;
+    const signal = requestDeadline(VALIDATE_TIMEOUT_MS);
+    const probe = async (method: "HEAD" | "GET") => {
+      let currentUrl = url;
+      for (let redirects = 0; ; redirects++) {
+        signal.throwIfAborted();
+        const result = await withPublicHttpResponse(currentUrl, {
+          method,
+          signal,
+          headers: {
+            "User-Agent": USER_AGENT,
+            Accept: "image/*,*/*;q=0.8",
+            ...(method === "GET" ? { Range: "bytes=0-0" } : {}),
+          },
+        }, async (response): Promise<{ redirect: string } | { status: number; contentType: string }> => {
+          if ([301, 302, 303, 307, 308].includes(response.status)) {
+            const location = response.headers.get("location");
+            if (!location || redirects >= 5) throw new Error("camera-redirect-limit");
+            return { redirect: new URL(location, currentUrl).toString() };
+          }
+          return { status: response.status, contentType: response.headers.get("content-type") ?? "" };
+        });
+        if ("redirect" in result) currentUrl = result.redirect;
+        else return result;
+      }
+    };
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), VALIDATE_TIMEOUT_MS);
-
-    // Try HEAD first (fast)
-    let resp = await fetch(url, {
-      method: "HEAD",
-      signal: controller.signal,
-      headers: { "User-Agent": USER_AGENT, Accept: "image/*,*/*;q=0.8" },
-    });
+    let resp = await probe("HEAD");
 
     // Some servers reject HEAD — fall back to range GET
     if (resp.status === 405 || resp.status === 501) {
-      resp = await fetch(url, {
-        signal: controller.signal,
-        headers: {
-          "User-Agent": USER_AGENT,
-          Accept: "image/*,*/*;q=0.8",
-          Range: "bytes=0-0",
-        },
-      });
+      resp = await probe("GET");
     }
 
-    clearTimeout(timeout);
-
-    if (!resp.ok && resp.status !== 206) return false;
-
-    const ct = resp.headers.get("content-type") ?? "";
-    return ct.startsWith("image/");
+    if (resp.status < 200 || resp.status >= 300) return false;
+    return resp.contentType.startsWith("image/");
   } catch {
     return false;
   }

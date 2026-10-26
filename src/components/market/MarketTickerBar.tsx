@@ -36,7 +36,7 @@ export default function MarketTickerBar() {
 
   return (
     <div className="si-market-ticker-bar">
-      <div className="si-market-ticker-label">LIVE</div>
+      <div className="si-market-ticker-label" title="Simulated snapshot · as-of unknown">SIMULATED · as-of unknown</div>
       <div className="si-market-ticker-track">
         <div className="si-market-ticker-scroll">
           {DOUBLED.map((item, i) => {

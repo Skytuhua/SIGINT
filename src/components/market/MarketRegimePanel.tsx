@@ -13,7 +13,7 @@ interface Signal {
   name: string;
   termId: string;
   value: string;
-  score: number;  // -2 to +2
+  score: number | null;  // -2 to +2; null means missing input
   label: string;
   color: string;
 }
@@ -136,22 +136,32 @@ export default function MarketRegimePanel({ style }: Props) {
       color: signalColor(momScore),
     });
 
-    const comp = sigs.reduce((s, sig) => s + sig.score, 0) / sigs.length;
-    const reg = getRegime(comp);
+    const finite = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
+    const hasVix = finite(quotes["^VIX"]?.price) && quotes["^VIX"].price > 0;
+    const hasVix9d = finite(quotes["^VIX9D"]?.price) && quotes["^VIX9D"].price > 0;
+    const hasRsp = finite(quotes.RSP?.changePercent);
+    const hasSpy = finite(quotes.SPY?.changePercent);
+    const coverage = [hasVix, hasVix && hasVix9d, hasRsp && hasSpy, hasSpy];
+    sigs.forEach((signal, index) => {
+      if (!coverage[index]) Object.assign(signal, { value: "—", score: null, label: "Unavailable", color: "var(--si-text-muted)" });
+    });
+    // A comparable composite requires every input; unknown signals are never neutral votes.
+    const comp = coverage.every(Boolean) ? sigs.reduce((sum, sig) => sum + (sig.score ?? 0), 0) / sigs.length : null;
+    const reg = comp == null ? { label: "INSUFFICIENT DATA", color: "var(--si-text-muted)" } : getRegime(comp);
 
     return { signals: sigs, composite: comp, regime: reg };
   }, [quotes]);
 
   // Gauge: map composite (-2 to +2) → position (0% to 100%)
-  const gaugePos = Math.max(0, Math.min(100, ((composite + 2) / 4) * 100));
+  const gaugePos = Math.max(0, Math.min(100, (((composite ?? 0) + 2) / 4) * 100));
 
   return (
     <div className="si-market-panel" style={style}>
       <div className="si-market-panel-header">
         <span className="si-market-panel-title"><Term id="RISK_ON">Market Regime</Term></span>
         <span style={{ fontSize: 9, color: "var(--si-text-muted)", letterSpacing: "0.04em" }}>FEAR & GREED</span>
-        <span className={`si-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
-          {isLive ? "LIVE" : "STATIC"}
+        <span className={`si-market-panel-badge ${isLive && composite != null ? "is-live" : "is-static"}`}>
+          {composite == null ? "UNAVAILABLE" : isLive ? "LIVE" : "STALE"}
         </span>
       </div>
       <div className="si-market-panel-body" style={{ padding: "12px 14px" }}>
@@ -163,11 +173,11 @@ export default function MarketRegimePanel({ style }: Props) {
             background: "linear-gradient(to right, #ff5a5f, #ff8c42, #89e5ff, #6ee7b7, #36b37e)",
           }}>
             {/* Needle */}
-            <div style={{
+            {composite != null && <div style={{
               position: "absolute", top: -3, left: `${gaugePos}%`, transform: "translateX(-50%)",
               width: 4, height: 16, borderRadius: 2, background: "#fff",
               boxShadow: "0 0 6px rgba(255,255,255,0.5)",
-            }} />
+            }} />}
           </div>
           {/* Labels under gauge */}
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 8, color: "var(--si-text-muted)", marginTop: 3 }}>
@@ -183,7 +193,7 @@ export default function MarketRegimePanel({ style }: Props) {
             {regime.label}
           </div>
           <div style={{ fontSize: 9, color: "var(--si-text-muted)", marginTop: 2 }}>
-            Score: {composite.toFixed(2)} / 2.00
+            Score: {composite == null ? "Unavailable · all 4 signals required" : `${composite.toFixed(2)} / 2.00`}
           </div>
         </div>
 
@@ -217,14 +227,14 @@ export default function MarketRegimePanel({ style }: Props) {
                 {sig.label}
               </span>
               <span style={{ textAlign: "right", fontSize: 11, color: sig.color, fontWeight: 700 }}>
-                {signalArrow(sig.score)}
+                {sig.score == null ? "—" : signalArrow(sig.score)}
               </span>
             </div>
           ))}
         </div>
       </div>
       <div className="si-market-panel-footer">
-        {isLive ? "Composite of VIX, breadth, momentum · 60s refresh" : "Waiting for data…"}
+        {composite == null ? "Insufficient quote coverage · all 4 signals required" : isLive ? "Composite of VIX, breadth, momentum · 60s refresh" : "Last received inputs · stale"}
       </div>
     </div>
   );

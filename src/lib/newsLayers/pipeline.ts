@@ -22,7 +22,7 @@ function nowHealth(
 
 export async function loadLayerFromCache(layer: LayerRegistryEntry): Promise<LayerFeatureCollection | null> {
   const cached = await readPersistentFeedCache<LayerFeatureCollection>(layer.dataSource.cacheKey);
-  if (!cached.entry?.payload) return null;
+  if (!cached.entry?.payload || !Number.isFinite(cached.entry.staleUntil) || cached.entry.staleUntil <= Date.now()) return null;
   return cached.entry.payload;
 }
 

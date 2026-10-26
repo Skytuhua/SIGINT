@@ -1,3 +1,4 @@
+import { normalizeGdeltCountryCode, toGdeltCountryCode } from "../../../news/countryCode";
 import type {
   GdeltAggregatePoint,
   GdeltArticle,
@@ -128,7 +129,11 @@ function buildQuery(params: GdeltDocParams): string {
   const parts: string[] = [];
   if (params.q?.trim()) parts.push(params.q.trim());
   if (params.cat && CAT_QUERY_MAP[params.cat]) parts.push(`(${CAT_QUERY_MAP[params.cat]})`);
-  if (params.country) parts.push(`sourcecountry:${params.country.toUpperCase()}`);
+  if (params.country) {
+    const countryCode = toGdeltCountryCode(params.country);
+    if (!countryCode) throw new RangeError("Unknown country ISO2 code or name");
+    parts.push(`sourcecountry:${countryCode}`);
+  }
   if (params.domain) parts.push(`domain:${params.domain}`);
   return parts.filter(Boolean).join(" ") || "(sourcelang:english OR sourcelang:spanish)";
 }
@@ -147,7 +152,7 @@ function parsePoint(row: Record<string, unknown>): GdeltGeoPoint | null {
   return {
     name: String(row.name ?? row.fullname ?? row.country ?? row.adm1 ?? ""),
     fullname: String(row.fullname ?? row.name ?? row.country ?? row.adm1 ?? ""),
-    countrycode: String(row.countrycode ?? row.code ?? row.country ?? "").slice(0, 2).toUpperCase(),
+    countrycode: normalizeGdeltCountryCode(String(row.countrycode ?? row.code ?? row.country ?? "")) ?? "",
     lat,
     lon,
     count: Number.isFinite(count) ? count : 1,
@@ -158,7 +163,7 @@ function parseAggregate(row: Record<string, unknown>): GdeltAggregatePoint | nul
   const p = parsePoint(row);
   if (!p) return null;
   return {
-    key: String(row.countrycode ?? row.code ?? row.name ?? p.fullname),
+    key: p.countrycode || String(row.name ?? p.fullname),
     label: p.fullname,
     count: p.count,
     lat: p.lat,
@@ -189,7 +194,7 @@ export async function getGdeltArticles(params: GdeltDocParams): Promise<CachedFe
         { headers: { "User-Agent": "SIGINT/0.1 (research)" } },
         DOC_POLICY.timeoutMs
       );
-      return json.articles ?? [];
+      return (json.articles ?? []).map((article) => ({ ...article, sourcecountry: normalizeGdeltCountryCode(article.sourcecountry) ?? article.sourcecountry }));
     },
   });
 }
@@ -263,7 +268,7 @@ export async function getGdeltContext(query: string): Promise<CachedFetchResult<
         { headers: { "User-Agent": "SIGINT/0.1 (research)" } },
         CONTEXT_POLICY.timeoutMs
       );
-      return json.articles ?? [];
+      return (json.articles ?? []).map((article) => ({ ...article, sourcecountry: normalizeGdeltCountryCode(article.sourcecountry) ?? article.sourcecountry }));
     },
   });
 }
@@ -283,15 +288,21 @@ export async function getGdeltTimeline(
     policy: TIMELINE_POLICY,
     fallbackValue: [],
     request: async () => {
-      const json = await fetchJsonOrThrow<{ timeline?: Array<{ date: string; value: number }> }>(
+      const json = await fetchJsonOrThrow<{
+        timeline?: Array<{ series?: string; data?: Array<{ date?: unknown; value?: unknown }> }>;
+      }>(
         url.toString(),
         { headers: { "User-Agent": "SIGINT/0.1 (research)" } },
         TIMELINE_POLICY.timeoutMs
       );
-      return (json.timeline ?? []).map((point) => ({
-        date: point.date,
-        value: Number(point.value) || 0,
-      }));
+      const series = Array.isArray(json.timeline) ? json.timeline : [];
+      const selected = series.find((entry) => entry.series === "Volume Intensity") ?? series[0];
+      if (!Array.isArray(selected?.data)) return [];
+      return selected.data.flatMap((point) => {
+        if (typeof point?.date !== "string" || !/^\d{8}T\d{6}Z$/.test(point.date)) return [];
+        if (typeof point.value !== "number" || !Number.isFinite(point.value)) return [];
+        return [{ date: point.date, value: point.value }];
+      });
     },
   });
 }

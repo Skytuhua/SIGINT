@@ -399,7 +399,7 @@ export async function getEarningsCalendar(): Promise<CachedFetchResult<{ upcomin
         "AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA","AVGO","NFLX","COST",
         "AMD","CRM","ORCL","ADBE","QCOM","INTC","PYPL","UBER","SQ","SNOW",
       ];
-      const url = `${YF_BASE}/v7/finance/quote?symbols=${earningsTickers.join(",")}&fields=symbol,shortName,earningsTimestamp,earningsTimestampStart,earningsTimestampEnd,epsTrailingTwelveMonths,epsForward,epsCurrentYear,marketCap`;
+      const url = `${YF_BASE}/v7/finance/quote?symbols=${earningsTickers.join(",")}&fields=symbol,shortName,earningsTimestamp,earningsTimestampStart,earningsTimestampEnd,marketCap`;
       const json = await yahooFetchJson<YFQuoteResponse>(url, QUOTE_POLICY.timeoutMs);
       const results = json.quoteResponse?.result ?? [];
       const now = Date.now();
@@ -416,7 +416,6 @@ export async function getEarningsCalendar(): Promise<CachedFetchResult<{ upcomin
         const hour = earningsDate.getUTCHours();
         const time = hour < 14 ? "BMO" : "AMC";
 
-        const epsEst = raw.epsForward ?? raw.epsCurrentYear;
         const mcap = raw.marketCap as number | undefined;
         const mcapStr = mcap ? `${(mcap / 1e9).toFixed(0)}B` : "";
 
@@ -425,7 +424,8 @@ export async function getEarningsCalendar(): Promise<CachedFetchResult<{ upcomin
           time,
           sym: item.symbol ?? "",
           company: item.shortName ?? item.symbol ?? "",
-          epsEst: epsEst != null ? `$${Number(epsEst).toFixed(2)}` : "—",
+          // Quote EPS fields describe annual periods, not this earnings event.
+          epsEst: "—",
           mktCapB: mcapStr,
         };
 
@@ -433,14 +433,6 @@ export async function getEarningsCalendar(): Promise<CachedFetchResult<{ upcomin
         if (diff > 0) {
           upcoming.push({ timestamp: earningsTs, entry });
         } else if (diff > -30 * 24 * 60 * 60 * 1000) {
-          const epsTTM = raw.epsTrailingTwelveMonths as number | undefined;
-          if (epsTTM != null) {
-            entry.epsAct = `$${epsTTM.toFixed(2)}`;
-            const estNum = typeof epsEst === "number" ? epsEst : parseFloat(String(epsEst));
-            if (!Number.isNaN(estNum)) {
-              entry.surprise = epsTTM > estNum * 1.01 ? "beat" : epsTTM < estNum * 0.99 ? "miss" : "in-line";
-            }
-          }
           recent.push({ timestamp: earningsTs, entry });
         }
       }

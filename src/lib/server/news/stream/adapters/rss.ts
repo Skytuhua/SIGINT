@@ -3,7 +3,8 @@ import type { NewsArticle } from "../../../../news/types";
 import { getRssArticles } from "../../providers/rss";
 import { articleToStreamItem } from "../normalize";
 
-let lastPollTimestamp = 0;
+const MAX_SEEN_IDS = 10_000;
+const seenIds = new Set<string>();
 
 export async function pollRss(): Promise<{ items: StreamItem[]; healthUpdate: { ok: boolean; count: number; error?: string } }> {
   try {
@@ -13,15 +14,19 @@ export async function pollRss(): Promise<{ items: StreamItem[]; healthUpdate: { 
     });
 
     const articles: NewsArticle[] = result.data?.items ?? [];
-    const newArticles = lastPollTimestamp > 0
-      ? articles.filter((a) => a.publishedAt > lastPollTimestamp)
-      : articles;
-
-    if (articles.length > 0) {
-      lastPollTimestamp = Math.max(lastPollTimestamp, ...articles.map((a) => a.publishedAt));
+    const streamItems: StreamItem[] = [];
+    for (const article of articles) {
+      const item = articleToStreamItem(article);
+      if (seenIds.has(item.id)) continue;
+      seenIds.add(item.id);
+      streamItems.push(item);
+    }
+    while (seenIds.size > MAX_SEEN_IDS) {
+      const oldest = seenIds.values().next().value;
+      if (oldest === undefined) break;
+      seenIds.delete(oldest);
     }
 
-    const streamItems = newArticles.map(articleToStreamItem);
     const degraded = result.degraded || (result.data?.degradedFeeds?.length ?? 0) > 0;
 
     return {
@@ -36,4 +41,4 @@ export async function pollRss(): Promise<{ items: StreamItem[]; healthUpdate: { 
   }
 }
 
-export function resetRssCursor() { lastPollTimestamp = 0; }
+export function resetRssCursor() { seenIds.clear(); }

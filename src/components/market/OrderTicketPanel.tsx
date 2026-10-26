@@ -6,68 +6,100 @@ import Term from "./shared/Term";
 type Side = "BUY" | "SELL";
 type OrderType = "MARKET" | "LIMIT" | "STOP" | "STOP-LIMIT";
 
-interface FilledOrder {
+interface SimulatedOrder {
   id: number;
   time: string;
   sym: string;
   side: Side;
   type: OrderType;
   qty: number;
-  price: number;
-  status: "FILLED";
+  price: number | null;
+  limit: number;
+  stop: number;
+  triggered: boolean;
+  status: "FILLED" | "PENDING";
+}
+
+function evaluateOrder(order: SimulatedOrder, spot: number): SimulatedOrder {
+  if (order.status === "FILLED" || !Number.isFinite(spot) || spot <= 0) return order;
+  const needsStop = order.type === "STOP" || order.type === "STOP-LIMIT";
+  const triggered = order.triggered || !needsStop || (order.side === "BUY" ? spot >= order.stop : spot <= order.stop);
+  if (!triggered) return order;
+  const needsLimit = order.type === "LIMIT" || order.type === "STOP-LIMIT";
+  const executable = !needsLimit || (order.side === "BUY" ? spot <= order.limit : spot >= order.limit);
+  return executable ? { ...order, triggered, price: spot, status: "FILLED" } : { ...order, triggered };
 }
 
 interface Props {
   sym: string;
-  spotPrice: number;
+  spotPrice: number | null;
+  spotSource?: string;
 }
 
 let _orderId = 1;
 
-export default function OrderTicketPanel({ sym, spotPrice }: Props) {
+export default function OrderTicketPanel({ sym, spotPrice, spotSource }: Props) {
   const [side, setSide] = useState<Side>("BUY");
   const [orderType, setOrderType] = useState<OrderType>("MARKET");
   const [qty, setQty] = useState("100");
-  const [limitPrice, setLimitPrice] = useState(() => spotPrice.toFixed(2));
-  const [stopPrice, setStopPrice] = useState(() => spotPrice.toFixed(2));
-  const [orders, setOrders] = useState<FilledOrder[]>([]);
+  const [limitPrice, setLimitPrice] = useState(() => spotPrice?.toFixed(2) ?? "");
+  const [stopPrice, setStopPrice] = useState(() => spotPrice?.toFixed(2) ?? "");
+  const [orders, setOrders] = useState<SimulatedOrder[]>([]);
   const [flash, setFlash] = useState(false);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Sync limit/stop price when spotPrice changes (overlay opened for new sym)
+  const initializedPrice = useRef({ sym, ready: spotPrice != null });
+  // Seed editable prices on the first valid quote without overwriting later user edits.
   useEffect(() => {
-    setLimitPrice(spotPrice.toFixed(2));
-    setStopPrice(spotPrice.toFixed(2));
+    if (initializedPrice.current.sym !== sym) initializedPrice.current = { sym, ready: false };
+    if (!initializedPrice.current.ready && spotPrice != null) {
+      setLimitPrice(spotPrice.toFixed(2));
+      setStopPrice(spotPrice.toFixed(2));
+      initializedPrice.current.ready = true;
+    }
   }, [sym, spotPrice]);
 
+  useEffect(() => {
+    if (spotPrice == null) return;
+    setOrders((previous) => previous.map((order) => order.sym === sym ? evaluateOrder(order, spotPrice) : order));
+  }, [sym, spotPrice]);
+
+  useEffect(() => () => { if (flashTimer.current) clearTimeout(flashTimer.current); }, []);
+
   const qtyNum = parseFloat(qty) || 0;
-  const limitNum = parseFloat(limitPrice) || spotPrice;
-  const stopNum = parseFloat(stopPrice) || spotPrice;
-  const execPrice = orderType === "MARKET" ? spotPrice : limitNum;
-  const estValue = qtyNum * execPrice;
+  const limitNum = parseFloat(limitPrice);
+  const stopNum = parseFloat(stopPrice);
+  const needsLimit = orderType === "LIMIT" || orderType === "STOP-LIMIT";
+  const needsStop = orderType === "STOP" || orderType === "STOP-LIMIT";
+  const validOrder = Number.isFinite(qtyNum) && qtyNum > 0 && spotPrice != null && Number.isFinite(spotPrice) && spotPrice > 0
+    && (!needsLimit || Number.isFinite(limitNum) && limitNum > 0)
+    && (!needsStop || Number.isFinite(stopNum) && stopNum > 0);
+  const execPrice = needsLimit ? limitNum : needsStop ? stopNum : spotPrice;
+  const estValue = execPrice == null || !Number.isFinite(execPrice) ? null : qtyNum * execPrice;
 
   function sendOrder() {
-    if (qtyNum <= 0) return;
+    if (!validOrder || spotPrice == null) return;
     const now = new Date();
     const time = now.toLocaleTimeString("en-US", { hour12: false });
-    const order: FilledOrder = {
+    const submitted: SimulatedOrder = {
       id: _orderId++,
       time,
       sym,
       side,
       type: orderType,
       qty: qtyNum,
-      price: execPrice,
-      status: "FILLED",
+      price: null,
+      limit: limitNum,
+      stop: stopNum,
+      triggered: false,
+      status: "PENDING",
     };
+    const order = evaluateOrder(submitted, spotPrice);
     setOrders((prev) => [order, ...prev].slice(0, 8));
     setFlash(true);
     if (flashTimer.current) clearTimeout(flashTimer.current);
     flashTimer.current = setTimeout(() => setFlash(false), 1500);
   }
-
-  const needsLimit = orderType === "LIMIT" || orderType === "STOP-LIMIT";
-  const needsStop = orderType === "STOP" || orderType === "STOP-LIMIT";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
@@ -140,20 +172,22 @@ export default function OrderTicketPanel({ sym, spotPrice }: Props) {
 
         {/* Est Value */}
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--si-text-muted)", marginTop: 6 }}>
-          <span>Spot: <span style={{ color: "var(--si-text)" }}>${spotPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></span>
-          <span>Est. Value: <span style={{ color: "var(--si-text)", fontWeight: 600 }}>${estValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span></span>
+          <span>{spotPrice == null ? "Spot unavailable" : <>Spot: <span style={{ color: "var(--si-text)" }}>${spotPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></>}</span>
+          <span>Est. Value: <span style={{ color: "var(--si-text)", fontWeight: 600 }}>{estValue == null ? "—" : `$${estValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}</span></span>
         </div>
 
         {/* Send button */}
         <button
           className={`si-order-send-btn${flash ? " is-flash" : ""} ${side === "BUY" ? "buy" : "sell"}`}
           onClick={sendOrder}
+          disabled={!validOrder}
         >
           {flash ? "✓ ORDER SENT" : `SEND ${side} ORDER`}
         </button>
 
         <div style={{ fontSize: 9, color: "rgba(185,205,224,0.35)", textAlign: "center", marginTop: 4 }}>
-          Simulated — no real orders are placed
+          Simulated · evaluated on displayed spot updates · no real orders are placed
+          {spotSource && <div>{spotPrice == null ? "Waiting for a current quote · orders paused" : spotSource}</div>}
         </div>
       </div>
 
@@ -174,7 +208,7 @@ export default function OrderTicketPanel({ sym, spotPrice }: Props) {
             <span style={{ color: "var(--si-text)", minWidth: 40, fontWeight: 600 }}>{o.sym}</span>
             <span style={{ color: "var(--si-text-muted)" }}>{o.type}</span>
             <span style={{ color: "var(--si-text)", minWidth: 44 }}>{o.qty.toLocaleString()}</span>
-            <span style={{ color: "var(--si-text)" }}>${o.price.toFixed(2)}</span>
+            <span style={{ color: "var(--si-text)" }}>{o.price == null ? "Awaiting trigger / limit" : `$${o.price.toFixed(2)}`}</span>
             <span className="si-order-filled-badge">{o.status}</span>
           </div>
         ))}

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { toGdeltCountryCode } from "../../../../lib/news/countryCode";
 import { computeAcledInstabilityScore, getAcledCountryEvents } from "../../../../lib/server/news/providers/acled";
 import { STANDARD_LIMITER } from "../../../../lib/server/rateLimitPresets";
 import { withRateLimit } from "../../../../lib/server/withRateLimit";
@@ -8,6 +9,9 @@ async function handler(request: Request) {
   const country = searchParams.get("country");
   if (!country) {
     return NextResponse.json({ error: "Missing country parameter" }, { status: 400 });
+  }
+  if (!toGdeltCountryCode(country)) {
+    return NextResponse.json({ error: "Unknown country ISO2 code or name" }, { status: 400 });
   }
 
   const days = Math.min(90, Math.max(7, Number(searchParams.get("days") ?? "30") || 30));

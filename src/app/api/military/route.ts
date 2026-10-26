@@ -1,3 +1,4 @@
+import { fetchWithTimeout as fetchUpstream } from "../../../lib/server/fetchWithTimeout";
 import { NextResponse } from 'next/server';
 import type { Flight } from '../../../lib/providers/types';
 import { inferFlightCountry } from '../../../lib/geo/country';
@@ -432,13 +433,7 @@ function dedupeByIcao(flights: Flight[]): Flight[] {
 // ── Fetch helpers ───────────────────────────────────────────────────────────
 
 async function fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
-  try {
-    return await fetch(url, { ...options, signal: ctrl.signal });
-  } finally {
-    clearTimeout(timer);
-  }
+  return fetchUpstream(url, options, FETCH_TIMEOUT_MS);
 }
 
 async function readJson<T>(res: Response, label: string): Promise<T> {
@@ -476,14 +471,14 @@ async function fetchLadd(baseUrl: string, label: string): Promise<Flight[]> {
   return normalizeAdsbxFilterMil(await readJson<{ ac?: AdsbxAircraft[] }>(res, label));
 }
 
-// ── Source 5+6: PIA privacy ICAO (anonymized military/gov aircraft) ──────────
+// ── Source 5+6: PIA privacy ICAO (requires independent military evidence) ───
 
 async function fetchPia(baseUrl: string, label: string): Promise<Flight[]> {
   const url = `${baseUrl.replace(/\/$/, '')}/pia`;
   const res = await fetchWithTimeout(url, { headers: UA, cache: 'no-store' });
   if (!res.ok) throw new Error(`${label} returned ${res.status}`);
   // PIA aircraft use anonymized hex — can't classify by ICAO, include all
-  return normalizeAdsbxAllMil(await readJson<{ ac?: AdsbxAircraft[] }>(res, label));
+  return normalizeAdsbxFilterMil(await readJson<{ ac?: AdsbxAircraft[] }>(res, label));
 }
 
 // ── Source 7: Type-based queries (military types globally) ───────────────────

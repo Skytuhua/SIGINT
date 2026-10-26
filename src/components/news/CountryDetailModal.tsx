@@ -476,7 +476,12 @@ const CountryNewsRow = memo(function CountryNewsRow({
   );
 });
 
-export default function CountryDetailModal({ countryCode, dockSide = "left", onClose }: Props) {
+export default function CountryDetailModal(props: Props) {
+  const countryKey = normalizeCountryCode(props.countryCode) ?? props.countryCode.toUpperCase();
+  return <CountryDetailContent key={countryKey} {...props} />;
+}
+
+function CountryDetailContent({ countryCode, dockSide = "left", onClose }: Props) {
   const normalizedCountryCode = normalizeCountryCode(countryCode) ?? countryCode.toUpperCase();
   const feedItems = useSIGINTStore((s) => s.news.feedItems);
   const setNewsUiState = useSIGINTStore((s) => s.setNewsUiState);

@@ -1,6 +1,7 @@
 "use client";
 
 import CryptoMarketPanel from "../CryptoMarketPanel";
+import type { MarketAssetContext } from "../shared/assetIdentity";
 import CryptoMetricsPanel from "../CryptoMetricsPanel";
 import WatchlistPanel from "../WatchlistPanel";
 import ChartPanel from "../ChartPanel";
@@ -9,7 +10,7 @@ import TradingViewWidget from "../shared/TradingViewWidget";
 import SectionLabel from "../shared/SectionLabel";
 
 interface Props {
-  onTickerClick?: (sym: string) => void;
+  onTickerClick?: (sym: string, context?: MarketAssetContext) => void;
 }
 
 export default function MarketCryptoTab({ onTickerClick }: Props) {
@@ -19,7 +20,7 @@ export default function MarketCryptoTab({ onTickerClick }: Props) {
       {/* ── 1: CRYPTO MARKETS ────────────────────────────────────── */}
       <SectionLabel label="CRYPTO MARKETS" sub="Ranked by market cap · Price · Volume · Dominance" />
       <div className="si-overview-row-full">
-        <CryptoMarketPanel style={{ minHeight: 460 }} />
+        <CryptoMarketPanel style={{ minHeight: 460 }} onTickerClick={onTickerClick} />
       </div>
 
       {/* ── 2: ON-CHAIN METRICS & WATCHLIST ──────────────────────── */}

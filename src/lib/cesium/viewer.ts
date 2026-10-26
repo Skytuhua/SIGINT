@@ -79,13 +79,14 @@ export async function preloadCesium(): Promise<void> {
   }
 }
 
-export async function initViewer(container: HTMLElement): Promise<import('cesium').Viewer> {
+export async function initViewer(container: HTMLElement, signal?: AbortSignal): Promise<import('cesium').Viewer> {
   // Must set CESIUM_BASE_URL before any Cesium import resolves asset URLs
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).CESIUM_BASE_URL = '/cesium';
 
   // Dynamic import so Next.js never bundles this on the server
   const Cesium = await import('cesium');
+  signal?.throwIfAborted();
   // Ion token is already set in preloadCesium() — no need to set it again.
 
   // Use a base imagery provider that works without Ion so the globe is never black.
@@ -111,56 +112,83 @@ export async function initViewer(container: HTMLElement): Promise<import('cesium
     requestRenderMode: false,
     maximumRenderTimeChange: Infinity,
   } as Record<string, unknown>);
-  configureCameraControls(viewer, Cesium);
-
-  // Hide default credit display — we add our own attribution
-  if (viewer.cesiumWidget.creditContainer) {
-    (viewer.cesiumWidget.creditContainer as HTMLElement).style.display = 'none';
-  }
-
-  // ── Terrain ──
+  const onAbort = () => { if (!viewer.isDestroyed()) viewer.destroy(); };
+  const assertActive = () => {
+    signal?.throwIfAborted();
+    if (viewer.isDestroyed()) throw new DOMException('Viewer destroyed', 'AbortError');
+  };
+  signal?.addEventListener('abort', onAbort, { once: true });
+  if (signal?.aborted) onAbort();
   try {
-    const terrain = await Cesium.CesiumTerrainProvider.fromIonAssetId(1);
-    viewer.terrainProvider = terrain;
-  } catch {
-    console.warn('[viewer] Cesium World Terrain unavailable, using ellipsoid');
-    viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider();
-  }
+    assertActive();
+    configureCameraControls(viewer, Cesium);
 
-  // ── 3D Tiles (Google Photorealistic ?OSM Buildings fallback) ──
-  try {
-    const google3dTiles = await Cesium.Cesium3DTileset.fromIonAssetId(2275207);
-    viewer.scene.primitives.add(google3dTiles);
-  } catch {
-    console.warn('[viewer] Google 3D Tiles unavailable, trying OSM Buildings');
-    try {
-      const osmBuildings = await Cesium.createOsmBuildingsAsync();
-      viewer.scene.primitives.add(osmBuildings);
-    } catch {
-      console.warn('[viewer] OSM Buildings also unavailable — plain globe only');
+    // Hide default credit display — we add our own attribution
+    if (viewer.cesiumWidget.creditContainer) {
+      (viewer.cesiumWidget.creditContainer as HTMLElement).style.display = 'none';
     }
+
+    // ── Terrain ──
+    try {
+      const terrain = await Cesium.CesiumTerrainProvider.fromIonAssetId(1);
+      assertActive();
+      viewer.terrainProvider = terrain;
+    } catch {
+      assertActive();
+      console.warn('[viewer] Cesium World Terrain unavailable, using ellipsoid');
+      viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider();
+    }
+
+    // ── 3D Tiles (Google Photorealistic ?OSM Buildings fallback) ──
+    try {
+      const google3dTiles = await Cesium.Cesium3DTileset.fromIonAssetId(2275207);
+      if (signal?.aborted || viewer.isDestroyed()) {
+        if (!google3dTiles.isDestroyed()) google3dTiles.destroy();
+        assertActive();
+      }
+      viewer.scene.primitives.add(google3dTiles);
+    } catch {
+      assertActive();
+      console.warn('[viewer] Google 3D Tiles unavailable, trying OSM Buildings');
+      try {
+        const osmBuildings = await Cesium.createOsmBuildingsAsync();
+        if (signal?.aborted || viewer.isDestroyed()) {
+          if (!osmBuildings.isDestroyed()) osmBuildings.destroy();
+          assertActive();
+        }
+        viewer.scene.primitives.add(osmBuildings);
+      } catch {
+        assertActive();
+        console.warn('[viewer] OSM Buildings also unavailable — plain globe only');
+      }
+    }
+
+    // ── Scene defaults ──
+    viewer.scene.globe.enableLighting = true;
+    viewer.scene.globe.atmosphereLightIntensity = 20.0;
+    viewer.scene.highDynamicRange = false;
+
+    // ── Initial camera: looking at NYC from ~8 km altitude ──
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(
+        DEFAULT_HOME_VIEW.lon,
+        DEFAULT_HOME_VIEW.lat,
+        DEFAULT_HOME_VIEW.altM
+      ),
+      orientation: {
+        heading: Cesium.Math.toRadians(DEFAULT_HOME_VIEW.heading),
+        pitch: Cesium.Math.toRadians(DEFAULT_HOME_VIEW.pitch),
+        roll: 0,
+      },
+    });
+
+    return viewer;
+  } catch (error) {
+    if (!viewer.isDestroyed()) viewer.destroy();
+    throw error;
+  } finally {
+    signal?.removeEventListener('abort', onAbort);
   }
-
-  // ── Scene defaults ──
-  viewer.scene.globe.enableLighting = true;
-  viewer.scene.globe.atmosphereLightIntensity = 20.0;
-  viewer.scene.highDynamicRange = false;
-
-  // ── Initial camera: looking at NYC from ~8 km altitude ──
-  viewer.camera.setView({
-    destination: Cesium.Cartesian3.fromDegrees(
-      DEFAULT_HOME_VIEW.lon,
-      DEFAULT_HOME_VIEW.lat,
-      DEFAULT_HOME_VIEW.altM
-    ),
-    orientation: {
-      heading: Cesium.Math.toRadians(DEFAULT_HOME_VIEW.heading),
-      pitch: Cesium.Math.toRadians(DEFAULT_HOME_VIEW.pitch),
-      roll: 0,
-    },
-  });
-
-  return viewer;
 }
 
 /** Fly the camera to a scene (lat, lon, altM, heading, pitch) */

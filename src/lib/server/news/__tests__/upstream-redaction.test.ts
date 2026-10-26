@@ -30,7 +30,7 @@ describe("fetchJsonOrThrow HTTP error redaction", () => {
     expect(error).toMatchObject({ status: 403, message: "Upstream returned HTTP 403" });
     expect(String((error as Error).message)).not.toContain("provider.example");
     expect(String((error as Error).message)).not.toContain("/api");
-    expect(fetchMock).toHaveBeenCalledWith(url, { cache: "no-store" });
+    expect(fetchMock).toHaveBeenCalledWith(url, { cache: "no-store", signal: expect.any(AbortSignal) });
   });
 
   it("keeps the cached fallback error and server log free of URL secrets", async () => {

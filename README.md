@@ -8,7 +8,7 @@
 
 Three workspaces &mdash; OPS, NEWS, MARKET &mdash; unified in a single console for monitoring global events, conflicts, markets, and live feeds in real time.
 
-[![Next.js](https://img.shields.io/badge/Next.js-14.2-black?logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![CesiumJS](https://img.shields.io/badge/CesiumJS-1.120-green)](https://cesium.com/)
 [![React](https://img.shields.io/badge/React-18.3-61dafb?logo=react)](https://react.dev/)
@@ -37,7 +37,7 @@ Three workspaces &mdash; OPS, NEWS, MARKET &mdash; unified in a single console f
 - **Sanctions Compliance** &mdash; OFAC, UN, EU, UK entity screening with profiles
 - **Web Workers** &mdash; SGP4 satellite propagation + traffic simulation off main thread
 
-> *Built with Next.js 14, React 18, TypeScript, CesiumJS, MapLibre, Zustand, and Tailwind CSS.*
+> *Built with Next.js 15, React 18, TypeScript, CesiumJS, MapLibre, Zustand, and Tailwind CSS.*
 
 ---
 
@@ -130,7 +130,7 @@ Additional: options chain/flow, order book, correlation matrix, interactive char
 
 | Layer | Technology |
 |-------|------------|
-| Framework | Next.js 14.2, React 18.3, TypeScript 5.5 |
+| Framework | Next.js 15.5, React 18.3, TypeScript 5.5 |
 | 3D Globe | CesiumJS 1.120 |
 | Maps | MapLibre GL, Leaflet |
 | State | Zustand (persist + subscribeWithSelector) |
@@ -149,10 +149,12 @@ Additional: options chain/flow, order book, correlation matrix, interactive char
 
 ### Prerequisites
 
-- Node.js 20.18.1+
+- Node.js 22.23.4 (the CI and `.nvmrc` version); see `package.json` for supported runtime ranges
 - [pnpm](https://pnpm.io/)
 
-Use `pnpm` for installs in this repo. The tracked lockfile is `pnpm-lock.yaml`.
+Use `pnpm` for installs in this repo. The tracked lockfile is `pnpm-lock.yaml`. Use pnpm 9.
+
+For production ingress and client rate-limit identity, follow [the trusted proxy configuration](docs/security-ingress.md). Forwarded client headers are ignored by default. The unused Next image optimizer is disabled; images use their original URLs.
 
 ### Quick Start
 

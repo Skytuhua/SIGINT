@@ -49,9 +49,11 @@ function classifySentiment(text: string): "positive" | "negative" | "neutral" {
 const summaryMemo = new Map<string, ArticleSummaryResponse>();
 const summaryInflight = new Map<string, Promise<ArticleSummaryResponse>>();
 const SUMMARY_MEMO_MAX = 200;
+const EMPTY_RELATED: GdeltArticle[] = [];
+const EMPTY_TIMELINE: Array<{ date: string; value: number }> = [];
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url, { cache: "no-store" });
+async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
+  const res = await fetch(url, { cache: "no-store", signal });
   if (!res.ok) throw new Error(`${url} returned ${res.status}`);
   return res.json() as Promise<T>;
 }
@@ -95,8 +97,8 @@ function fetchSummaryWithDedup(cacheKey: string, params: URLSearchParams): Promi
 
 export default function NewsPopupModal({
   article,
-  relatedItems: providedRelated = [],
-  timeline: providedTimeline = [],
+  relatedItems: providedRelated = EMPTY_RELATED,
+  timeline: providedTimeline = EMPTY_TIMELINE,
   onClose,
   isBookmarked,
   onToggleBookmark,
@@ -124,20 +126,26 @@ export default function NewsPopupModal({
     const query = [article.entity, article.placeName, article.headline.split(/\s+/g).slice(0, 4).join(" ")]
       .filter(Boolean)
       .join(" ");
+    const controller = new AbortController();
+    setRelatedItems(EMPTY_RELATED);
+    setTimeline(EMPTY_TIMELINE);
     Promise.all([
-      fetchJson<{ articles?: GdeltArticle[] }>(`/api/news/gdelt-context?q=${encodeURIComponent(query)}`),
+      fetchJson<{ articles?: GdeltArticle[] }>(`/api/news/gdelt-context?q=${encodeURIComponent(query)}`, controller.signal),
       fetchJson<{ timeline?: Array<{ date: string; value: number }> }>(
-        `/api/news/gdelt-timeline?q=${encodeURIComponent(query)}&timespan=7d`
+        `/api/news/gdelt-timeline?q=${encodeURIComponent(query)}&timespan=7d`, controller.signal
       ),
     ])
       .then(([ctx, tl]) => {
+        if (controller.signal.aborted) return;
         setRelatedItems((ctx.articles ?? []).slice(0, 8));
         setTimeline(tl.timeline ?? []);
       })
       .catch(() => {
+        if (controller.signal.aborted) return;
         setRelatedItems([]);
         setTimeline([]);
       });
+    return () => controller.abort();
   }, [article?.id, article?.url, providedRelated, providedTimeline]);
   useEffect(() => {
     if (!article) {

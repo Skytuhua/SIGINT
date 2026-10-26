@@ -1,0 +1,22 @@
+import {createElement} from "react";
+import {act,create,type ReactTestRenderer} from "react-test-renderer";
+import {afterEach,expect,it,vi} from "vitest";
+import MapDotDetailPanel from "../MapDotDetailPanel";
+vi.mock("react-dom",()=>({createPortal:(children:unknown)=>children}));
+let renderer:ReactTestRenderer|undefined;
+afterEach(()=>{act(()=>renderer?.unmount());renderer=undefined;vi.unstubAllGlobals();});
+it("fetches and displays only the selected base enrichment",async()=>{
+ vi.stubGlobal("document",{body:{}});
+ const fetchMock=vi.fn().mockResolvedValueOnce(Response.json({result:{wikipedia:{extract:"ENRICHMENT OF BASE A"}}})).mockResolvedValueOnce(Response.json({result:{wikipedia:{extract:"ENRICHMENT OF BASE B"}}}));
+ vi.stubGlobal("fetch",fetchMock);
+ const detail:any={layerId:"military-bases",layerType:"Point",title:"Base A",fields:[],uid:"base-a",lat:10,lon:20};
+ await act(async()=>{renderer=create(createElement(MapDotDetailPanel,{detail,onClose(){}}));});
+ expect(fetchMock).toHaveBeenCalledOnce();
+ expect(JSON.stringify(renderer!.toJSON())).toContain("ENRICHMENT OF BASE A");
+ await act(async()=>{renderer!.update(createElement(MapDotDetailPanel,{detail:{...detail,title:"Base B",uid:"base-b",lat:30,lon:40},onClose(){}}));});
+ expect(fetchMock).toHaveBeenCalledTimes(2);
+ const json=JSON.stringify(renderer!.toJSON());
+ expect(json).toContain("Base B");
+ expect(json).not.toContain("ENRICHMENT OF BASE A");
+ expect(json).toContain("ENRICHMENT OF BASE B");
+});

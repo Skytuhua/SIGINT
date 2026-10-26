@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSIGINTStore } from "../../store";
 import { useIsMobile } from "../../hooks/useIsMobile";
+import { writeBrowserPreference } from "../../lib/browserStorage";
 import type { NewsArticle } from "../../lib/news/types";
 import PhoneOverlayShell from "../ui/PhoneOverlayShell";
 
@@ -214,7 +215,7 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
   }, [turnOff]);
 
   function handleClose() {
-    if (turnOff) localStorage.setItem("si-news-briefing-disabled", "true");
+    if (turnOff) writeBrowserPreference("si-news-briefing-disabled", "true");
     onClose();
   }
 

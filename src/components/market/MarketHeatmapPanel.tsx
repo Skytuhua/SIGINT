@@ -4,7 +4,7 @@ import React, { useMemo, useState, useRef, useCallback, useEffect } from "react"
 import { SCREENER_UNIVERSE, ScreenerRow } from "./shared/screenerData";
 import { heatColor } from "./shared/heatColor";
 import Term from "./shared/Term";
-import { useMarketData } from "../../hooks/useMarketData";
+import { useHeatmapQuotes } from "./shared/useHeatmapQuotes";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -25,25 +25,10 @@ interface TileData {
   name: string;
   sector: string;
   weight: number;
-  chg: number;
+  chg: number | null;
 }
 
 interface PositionedTile extends TileData, Rect {}
-
-interface QuoteItem {
-  symbol: string;
-  changePercent: number;
-  [key: string]: unknown;
-}
-
-interface QuotesResponse {
-  quotes: QuoteItem[];
-  degraded: boolean;
-}
-
-const EMPTY: QuotesResponse = { quotes: [], degraded: true };
-
-const ALL_SYMBOLS = SCREENER_UNIVERSE.map((s) => s.sym).join(",");
 
 // ── Squarified Treemap Algorithm ─────────────────────────────────────────────
 
@@ -215,21 +200,7 @@ export default function MarketHeatmapPanel({ style, onTickerClick }: Props) {
     return () => ro.disconnect();
   }, []);
 
-  const { data, isLive } = useMarketData<QuotesResponse>(
-    `/api/market/quotes?symbols=${ALL_SYMBOLS}`,
-    1_000,
-    EMPTY,
-  );
-
-  const changeMap = useMemo(() => {
-    const map: Record<string, number> = {};
-    const quotesArr = Array.isArray(data?.quotes) ? data.quotes : Object.values(data?.quotes ?? {});
-    for (const q of quotesArr) {
-      const quote = q as { symbol: string; changePercent: number };
-      map[quote.symbol] = quote.changePercent;
-    }
-    return map;
-  }, [data]);
+  const { changes: changeMap, isLive } = useHeatmapQuotes();
 
   const tiles = useMemo(() => {
     return SCREENER_UNIVERSE.map((s: ScreenerRow) => ({
@@ -237,7 +208,7 @@ export default function MarketHeatmapPanel({ style, onTickerClick }: Props) {
       name: s.name,
       sector: s.sector,
       weight: s.marketCapB,
-      chg: changeMap[s.sym] ?? s.chg1d,
+      chg: changeMap[s.sym] ?? null,
     }));
   }, [changeMap]);
 
@@ -449,7 +420,7 @@ export default function MarketHeatmapPanel({ style, onTickerClick }: Props) {
           S&P 500 · <Term id="HEATMAP">Heatmap</Term> · <Term id="MKTCAP">Cap-Weighted</Term> · Scroll to zoom
         </span>
         <span className={`si-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
-          {isLive ? "LIVE" : "STATIC"}
+          {isLive ? "LIVE" : "PARTIAL / UNAVAILABLE"}
         </span>
       </div>
       <div
@@ -523,12 +494,13 @@ export default function MarketHeatmapPanel({ style, onTickerClick }: Props) {
                 onMouseLeave={() => setHoveredSym(null)}
                 style={{ cursor: onTickerClick ? "pointer" : "default" }}
               >
+                <title>{tile.sym}: {tile.chg == null ? "Unavailable" : `${tile.chg >= 0 ? "+" : ""}${tile.chg.toFixed(2)}%`}</title>
                 <rect
                   x={tile.x + TILE_GAP}
                   y={tile.y + TILE_GAP}
                   width={Math.max(0, tile.w - TILE_GAP * 2)}
                   height={Math.max(0, tile.h - TILE_GAP * 2)}
-                  fill={heatColor(tile.chg)}
+                  fill={tile.chg == null ? "#343b45" : heatColor(tile.chg)}
                   rx={1}
                   opacity={isHovered ? 1 : 0.92}
                   stroke={isHovered ? "rgba(255,255,255,0.5)" : "none"}
@@ -561,7 +533,7 @@ export default function MarketHeatmapPanel({ style, onTickerClick }: Props) {
                     fontFamily="monospace"
                     pointerEvents="none"
                   >
-                    {tile.chg >= 0 ? "+" : ""}{tile.chg.toFixed(2)}%
+                    {tile.chg == null ? "—" : `${tile.chg >= 0 ? "+" : ""}${tile.chg.toFixed(2)}%`}
                   </text>
                 )}
               </g>
@@ -640,14 +612,14 @@ export default function MarketHeatmapPanel({ style, onTickerClick }: Props) {
             <div style={{ color: SECTOR_LABEL_COLORS[hoveredTile.sector] ?? "#89e5ff", fontSize: 9 }}>
               {hoveredTile.sector}
             </div>
-            <div style={{ color: hoveredTile.chg >= 0 ? "#36b37e" : "#ff5a5f", fontWeight: 600 }}>
-              {hoveredTile.chg >= 0 ? "+" : ""}{hoveredTile.chg.toFixed(2)}%
+            <div style={{ color: hoveredTile.chg == null ? "var(--si-text-muted)" : hoveredTile.chg >= 0 ? "#36b37e" : "#ff5a5f", fontWeight: 600 }}>
+              {hoveredTile.chg == null ? "Quote unavailable" : `${hoveredTile.chg >= 0 ? "+" : ""}${hoveredTile.chg.toFixed(2)}%`}
             </div>
           </div>
         )}
       </div>
       <div className="si-market-panel-footer">
-        {isLive ? "Yahoo Finance · live data · 1s refresh" : "S&P 500 · static data"} · {SCREENER_UNIVERSE.length} stocks
+        Yahoo Finance · 60s refresh · {Object.keys(changeMap).length}/{SCREENER_UNIVERSE.length} quotes · Cap weights are reference values
       </div>
     </div>
   );

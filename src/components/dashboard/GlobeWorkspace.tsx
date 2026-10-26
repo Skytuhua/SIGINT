@@ -275,15 +275,15 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
               <Panel panelId="globe-filters" className="si-globe-side-panel">
                 <PanelHeader
                   title="FILTERS"
-                  subtitle="Filter earthquakes and altitude ranges."
+                  subtitle="Filter seismic table magnitudes and globe flight altitudes."
                   controls={<PanelControls />}
                 />
                 <PanelBody>
                   <label className="si-range-label">
-                    <span>Min Magnitude</span>
+                    <span>Min Magnitude (seismic table)</span>
                     <input
                       type="range"
-                      aria-label="Min Magnitude"
+                      aria-label="Min Magnitude (seismic table)"
                       min={0}
                       max={9}
                       step={0.1}
@@ -447,12 +447,12 @@ export default function GlobeWorkspace({ embedded = false, compact = false }: Gl
             <Panel panelId="globe-filters" className="si-globe-side-panel">
               <PanelHeader
                 title="FILTERS"
-                subtitle="Filter earthquakes and altitude ranges."
+                subtitle="Filter seismic table magnitudes and globe flight altitudes."
                 controls={<PanelControls />}
               />
               <PanelBody>
                 <label className="si-range-label">
-                  <span>Min Magnitude</span>
+                  <span>Min Magnitude (seismic table)</span>
                   <input
                     type="range"
                     min={0}
