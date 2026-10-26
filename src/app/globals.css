@@ -5154,6 +5154,12 @@ body.si-resizing-globe {
   scrollbar-gutter: stable;
 }
 
+.si-news-saved-articles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 .si-news-bookmark-row {
   display: flex;
   align-items: center;
@@ -5168,30 +5174,50 @@ body.si-resizing-globe {
 }
 
 .si-news-bookmark-title {
-  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  cursor: pointer;
 }
 
-.si-news-bookmark-title:hover {
-  color: var(--si-accent);
+.si-news-bookmark-row .si-news-bookmark-title {
+  flex: 1;
+  text-align: left;
+  font-size: inherit;
 }
 
 .si-news-bookmark-row button {
-  flex: 0 0 auto;
-  font-size: 9px;
+  min-height: 32px;
+  font-size: 10px;
   color: var(--si-text-muted);
   background: none;
   border: none;
   cursor: pointer;
-  opacity: 0.6;
+}
+
+.si-news-bookmark-row .si-news-bookmark-remove {
+  flex: 0 0 32px;
 }
 
 .si-news-bookmark-row button:hover {
+  color: var(--si-accent);
+}
+
+.si-news-bookmark-row .si-news-bookmark-remove:hover {
   color: #ff6b6b;
-  opacity: 1;
+}
+
+.si-news-bookmark-row button:focus-visible {
+  outline: 1px solid var(--si-accent);
+  outline-offset: -1px;
+}
+
+.si-news-reading-list-warning {
+  padding: 8px;
+  color: var(--si-amber);
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 /* ── Filter bar (time range + stats) ── */
@@ -11102,6 +11128,14 @@ body.si-resizing-globe {
     overflow: auto;
     border: 1px solid var(--si-line);
     background: var(--si-bg-2);
+  }
+
+  .si-news-phone-saved-list .si-news-bookmark-row button {
+    min-height: 44px;
+  }
+
+  .si-news-phone-saved-list .si-news-bookmark-remove {
+    flex-basis: 44px;
   }
 
   .si-news-phone-filter-drawer {
