@@ -50,8 +50,8 @@ describe("UCDP validation before cache and data loading", () => {
     const cached = await request("fromYear=2024&toYear=2024");
     expect(cached.headers.get("X-Cache")).toBe("hit");
     expect((await request("fromYear=2025")).status).toBe(400);
-    expect((await request("fromYear=2024")).status).toBe(200);
-    expect((await request("toYear=2024")).status).toBe(200);
+    expect((await request("fromYear=2024")).headers.get("X-Cache")).toBe("hit");
+    expect((await request("toYear=2024")).headers.get("X-Cache")).toBe("hit");
     vi.clearAllMocks();
     const invalid = await request("fromYear=2024&toYear=2023");
     expect(invalid.status).toBe(400);

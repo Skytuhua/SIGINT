@@ -69,10 +69,12 @@ async function handler(req: Request) {
       );
     }
 
-    const contentType = resp.headers.get("content-type") ?? "image/jpeg";
+    const contentType = (resp.headers.get("content-type") ?? "")
+      .split(";", 1)[0].trim().toLowerCase();
 
-    // Reject non-image responses (HTML error pages, redirects, etc.)
-    if (contentType.startsWith("text/") || contentType.includes("html")) {
+    // Snapshots must declare a supported raster type; do not relay active SVG
+    // documents or guess a type for unlabelled responses.
+    if (!["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif", "image/apng"].includes(contentType)) {
       return NextResponse.json(
         { error: "Non-image response from upstream" },
         { status: 502 },

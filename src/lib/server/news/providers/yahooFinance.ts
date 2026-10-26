@@ -403,8 +403,8 @@ export async function getEarningsCalendar(): Promise<CachedFetchResult<{ upcomin
       const json = await yahooFetchJson<YFQuoteResponse>(url, QUOTE_POLICY.timeoutMs);
       const results = json.quoteResponse?.result ?? [];
       const now = Date.now();
-      const upcoming: EarningsEntry[] = [];
-      const recent: EarningsEntry[] = [];
+      const upcoming: Array<{ timestamp: number; entry: EarningsEntry }> = [];
+      const recent: Array<{ timestamp: number; entry: EarningsEntry }> = [];
 
       for (const item of results) {
         const raw = item as unknown as Record<string, unknown>;
@@ -431,7 +431,7 @@ export async function getEarningsCalendar(): Promise<CachedFetchResult<{ upcomin
 
         const diff = earningsTs * 1000 - now;
         if (diff > 0) {
-          upcoming.push(entry);
+          upcoming.push({ timestamp: earningsTs, entry });
         } else if (diff > -30 * 24 * 60 * 60 * 1000) {
           const epsTTM = raw.epsTrailingTwelveMonths as number | undefined;
           if (epsTTM != null) {
@@ -441,16 +441,16 @@ export async function getEarningsCalendar(): Promise<CachedFetchResult<{ upcomin
               entry.surprise = epsTTM > estNum * 1.01 ? "beat" : epsTTM < estNum * 0.99 ? "miss" : "in-line";
             }
           }
-          recent.push(entry);
+          recent.push({ timestamp: earningsTs, entry });
         }
       }
 
-      upcoming.sort((a, b) => a.date.localeCompare(b.date));
-      recent.sort((a, b) => b.date.localeCompare(a.date));
+      upcoming.sort((a, b) => a.timestamp - b.timestamp);
+      recent.sort((a, b) => b.timestamp - a.timestamp);
 
       return {
-        upcoming: upcoming.slice(0, 15),
-        recent: recent.slice(0, 8),
+        upcoming: upcoming.slice(0, 15).map(({ entry }) => entry),
+        recent: recent.slice(0, 8).map(({ entry }) => entry),
       };
     },
   });

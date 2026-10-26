@@ -79,6 +79,8 @@ interface TokenBucket {
 }
 
 const cache = new Map<string, CacheEntry<unknown>>();
+// Bound the cache: keys can embed user query text, so unbounded growth is a memory leak.
+const CACHE_MAX_ENTRIES = 512;
 const inFlight = new Map<string, Promise<CachedFetchResult<unknown>>>();
 const circuits = new Map<string, CircuitState>();
 const buckets = new Map<string, TokenBucket>();
@@ -107,11 +109,22 @@ function getStale<T>(key: string): T | null {
 
 function putCache<T>(key: string, value: T, ttlMs: number, staleTtlMs: number): void {
   const now = Date.now();
+  if (cache.has(key)) cache.delete(key); // reinsert to refresh insertion order
   cache.set(key, {
     value,
     expiresAt: now + ttlMs,
     staleUntil: now + staleTtlMs,
   });
+  if (cache.size > CACHE_MAX_ENTRIES) {
+    cache.forEach((entry, entryKey) => {
+      if (entry.staleUntil <= now) cache.delete(entryKey); // drop expired entries first
+    });
+  }
+  while (cache.size > CACHE_MAX_ENTRIES) {
+    const oldest = cache.keys().next().value;
+    if (oldest === undefined) break;
+    cache.delete(oldest);
+  }
 }
 
 function getCircuit(policy: UpstreamPolicy): CircuitState {
@@ -224,7 +237,7 @@ export async function fetchJsonOrThrow<T>(
   const merged: RequestInit = { ...init, cache: "no-store" as RequestCache };
   const response = await withTimeout(fetch(url, merged), timeoutMs);
   if (!response.ok) {
-    throw new UpstreamHttpError(response.status, `${url} returned ${response.status}`);
+    throw new UpstreamHttpError(response.status, `Upstream returned HTTP ${response.status}`);
   }
   return (await response.json()) as T;
 }

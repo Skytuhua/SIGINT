@@ -22,6 +22,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "postinstall": "node scripts/copy-cesium.js"
   },
   "dependencies": {
@@ -56,7 +57,9 @@
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.15",
+    "@types/react-test-renderer": "18.3.1",
     "@types/react-window": "^2.0.0",
+    "react-test-renderer": "18.3.1",
     "vitest": "^4.0.18"
   }
 }
