@@ -42,6 +42,8 @@ interface TaskState {
   nextDueAt: number;
   plannedDueAt: number;
   abortController: AbortController | null;
+  /** Set by trigger() while a run is in flight; the finishing run reschedules immediately. */
+  supersede: boolean;
 }
 
 const DEFAULT_JITTER = 0.12;
@@ -149,6 +151,7 @@ export class RefreshScheduler {
       nextDueAt: now,
       plannedDueAt: now,
       abortController: null,
+      supersede: false,
     });
 
     if (this.running) {
@@ -194,6 +197,7 @@ export class RefreshScheduler {
       task.abortController?.abort();
       task.abortController = null;
       task.inFlight = false;
+      task.supersede = false;
       task.attempt = 0;
       task.nextDueAt = 0;
       task.plannedDueAt = 0;
@@ -215,8 +219,15 @@ export class RefreshScheduler {
     const task = this.tasks.get(key);
     if (!task) return;
     // Abort stale run and retrigger immediately.
+    if (task.inFlight) {
+      // The in-flight run's finally block will cancel any timer we set here
+      // (via scheduleNext -> scheduleAt -> clearTimeout). Mark it instead so
+      // the finishing run reschedules immediately.
+      task.supersede = true;
+    } else {
+      this.scheduleAt(key, Date.now(), "interval");
+    }
     task.abortController?.abort();
-    this.scheduleAt(key, Date.now(), "interval");
   }
 
   private unregisterTask(key: string): void {
@@ -311,6 +322,7 @@ export class RefreshScheduler {
         now: Date.now(),
       });
 
+      if (this.tasks.get(key) !== task || task.abortController !== controller) return;
       task.attempt = 0;
       this.emit({
         taskKey: key,
@@ -320,6 +332,7 @@ export class RefreshScheduler {
         attempt: 0,
       });
     } catch (error) {
+      if (this.tasks.get(key) !== task || task.abortController !== controller) return;
       if (isAbortError(error)) {
         this.emit({
           taskKey: key,
@@ -342,12 +355,17 @@ export class RefreshScheduler {
       }
     } finally {
       if (releaseSlot) releaseSlot();
+      // A stopped or replaced run must not clear or reschedule a newer run.
+      if (this.tasks.get(key) !== task || task.abortController !== controller) return;
       task.inFlight = false;
-      if (task.abortController === controller) {
-        task.abortController = null;
-      }
+      task.abortController = null;
       if (!this.running || this.disposed) return;
-      this.scheduleNext(key);
+      if (task.supersede) {
+        task.supersede = false;
+        this.scheduleAt(key, Date.now(), "interval");
+      } else {
+        this.scheduleNext(key);
+      }
     }
   }
 
