@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { getGdeltTimeline } from "../../../../lib/server/news/providers/gdelt";
+import { STANDARD_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q") ?? "news";
   const timespan = searchParams.get("timespan") ?? "7d";
@@ -21,3 +23,5 @@ export async function GET(request: Request) {
     { headers: { "Cache-Control": "public, max-age=300" } }
   );
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

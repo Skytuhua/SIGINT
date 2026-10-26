@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { getMovers } from "../../../../lib/server/news/providers/yahooFinance";
+import { STANDARD_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
-export async function GET() {
+async function handler() {
   const result = await getMovers();
   return NextResponse.json(
     {
@@ -13,3 +15,5 @@ export async function GET() {
     { headers: { "Cache-Control": "no-store, max-age=0" } },
   );
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

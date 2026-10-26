@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useSIGINTStore } from "../../store";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import type { NewsArticle } from "../../lib/news/types";
+import PhoneOverlayShell from "../ui/PhoneOverlayShell";
 
 // ─── Sector definitions ────────────────────────────────────────────────────
 
@@ -181,6 +183,7 @@ interface Props {
 }
 
 export default function NewsDailyBriefingModal({ onClose }: Props) {
+  const isMobile = useIsMobile();
   const feedItems = useSIGINTStore((s) => s.news.feedItems);
   const [turnOff, setTurnOff] = useState(false);
   const [aiPage, setAiPage] = useState(0);
@@ -264,7 +267,7 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
 
   const twoCol: React.CSSProperties = {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
     ...divider,
   };
 
@@ -339,6 +342,215 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
     ]);
   }
 
+  function renderMobileHeadlines(items: NewsArticle[], fallback: string[]) {
+    const lines =
+      items.length > 0
+        ? items.map((article) => ({
+            text: article.headline,
+            source: article.source ?? article.domain ?? "Live feed",
+            time: relativeTime(article.publishedAt),
+          }))
+        : fallback.map((headline) => ({
+            text: headline,
+            source: "Reference",
+            time: "",
+          }));
+
+    return (
+      <div style={{ display: "grid", gap: 8 }}>
+        {lines.map((line, index) => (
+          <div
+            key={`${line.text}-${index}`}
+            style={{
+              display: "grid",
+              gap: 4,
+              padding: "10px 0",
+              borderBottom: "1px solid rgba(80,100,125,0.08)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+              <span style={{ fontSize: 10, color: "#5f7488", minWidth: 18 }}>{index + 1}.</span>
+              <span
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.4,
+                  color: "#d7e3ef",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
+                {line.text}
+              </span>
+            </div>
+            <div style={{ paddingLeft: 26, fontSize: 10, lineHeight: 1.35, color: "#7c93ab" }}>
+              {[line.source, line.time].filter(Boolean).join(" / ")}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <PhoneOverlayShell
+        title="Intelligence Briefing"
+        ariaLabel="News intelligence briefing"
+        onClose={handleClose}
+        footer={
+          <div style={{ display: "grid", gap: 10, fontFamily: mono }}>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 10,
+                fontSize: 11,
+                lineHeight: 1.45,
+                color: "#9eb5ca",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={turnOff}
+                onChange={(event) => setTurnOff(event.target.checked)}
+                style={{ accentColor: "#89e5ff", width: 16, height: 16, marginTop: 1, flexShrink: 0 }}
+              />
+              Turn off intelligence briefing on this device
+            </label>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 10,
+                flexWrap: "wrap",
+                fontSize: 10,
+                lineHeight: 1.35,
+                color: "#6e849d",
+              }}
+            >
+              <span>{dateLabel}</span>
+              <span>{utc} UTC</span>
+            </div>
+          </div>
+        }
+      >
+        <div style={{ display: "grid", gap: 12, fontFamily: mono, color: "#b9cde0" }}>
+          <section
+            style={{
+              display: "grid",
+              gap: 10,
+              padding: "12px",
+              border: "1px solid rgba(80,100,125,0.15)",
+              background: "rgba(10,16,26,0.92)",
+            }}
+          >
+            <div style={{ ...sectionTitle, marginBottom: 0 }}>CRISIS WATCH</div>
+            <div style={{ display: "grid", gap: 10 }}>
+              {CRISIS_ITEMS.map((item) => (
+                <div
+                  key={item.region}
+                  style={{
+                    display: "grid",
+                    gap: 6,
+                    padding: "10px",
+                    border: "1px solid rgba(80,100,125,0.14)",
+                    background: "rgba(80,110,140,0.04)",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <span
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        background: item.statusColor,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span style={{ fontSize: 10, letterSpacing: "0.08em", color: "#7fa8c4" }}>{item.region}</span>
+                    <span
+                      style={{
+                        fontSize: 9,
+                        letterSpacing: "0.08em",
+                        color: item.statusColor,
+                        border: `1px solid ${item.statusColor}44`,
+                        padding: "2px 6px",
+                      }}
+                    >
+                      {item.status}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 13, lineHeight: 1.4, color: "#d7e3ef" }}>{item.title}</div>
+                  <p style={{ margin: 0, fontSize: 11, lineHeight: 1.55, color: "#8da3b8" }}>{item.summary}</p>
+                </div>
+              ))}
+            </div>
+            {renderMobileHeadlines(grouped.__crisis ?? [], STATIC_CRISIS_HEADLINES)}
+          </section>
+
+          {SECTOR_GROUPS.map((group) => (
+            <section
+              key={group.id}
+              style={{
+                display: "grid",
+                gap: 8,
+                padding: "12px",
+                border: "1px solid rgba(80,100,125,0.15)",
+                background: "rgba(10,16,26,0.92)",
+              }}
+            >
+              <div style={{ ...sectionTitle, marginBottom: 0 }}>{group.label}</div>
+              {renderMobileHeadlines(grouped[group.id] ?? [], STATIC_SECTOR_HEADLINES[group.id] ?? [])}
+            </section>
+          ))}
+
+          <section
+            style={{
+              display: "grid",
+              gap: 10,
+              padding: "12px",
+              border: "1px solid rgba(80,100,125,0.15)",
+              background: "rgba(10,16,26,0.92)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
+              <div style={{ ...sectionTitle, marginBottom: 0 }}>AI Intelligence Digest</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <button
+                  type="button"
+                  className="si-phone-overlay-action"
+                  style={{ minWidth: 44, minHeight: 36, padding: "0 10px" }}
+                  onClick={() => setAiPage((page) => (page - 1 + INTEL_SUMMARIES.length) % INTEL_SUMMARIES.length)}
+                  aria-label="Previous summary"
+                >
+                  PREV
+                </button>
+                <span style={{ fontSize: 10, color: "#7c93ab" }}>
+                  {aiPage + 1} / {INTEL_SUMMARIES.length}
+                </span>
+                <button
+                  type="button"
+                  className="si-phone-overlay-action"
+                  style={{ minWidth: 44, minHeight: 36, padding: "0 10px" }}
+                  onClick={() => setAiPage((page) => (page + 1) % INTEL_SUMMARIES.length)}
+                  aria-label="Next summary"
+                >
+                  NEXT
+                </button>
+              </div>
+            </div>
+            <div style={{ fontSize: 12, lineHeight: 1.45, color: "#89e5ff" }}>{INTEL_SUMMARIES[aiPage].title}</div>
+            <p style={{ margin: 0, fontSize: 12, lineHeight: 1.65, color: "#b9cde0" }}>
+              {INTEL_SUMMARIES[aiPage].body}
+            </p>
+          </section>
+        </div>
+      </PhoneOverlayShell>
+    );
+  }
+
   return (
     <div
       style={{
@@ -349,7 +561,7 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: 16,
+        padding: isMobile ? 0 : 16,
       }}
     >
       <div
@@ -358,8 +570,9 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
           background: "#020b12",
           border: "1px solid rgba(80,110,140,0.35)",
           width: "100%",
-          maxWidth: 920,
-          maxHeight: "90vh",
+          maxWidth: isMobile ? "100%" : 920,
+          height: isMobile ? "100dvh" : undefined,
+          maxHeight: isMobile ? "100dvh" : "90vh",
           overflowY: "auto",
         }}
       >
@@ -368,7 +581,7 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
           style={{
             background: "rgba(80,110,140,0.08)",
             borderBottom: "1px solid rgba(80,110,140,0.25)",
-            padding: "8px 14px",
+            padding: isMobile ? "calc(8px + env(safe-area-inset-top, 0px)) 14px 8px" : "8px 14px",
             display: "flex",
             alignItems: "center",
             gap: 10,
@@ -445,7 +658,7 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
+              gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
               gap: 12,
               marginBottom: 12,
             }}
@@ -720,10 +933,12 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
         {/* ── FOOTER ── */}
         <div
           style={{
-            padding: "8px 14px",
+            padding: isMobile ? "10px 14px calc(10px + env(safe-area-inset-bottom, 0px))" : "8px 14px",
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: isMobile ? "stretch" : "center",
+            flexDirection: isMobile ? "column" : "row",
+            gap: isMobile ? 10 : 0,
             borderTop: "1px solid rgba(80,110,140,0.22)",
             background: "rgba(80,110,140,0.04)",
             position: "sticky",
@@ -738,15 +953,16 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
               gap: 8,
               cursor: "pointer",
               color: "#6e849d",
-              fontSize: 10,
+              fontSize: isMobile ? 12 : 10,
               letterSpacing: 1,
+              lineHeight: isMobile ? 1.4 : undefined,
             }}
           >
             <input
               type="checkbox"
               checked={turnOff}
               onChange={(e) => setTurnOff(e.target.checked)}
-              style={{ accentColor: "#8da3b8" }}
+              style={{ accentColor: "#8da3b8", width: isMobile ? 18 : undefined, height: isMobile ? 18 : undefined }}
             />
             Turn Off Intelligence Briefing
           </label>
@@ -756,11 +972,13 @@ export default function NewsDailyBriefingModal({ onClose }: Props) {
               background: "none",
               border: "1px solid rgba(80,110,140,0.4)",
               color: "#7fa8c4",
-              padding: "3px 14px",
+              padding: isMobile ? "10px 14px" : "3px 14px",
               fontSize: 10,
               letterSpacing: 1,
               cursor: "pointer",
               fontFamily: mono,
+              width: isMobile ? "100%" : undefined,
+              minHeight: isMobile ? 44 : undefined,
             }}
           >
             Close Briefing

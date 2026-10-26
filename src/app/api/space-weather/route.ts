@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import type { SpaceWeatherAlert } from "../../../lib/providers/types";
 import { normalizeSwpcItems } from "../../../lib/runtime/ops/spaceWeatherNormalizer";
 import type { SwpcRawItem } from "../../../lib/runtime/ops/types";
+import { STANDARD_LIMITER } from "../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../lib/server/withRateLimit";
 
 export const dynamic = "force-dynamic";
 
@@ -63,7 +65,7 @@ function toResponse(payload: SpaceWeatherRouteResponse): NextResponse<SpaceWeath
   });
 }
 
-export async function GET(): Promise<NextResponse<SpaceWeatherRouteResponse>> {
+async function handler(): Promise<NextResponse<SpaceWeatherRouteResponse>> {
   const fresh = getFreshCache();
   if (fresh) {
     return toResponse({
@@ -170,3 +172,5 @@ export async function GET(): Promise<NextResponse<SpaceWeatherRouteResponse>> {
     });
   }
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { STANDARD_LIMITER } from "../../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../../lib/server/withRateLimit";
 import crypto from "node:crypto";
+import { buildLayerCacheKey, getCached, isFresh, setCache } from "./layerCache";
 import type { Earthquake, Flight } from "../../../../../lib/providers/types";
 import type { FaaAirportStatus } from "../../../../api/faa/route";
 import { getIntelHotspotsComputed } from "../../../../../lib/server/news/hotspots";
@@ -19,6 +22,7 @@ import {
   getUcdpMeta,
   getUcdpDefaultYear,
 } from "../../../../../lib/server/ucdp/ucdpGedStore";
+import { isValidUcdpYearRange } from "../../../../../lib/server/ucdp/yearRange";
 import { computeUcdpSeverity, severityLabel as ucdpSeverityLabel } from "../../../../../lib/server/ucdp/severity";
 import type { UcdpViolenceType } from "../../../../../lib/server/ucdp/types";
 
@@ -38,59 +42,6 @@ type GenericFeatureCollection = {
   type: "FeatureCollection";
   features: GenericFeature[];
 };
-
-// ── Server-side TTL cache ────────────────────────────────────────────────────
-
-interface CacheEntry {
-  data: GenericFeatureCollection;
-  expiresAt: number;
-  staleUntil: number;
-}
-
-const layerCache = new Map<string, CacheEntry>();
-
-const LAYER_TTL: Record<string, number> = {
-  "intel-hotspots":     90_000,
-  "conflict-zones":     120_000,
-  "armed-conflict":     120_000,
-  "military-activity":  20_000,
-  "cyber-incidents":    120_000,
-  "disease-outbreaks":  600_000,
-  "arms-embargo-zones":  6 * 3600_000,
-  "sanctions-entities":  24 * 3600_000,
-  "ucdp-events":         6 * 3600_000,
-  "economic-centers":    4 * 3600_000,
-  "ai-data-centers":     4 * 3600_000,
-  "earthquakes":         60_000,
-  "disaster-alerts":     6 * 60_000,
-};
-
-const STALE_MULTIPLIER = 10;
-
-function getCached(layerId: string): GenericFeatureCollection | null {
-  const entry = layerCache.get(layerId);
-  if (!entry) return null;
-  const now = Date.now();
-  if (now < entry.expiresAt) return entry.data;
-  if (now < entry.staleUntil) return entry.data;
-  layerCache.delete(layerId);
-  return null;
-}
-
-function isFresh(layerId: string): boolean {
-  const entry = layerCache.get(layerId);
-  return Boolean(entry && Date.now() < entry.expiresAt);
-}
-
-function setCache(layerId: string, data: GenericFeatureCollection): void {
-  const ttl = LAYER_TTL[layerId] ?? 120_000;
-  const now = Date.now();
-  layerCache.set(layerId, {
-    data,
-    expiresAt: now + ttl,
-    staleUntil: now + ttl * STALE_MULTIPLIER,
-  });
-}
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -535,7 +486,7 @@ async function loadSnapshot(layerId: string): Promise<GenericFeatureCollection> 
 
 // ── Dispatch ─────────────────────────────────────────────────────────────────
 
-async function getLayerPayload(layerId: string, origin: string, requestUrl: string): Promise<GenericFeatureCollection> {
+async function getLayerPayload(layerId: string, cacheKey: string, origin: string, requestUrl: string): Promise<GenericFeatureCollection> {
   if (layerId === "intel-hotspots") {
     const url = new URL(requestUrl);
     const tw = (url.searchParams.get("timeWindow") ?? "24h") as TimeWindow;
@@ -558,7 +509,7 @@ async function getLayerPayload(layerId: string, origin: string, requestUrl: stri
     } catch (err) {
       console.warn("[conflict-zones] pipeline failed:", err);
     }
-    const stale = getCached(layerId);
+    const stale = getCached(cacheKey);
     if (stale && stale.features.length > 0) return stale;
     try {
       return await loadSnapshot(layerId);
@@ -585,7 +536,7 @@ async function getLayerPayload(layerId: string, origin: string, requestUrl: stri
     const fc = toFeatureCollection(features);
 
     if (degraded && features.length === 0) {
-      const stale = getCached(layerId);
+      const stale = getCached(cacheKey);
       if (stale && stale.features.length > 0) return stale;
       try {
         const snapshot = await loadSnapshot(layerId);
@@ -760,7 +711,7 @@ async function getLayerPayload(layerId: string, origin: string, requestUrl: stri
   return loadSnapshot(layerId);
 }
 
-export async function GET(request: Request, { params }: { params: { layerId: string } }) {
+async function handler(request: Request, { params }: { params: { layerId: string } }) {
   const layerId = params.layerId;
 
   // Path traversal protection: only allow lowercase alphanumeric + hyphens
@@ -768,21 +719,42 @@ export async function GET(request: Request, { params }: { params: { layerId: str
     return NextResponse.json({ error: "Invalid layer ID" }, { status: 400 });
   }
 
-  const origin = new URL(request.url).origin;
+  const url = new URL(request.url);
+  if (layerId === "ucdp-events" && !isValidUcdpYearRange(url.searchParams)) {
+    return NextResponse.json(
+      { error: "Invalid UCDP year range: use ordered four-digit years from 1989 through the current year" },
+      { status: 400, headers: { "Cache-Control": "no-store" } }
+    );
+  }
+  // Resolve one-sided filters against the loaded dataset, not the empty-store fallback.
+  if (layerId === "ucdp-events" && url.searchParams.has("fromYear") !== url.searchParams.has("toYear")) {
+    await ensureUcdpLoaded();
+    const defaultYear = String(getUcdpDefaultYear());
+    if (!url.searchParams.has("fromYear")) url.searchParams.set("fromYear", defaultYear);
+    if (!url.searchParams.has("toYear")) url.searchParams.set("toYear", defaultYear);
+    if (!isValidUcdpYearRange(url.searchParams)) {
+      return NextResponse.json(
+        { error: "Invalid UCDP year range after applying the dataset default" },
+        { status: 400, headers: { "Cache-Control": "no-store" } }
+      );
+    }
+  }
+  const origin = url.origin;
+  const cacheKey = buildLayerCacheKey(layerId, url.searchParams);
 
-  // Fresh cache hit — return immediately.
-  if (isFresh(layerId)) {
-    return NextResponse.json(getCached(layerId)!, {
+  // Fresh cache hit
+  if (isFresh(cacheKey)) {
+    return NextResponse.json(getCached(cacheKey)!, {
       headers: { "Cache-Control": "no-store", "X-Cache": "hit" },
     });
   }
 
   // Stale-while-revalidate: serve stale data immediately and refresh in the background.
   // This eliminates perceived latency on every refresh cycle after the first cold load.
-  const stale = getCached(layerId);
+  const stale = getCached(cacheKey);
   if (stale) {
-    void getLayerPayload(layerId, origin, request.url)
-      .then((payload) => { if (payload.features.length > 0) setCache(layerId, payload); })
+    void getLayerPayload(layerId, cacheKey, origin, url.toString())
+      .then((payload) => { if (payload.features.length > 0) setCache(cacheKey, payload); })
       .catch(() => { /* keep existing stale entry */ });
     return NextResponse.json(stale, {
       headers: { "Cache-Control": "no-store", "X-Cache": "stale" },
@@ -791,9 +763,9 @@ export async function GET(request: Request, { params }: { params: { layerId: str
 
   // Cold start: no cache — must fetch synchronously.
   try {
-    const payload = await getLayerPayload(layerId, origin, request.url);
+    const payload = await getLayerPayload(layerId, cacheKey, origin, url.toString());
     const shouldCache = payload.features.length > 0;
-    if (shouldCache) setCache(layerId, payload);
+    if (shouldCache) setCache(cacheKey, payload);
     return NextResponse.json(payload, {
       headers: { "Cache-Control": "no-store", "X-Cache": "miss" },
     });
@@ -809,3 +781,5 @@ export async function GET(request: Request, { params }: { params: { layerId: str
     }
   }
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

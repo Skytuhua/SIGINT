@@ -94,8 +94,9 @@ export default function InitialLoader({ onDone }: Props) {
   return (
     <div
       style={{
-        width: "100vw",
-        height: "100vh",
+        width: "100%",
+        height: "100dvh",
+        minHeight: "100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -125,7 +126,7 @@ export default function InitialLoader({ onDone }: Props) {
       <div
         style={{
           border: "1px solid #1e3a5f",
-          minWidth: 360,
+          minWidth: "min(360px, 90vw)",
           background: "#0d1b2a",
         }}
       >
@@ -196,7 +197,7 @@ export default function InitialLoader({ onDone }: Props) {
       <div
         style={{
           marginTop: 14,
-          minWidth: 360,
+          minWidth: "min(360px, 90vw)",
           height: 2,
           background: "#111e2e",
           position: "relative",

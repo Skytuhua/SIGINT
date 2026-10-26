@@ -1,4 +1,5 @@
 import { readPersistentFeedCache, writePersistentFeedCache } from "../runtime/persistentFeedCache";
+import { isAbortError } from "../runtime/fetchJson";
 import { capAndAggregateFeatures } from "./normalize";
 import { selectAdapter } from "./adapters";
 import type { LayerFeatureCollection, LayerHealthState, LayerRegistryEntry } from "./types";
@@ -63,6 +64,10 @@ export async function runLayerPipeline(
       ),
     };
   } catch (error) {
+    // Cancellation aborts (scheduler trigger/stop, layer disable) are not
+    // upstream failures — rethrow so the runtime's isAbortError guard skips
+    // the failure bookkeeping and the circuit breaker stays closed.
+    if (isAbortError(error)) throw error;
     const isFresh = Boolean(cached.entry && cached.entry.expiresAt > now);
     const isStaleUsable = Boolean(cached.entry && cached.entry.staleUntil > now);
     if (warm && (isFresh || isStaleUsable)) {

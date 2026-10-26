@@ -2,8 +2,11 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { isBlockedHost } from "../../../../../lib/server/ssrf";
+import { STRICT_LIMITER } from "../../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../../lib/server/withRateLimit";
 
 const TIMEOUT_MS = 8_000;
+const MAX_BODY_BYTES = 10 * 1024 * 1024; // 10 MB
 
 /**
  * Proxy JPEG snapshots from IP cameras to bypass CORS and mixed-content
@@ -11,8 +14,8 @@ const TIMEOUT_MS = 8_000;
  *
  * Usage: GET /api/cctv/insecam/proxy?url=<encoded camera URL>
  */
-export async function GET(req: NextRequest) {
-  const url = req.nextUrl.searchParams.get("url");
+async function handler(req: Request) {
+  const url = new URL(req.url).searchParams.get("url");
   if (!url) {
     return NextResponse.json({ error: "Missing url parameter" }, { status: 400 });
   }
@@ -39,6 +42,7 @@ export async function GET(req: NextRequest) {
 
     const resp = await fetch(url, {
       signal: controller.signal,
+      redirect: "manual",
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -49,6 +53,15 @@ export async function GET(req: NextRequest) {
 
     clearTimeout(timeout);
 
+    // Reject redirects — camera snapshots should serve images directly.
+    // Following redirects opens SSRF bypass vectors (DNS rebinding).
+    if (resp.status >= 300 && resp.status < 400) {
+      return NextResponse.json(
+        { error: "Redirects not allowed" },
+        { status: 403 },
+      );
+    }
+
     if (!resp.ok) {
       return NextResponse.json(
         { error: "Upstream request failed" },
@@ -56,12 +69,23 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const contentType = resp.headers.get("content-type") ?? "image/jpeg";
+    const contentType = (resp.headers.get("content-type") ?? "")
+      .split(";", 1)[0].trim().toLowerCase();
 
-    // Reject non-image responses (HTML error pages, redirects, etc.)
-    if (contentType.startsWith("text/") || contentType.includes("html")) {
+    // Snapshots must declare a supported raster type; do not relay active SVG
+    // documents or guess a type for unlabelled responses.
+    if (!["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif", "image/apng"].includes(contentType)) {
       return NextResponse.json(
         { error: "Non-image response from upstream" },
+        { status: 502 },
+      );
+    }
+
+    // Reject oversized responses before reading the full body
+    const contentLength = resp.headers.get("content-length");
+    if (contentLength && Number(contentLength) > MAX_BODY_BYTES) {
+      return NextResponse.json(
+        { error: "Response too large" },
         { status: 502 },
       );
     }
@@ -72,6 +96,14 @@ export async function GET(req: NextRequest) {
     if (body.byteLength === 0) {
       return NextResponse.json(
         { error: "Empty response from upstream" },
+        { status: 502 },
+      );
+    }
+
+    // Reject oversized bodies (Content-Length may have been missing or lying)
+    if (body.byteLength > MAX_BODY_BYTES) {
+      return NextResponse.json(
+        { error: "Response too large" },
         { status: 502 },
       );
     }
@@ -87,3 +119,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Proxy request failed" }, { status: 502 });
   }
 }
+
+export const GET = withRateLimit(STRICT_LIMITER, handler);

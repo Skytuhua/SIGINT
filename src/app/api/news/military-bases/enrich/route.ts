@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { STRICT_LIMITER } from "../../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../../lib/server/withRateLimit";
 import { reverseGeocodeNominatim } from "../../../../../lib/server/news/providers/nominatim";
 import { cachedFetch, fetchJsonOrThrow, type UpstreamPolicy } from "../../../../../lib/server/news/upstream";
 
@@ -385,7 +387,7 @@ async function fetchWikipediaSummary(title: string): Promise<{
   const result = await cachedFetch({
     cacheKey: `title:${clean.toLowerCase()}`,
     policy: WIKIPEDIA_POLICY,
-    fallbackValue: null as { title: string; extract: string | null; content_urls?: { desktop?: { page?: string } } } | null,
+    fallbackValue: null as { title: string; extract?: string; content_urls?: { desktop?: { page?: string } } } | null,
     request: async () => {
       const url = `${WIKIPEDIA_SUMMARY}/${encodeURIComponent(clean.replace(/ /g, "_"))}`;
       return await fetchJsonOrThrow<{
@@ -420,7 +422,7 @@ async function fetchWikipediaSummary(title: string): Promise<{
   };
 }
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const latRaw = searchParams.get("lat");
   const lonRaw = searchParams.get("lon");
@@ -496,4 +498,6 @@ export async function GET(request: Request) {
     { headers: { "Cache-Control": "public, max-age=86400" } }
   );
 }
+
+export const GET = withRateLimit(STRICT_LIMITER, handler);
 

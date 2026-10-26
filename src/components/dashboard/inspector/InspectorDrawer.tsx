@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useSIGINTStore } from "../../../store";
 import { featureFlags } from "../../../config/featureFlags";
+import { useIsMobile } from "../../../hooks/useIsMobile";
 import PanelTabs from "../panel/PanelTabs";
 import Toggle from "../controls/Toggle";
 import { formatUtc } from "../../../lib/dashboard/format";
@@ -221,6 +222,7 @@ function flightSummaryRows(flight: Flight, id: string): SummaryRow[] {
 }
 
 export default function InspectorDrawer() {
+  const isMobile = useIsMobile();
   const inspector = useSIGINTStore((s) => s.dashboard.inspector);
   const setInspectorTab = useSIGINTStore((s) => s.setInspectorTab);
   const setInspectorPinned = useSIGINTStore((s) => s.setInspectorPinned);
@@ -356,7 +358,7 @@ export default function InspectorDrawer() {
         </div>
         <div className="si-inspector-actions">
           <Toggle checked={inspector.pinned} onChange={setInspectorPinned} label="Pin" />
-          {featureFlags.enableInspectorSplitView ? (
+          {featureFlags.enableInspectorSplitView && !isMobile ? (
             <Toggle checked={inspector.splitView} onChange={setInspectorSplitView} label="Split" />
           ) : null}
           <button type="button" className="si-inline-action" onClick={clearSelectionContext}>
@@ -390,26 +392,28 @@ export default function InspectorDrawer() {
                   onSnapshotError={markCctvBroken}
                   onStreamError={markCctvBroken}
                 />
-                <button
-                  type="button"
-                  className="si-inline-action"
-                  style={{
-                    marginTop: 8,
-                    width: "100%",
-                    padding: "5px 0",
-                    background: "rgba(0, 229, 255, 0.12)",
-                    border: "1px solid rgba(0, 229, 255, 0.3)",
-                    color: "#00e5ff",
-                    borderRadius: 4,
-                    cursor: "pointer",
-                    fontSize: 11,
-                    fontWeight: 600,
-                    letterSpacing: "0.05em",
-                  }}
-                  onClick={() => openCctvFloating(cctvCamera)}
-                >
-                  POP OUT
-                </button>
+                {!isMobile ? (
+                  <button
+                    type="button"
+                    className="si-inline-action"
+                    style={{
+                      marginTop: 8,
+                      width: "100%",
+                      padding: "5px 0",
+                      background: "rgba(0, 229, 255, 0.12)",
+                      border: "1px solid rgba(0, 229, 255, 0.3)",
+                      color: "#00e5ff",
+                      borderRadius: 4,
+                      cursor: "pointer",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      letterSpacing: "0.05em",
+                    }}
+                    onClick={() => openCctvFloating(cctvCamera)}
+                  >
+                    POP OUT
+                  </button>
+                ) : null}
               </div>
             )}
           </>

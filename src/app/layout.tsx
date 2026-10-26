@@ -22,6 +22,12 @@ export const metadata = {
   description: "SIGINT geospatial intelligence dashboard powered by CesiumJS",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">

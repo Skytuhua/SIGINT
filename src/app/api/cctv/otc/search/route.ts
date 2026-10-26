@@ -9,6 +9,8 @@ import {
   toCctvCamera,
   validateBatch,
 } from "../../../../../lib/server/cctv/otc";
+import { MODERATE_LIMITER } from "../../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../../lib/server/withRateLimit";
 
 const MAX_VALIDATE = 30; // validate up to this many matches
 const VALIDATE_BATCH_SIZE = 30; // all in one parallel batch
@@ -24,7 +26,7 @@ function evictOldest() {
   if (firstKey !== undefined) queryCache.delete(firstKey);
 }
 
-export async function GET(req: NextRequest) {
+async function handler(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim().toLowerCase() ?? "";
   if (q.length < 2) {
     return NextResponse.json([], { status: 200 });
@@ -56,7 +58,7 @@ export async function GET(req: NextRequest) {
     const validated = await validateBatch(toValidate, VALIDATE_BATCH_SIZE);
     const cameras = validated.map(toCctvCamera);
 
-    console.log(`[otc/search] q="${q}" → ${matches.length} matches, ${cameras.length} validated`);
+    console.log(`[otc/search] → ${matches.length} matches, ${cameras.length} validated`);
 
     // Cache result
     evictOldest();
@@ -70,3 +72,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json([], { status: 502 });
   }
 }
+
+export const GET = withRateLimit(MODERATE_LIMITER, handler);

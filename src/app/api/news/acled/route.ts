@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { computeAcledInstabilityScore, getAcledCountryEvents } from "../../../../lib/server/news/providers/acled";
+import { STANDARD_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const country = searchParams.get("country");
   if (!country) {
@@ -25,3 +27,5 @@ export async function GET(request: Request) {
     { headers: { "Cache-Control": "no-store, max-age=0" } },
   );
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

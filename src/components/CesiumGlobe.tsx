@@ -54,7 +54,7 @@ import { fetchJsonWithPolicy, isAbortError } from "../lib/runtime/fetchJson";
 import { buildRecordKey, dedupeByRecordKey } from "../lib/runtime/normalize";
 import type { Viewer } from "cesium";
 
-// 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?Types for worker messages 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
+// ── Types for worker messages ──
 interface SatWorkerOutMessage {
   type: "POSITIONS" | "ORBIT_PATH" | "TLE_LOADED";
   positions?: PropagatedSat[];
@@ -193,7 +193,7 @@ interface CesiumGlobeProps {
    onReady?: () => void;
 }
 
-// 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?CesiumGlobe 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?
+// ── CesiumGlobe ──
 
 export default function CesiumGlobe({
   onControlApi,
@@ -459,12 +459,12 @@ export default function CesiumGlobe({
     });
   }, []);
 
-  // 闁冲厜鍋撻柍鍏夊亾 Layer render helpers 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?
+  // ── Layer render helpers ──
 
   const renderSatsIfEnabled = useCallback(
     async (sats: PropagatedSat[]) => {
       const { layers, ui } = store.getState();
-      if (!viewerRef.current || !layers.satellites) return;
+      if (!viewerRef.current || viewerRef.current.isDestroyed() || !layers.satellites) return;
       await renderSatellites(viewerRef.current, sats, ui.detectMode);
     },
     [store]
@@ -483,7 +483,7 @@ export default function CesiumGlobe({
   const renderFlightsIfEnabled = useCallback(
     async (flights: Flight[]) => {
       const { layers, filters } = store.getState();
-      if (!viewerRef.current) return;
+      if (!viewerRef.current || viewerRef.current.isDestroyed()) return;
 
       // Combine commercial + military based on toggles
       const visible = flights.filter(
@@ -506,7 +506,7 @@ export default function CesiumGlobe({
   const renderDisastersIfEnabled = useCallback(
     async (alerts: DisasterAlert[]) => {
       const { layers } = store.getState();
-      if (!viewerRef.current) return;
+      if (!viewerRef.current || viewerRef.current.isDestroyed()) return;
       if (!layers.disasters) {
         clearLayer(viewerRef.current, "disasters");
         return;
@@ -519,7 +519,7 @@ export default function CesiumGlobe({
   const renderGpsJamIfEnabled = useCallback(
     async (flights: Flight[], military?: Flight[]) => {
       const { layers } = store.getState();
-      if (!viewerRef.current) return;
+      if (!viewerRef.current || viewerRef.current.isDestroyed()) return;
       if (!layers.gpsJam) {
         clearLayer(viewerRef.current, 'gps_jam');
         for (let i = viewerRef.current.dataSources.length - 1; i >= 0; i--) {
@@ -553,7 +553,7 @@ export default function CesiumGlobe({
         tracker.pushSnapshot(civilianFlights, militaryFlights);
 
         const { layers } = store.getState();
-        if (!viewerRef.current) return;
+        if (!viewerRef.current || viewerRef.current.isDestroyed()) return;
         if (!layers.airspaceAnomaly) {
           clearLayer(viewerRef.current, 'airspace_anomaly');
           clearLayer(viewerRef.current, 'disappeared_flights');
@@ -565,15 +565,15 @@ export default function CesiumGlobe({
           const baseline = tracker.getBaseline();
           const zones = computeAirspaceAnomalies(baseline, civilianFlights, militaryFlights);
           console.log(`[airspace-anomaly] baseline cells=${baseline.size} zones=${zones.length}`);
-        store.getState().setAirspaceAnomalies(zones);
-        await renderAirspaceAnomalies(viewerRef.current, zones);
-        // Re-check — user may have toggled off during async render
-        if (!store.getState().layers.airspaceAnomaly && viewerRef.current) {
-          clearLayer(viewerRef.current, 'airspace_anomaly');
-          clearLayer(viewerRef.current, 'disappeared_flights');
-          return;
+          store.getState().setAirspaceAnomalies(zones);
+          await renderAirspaceAnomalies(viewerRef.current, zones);
+          // Re-check — user may have toggled off during async render
+          if (!store.getState().layers.airspaceAnomaly && viewerRef.current) {
+            clearLayer(viewerRef.current, 'airspace_anomaly');
+            clearLayer(viewerRef.current, 'disappeared_flights');
+            return;
+          }
         }
-      }
       // Detect disappeared military flights (require 3 consecutive misses)
       const currentMilMap = new Map(militaryFlights.map((f) => [f.icao, f]));
       const prevMap = previousMilitaryMapRef.current;
@@ -656,7 +656,7 @@ export default function CesiumGlobe({
 
   const updateCameraSnapshot = useCallback(() => {
     const viewer = viewerRef.current;
-    if (!viewer) return;
+    if (!viewer || viewer.isDestroyed()) return;
     const cartographic = viewer.camera.positionCartographic;
     const next: CameraSnapshot = {
       lat: toDegrees(cartographic.latitude),
@@ -705,7 +705,7 @@ export default function CesiumGlobe({
   const nudgeCardinal = useCallback(
     async (dir: "N" | "S" | "E" | "W") => {
       const viewer = viewerRef.current;
-      if (!viewer) return;
+      if (!viewer || viewer.isDestroyed()) return;
       const cartographic = viewer.camera.positionCartographic;
       const lat = toDegrees(cartographic.latitude);
       const lon = toDegrees(cartographic.longitude);
@@ -741,7 +741,7 @@ export default function CesiumGlobe({
 
   const setNorthUp = useCallback(() => {
     const viewer = viewerRef.current;
-    if (!viewer) return;
+    if (!viewer || viewer.isDestroyed()) return;
     viewer.camera.flyTo({
       destination: viewer.camera.positionWC,
       orientation: {
@@ -755,7 +755,7 @@ export default function CesiumGlobe({
 
   const setTopDown = useCallback(() => {
     const viewer = viewerRef.current;
-    if (!viewer) return;
+    if (!viewer || viewer.isDestroyed()) return;
     viewer.camera.flyTo({
       destination: viewer.camera.positionWC,
       orientation: {
@@ -769,7 +769,7 @@ export default function CesiumGlobe({
 
   const setOblique = useCallback(() => {
     const viewer = viewerRef.current;
-    if (!viewer) return;
+    if (!viewer || viewer.isDestroyed()) return;
     viewer.camera.flyTo({
       destination: viewer.camera.positionWC,
       orientation: {
@@ -783,21 +783,21 @@ export default function CesiumGlobe({
 
   const zoomIn = useCallback(() => {
     const viewer = viewerRef.current;
-    if (!viewer) return;
+    if (!viewer || viewer.isDestroyed()) return;
     const amount = Math.max(80, viewer.camera.positionCartographic.height * 0.16);
     viewer.camera.zoomIn(amount);
   }, []);
 
   const zoomOut = useCallback(() => {
     const viewer = viewerRef.current;
-    if (!viewer) return;
+    if (!viewer || viewer.isDestroyed()) return;
     const amount = Math.max(80, viewer.camera.positionCartographic.height * 0.16);
     viewer.camera.zoomOut(amount);
   }, []);
 
   const gotoHome = useCallback(async () => {
     const viewer = viewerRef.current;
-    if (!viewer) return;
+    if (!viewer || viewer.isDestroyed()) return;
     const home = homeViewRef.current;
     await flyToScene(
       viewer,
@@ -844,10 +844,10 @@ export default function CesiumGlobe({
     zoomOut,
     nudgeCardinal,
   ]);
-  // 闁冲厜鍋撻柍鍏夊亾 FPS tracking 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?
+  // ── FPS tracking ──
   const setupFpsTracking = useCallback(
-    (viewer: Viewer) => {
-      viewer.scene.postRender.addEventListener(() => {
+    (viewer: Viewer): (() => void) => {
+      const onPostRenderFps = () => {
         const now = performance.now();
         fpsFrameRef.current.frames++;
         if (now - fpsFrameRef.current.lastTime >= 1000) {
@@ -855,12 +855,20 @@ export default function CesiumGlobe({
           fpsFrameRef.current.frames = 0;
           fpsFrameRef.current.lastTime = now;
         }
-      });
+      };
+      viewer.scene.postRender.addEventListener(onPostRenderFps);
+      return () => {
+        try {
+          viewer.scene.postRender.removeEventListener(onPostRenderFps);
+        } catch {
+          // ignore if viewer destroyed
+        }
+      };
     },
     [store]
   );
 
-  // 闁冲厜鍋撻柍鍏夊亾 Entity click handler 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?
+  // ── Entity click handler ──
   const setupClickHandler = useCallback(
     async (viewer: Viewer) => {
       const Cesium = await import("cesium");
@@ -1085,7 +1093,7 @@ export default function CesiumGlobe({
     ]
   );
 
-  // 闁冲厜鍋撻柍鍏夊亾 Scene flying via store subscription 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?
+  // ── Scene flying via store subscription ──
   const setupSceneSubscription = useCallback(
     (viewer: Viewer) => {
       return store.subscribe(
@@ -1101,7 +1109,7 @@ export default function CesiumGlobe({
     [store]
   );
 
-  // 闁冲厜鍋撻柍鍏夊亾 Style preset subscription 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
+  // ── Style preset subscription ──
   const setupPresetSubscription = useCallback(
     (viewer: Viewer) => {
       return store.subscribe(
@@ -1122,7 +1130,7 @@ export default function CesiumGlobe({
     [store]
   );
 
-  // 闁冲厜鍋撻柍鍏夊亾 Data fetching 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
+  // ── Data fetching ──
 
   const refreshTrackedPath = useCallback(async (icao: string, force = false) => {
     if (!icao) return;
@@ -1145,7 +1153,7 @@ export default function CesiumGlobe({
         }
       );
       const viewer = viewerRef.current;
-      if (!viewer || trackedFlightIdRef.current !== icao || track.length < 2) return;
+      if (!viewer || viewer.isDestroyed() || trackedFlightIdRef.current !== icao || track.length < 2) return;
       flightPathAccumRef.current = track;
       await renderFlightPath(viewer, track);
     } catch (error) {
@@ -1162,7 +1170,7 @@ export default function CesiumGlobe({
     await renderFlightsIfEnabled(flights);
 
     const trackedId = trackedFlightIdRef.current;
-    if (trackedId && viewerRef.current) {
+    if (trackedId && viewerRef.current && !viewerRef.current.isDestroyed()) {
       const tracked = flights.find((flight) => flight.icao === trackedId);
       if (tracked) {
         void renderFlightHighlight(viewerRef.current, tracked, getInterpolatedPosition);
@@ -1260,7 +1268,7 @@ export default function CesiumGlobe({
     [scheduleFlightRender, renderGpsJamIfEnabled, renderAnomaliesIfEnabled, store]
   );
 
-  // 闁冲厜鍋撻柍鍏夊亾 Layer toggle subscriptions 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?
+  // ── Layer toggle subscriptions ──
 
   const setupLayerSubscriptions = useCallback(
     (viewer: Viewer) => {
@@ -1271,6 +1279,7 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => s.layers.satellites,
           (enabled) => {
+            if (viewer.isDestroyed()) return;
             if (!enabled) clearLayer(viewer, "satellites");
             else renderSatsIfEnabled(currentSatsRef.current);
           }
@@ -1282,6 +1291,7 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => ({ flights: s.layers.flights, military: s.layers.military }),
           ({ flights, military }) => {
+            if (viewer.isDestroyed()) return;
             if (!flights && !military) {
               // Full shutdown: clear all flight state
               clearLayer(viewer, "flights");
@@ -1317,6 +1327,7 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => s.layers.disasters,
           (enabled) => {
+            if (viewer.isDestroyed()) return;
             if (!enabled) clearLayer(viewer, "disasters");
             else renderDisastersIfEnabled(currentDisastersRef.current);
           }
@@ -1328,6 +1339,7 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => s.liveData.disasters,
           (disasters) => {
+            if (viewer.isDestroyed()) return;
             currentDisastersRef.current = disasters ?? [];
             renderDisastersIfEnabled(currentDisastersRef.current);
           }
@@ -1339,6 +1351,7 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => s.layers.gpsJam,
           (enabled) => {
+            if (viewer.isDestroyed()) return;
             if (!enabled) {
               clearLayer(viewer, 'gps_jam');
               // Remove any orphaned data sources from overlapping async renders
@@ -1361,6 +1374,7 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => s.layers.airspaceAnomaly,
           (enabled) => {
+            if (viewer.isDestroyed()) return;
             if (!enabled) {
               clearLayer(viewer, 'airspace_anomaly');
               clearLayer(viewer, 'disappeared_flights');
@@ -1505,7 +1519,14 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => s.filters,
           () => renderFlightsIfEnabled(currentFlightsRef.current),
-          { equalityFn: (a, b) => JSON.stringify(a) === JSON.stringify(b) }
+          {
+            equalityFn: (a, b) =>
+              a.minMagnitude === b.minMagnitude &&
+              a.maxMagnitude === b.maxMagnitude &&
+              a.minAltM === b.minAltM &&
+              a.maxAltM === b.maxAltM &&
+              a.onGroundVisible === b.onGroundVisible,
+          }
         )
       );
 
@@ -1535,7 +1556,7 @@ export default function CesiumGlobe({
     ]
   );
 
-  // 闁冲厜鍋撻柍鍏夊亾 Main initialization effect 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?
+  // ── Main initialization effect ──
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (
@@ -1633,13 +1654,14 @@ export default function CesiumGlobe({
       const { ui } = store.getState();
       await applyStylePreset(viewer, ui.stylePreset, ui);
 
-      // 闁冲厜鍋撻柍鍏夊亾 Satellite worker 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?
+      // ── Satellite worker ──
       const satWorker = new Worker(
         new URL("../workers/satellite.worker.ts", import.meta.url)
       );
       satWorkerRef.current = satWorker;
 
       satWorker.onmessage = async (e: MessageEvent<SatWorkerOutMessage>) => {
+        if (viewer.isDestroyed()) return;
         if (e.data.type === "POSITIONS" && e.data.positions) {
           currentSatsRef.current = e.data.positions;
           store.getState().setLiveSatellites(e.data.positions);
@@ -1699,8 +1721,8 @@ export default function CesiumGlobe({
         )
       );
 
-      // 闁冲厜鍋撻柍鍏夊亾 Traffic worker 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋?
-      // 闁冲厜鍋撻柍鍏夊亾 Polling intervals 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
+      // ── Traffic worker ──
+      // ── Polling intervals ──
       const seededLiveData = store.getState().liveData;
       applyLiveFlights(
         (seededLiveData.flights as Flight[]) ?? [],
@@ -1715,7 +1737,7 @@ export default function CesiumGlobe({
         await renderAnomaliesIfEnabled(civ, mil);
       } catch (err) { console.warn("[globe] airspace anomaly render error:", err); }
 
-      // 闁冲厜鍋撻柍鍏夊亾 Load CCTV cameras 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
+      // ── Load CCTV cameras ──
       try {
         const cameras = await fetchAllCctvCameras();
         store.getState().setCameras(cameras);
@@ -1727,22 +1749,27 @@ export default function CesiumGlobe({
           const { calibrations } = cctv;
           renderCctv(viewer, camerasForGlobe, calibrations);
         }
-      } catch {
-        // CCTV data optional
+      } catch (err) {
+        console.warn("[globe] CCTV load error:", err);
       }
 
       // Load static GeoJSON layers (volcanoes, nuclear sites, military bases, country borders)
       try {
-        const [volcGeo, nukeGeo, milBaseGeo, borderGeo] = await Promise.all([
+        const results = await Promise.allSettled([
           fetch('/data/news-layers/volcanoes.geojson').then(r => r.json()),
           fetch('/data/news-layers/nuclear-sites.geojson').then(r => r.json()),
           fetch('/data/news-layers/military-bases.geojson').then(r => r.json()),
           fetch('/data/news-layers/country-borders.geojson').then(r => r.json()),
         ]);
-        volcanoDataRef.current = volcGeo.features ?? [];
-        nuclearSitesDataRef.current = nukeGeo.features ?? [];
-        militaryBasesDataRef.current = milBaseGeo.features ?? [];
-        countryBordersDataRef.current = borderGeo.features ?? [];
+        const [volcResult, nukeResult, milBaseResult, borderResult] = results;
+        if (volcResult.status === 'fulfilled') volcanoDataRef.current = volcResult.value.features ?? [];
+        else console.warn("[globe] volcanoes.geojson failed:", volcResult.reason);
+        if (nukeResult.status === 'fulfilled') nuclearSitesDataRef.current = nukeResult.value.features ?? [];
+        else console.warn("[globe] nuclear-sites.geojson failed:", nukeResult.reason);
+        if (milBaseResult.status === 'fulfilled') militaryBasesDataRef.current = milBaseResult.value.features ?? [];
+        else console.warn("[globe] military-bases.geojson failed:", milBaseResult.reason);
+        if (borderResult.status === 'fulfilled') countryBordersDataRef.current = borderResult.value.features ?? [];
+        else console.warn("[globe] country-borders.geojson failed:", borderResult.reason);
         const currentLayers = store.getState().layers;
         if (currentLayers.volcanoes) await renderVolcanoes(viewer, volcanoDataRef.current);
         if (currentLayers.nuclearSites) await renderNuclearSites(viewer, nuclearSitesDataRef.current);
@@ -1752,7 +1779,7 @@ export default function CesiumGlobe({
         console.warn("[globe] static GeoJSON layer load error:", err);
       }
 
-      // 闁冲厜鍋撻柍鍏夊亾 Load scenes 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
+      // ── Load scenes ──
       try {
         const scenes = await fetchJsonWithPolicy<Scene[]>("/data/scenes.json", {
           key: "globe:scenes",
@@ -1767,8 +1794,8 @@ export default function CesiumGlobe({
         // Scenes optional
       }
 
-      // 闁冲厜鍋撻柍鍏夊亾 Subscriptions 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
-      setupFpsTracking(viewer);
+      // ── Subscriptions ──
+      unsubscribers.push(setupFpsTracking(viewer));
       unsubscribers.push(setupLayerSubscriptions(viewer));
       try {
         if (store.getState().layers.tradeRoutes) {
@@ -1786,7 +1813,7 @@ export default function CesiumGlobe({
       unsubscribers.push(setupPresetSubscription(viewer));
       try { await setupClickHandler(viewer); } catch (err) { console.warn("[globe] click handler setup error:", err); }
 
-      // 闁冲厜鍋撻柍鍏夊亾 Flight camera tracking (postRender for smooth 60fps follow) 闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾闁冲厜鍋撻柍鍏夊亾
+      // ── Flight camera tracking (postRender for smooth 60fps follow) ──
       const CesiumMod = await import("cesium");
       cesiumRef.current = CesiumMod;
 
@@ -1798,6 +1825,7 @@ export default function CesiumGlobe({
       const onPreRender = () => {
         const CesiumMod = cesiumRef.current;
         if (!CesiumMod) return;
+        if (viewer.isDestroyed()) return;
         const { layers } = store.getState();
         if ((layers.flights || layers.military) && flightSnapshotsRef.current.size > 0) {
           const now = performance.now();
@@ -1822,7 +1850,8 @@ export default function CesiumGlobe({
         }
       });
 
-      viewer.scene.postRender.addEventListener(() => {
+      const onPostRenderTracking = () => {
+        if (viewer.isDestroyed()) return;
         const target = focusTargetRef.current;
         if (!target) return;
         if (!followTrackedFlightRef.current) return;
@@ -1871,6 +1900,14 @@ export default function CesiumGlobe({
           )
         );
         lookAtInitializedRef.current = true;
+      };
+      viewer.scene.postRender.addEventListener(onPostRenderTracking);
+      unsubscribers.push(() => {
+        try {
+          viewer.scene.postRender.removeEventListener(onPostRenderTracking);
+        } catch {
+          // ignore if viewer destroyed
+        }
       });
 
       // Subscribe to trackedFlightId to clear layers when tracking stops

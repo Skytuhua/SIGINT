@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getQuotes, getMovers, getMarketNews, getEarningsCalendar } from "../../../../lib/server/news/providers/yahooFinance";
+import { STANDARD_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
 // All symbols used across Overview panels — batched into one call to warm cache
 const PREFETCH_SYMBOLS = [
@@ -20,7 +22,7 @@ const PREFETCH_SYMBOLS = [
   "RSP", "SPY",
 ];
 
-export async function GET() {
+async function handler() {
   // Fire all fetches in parallel to warm the server cache
   const [quotes, movers, news, earnings] = await Promise.allSettled([
     getQuotes(PREFETCH_SYMBOLS),
@@ -40,3 +42,5 @@ export async function GET() {
     timestamp: new Date().toISOString(),
   });
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

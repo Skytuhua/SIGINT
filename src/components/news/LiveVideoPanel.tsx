@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { NEWS_VIDEO_CHANNELS } from "../../config/newsConfig";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import type { VideoPanelCategory } from "../../lib/news/types";
 import type { YouTubeLive } from "../../lib/news/types";
 import Panel from "../dashboard/panel/Panel";
@@ -60,6 +61,7 @@ export default function LiveVideoPanel({
   liveCount,
   totalCount,
 }: LiveVideoPanelProps) {
+  const isMobile = useIsMobile();
   const channelIds = CATEGORY_CHANNEL_IDS.get(category) ?? new Set<string>();
 
   const filteredStreams = useMemo(() => {
@@ -124,6 +126,12 @@ export default function LiveVideoPanel({
     manualVideoId ??
     (selectedVideoInCategory ? panelState.selectedVideoId : tabItems[0]?.videoId ?? null);
 
+  const footerMessage = fallbackActive
+    ? `Fallback active. Showing recent uploads from ${discoverySource === "youtube-rss" ? "RSS" : discoverySource}.`
+    : isMobile
+      ? `${liveCount} live / ${filteredStreams.length} shown`
+      : `${liveCount} live / ${totalCount} total (${filteredStreams.length} in category)`;
+
   return (
     <Panel panelId={panelId} workspace="news">
       <PanelHeader
@@ -132,7 +140,7 @@ export default function LiveVideoPanel({
         {...lockHeaderProps}
         controls={<PanelControls onRefresh={onRefresh} loading={loading} refreshText="LIVE" />}
       />
-      <PanelBody noPadding className="si-news-video-body">
+      <PanelBody noPadding className={`si-news-video-body${isMobile ? " is-mobile" : ""}`.trim()}>
         {displayVideoId ? (
           <iframe
             className="si-news-video-frame"
@@ -206,11 +214,7 @@ export default function LiveVideoPanel({
         source="YOUTUBE"
         updatedAt={Date.now()}
         health={fallbackActive || backendHealth === "degraded" ? "stale" : "ok"}
-        message={
-          fallbackActive
-            ? `Fallback active. Showing recent uploads from ${discoverySource === "youtube-rss" ? "RSS" : discoverySource}.`
-            : `${liveCount} live / ${totalCount} total (${filteredStreams.length} in category)`
-        }
+        message={footerMessage}
       />
     </Panel>
   );

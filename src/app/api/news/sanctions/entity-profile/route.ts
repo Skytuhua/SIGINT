@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getGdeltArticles } from "../../../../../lib/server/news/providers/gdelt";
 import { generateHostedSummary, isHostedLlmAvailable } from "../../../../../lib/llm/hostedClient";
+import { STRICT_LIMITER } from "../../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../../lib/server/withRateLimit";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -94,7 +96,7 @@ async function fetchOpenSanctionsProfile(name: string, entityType: string): Prom
   }
 }
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const name = searchParams.get("name")?.trim();
   const entityType = searchParams.get("entityType") ?? "";
@@ -165,3 +167,5 @@ export async function GET(request: Request) {
     degraded: gdeltResult.degraded ?? false,
   });
 }
+
+export const GET = withRateLimit(STRICT_LIMITER, handler);

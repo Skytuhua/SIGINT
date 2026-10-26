@@ -148,8 +148,10 @@ Additional: options chain/flow, order book, correlation matrix, interactive char
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20.18.1+
 - [pnpm](https://pnpm.io/)
+
+Use `pnpm` for installs in this repo. The tracked lockfile is `pnpm-lock.yaml`.
 
 ### Quick Start
 

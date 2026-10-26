@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { getConflictZonesLayer } from "../../../../../../lib/server/news/conflictZones";
+import { STANDARD_LIMITER } from "../../../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../../../lib/server/withRateLimit";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   try {
     const origin = new URL(request.url).origin;
     const requestUrl = `${origin}/api/news/layers/conflict-zones?timeWindow=7d&mode=strict`;
@@ -34,3 +36,5 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

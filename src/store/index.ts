@@ -2021,9 +2021,6 @@ export const useSIGINTStore = create<SIGINTStore>()(
                   byPanel: {
                     ...byPanel,
                     [panelId]: {
-                      selectedVideoId: null,
-                      selectedChannelFilter: null,
-                      manualUrl: "",
                       ...byPanel[panelId],
                       ...partial,
                     },
@@ -2140,7 +2137,7 @@ export const useSIGINTStore = create<SIGINTStore>()(
     {
       name: "sigint-store-v2",
       version: 15,
-      migrate: (persistedState) => {
+      migrate: (persistedState, version) => {
         const state = persistedState as
           | {
               dashboard?: Partial<DashboardState>;
@@ -2154,9 +2151,9 @@ export const useSIGINTStore = create<SIGINTStore>()(
         const panelVisibility = sanitizePanelVisibility(dashboardInput.panelVisibility);
         const panelLocks = sanitizePanelLocks(dashboardInput.panelLocks);
 
-        // v12 intentionally resets all NEWS persisted state once to clear stale layout
-        // and incompatible query/control states while keeping OPS/dashboard preferences.
-        const mergedNews: NewsState = defaultNewsState();
+        // Only saves predating v12 need the one-time NEWS reset. Later saves
+        // retain curated data; merge below supplies defaults and sanitizes layouts.
+        const mergedNews = version < 12 ? defaultNewsState() : (state.news ?? {});
 
         return {
           ...state,
@@ -2200,7 +2197,13 @@ export const useSIGINTStore = create<SIGINTStore>()(
 
         return {
           ...current,
-          ...persisted,
+          // Only restore roots written by partialize below. Persisted snapshots
+          // must not replace live actions or revive unrelated runtime state.
+          filters: persisted.filters ?? current.filters,
+          ui: persisted.ui ?? current.ui,
+          savedScenes: persisted.savedScenes ?? current.savedScenes,
+          cctv: persisted.cctv ?? current.cctv,
+          tradeRouteSelection: persisted.tradeRouteSelection ?? current.tradeRouteSelection,
           layers: {
             ...current.layers,
             ...(persisted.layers ?? {}),

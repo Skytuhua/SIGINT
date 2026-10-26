@@ -123,13 +123,19 @@ export async function generateUcdpSummary(
     }
   }
 
+  // Use server-side API route instead of importing hostedClient directly.
+  // This keeps the LLM API key out of the client bundle.
   try {
-    const { isHostedLlmAvailable, generateHostedSummary } = await import(
-      "../llm/hostedClient"
-    );
-    if (isHostedLlmAvailable()) {
-      const raw = await generateHostedSummary(prompt);
-      return { text: clampToWordLimit(raw), degraded: false };
+    const res = await fetch("/api/llm/summary", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(prompt),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.text) {
+        return { text: clampToWordLimit(data.text), degraded: false };
+      }
     }
   } catch {
     // fall through to template

@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { ensureUcdpLoaded, getUcdpMeta } from "../../../../../../lib/server/ucdp/ucdpGedStore";
+import { STANDARD_LIMITER } from "../../../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../../../lib/server/withRateLimit";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+async function handler() {
   try {
     await ensureUcdpLoaded();
   } catch {
@@ -14,3 +16,5 @@ export async function GET() {
     headers: { "Cache-Control": "no-store" },
   });
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

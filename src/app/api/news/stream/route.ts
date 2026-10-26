@@ -3,6 +3,8 @@ import { getStreamStore, applyFilters } from "../../../../lib/server/news/stream
 import { startScheduler } from "../../../../lib/server/news/stream/scheduler";
 import type { StreamFilterParams } from "../../../../lib/news/stream/types";
 import type { StreamEvent, SnapshotEvent, StatusEvent, HeartbeatEvent } from "../../../../lib/news/stream/events";
+import { STANDARD_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -40,7 +42,7 @@ function parseFilters(params: URLSearchParams): StreamFilterParams {
   return filters;
 }
 
-export async function GET(request: NextRequest) {
+async function handler(request: NextRequest) {
   startScheduler();
 
   const store = getStreamStore();
@@ -118,3 +120,5 @@ export async function GET(request: NextRequest) {
     },
   });
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

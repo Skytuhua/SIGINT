@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 import { useSIGINTStore } from "../../store";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import CctvFeedView from "./inspector/CctvFeedView";
 
 const MIN_W = 320;
@@ -10,6 +11,7 @@ const DEFAULT_W = 420;
 const DEFAULT_H = 300;
 
 export default function CctvFloatingPanel() {
+  const isMobile = useIsMobile();
   const floating = useSIGINTStore((s) => s.cctv.floating);
   const close = useSIGINTStore((s) => s.closeCctvFloating);
   const markCctvBroken = useSIGINTStore((s) => s.markCctvBroken);
@@ -68,7 +70,7 @@ export default function CctvFloatingPanel() {
     if (floating.open) setMinimized(false);
   }, [floating.open, floating.camera?.id]);
 
-  if (!floating.open || !floating.camera) return null;
+  if (isMobile || !floating.open || !floating.camera) return null;
 
   const cam = floating.camera;
 

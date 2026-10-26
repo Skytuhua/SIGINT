@@ -54,7 +54,9 @@ import { leafletRenderer, registerLeafletForMap } from "../../lib/newsLayers/ren
 import type { LayerFeature, LayerFeatureCollection, LayerHealthState } from "../../lib/newsLayers/types";
 import { applyConflictZoneFilters } from "../../lib/newsLayers/conflictZoneFilters";
 import { setLayerClickHandler } from "../../lib/newsLayers/store";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import { propsToConflictZoneDetail } from "../../lib/server/news/conflictZones/types";
+import usePhoneMapGestureLock from "./usePhoneMapGestureLock";
 
 const MAP_DEFAULT_CENTER: [number, number] = [20, 10];
 const MAP_DEFAULT_ZOOM = 2;
@@ -226,6 +228,7 @@ function oppositeDockSideForLng(lng: number): "left" | "right" {
 }
 
 export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
+  const isMobile = useIsMobile();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapCanvasRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<ManagedLeafletMap | null>(null);
@@ -269,6 +272,7 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
   const hasMapTilerKey = mapTilerKey.length > 0;
 
   const [tileLoadError, setTileLoadError] = useState(false);
+  const [mobileLayersOpen, setMobileLayersOpen] = useState(false);
   const [dockSide, setDockSide] = useState<"left" | "right">("left");
   const [countryGeometryVersion, setCountryGeometryVersion] = useState(0);
   const layerTogglesRef = useRef<Record<string, boolean>>({});
@@ -2045,11 +2049,27 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
   const mapErrorTitle = "MAP TILES UNAVAILABLE";
   const mapErrorBody = "Unable to load OpenStreetMap/CARTO tiles right now. Check network connectivity and retry.";
 
+  usePhoneMapGestureLock(mapCanvasRef, isMobile);
+
   return (
     <div ref={mapContainerRef} className="si-news-map-container">
-      <div className="si-news-map-layout">
-        <aside className="si-news-layers-panel" aria-label="News map layers">
-          <div className="si-news-layers-title">LAYERS</div>
+      <div className={`si-news-map-layout${isMobile ? " is-phone" : ""}`.trim()}>
+        <aside
+          className={`si-news-layers-panel${isMobile ? " is-phone" : ""}${isMobile && mobileLayersOpen ? " is-mobile-open" : ""}`.trim()}
+          aria-label="News map layers"
+        >
+          <div className="si-news-layers-header">
+            <div className="si-news-layers-title">LAYERS</div>
+            {isMobile ? (
+              <button
+                type="button"
+                className="si-news-map-mobile-toggle"
+                onClick={() => setMobileLayersOpen(false)}
+              >
+                CLOSE
+              </button>
+            ) : null}
+          </div>
           <div className="si-news-layers-scroll">
             {groupedLayers.map(([category, layers]) => (
               <div key={category} className="si-news-layers-group">
@@ -2203,6 +2223,17 @@ export default function NewsWorldMap({ onReady }: NewsWorldMapProps) {
         </aside>
 
         <div className="si-news-map-canvas-wrap">
+          {isMobile ? (
+            <div className="si-news-map-mobile-actions">
+              <button
+                type="button"
+                className="si-news-map-mobile-toggle"
+                onClick={() => setMobileLayersOpen((prev) => !prev)}
+              >
+                {mobileLayersOpen ? "HIDE LAYERS" : "LAYERS"}
+              </button>
+            </div>
+          ) : null}
           <div ref={mapCanvasRef} className="si-news-map-canvas" />
 
           {showMapError ? (

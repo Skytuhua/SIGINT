@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useIsMobile } from "../../../hooks/useIsMobile";
 import GlobalSnapshotPanel from "../GlobalSnapshotPanel";
 import VolatilityPanel from "../VolatilityPanel";
 import MarketHeatmapPanel from "../MarketHeatmapPanel";
@@ -40,10 +41,79 @@ function SectionLabel({ label, sub }: { label: string; sub?: string }) {
 }
 
 export default function MarketOverviewTab({ scenario, onTickerClick }: Props) {
+  const isMobile = useIsMobile();
   // Prefetch all market data in one batch call to warm server caches
   useEffect(() => {
     fetch("/api/market/prefetch").catch(() => {});
   }, []);
+
+  if (isMobile) {
+    return (
+      <div className="si-overview-scroll">
+        <SectionLabel label="SECTOR HEATMAP" sub="S&P 500 individual stocks  1D performance" />
+        <div className="si-overview-row-full">
+          <MarketHeatmapPanel style={{ minHeight: 440 }} onTickerClick={onTickerClick} />
+        </div>
+
+        <SectionLabel label="EQUITY MARKETS" sub="Snapshot  Top movers  Sector performance" />
+        <div className="si-overview-row-full">
+          <GlobalSnapshotPanel
+            scenario={scenario}
+            style={{ minHeight: 320 }}
+            onTickerClick={onTickerClick}
+          />
+        </div>
+        <div className="si-overview-row-full">
+          <TopMoversPanel style={{ minHeight: 320 }} onTickerClick={onTickerClick} />
+        </div>
+        <div className="si-overview-row-full">
+          <SectorRotationPanel style={{ minHeight: 300 }} onTickerClick={onTickerClick} />
+        </div>
+
+        <SectionLabel label="SENTIMENT & BREADTH" sub="Regime  Volatility  Market internals  Correlations" />
+        <div className="si-overview-row-full">
+          <MarketRegimePanel style={{ minHeight: 260 }} />
+        </div>
+        <div className="si-overview-row-full">
+          <VolatilityPanel style={{ minHeight: 240 }} />
+        </div>
+        <div className="si-overview-row-full">
+          <MarketBreadthPanel style={{ minHeight: 260 }} />
+        </div>
+
+        <SectionLabel label="RATES & MACRO" sub="Yield curve  Fed futures  Credit spreads" />
+        <div className="si-overview-row-full">
+          <YieldCurvePanel style={{ minHeight: 300 }} />
+        </div>
+        <div className="si-overview-row-full">
+          <FedFuturesPanel style={{ minHeight: 300 }} />
+        </div>
+        <div className="si-overview-row-full">
+          <CreditSpreadPanel style={{ minHeight: 280 }} />
+        </div>
+
+        <SectionLabel label="CENTRAL BANKS & CALENDAR" sub="Policy rates  Upcoming events" />
+        <div className="si-overview-row-full">
+          <CentralBankPanel style={{ minHeight: 300 }} />
+        </div>
+        <div className="si-overview-row-full">
+          <EconCalendarPanel style={{ minHeight: 320 }} />
+        </div>
+
+        <SectionLabel label="EARNINGS" sub="Calendar  Beat / miss tracker" />
+        <div className="si-overview-row-full">
+          <EarningsTracker style={{ minHeight: 320 }} onTickerClick={onTickerClick} />
+        </div>
+
+        <SectionLabel label="MARKET NEWS" sub="Headline tape" />
+        <div className="si-overview-row-full">
+          <MarketNewsTape style={{ minHeight: 260 }} />
+        </div>
+
+        <div style={{ height: 24 }} />
+      </div>
+    );
+  }
 
   return (
     <div className="si-overview-scroll">

@@ -58,6 +58,7 @@ function makeInitial(): SubsystemMap {
 let _states: SubsystemMap = makeInitial();
 let _started = false;
 let _done = false;
+let _deferMapWarmup = false;
 const _listeners = new Set<(s: SubsystemMap) => void>();
 const _doneWaiters: Array<() => void> = [];
 
@@ -90,9 +91,10 @@ export function preloadComplete(): Promise<void> {
  * Start the preload. Idempotent — safe to call multiple times,
  * only the first call has any effect.
  */
-export function startPreload(): void {
+export function startPreload(options?: { deferMapWarmup?: boolean }): void {
   if (_started || typeof window === "undefined") return;
   _started = true;
+  _deferMapWarmup = options?.deferMapWarmup === true;
   void _run();
 }
 
@@ -158,16 +160,23 @@ async function _run(): Promise<void> {
     ).catch(() => null);
   }
 
-  const mapTask = Promise.allSettled([
-    _safeJson("/data/ne_50m_admin_0_countries.geojson", 12_000).then((d) => {
-      setCountryBordersCache(d as GeoJSON.FeatureCollection);
-      return true;
-    }),
-    import("maplibre-gl").then(() => true),
-  ]).then(([geoResult]) => {
-    const ok = geoResult.status === "fulfilled";
-    _update("map", ok ? "ready" : "partial", ok ? "module + borders cached" : "borders unavailable");
-  });
+  const mapTask = _deferMapWarmup
+    ? _safeJson("/data/ne_50m_admin_0_countries.geojson", 12_000)
+        .then((d) => {
+          setCountryBordersCache(d as GeoJSON.FeatureCollection);
+          _update("map", "partial", "map warmup deferred on phone");
+        })
+        .catch(() => _update("map", "offline", "map warmup deferred on phone"))
+    : Promise.allSettled([
+        _safeJson("/data/ne_50m_admin_0_countries.geojson", 12_000).then((d) => {
+          setCountryBordersCache(d as GeoJSON.FeatureCollection);
+          return true;
+        }),
+        import("maplibre-gl").then(() => true),
+      ]).then(([geoResult]) => {
+        const ok = geoResult.status === "fulfilled";
+        _update("map", ok ? "ready" : "partial", ok ? "module + borders cached" : "borders unavailable");
+      });
 
   // ── Globe ─────────────────────────────────────────────────────────────────
   const globeTask = import("../cesium/viewer")

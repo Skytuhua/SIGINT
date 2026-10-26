@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { STANDARD_LIMITER } from "../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../lib/server/withRateLimit";
 
 export const dynamic = "force-dynamic";
 
@@ -93,7 +95,7 @@ function normalize(raw: FaaRawEntry[]): FaaAirportStatus[] {
     .filter((a) => Number.isFinite(a.lat) && Number.isFinite(a.lon));
 }
 
-export async function GET() {
+async function handler() {
   const now = Date.now();
 
   if (cache && cache.expires > now) {
@@ -129,3 +131,5 @@ export async function GET() {
     return NextResponse.json([], { status: 200 });
   }
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

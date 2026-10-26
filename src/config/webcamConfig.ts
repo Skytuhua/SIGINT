@@ -29,12 +29,14 @@ export const WEBCAM_VIDEO_CHANNELS: WebcamChannel[] = [
   },
   // Resolved at runtime via forUsername when YOUTUBE_API_KEY is set
   {
+    channelId: "UC3eSRD2gPP4LkUnxLrA0xHg",
     forUsername: "earthcam",
     label: "EarthCam",
     priority: 95,
     region: "americas",
   },
   {
+    channelId: "UCEyX5lg6BL_Hl9rpE6B7Y9w",
     forUsername: "SkylineWebcams",
     label: "SkylineWebcams",
     priority: 88,

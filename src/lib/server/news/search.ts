@@ -761,12 +761,12 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
     const videoDomains = ["youtube.com", "youtu.be", "reuters.com", "bloomberg.com", "apnews.com"];
     items = items.filter((item) => videoDomains.some((domain) => item.domain.includes(domain)));
     if (!items.length && youtubeResult.data.items.length) {
-      items = youtubeResult.data.items.map((stream) => toYoutubeNewsArticle(stream, "live"));
+      items = youtubeResult.data.items.map((stream: YouTubeLive) => toYoutubeNewsArticle(stream, "live"));
     }
   }
 
   if (!items.length && plan.useYoutube && youtubeResult.data.items.length) {
-    items = youtubeResult.data.items.slice(0, 40).map((stream) => toYoutubeNewsArticle(stream, "fallback"));
+    items = youtubeResult.data.items.slice(0, 40).map((stream: YouTubeLive) => toYoutubeNewsArticle(stream, "fallback"));
   }
 
   items = [...items].sort(sortDeterministic);

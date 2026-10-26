@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { getGdeltGeo } from "../../../../lib/server/news/providers/gdelt";
+import { STANDARD_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const mode = (searchParams.get("mode") ?? "pointdata") as "pointdata" | "country" | "adm1";
   const result = await getGdeltGeo({
@@ -28,4 +30,6 @@ export async function GET(request: Request) {
     { headers: { "Cache-Control": "public, max-age=240" } }
   );
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);
 

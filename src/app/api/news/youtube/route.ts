@@ -1,14 +1,16 @@
 import { NextResponse } from "next/server";
 import { discoverYouTubeLiveStreams } from "../../../../lib/server/news/providers/youtube";
+import { STANDARD_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
-export async function GET() {
+async function handler() {
   const apiKey = process.env.YOUTUBE_API_KEY;
   const result = await discoverYouTubeLiveStreams(apiKey);
   const backendDegraded = [
     ...(result.degraded ? ["youtube"] : []),
     ...(result.data.degraded ?? []),
   ];
-  const totalItems = result.data.items.length;
+  const totalItems = result.data.items?.length ?? 0;
   const upstreamError = Boolean(result.error);
   const zeroResults = !upstreamError && totalItems === 0;
 
@@ -43,3 +45,5 @@ export async function GET() {
     { headers: { "Cache-Control": "public, max-age=600" } }
   );
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

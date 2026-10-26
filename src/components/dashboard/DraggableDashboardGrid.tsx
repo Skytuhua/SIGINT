@@ -7,8 +7,9 @@ import {
   type LayoutItem,
   type ResponsiveLayouts,
 } from "react-grid-layout/legacy";
-import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, useMemo, useRef, useState } from "react";
 import { useSIGINTStore } from "../../store";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const GRID_BREAKPOINTS = { lg: 1680, md: 1320, sm: 980, xs: 0 } as const;
@@ -30,6 +31,7 @@ interface DraggableDashboardGridProps {
 }
 
 export default function DraggableDashboardGrid({ panels }: DraggableDashboardGridProps) {
+  const isMobile = useIsMobile();
   const [isInteracting, setIsInteracting] = useState(false);
   const layouts = useSIGINTStore((s) => s.dashboard.panelLayouts);
   const panelLocks = useSIGINTStore((s) => s.dashboard.panelLocks);
@@ -83,6 +85,32 @@ export default function DraggableDashboardGrid({ panels }: DraggableDashboardGri
 
     return next;
   }, [layouts, panelLocks, panels]);
+
+  if (isMobile) {
+    const mobilePanelOrder = [
+      "threat-board",
+      "feed",
+      "cctv-live",
+      "space-weather",
+      "flight-table",
+      "quake-table",
+      "sat-list",
+      "source-health",
+    ] as const;
+    const panelById = new Map(panels.map((panel) => [panel.id, panel] as const));
+    const mobilePanels = mobilePanelOrder
+      .map((panelId) => panelById.get(panelId))
+      .filter((panel): panel is GridPanel => Boolean(panel));
+    return (
+      <div className="si-mobile-dashboard-stack">
+        {mobilePanels.map((panel) => (
+          <div key={panel.id} className="si-mobile-dashboard-panel">
+            {panel.node}
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>

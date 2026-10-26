@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { executeNewsSearch } from "../../../../lib/server/news/search";
+import { MODERATE_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const result = await executeNewsSearch(searchParams);
 
@@ -39,3 +41,5 @@ export async function GET(request: Request) {
     { headers }
   );
 }
+
+export const GET = withRateLimit(MODERATE_LIMITER, handler);

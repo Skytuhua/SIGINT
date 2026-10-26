@@ -197,11 +197,13 @@ function SnapshotViewer({
   url,
   refreshSeconds,
   compact,
+  mosaic,
   onError,
 }: {
   url: string;
   refreshSeconds: number;
   compact?: boolean;
+  mosaic?: boolean;
   onError?: () => void;
 }) {
   const [src, setSrc] = useState(url);
@@ -241,10 +243,10 @@ function SnapshotViewer({
       }}
       style={{
         width: "100%",
-        height: compact ? 220 : 320,
-        objectFit: "contain",
+        height: mosaic ? "100%" : compact ? 220 : 320,
+        objectFit: mosaic ? "cover" : "contain",
         background: "#000",
-        borderRadius: 4,
+        borderRadius: mosaic ? 0 : 4,
         display: "block",
       }}
     />
@@ -282,6 +284,7 @@ export default function CctvFeedView({
     }
     return (
       <YoutubePlayer
+        key={JSON.stringify([camera.id, iframeSrc])}
         iframeSrc={iframeSrc}
         compact={compact}
         mosaic={mosaic}
@@ -312,9 +315,11 @@ export default function CctvFeedView({
         : camera.snapshotUrl ?? streamUrl!;
     return (
       <SnapshotViewer
+        key={JSON.stringify([camera.id, imgUrl])}
         url={imgUrl}
         refreshSeconds={camera.refreshSeconds ?? 30}
         compact={compact}
+        mosaic={mosaic}
         onError={() => onSnapshotError?.(camera.id)}
       />
     );

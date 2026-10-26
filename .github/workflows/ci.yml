@@ -19,10 +19,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: '22'
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
+
+      - run: pnpm test
+
+      - run: pnpm typecheck
 
       - run: pnpm build
         env:

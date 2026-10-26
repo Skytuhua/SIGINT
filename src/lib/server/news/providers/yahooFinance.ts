@@ -161,30 +161,32 @@ async function yahooFetchJson<T>(
 
 /* ── Yahoo Finance v7 quote API ──────────────────────────────────────────── */
 
+interface YFQuoteItem {
+  symbol: string;
+  shortName?: string;
+  longName?: string;
+  regularMarketPrice?: number;
+  regularMarketChange?: number;
+  regularMarketChangePercent?: number;
+  regularMarketPreviousClose?: number;
+  regularMarketVolume?: number;
+  marketCap?: number;
+  regularMarketDayHigh?: number;
+  regularMarketDayLow?: number;
+  fiftyTwoWeekHigh?: number;
+  fiftyTwoWeekLow?: number;
+  ytdReturn?: number;
+  marketState?: string;
+}
+
 interface YFQuoteResponse {
   quoteResponse?: {
-    result?: Array<{
-      symbol: string;
-      shortName?: string;
-      longName?: string;
-      regularMarketPrice?: number;
-      regularMarketChange?: number;
-      regularMarketChangePercent?: number;
-      regularMarketPreviousClose?: number;
-      regularMarketVolume?: number;
-      marketCap?: number;
-      regularMarketDayHigh?: number;
-      regularMarketDayLow?: number;
-      fiftyTwoWeekHigh?: number;
-      fiftyTwoWeekLow?: number;
-      ytdReturn?: number;
-      marketState?: string;
-    }>;
+    result?: Array<YFQuoteItem>;
     error?: unknown;
   };
 }
 
-function mapQuote(raw: NonNullable<YFQuoteResponse["quoteResponse"]>["result"] extends Array<infer T> ? T : never): QuoteData {
+function mapQuote(raw: YFQuoteItem): QuoteData {
   return {
     symbol: raw.symbol ?? "",
     name: raw.shortName ?? raw.longName ?? raw.symbol ?? "",
@@ -296,7 +298,7 @@ export async function getMovers(): Promise<CachedFetchResult<{ gainers: MoverRow
         .filter((i) => i.regularMarketChangePercent != null)
         .map((i) => {
           const pct = i.regularMarketChangePercent ?? 0;
-          const avgVol = (i as Record<string, unknown>).averageDailyVolume3Month as number | undefined;
+          const avgVol = (i as unknown as Record<string, unknown>).averageDailyVolume3Month as number | undefined;
           const vol = i.regularMarketVolume ?? 0;
           const volMult = avgVol && avgVol > 0 ? (vol / avgVol).toFixed(1) + "x" : "—";
           return {
@@ -401,11 +403,11 @@ export async function getEarningsCalendar(): Promise<CachedFetchResult<{ upcomin
       const json = await yahooFetchJson<YFQuoteResponse>(url, QUOTE_POLICY.timeoutMs);
       const results = json.quoteResponse?.result ?? [];
       const now = Date.now();
-      const upcoming: EarningsEntry[] = [];
-      const recent: EarningsEntry[] = [];
+      const upcoming: Array<{ timestamp: number; entry: EarningsEntry }> = [];
+      const recent: Array<{ timestamp: number; entry: EarningsEntry }> = [];
 
       for (const item of results) {
-        const raw = item as Record<string, unknown>;
+        const raw = item as unknown as Record<string, unknown>;
         const earningsTs = (raw.earningsTimestamp as number) ?? (raw.earningsTimestampStart as number);
         if (!earningsTs) continue;
 
@@ -429,7 +431,7 @@ export async function getEarningsCalendar(): Promise<CachedFetchResult<{ upcomin
 
         const diff = earningsTs * 1000 - now;
         if (diff > 0) {
-          upcoming.push(entry);
+          upcoming.push({ timestamp: earningsTs, entry });
         } else if (diff > -30 * 24 * 60 * 60 * 1000) {
           const epsTTM = raw.epsTrailingTwelveMonths as number | undefined;
           if (epsTTM != null) {
@@ -439,16 +441,16 @@ export async function getEarningsCalendar(): Promise<CachedFetchResult<{ upcomin
               entry.surprise = epsTTM > estNum * 1.01 ? "beat" : epsTTM < estNum * 0.99 ? "miss" : "in-line";
             }
           }
-          recent.push(entry);
+          recent.push({ timestamp: earningsTs, entry });
         }
       }
 
-      upcoming.sort((a, b) => a.date.localeCompare(b.date));
-      recent.sort((a, b) => b.date.localeCompare(a.date));
+      upcoming.sort((a, b) => a.timestamp - b.timestamp);
+      recent.sort((a, b) => b.timestamp - a.timestamp);
 
       return {
-        upcoming: upcoming.slice(0, 15),
-        recent: recent.slice(0, 8),
+        upcoming: upcoming.slice(0, 15).map(({ entry }) => entry),
+        recent: recent.slice(0, 8).map(({ entry }) => entry),
       };
     },
   });

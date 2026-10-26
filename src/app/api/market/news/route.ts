@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { getMarketNews } from "../../../../lib/server/news/providers/yahooFinance";
+import { STANDARD_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const limit = Math.min(
     50,
@@ -17,3 +19,5 @@ export async function GET(request: Request) {
     { headers: { "Cache-Control": "no-store, max-age=0" } },
   );
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

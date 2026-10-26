@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { getArticleSummary } from "../../../../lib/server/news/providers/articleSummary";
+import { STRICT_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const cacheHeaders = {
     "Cache-Control": "private, max-age=45, stale-while-revalidate=120",
   };
@@ -39,4 +41,6 @@ export async function GET(request: Request) {
     { headers: cacheHeaders }
   );
 }
+
+export const GET = withRateLimit(STRICT_LIMITER, handler);
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CctvCamera, CctvRegion } from "../../lib/providers/types";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import { useSIGINTStore } from "../../store";
 import CctvFeedView from "./inspector/CctvFeedView";
 import Panel from "./panel/Panel";
@@ -39,11 +40,13 @@ export default function LiveCctvPanel({
   onRefresh,
   loading,
 }: LiveCctvPanelProps) {
+  const isMobile = useIsMobile();
   const brokenIds = useSIGINTStore((s) => s.cctv.brokenIds);
   const markCctvBroken = useSIGINTStore((s) => s.markCctvBroken);
   const resetCctvHealth = useSIGINTStore((s) => s.resetCctvHealth);
   const [selectedRegion, setSelectedRegion] = useState<"all" | CctvRegion>("all");
   const [viewMode, setViewMode] = useState<"grid" | "single">("grid");
+  const effectiveViewMode = isMobile ? "single" : viewMode;
   const [cycleIndex, setCycleIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [remoteResults, setRemoteResults] = useState<CctvCamera[]>([]);
@@ -168,7 +171,48 @@ export default function LiveCctvPanel({
     advanceCycle();
   }, [advanceCycle]);
 
-  const regionTabs = (
+  const regionTabs = isMobile ? (
+    <div className="si-cctv-live-mobile-toolbar">
+      <label className="si-cctv-live-region-select">
+        <span>Region</span>
+        <select
+          value={selectedRegion}
+          onChange={(event) => setSelectedRegion(event.target.value as "all" | CctvRegion)}
+          aria-label="Region filter"
+        >
+          {REGIONS.map((region) => (
+            <option key={region.value} value={region.value}>
+              {region.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="si-cctv-live-search">
+        <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+          <circle cx="11" cy="11" r="8" />
+          <path d="M21 21l-4.35-4.35" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Search camera..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="si-cctv-live-search-input"
+          aria-label="Search cameras by city"
+        />
+        {searchQuery && (
+          <button
+            type="button"
+            className="si-cctv-live-search-clear"
+            onClick={() => setSearchQuery("")}
+            aria-label="Clear search"
+          >
+            &times;
+          </button>
+        )}
+      </div>
+    </div>
+  ) : (
     <div className="si-cctv-live-filters">
       <div className="si-cctv-live-tabs" role="tablist" aria-label="Region filter">
         {REGIONS.map((r) => (
@@ -250,7 +294,7 @@ export default function LiveCctvPanel({
         {...lockHeaderProps}
         controls={
           <>
-            {viewModeControls}
+            {!isMobile && viewModeControls}
             <PanelControls
               onRefresh={handleNextSet}
               loading={loading}
@@ -270,7 +314,7 @@ export default function LiveCctvPanel({
               </svg>
               <span>{searching ? "Searching insecam.org..." : "No live streams for this region"}</span>
             </div>
-          ) : viewMode === "grid" ? (
+          ) : effectiveViewMode === "grid" ? (
             <div className="si-cctv-live-grid">
               {displayedCameras.map((cam) => (
                 <div key={cam.id} className="si-cctv-live-cell">
@@ -305,6 +349,7 @@ export default function LiveCctvPanel({
                     <CctvFeedView
                       camera={displayedCameras[0]}
                       compact={false}
+                      mosaic={isMobile}
                       onSnapshotError={markCctvBroken}
                       onStreamError={markCctvBroken}
                     />

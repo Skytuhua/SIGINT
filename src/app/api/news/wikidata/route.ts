@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { fetchWikidataEntity } from "../../../../lib/server/news/providers/wikidata";
+import { MODERATE_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const ticker = searchParams.get("ticker") ?? undefined;
   const company = searchParams.get("company") ?? undefined;
@@ -19,4 +21,6 @@ export async function GET(request: Request) {
     { headers: { "Cache-Control": "public, max-age=86400" } }
   );
 }
+
+export const GET = withRateLimit(MODERATE_LIMITER, handler);
 

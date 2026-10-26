@@ -125,7 +125,8 @@ export async function getNewsApiArticles(
   if (params.language) url.searchParams.set("language", params.language);
   url.searchParams.set("pageSize", String(Math.max(20, Math.min(100, params.maxItems ?? 60))));
   url.searchParams.set("sortBy", "publishedAt");
-  url.searchParams.set("apiKey", apiKey);
+  // Keep credentials out of request URLs and cache identifiers.
+  url.searchParams.delete("apiKey");
 
   return cachedFetch<NewsArticle[]>({
     cacheKey: url.toString(),
@@ -138,6 +139,7 @@ export async function getNewsApiArticles(
           headers: {
             "User-Agent": "SIGINT/0.1 (newsapi-ingestion)",
             Accept: "application/json",
+            "X-Api-Key": apiKey,
           },
         },
         NEWSAPI_POLICY.timeoutMs

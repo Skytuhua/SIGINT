@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { STANDARD_LIMITER } from "../../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../../lib/server/withRateLimit";
 
 interface GdeltArticle {
   title?: string;
@@ -18,7 +20,20 @@ interface DisruptionSignal {
 const GDELT_API = "https://api.gdeltproject.org/api/v2/doc/doc";
 const CACHE_TTL_MS = 5 * 60_000;
 
+const MAX_CACHE_SIZE = 100;
 const cache = new Map<string, { data: DisruptionSignal; ts: number }>();
+
+function evictOldestCacheEntry(): void {
+  let oldestKey: string | null = null;
+  let oldestTs = Infinity;
+  for (const [key, entry] of cache) {
+    if (entry.ts < oldestTs) {
+      oldestTs = entry.ts;
+      oldestKey = key;
+    }
+  }
+  if (oldestKey) cache.delete(oldestKey);
+}
 
 async function queryGdeltForChokepoint(name: string): Promise<DisruptionSignal> {
   const cached = cache.get(name);
@@ -61,6 +76,7 @@ async function queryGdeltForChokepoint(name: string): Promise<DisruptionSignal> 
         })),
     };
 
+    if (cache.size >= MAX_CACHE_SIZE) evictOldestCacheEntry();
     cache.set(name, { data: signal, ts: Date.now() });
     return signal;
   } catch {
@@ -68,7 +84,7 @@ async function queryGdeltForChokepoint(name: string): Promise<DisruptionSignal> 
   }
 }
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const chokepointsParam = searchParams.get("chokepoints") ?? "";
 
@@ -91,3 +107,5 @@ export async function GET(request: Request) {
     },
   });
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

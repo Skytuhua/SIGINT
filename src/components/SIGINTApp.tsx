@@ -1,6 +1,7 @@
 "use client";
 
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { useSIGINTStore } from "../store";
 import { useDashboardFeeds } from "../hooks/useDashboardFeeds";
 import { featureFlags } from "../config/featureFlags";
@@ -9,10 +10,16 @@ import GlobeWorkspace from "./dashboard/GlobeWorkspace";
 import InspectorDrawer from "./dashboard/inspector/InspectorDrawer";
 import Toggle from "./dashboard/controls/Toggle";
 import NewsWorkspace from "./news/NewsWorkspace";
-import MarketWorkspace from "./market/MarketWorkspace";
+
+const MarketWorkspace = dynamic(() => import("./market/MarketWorkspace"), {
+  ssr: false,
+  loading: () => null,
+});
 import CctvFloatingPanel from "./dashboard/CctvFloatingPanel";
 import TradeRouteCard from "./dashboard/TradeRouteCard";
 import { formatUtc } from "../lib/dashboard/format";
+import { useIsMobile } from "../hooks/useIsMobile";
+import WorkspaceErrorBoundary from "./ui/WorkspaceErrorBoundary";
 
 function selectGlobalFreshness(lastUpdated: Record<string, number | null>): number | null {
   const values = Object.values(lastUpdated).filter((value): value is number => typeof value === "number");
@@ -27,6 +34,7 @@ const MAX_GLOBE_HEIGHT_VH = 72;
 
 export default function SIGINTApp() {
   useDashboardFeeds();
+  const isMobile = useIsMobile();
 
   const setDensity = useSIGINTStore((s) => s.setDensity);
   const activeView = useSIGINTStore((s) => s.dashboard.activeView);
@@ -39,6 +47,8 @@ export default function SIGINTApp() {
   const inspector = useSIGINTStore((s) => s.dashboard.inspector);
   const openInspector = useSIGINTStore((s) => s.openInspector);
   const clearSelectionContext = useSIGINTStore((s) => s.clearSelectionContext);
+  const closeCctvFloating = useSIGINTStore((s) => s.closeCctvFloating);
+  const clearTradeRouteSelection = useSIGINTStore((s) => s.clearTradeRouteSelection);
   const globeSectionRef = useRef<HTMLElement | null>(null);
   const opsLayerSnapshotRef = useRef<Record<string, boolean> | null>(null);
   const [globeHeightVh, setGlobeHeightVh] = useState(() => {
@@ -226,103 +236,129 @@ export default function SIGINTApp() {
     if (!main || !scroll || !globeSectionRef.current) return;
   }, [globeHeightVh]);
 
+  useEffect(() => {
+    if (!isMobile || activeView === "ops") return;
+    clearSelectionContext();
+    closeCctvFloating();
+    clearTradeRouteSelection();
+  }, [activeView, clearSelectionContext, clearTradeRouteSelection, closeCctvFloating, isMobile]);
+
+  useEffect(() => {
+    if (!isMobile || !inspector.open) return;
+    closeCctvFloating();
+    clearTradeRouteSelection();
+  }, [clearTradeRouteSelection, closeCctvFloating, inspector.open, isMobile]);
+
+  const statusClassName =
+    activeView === "market"
+      ? "is-ok"
+      : activeView === "news"
+        ? newsLoading
+          ? "is-loading"
+          : newsErrors
+            ? "is-error"
+            : "is-ok"
+        : feedLoading
+          ? "is-loading"
+          : feedErrors
+            ? "is-error"
+            : "is-ok";
+
+  const statusNode = (
+    <div className="si-header-status">
+      <span className={`si-live-dot ${statusClassName}`} />
+      {activeView === "market" ? (
+        <>
+          <span>MARKET READY</span>
+          <span>DATA SOURCE PENDING</span>
+        </>
+      ) : activeView === "news" ? (
+        <>
+          <span>{newsErrors ? `${newsErrors} NEWS ERR` : "NEWS OK"}</span>
+          <span>{newsState.lastUpdated ? formatUtc(newsState.lastUpdated) : "NO NEWS TS"}</span>
+        </>
+      ) : (
+        <>
+          <span>{feedErrors ? `${feedErrors} FEED ERR` : "FEEDS OK"}</span>
+          <span>{freshness ? formatUtc(freshness) : "NO FEED TS"}</span>
+        </>
+      )}
+    </div>
+  );
+
+  const viewToggle = (
+    <div className="si-header-view-toggle" role="tablist" aria-label="Workspace view mode">
+      <button
+        type="button"
+        role="tab"
+        aria-selected={activeView === "ops"}
+        className={activeView === "ops" ? "is-active" : ""}
+        onClick={() => setActiveView("ops")}
+      >
+        OPS
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={activeView === "news"}
+        className={activeView === "news" ? "is-active" : ""}
+        onClick={() => setActiveView("news")}
+      >
+        NEWS
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={activeView === "market"}
+        className={activeView === "market" ? "is-active" : ""}
+        onClick={() => setActiveView("market")}
+      >
+        MARKET
+      </button>
+    </div>
+  );
+
   return (
     <div
       className="si-app"
       data-theme="workstation"
       data-density="ultra"
+      data-phone={isMobile ? "true" : "false"}
       data-inspector-open={inspector.open ? "true" : "false"}
       style={{
         position: "relative",
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
+        width: "100%",
+        height: "100%",
+        minHeight: "100dvh",
+        overflow: isMobile ? "clip" : "hidden",
       }}
     >
-      <header className="si-global-header">
-        <div className="si-header-left">
-          <div className="si-app-wordmark">SIGINT CONSOLE</div>
-          <div className="si-header-view-toggle" role="tablist" aria-label="Workspace view mode">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeView === "ops"}
-              className={activeView === "ops" ? "is-active" : ""}
-              onClick={() => setActiveView("ops")}
-            >
-              OPS
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeView === "news"}
-              className={activeView === "news" ? "is-active" : ""}
-              onClick={() => setActiveView("news")}
-            >
-              NEWS
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeView === "market"}
-              className={activeView === "market" ? "is-active" : ""}
-              onClick={() => setActiveView("market")}
-            >
-              MARKET
-            </button>
-          </div>
-        </div>
+      <header className={`si-global-header ${isMobile ? "is-phone" : ""}`.trim()}>
+        {isMobile ? (
+          <div className="si-header-phone-tabs">{viewToggle}</div>
+        ) : (
+          <>
+            <div className="si-header-left">
+              <div className="si-app-wordmark">SIGINT CONSOLE</div>
+              {viewToggle}
+            </div>
 
-        <div className="si-header-center">
-          <div className="si-header-status">
-            <span
-              className={`si-live-dot ${
-                activeView === "market"
-                  ? "is-ok"
-                  : activeView === "news"
-                    ? newsLoading
-                      ? "is-loading"
-                      : newsErrors
-                        ? "is-error"
-                        : "is-ok"
-                    : feedLoading
-                      ? "is-loading"
-                      : feedErrors
-                        ? "is-error"
-                        : "is-ok"
-              }`}
-            />
-            {activeView === "market" ? (
-              <>
-                <span>MARKET READY</span>
-                <span>DATA SOURCE PENDING</span>
-              </>
-            ) : activeView === "news" ? (
-              <>
-                <span>{newsErrors ? `${newsErrors} NEWS ERR` : "NEWS OK"}</span>
-                <span>{newsState.lastUpdated ? `UPDATED ${formatUtc(newsState.lastUpdated)}` : "NO NEWS TS"}</span>
-              </>
-            ) : (
-              <>
-                <span>{feedErrors ? `${feedErrors} FEED ERR` : "FEEDS OK"}</span>
-                <span>{freshness ? `UPDATED ${formatUtc(freshness)}` : "NO FEED TS"}</span>
-              </>
-            )}
-          </div>
-        </div>
+            <div className="si-header-center">{statusNode}</div>
 
-        <div className="si-header-right">
-          {featureFlags.enablePanelHotkeys ? (
-            <Toggle checked={hotkeysEnabled} onChange={setHotkeysEnabled} label="Hotkeys" />
-          ) : null}
-          <button
-            type="button"
-            className="si-inline-action"
-            onClick={() => useSIGINTStore.getState().bumpRefreshTick()}
-          >
-            REFRESH
-          </button>
-        </div>
+            <div className="si-header-right">
+              {featureFlags.enablePanelHotkeys ? (
+                <Toggle checked={hotkeysEnabled} onChange={setHotkeysEnabled} label="Hotkeys" />
+              ) : null}
+              <button
+                type="button"
+                className="si-inline-action"
+                onClick={() => useSIGINTStore.getState().bumpRefreshTick()}
+              >
+                REFRESH
+              </button>
+            </div>
+          </>
+        )}
       </header>
 
       <main className="si-main-frame">
@@ -330,22 +366,30 @@ export default function SIGINTApp() {
             When not the active view, position it absolutely behind the visible
             view with visibility:hidden — the container still has dimensions
             so MapLibre/Leaflet can create their WebGL/canvas context. */}
-        <div
-          className="si-news-main-frame"
-          role="region"
-          aria-label="News workspace"
-          style={activeView !== "news" ? {
-            visibility: "hidden",
-            position: "absolute",
-            inset: 0,
-            pointerEvents: "none",
-            zIndex: -1,
-          } : undefined}
-        >
-          <section className="si-unified-dashboard-section si-news-section">
-            <NewsWorkspace />
-          </section>
-        </div>
+        {!isMobile ? (
+          <div
+            className="si-news-main-frame"
+            role="region"
+            aria-label="News workspace"
+            style={
+              activeView !== "news"
+                ? {
+                    visibility: "hidden",
+                    position: "absolute",
+                    inset: 0,
+                    pointerEvents: "none",
+                    zIndex: -1,
+                  }
+                : undefined
+            }
+          >
+            <section className="si-unified-dashboard-section si-news-section">
+              <WorkspaceErrorBoundary name="NEWS">
+                <NewsWorkspace />
+              </WorkspaceErrorBoundary>
+            </section>
+          </div>
+        ) : null}
 
         {activeView === "ops" ? (
           <div className="si-unified-scroll" role="region" aria-label="Unified globe and dashboard workspace">
@@ -358,7 +402,9 @@ export default function SIGINTApp() {
                 } as CSSProperties
               }
             >
-              <GlobeWorkspace embedded compact />
+              <WorkspaceErrorBoundary name="OPS">
+                <GlobeWorkspace embedded compact />
+              </WorkspaceErrorBoundary>
             </section>
             <div
               className="si-globe-height-resizer"
@@ -377,19 +423,31 @@ export default function SIGINTApp() {
               }}
             />
             <section className="si-unified-dashboard-section">
-              <DashboardWorkspace embedded />
+              <WorkspaceErrorBoundary name="OPS-DASHBOARD">
+                <DashboardWorkspace embedded />
+              </WorkspaceErrorBoundary>
             </section>
           </div>
         ) : activeView === "market" ? (
           <div className="si-market-main-frame" role="region" aria-label="Market workspace">
-            <MarketWorkspace />
+            <WorkspaceErrorBoundary name="MARKET">
+              <MarketWorkspace />
+            </WorkspaceErrorBoundary>
+          </div>
+        ) : isMobile && activeView === "news" ? (
+          <div className="si-news-main-frame" role="region" aria-label="News workspace">
+            <section className="si-unified-dashboard-section si-news-section">
+              <WorkspaceErrorBoundary name="NEWS">
+                <NewsWorkspace />
+              </WorkspaceErrorBoundary>
+            </section>
           </div>
         ) : null}
       </main>
 
       <InspectorDrawer />
       <CctvFloatingPanel />
-      <TradeRouteCard />
+      {!isMobile || !inspector.open ? <TradeRouteCard /> : null}
     </div>
   );
 }

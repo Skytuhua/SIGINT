@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useSIGINTStore } from "../../store";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import DraggableDashboardGrid from "./DraggableDashboardGrid";
 import Panel from "./panel/Panel";
 import PanelBody from "./panel/PanelBody";
@@ -13,6 +14,8 @@ import DataTable from "./table/DataTable";
 import Sparkline from "./charts/Sparkline";
 import LiveCctvPanel from "./LiveCctvPanel";
 import MarketsPanel from "./MarketsPanel";
+import PhoneOverlayShell from "../ui/PhoneOverlayShell";
+import WorkspaceErrorBoundary from "../ui/WorkspaceErrorBoundary";
 import { formatNumber, formatUtc } from "../../lib/dashboard/format";
 import {
   selectFeedItems,
@@ -29,6 +32,73 @@ interface DashboardWorkspaceProps {
   embedded?: boolean;
 }
 
+type MobileOverlayId =
+  | "flight-table"
+  | "quake-table"
+  | "sat-list"
+  | "feed"
+  | "space-weather"
+  | "threat-board"
+  | "source-health"
+  | null;
+
+const MOBILE_PREVIEW_LIMITS = {
+  "flight-table": 12,
+  "quake-table": 12,
+  "sat-list": 12,
+  "feed": 8,
+  "space-weather": 8,
+  "threat-board": 8,
+  "source-health": 8,
+} as const;
+
+interface MobileOpsRowProps {
+  title: string;
+  subtitle?: string;
+  meta?: string[];
+  onClick?: () => void;
+  staticRow?: boolean;
+}
+
+function MobileOpsRow({
+  title,
+  subtitle,
+  meta = [],
+  onClick,
+  staticRow = false,
+}: MobileOpsRowProps) {
+  const body = (
+    <>
+      <span className="si-ops-mobile-row-title">{title}</span>
+      {subtitle ? <span className="si-ops-mobile-row-subtitle">{subtitle}</span> : null}
+      {meta.length ? (
+        <div className="si-ops-mobile-row-meta">
+          {meta.map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
+      ) : null}
+    </>
+  );
+
+  if (staticRow || !onClick) {
+    return <div className="si-ops-mobile-row si-ops-mobile-row-static">{body}</div>;
+  }
+
+  return (
+    <button type="button" className="si-ops-mobile-row" onClick={onClick}>
+      {body}
+    </button>
+  );
+}
+
+function describeSourceHealthStatus(status: "live" | "cached" | "degraded" | "unavailable"): string {
+  if (status === "live") return "Live feed healthy";
+  if (status === "cached") return "Cached fallback active";
+  if (status === "degraded") return "Degraded feed / fallback active";
+  return "Feed unavailable";
+}
+
 export default function DashboardWorkspace({ embedded = false }: DashboardWorkspaceProps) {
   const liveData = useSIGINTStore((s) => s.liveData);
   const health = useSIGINTStore((s) => s.liveData.health);
@@ -42,7 +112,10 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
   const openInspector = useSIGINTStore((s) => s.openInspector);
   const pinEntity = useSIGINTStore((s) => s.pinEntity);
   const resetPanelLayouts = useSIGINTStore((s) => s.resetPanelLayouts);
+  const isMobile = useIsMobile();
   const [showViewMenu, setShowViewMenu] = useState(false);
+  const [mobileOverlayId, setMobileOverlayId] = useState<MobileOverlayId>(null);
+  const [mobileOverlayQuery, setMobileOverlayQuery] = useState("");
   const viewMenuRef = useRef<HTMLDivElement | null>(null);
 
   const kpis = useMemo(() => selectKpiTiles(liveData), [liveData]);
@@ -84,8 +157,36 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
         });
       }
     }
-    return items.sort((a, b) => b.ts - a.ts).slice(0, 50);
+    return items.sort((a, b) => b.ts - a.ts).slice(0, 120);
   }, [liveData.earthquakes, liveData.disasters, liveData.spaceWeather]);
+
+  useEffect(() => {
+    setMobileOverlayQuery("");
+  }, [mobileOverlayId]);
+
+  const overlayFlightRows = useMemo(() => {
+    const query = mobileOverlayQuery.trim().toLowerCase();
+    if (!query) return flightRows;
+    return flightRows.filter((row) =>
+      `${row.callsign} ${row.type} ${row.country} ${row.speed} ${row.heading} ${row.alt}`.toLowerCase().includes(query)
+    );
+  }, [flightRows, mobileOverlayQuery]);
+
+  const overlayQuakeRows = useMemo(() => {
+    const query = mobileOverlayQuery.trim().toLowerCase();
+    if (!query) return quakeRows;
+    return quakeRows.filter((row) =>
+      `${row.place} ${row.mag} ${row.depthKm} ${formatUtc(row.ts)}`.toLowerCase().includes(query)
+    );
+  }, [quakeRows, mobileOverlayQuery]);
+
+  const overlaySatRows = useMemo(() => {
+    const query = mobileOverlayQuery.trim().toLowerCase();
+    if (!query) return satRows;
+    return satRows.filter((row) =>
+      `${row.name} ${row.noradId} ${row.orbitClass} ${row.country} ${row.liveAltitudeKm ?? ""}`.toLowerCase().includes(query)
+    );
+  }, [satRows, mobileOverlayQuery]);
 
   const flightColumns = useMemo<ColumnDef<FlightTableRow>[]>(
     () => [
@@ -233,6 +334,19 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
   const sourceHealthValues = Object.values(sourceHealth ?? {});
   const degradedCount = sourceHealthValues.filter((state) => state.status === "degraded").length;
   const unavailableCount = sourceHealthValues.filter((state) => state.status === "unavailable").length;
+  const mobileSourceHealthRows = useMemo(
+    () =>
+      Object.entries(sourceHealth ?? {}).map(([name, state]) => ({
+        id: name,
+        title: name.toUpperCase(),
+        subtitle: `${state.status.toUpperCase()} / ${describeSourceHealthStatus(state.status)}`,
+        meta: [
+          state.lastSuccessAt ? `LAST OK ${new Date(state.lastSuccessAt).toISOString().slice(11, 19)}Z` : "NO SUCCESS TS",
+          state.errorCode ? `CODE ${state.errorCode}` : "",
+        ].filter(Boolean),
+      })),
+    [sourceHealth]
+  );
   const opsFeedHealth: "ok" | "loading" | "stale" | "error" =
     unavailableCount > 0 ? "error" : degradedCount > 0 ? "stale" : anyLoading ? "loading" : "ok";
   const opsFeedMessage =
@@ -320,22 +434,50 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
             }
           />
           <PanelBody noPadding>
-            <DataTable
-              tableId="flight-table"
-              data={flightRows}
-              columns={flightColumns}
-              bodyHeight="100%"
-              stickyFirstColumn
-              getRowId={(row) => row.id}
-              onRowClick={(row) => openInspector(row.entity)}
-              rowActionColumnIndex={0}
-              onRowPin={(row) => pinEntity(row.entity)}
-              onRowOpenDetail={(row) => openInspector(row.entity, true)}
-              searchPlaceholder="Search callsign, country, type, speed, heading"
-              searchHelpText="Global search across all flight columns."
-              enableColumnFilters
-              emptyMessage="No live flight rows available"
-            />
+            {isMobile ? (
+              <div className="si-ops-mobile-list" role="list">
+                {flightRows.length ? (
+                  flightRows.slice(0, MOBILE_PREVIEW_LIMITS["flight-table"]).map((row) => (
+                    <MobileOpsRow
+                      key={row.id}
+                      title={row.callsign}
+                      subtitle={`${row.type} / ${row.country}`}
+                      meta={[row.speed, `HDG ${row.heading}`, row.alt]}
+                      onClick={() => openInspector(row.entity)}
+                    />
+                  ))
+                ) : (
+                  <div className="si-ops-mobile-empty">No live flight rows available</div>
+                )}
+                {flightRows.length > MOBILE_PREVIEW_LIMITS["flight-table"] ? (
+                  <button
+                    type="button"
+                    className="si-phone-overlay-action"
+                    style={{ width: "100%", minHeight: 44 }}
+                    onClick={() => setMobileOverlayId("flight-table")}
+                  >
+                    Open Full List
+                  </button>
+                ) : null}
+              </div>
+            ) : (
+              <DataTable
+                tableId="flight-table"
+                data={flightRows}
+                columns={flightColumns}
+                bodyHeight="100%"
+                stickyFirstColumn
+                getRowId={(row) => row.id}
+                onRowClick={(row) => openInspector(row.entity)}
+                rowActionColumnIndex={0}
+                onRowPin={(row) => pinEntity(row.entity)}
+                onRowOpenDetail={(row) => openInspector(row.entity, true)}
+                searchPlaceholder="Search callsign, country, type, speed, heading"
+                searchHelpText="Global search across all flight columns."
+                enableColumnFilters
+                emptyMessage="No live flight rows available"
+              />
+            )}
           </PanelBody>
           <PanelFooter
             source="OpenSky + ADS-B"
@@ -364,21 +506,49 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
             }
           />
           <PanelBody noPadding>
-            <DataTable
-              tableId="quake-table"
-              data={quakeRows}
-              columns={quakeColumns}
-              bodyHeight="100%"
-              stickyFirstColumn
-              getRowId={(row) => row.id}
-              onRowClick={(row) => openInspector(row.entity)}
-              rowActionColumnIndex={0}
-              onRowOpenDetail={(row) => openInspector(row.entity, true)}
-              searchPlaceholder="Search location, magnitude, depth, or timestamp"
-              searchHelpText="Global search across all earthquake columns."
-              enableColumnFilters
-              emptyMessage="No recent seismic activity"
-            />
+            {isMobile ? (
+              <div className="si-ops-mobile-list" role="list">
+                {quakeRows.length ? (
+                  quakeRows.slice(0, MOBILE_PREVIEW_LIMITS["quake-table"]).map((row) => (
+                    <MobileOpsRow
+                      key={row.id}
+                      title={row.place}
+                      subtitle={`M${row.mag.toFixed(1)} / ${formatNumber(row.depthKm, 1)} km`}
+                      meta={[formatUtc(row.ts)]}
+                      onClick={() => openInspector(row.entity)}
+                    />
+                  ))
+                ) : (
+                  <div className="si-ops-mobile-empty">No recent seismic activity</div>
+                )}
+                {quakeRows.length > MOBILE_PREVIEW_LIMITS["quake-table"] ? (
+                  <button
+                    type="button"
+                    className="si-phone-overlay-action"
+                    style={{ width: "100%", minHeight: 44 }}
+                    onClick={() => setMobileOverlayId("quake-table")}
+                  >
+                    Open Full List
+                  </button>
+                ) : null}
+              </div>
+            ) : (
+              <DataTable
+                tableId="quake-table"
+                data={quakeRows}
+                columns={quakeColumns}
+                bodyHeight="100%"
+                stickyFirstColumn
+                getRowId={(row) => row.id}
+                onRowClick={(row) => openInspector(row.entity)}
+                rowActionColumnIndex={0}
+                onRowOpenDetail={(row) => openInspector(row.entity, true)}
+                searchPlaceholder="Search location, magnitude, depth, or timestamp"
+                searchHelpText="Global search across all earthquake columns."
+                enableColumnFilters
+                emptyMessage="No recent seismic activity"
+              />
+            )}
           </PanelBody>
           <PanelFooter
             source="USGS"
@@ -407,21 +577,54 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
             }
           />
           <PanelBody noPadding>
-            <DataTable
-              tableId="sat-list"
-              data={satRows}
-              columns={satColumns}
-              bodyHeight="100%"
-              stickyFirstColumn
-              getRowId={(row) => row.id}
-              onRowClick={(row) => openInspector(row.entity)}
-              rowActionColumnIndex={0}
-              onRowOpenDetail={(row) => openInspector(row.entity, true)}
-              searchPlaceholder="Search object name, NORAD ID, country, orbit class"
-              searchHelpText="Catalog rows are merged with live propagated altitude when present."
-              enableColumnFilters
-              emptyMessage="No satellite catalog rows yet"
-            />
+            {isMobile ? (
+              <div className="si-ops-mobile-list" role="list">
+                {satRows.length ? (
+                  satRows.slice(0, MOBILE_PREVIEW_LIMITS["sat-list"]).map((row) => (
+                    <MobileOpsRow
+                      key={row.id}
+                      title={row.name}
+                      subtitle={`${row.orbitClass} / ${row.country}`}
+                      meta={[
+                        `NORAD ${row.noradId}`,
+                        typeof row.liveAltitudeKm === "number"
+                          ? `${formatNumber(row.liveAltitudeKm, 1)} km`
+                          : "Catalog altitude",
+                      ]}
+                      onClick={() => openInspector(row.entity)}
+                    />
+                  ))
+                ) : (
+                  <div className="si-ops-mobile-empty">No satellite catalog rows yet</div>
+                )}
+                {satRows.length > MOBILE_PREVIEW_LIMITS["sat-list"] ? (
+                  <button
+                    type="button"
+                    className="si-phone-overlay-action"
+                    style={{ width: "100%", minHeight: 44 }}
+                    onClick={() => setMobileOverlayId("sat-list")}
+                  >
+                    Open Full List
+                  </button>
+                ) : null}
+              </div>
+            ) : (
+              <DataTable
+                tableId="sat-list"
+                data={satRows}
+                columns={satColumns}
+                bodyHeight="100%"
+                stickyFirstColumn
+                getRowId={(row) => row.id}
+                onRowClick={(row) => openInspector(row.entity)}
+                rowActionColumnIndex={0}
+                onRowOpenDetail={(row) => openInspector(row.entity, true)}
+                searchPlaceholder="Search object name, NORAD ID, country, orbit class"
+                searchHelpText="Catalog rows are merged with live propagated altitude when present."
+                enableColumnFilters
+                emptyMessage="No satellite catalog rows yet"
+              />
+            )}
           </PanelBody>
           <PanelFooter
             source="CelesTrak"
@@ -448,7 +651,7 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
               role="log"
               aria-label="Operations feed"
             >
-              {feedItems.slice(0, 120).map((item) => (
+              {feedItems.slice(0, isMobile ? MOBILE_PREVIEW_LIMITS["feed"] : 120).map((item) => (
                 <div key={item.id} className={`si-feed-item is-${item.level}`}>
                   <span>{new Date(item.ts).toISOString().slice(11, 19)}</span>
                   <strong>{item.source}</strong>
@@ -456,6 +659,16 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
                 </div>
               ))}
             </div>
+            {isMobile && feedItems.length > MOBILE_PREVIEW_LIMITS["feed"] ? (
+              <button
+                type="button"
+                className="si-phone-overlay-action"
+                style={{ width: "100%", minHeight: 44, marginTop: 8 }}
+                onClick={() => setMobileOverlayId("feed")}
+              >
+                Open Full List
+              </button>
+            ) : null}
           </PanelBody>
           <PanelFooter
             source="Internal event stream"
@@ -498,7 +711,7 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
           <PanelBody>
             <div className="si-feed-list" role="log" aria-label="Space weather feed">
               {spaceWeatherItems.length ? (
-                spaceWeatherItems.map((item) => (
+                spaceWeatherItems.slice(0, isMobile ? MOBILE_PREVIEW_LIMITS["space-weather"] : 40).map((item) => (
                   <div
                     key={item.id}
                     className={`si-feed-item ${
@@ -518,6 +731,16 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
                 </div>
               )}
             </div>
+            {isMobile && spaceWeatherItems.length > MOBILE_PREVIEW_LIMITS["space-weather"] ? (
+              <button
+                type="button"
+                className="si-phone-overlay-action"
+                style={{ width: "100%", minHeight: 44, marginTop: 8 }}
+                onClick={() => setMobileOverlayId("space-weather")}
+              >
+                Open Full List
+              </button>
+            ) : null}
           </PanelBody>
           <PanelFooter
             source="NOAA SWPC"
@@ -549,7 +772,7 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
           <PanelBody>
             <div className="si-feed-list" role="log" aria-label="Threat board">
               {threatItems.length ? (
-                threatItems.map((item) => (
+                threatItems.slice(0, isMobile ? MOBILE_PREVIEW_LIMITS["threat-board"] : 120).map((item) => (
                   <div key={item.id} className={`si-feed-item is-${item.level}`}>
                     <span>{new Date(item.ts).toISOString().slice(11, 19)}</span>
                     <strong>{item.source}</strong>
@@ -564,6 +787,16 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
                 </div>
               )}
             </div>
+            {isMobile && threatItems.length > MOBILE_PREVIEW_LIMITS["threat-board"] ? (
+              <button
+                type="button"
+                className="si-phone-overlay-action"
+                style={{ width: "100%", minHeight: 44, marginTop: 8 }}
+                onClick={() => setMobileOverlayId("threat-board")}
+              >
+                Open Full List
+              </button>
+            ) : null}
           </PanelBody>
           <PanelFooter
             source="USGS + GDACS + SWPC"
@@ -585,9 +818,24 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
             controls={<PanelControls onRefresh={bumpRefreshTick} refreshText="REFRESH" />}
           />
           <PanelBody>
-            <div className="si-feed-list" role="log" aria-label="Data sources health">
-              {Object.entries(sourceHealth ?? {}).length ? (
-                Object.entries(sourceHealth ?? {}).map(([name, state]) => {
+            {Object.entries(sourceHealth ?? {}).length ? (
+                isMobile ? (
+                  <div className="si-ops-mobile-list" role="list" aria-label="Data sources health">
+                    {mobileSourceHealthRows
+                      .slice(0, MOBILE_PREVIEW_LIMITS["source-health"])
+                      .map((row) => (
+                        <MobileOpsRow
+                          key={row.id}
+                          title={row.title}
+                          subtitle={row.subtitle}
+                          meta={row.meta}
+                          onClick={() => setMobileOverlayId("source-health")}
+                        />
+                      ))}
+                  </div>
+                ) : (
+                  <div className="si-feed-list" role="log" aria-label="Data sources health">
+                    {Object.entries(sourceHealth ?? {}).map(([name, state]) => {
                   const statusColor =
                     state.status === "live" ? "#69f0ae"
                     : state.status === "cached" ? "#4fc3f7"
@@ -610,15 +858,30 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
                       </span>
                     </div>
                   );
-                })
+                    })}
+                  </div>
+                )
+              ) : isMobile ? (
+                <div className="si-ops-mobile-empty">No source health data available yet.</div>
               ) : (
-                <div className="si-feed-item is-info">
-                  <span>--:--:--</span>
-                  <strong>INFO</strong>
-                  <span>No source health data available yet.</span>
+                <div className="si-feed-list" role="log" aria-label="Data sources health">
+                  <div className="si-feed-item is-info">
+                    <span>--:--:--</span>
+                    <strong>INFO</strong>
+                    <span>No source health data available yet.</span>
+                  </div>
                 </div>
               )}
-            </div>
+            {isMobile && Object.entries(sourceHealth ?? {}).length > MOBILE_PREVIEW_LIMITS["source-health"] ? (
+              <button
+                type="button"
+                className="si-phone-overlay-action"
+                style={{ width: "100%", minHeight: 44, marginTop: 8 }}
+                onClick={() => setMobileOverlayId("source-health")}
+              >
+                Open Full List
+              </button>
+            ) : null}
           </PanelBody>
           <PanelFooter
             source="SYSTEM"
@@ -661,45 +924,253 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
     };
   }, [showViewMenu]);
 
+  const mobileOverlayTitle =
+    mobileOverlayId === "flight-table"
+      ? "Air Traffic Matrix"
+      : mobileOverlayId === "quake-table"
+        ? "Seismic Heat Table"
+        : mobileOverlayId === "sat-list"
+          ? "Satellite List"
+          : mobileOverlayId === "feed"
+            ? "Ops Feed"
+            : mobileOverlayId === "space-weather"
+              ? "Space Weather"
+              : mobileOverlayId === "threat-board"
+                ? "Threat Board"
+                : mobileOverlayId === "source-health"
+                  ? "Data Sources"
+                  : "";
+
+  const mobileOverlayBody = mobileOverlayId === "flight-table" ? (
+    <div style={{ display: "grid", gap: 10 }}>
+      <input
+        type="text"
+        value={mobileOverlayQuery}
+        onChange={(event) => setMobileOverlayQuery(event.target.value)}
+        placeholder="Search callsign, type, country, speed..."
+        style={{
+          width: "100%",
+          minHeight: 44,
+          padding: "0 12px",
+          fontSize: 12,
+          background: "#0d1521",
+          color: "#ddd",
+          border: "1px solid #243246",
+        }}
+      />
+      <div className="si-ops-mobile-list" role="list">
+        {overlayFlightRows.length ? (
+          overlayFlightRows.map((row) => (
+            <MobileOpsRow
+              key={row.id}
+              title={row.callsign}
+              subtitle={`${row.type} / ${row.country}`}
+              meta={[row.speed, `HDG ${row.heading}`, row.alt]}
+              onClick={() => {
+                openInspector(row.entity);
+                setMobileOverlayId(null);
+              }}
+            />
+          ))
+        ) : (
+          <div className="si-ops-mobile-empty">No live flight rows available</div>
+        )}
+      </div>
+    </div>
+  ) : mobileOverlayId === "quake-table" ? (
+    <div style={{ display: "grid", gap: 10 }}>
+      <input
+        type="text"
+        value={mobileOverlayQuery}
+        onChange={(event) => setMobileOverlayQuery(event.target.value)}
+        placeholder="Search location, magnitude, depth..."
+        style={{
+          width: "100%",
+          minHeight: 44,
+          padding: "0 12px",
+          fontSize: 12,
+          background: "#0d1521",
+          color: "#ddd",
+          border: "1px solid #243246",
+        }}
+      />
+      <div className="si-ops-mobile-list" role="list">
+        {overlayQuakeRows.length ? (
+          overlayQuakeRows.map((row) => (
+            <MobileOpsRow
+              key={row.id}
+              title={row.place}
+              subtitle={`M${row.mag.toFixed(1)} / ${formatNumber(row.depthKm, 1)} km`}
+              meta={[formatUtc(row.ts)]}
+              onClick={() => {
+                openInspector(row.entity);
+                setMobileOverlayId(null);
+              }}
+            />
+          ))
+        ) : (
+          <div className="si-ops-mobile-empty">No recent seismic activity</div>
+        )}
+      </div>
+    </div>
+  ) : mobileOverlayId === "sat-list" ? (
+    <div style={{ display: "grid", gap: 10 }}>
+      <input
+        type="text"
+        value={mobileOverlayQuery}
+        onChange={(event) => setMobileOverlayQuery(event.target.value)}
+        placeholder="Search object name, NORAD, country..."
+        style={{
+          width: "100%",
+          minHeight: 44,
+          padding: "0 12px",
+          fontSize: 12,
+          background: "#0d1521",
+          color: "#ddd",
+          border: "1px solid #243246",
+        }}
+      />
+      <div className="si-ops-mobile-list" role="list">
+        {overlaySatRows.length ? (
+          overlaySatRows.map((row) => (
+            <MobileOpsRow
+              key={row.id}
+              title={row.name}
+              subtitle={`${row.orbitClass} / ${row.country}`}
+              meta={[
+                `NORAD ${row.noradId}`,
+                typeof row.liveAltitudeKm === "number"
+                  ? `${formatNumber(row.liveAltitudeKm, 1)} km`
+                  : "Catalog altitude",
+              ]}
+              onClick={() => {
+                openInspector(row.entity);
+                setMobileOverlayId(null);
+              }}
+            />
+          ))
+        ) : (
+          <div className="si-ops-mobile-empty">No satellite catalog rows yet</div>
+        )}
+      </div>
+    </div>
+  ) : mobileOverlayId === "feed" ? (
+    <div className="si-feed-list" role="log" aria-label="Operations feed">
+      {feedItems.map((item) => (
+        <div key={item.id} className={`si-feed-item is-${item.level}`}>
+          <span>{new Date(item.ts).toISOString().slice(11, 19)}</span>
+          <strong>{item.source}</strong>
+          <span title={item.message}>{item.message}</span>
+        </div>
+      ))}
+    </div>
+  ) : mobileOverlayId === "space-weather" ? (
+    <div className="si-feed-list" role="log" aria-label="Space weather feed">
+      {spaceWeatherItems.length ? (
+        spaceWeatherItems.map((item) => (
+          <div
+            key={item.id}
+            className={`si-feed-item ${
+              item.level === "ALERT" ? "is-error" : item.level === "WARNING" ? "is-warn" : "is-info"
+            }`}
+          >
+            <span>{new Date(item.issueDatetime).toISOString().slice(11, 19)}</span>
+            <strong>{item.level}</strong>
+            <span title={item.title}>{item.title}</span>
+          </div>
+        ))
+      ) : (
+        <div className="si-feed-item is-warn">
+          <span>--:--:--</span>
+          <strong>INFO</strong>
+          <span>No SWPC alerts received yet.</span>
+        </div>
+      )}
+    </div>
+  ) : mobileOverlayId === "threat-board" ? (
+    <div className="si-feed-list" role="log" aria-label="Threat board">
+      {threatItems.length ? (
+        threatItems.map((item) => (
+          <div key={item.id} className={`si-feed-item is-${item.level}`}>
+            <span>{new Date(item.ts).toISOString().slice(11, 19)}</span>
+            <strong>{item.source}</strong>
+            <span title={item.title}>{item.title}</span>
+          </div>
+        ))
+      ) : (
+        <div className="si-feed-item is-info">
+          <span>--:--:--</span>
+          <strong>INFO</strong>
+          <span>No high-severity alerts active.</span>
+        </div>
+      )}
+    </div>
+  ) : mobileOverlayId === "source-health" ? (
+    <div className="si-ops-mobile-list" role="list">
+      {mobileSourceHealthRows.length ? (
+        mobileSourceHealthRows.map((row) => (
+          <MobileOpsRow
+            key={row.id}
+            title={row.title}
+            subtitle={row.subtitle}
+            meta={row.meta}
+            staticRow
+          />
+        ))
+      ) : (
+        <div className="si-ops-mobile-empty">No source health data available yet.</div>
+      )}
+    </div>
+  ) : null;
+
   return (
     <div className={`si-dashboard-workspace ${embedded ? "is-embedded" : ""}`.trim()}>
-      <div className="si-dashboard-toolbar">
-        <div className="si-toolbar-status">DASHBOARD MODE / ULTRA WORKSTATION GRID / FREEFORM WINDOW MOVE</div>
-        <div className="si-toolbar-actions">
-          <div className="si-view-menu-wrap" ref={viewMenuRef}>
-            <button
-              type="button"
-              className={`si-inline-action ${showViewMenu ? "is-active" : ""}`}
-              onClick={() => setShowViewMenu((open) => !open)}
-              aria-expanded={showViewMenu}
-            >
-              VIEW WINDOWS
+      {!isMobile ? (
+        <div className="si-dashboard-toolbar">
+          <div className="si-toolbar-status">DASHBOARD MODE / ULTRA WORKSTATION GRID / FREEFORM WINDOW MOVE</div>
+          <div className="si-toolbar-actions">
+            <div className="si-view-menu-wrap" ref={viewMenuRef}>
+              <button
+                type="button"
+                className={`si-inline-action ${showViewMenu ? "is-active" : ""}`}
+                onClick={() => setShowViewMenu((open) => !open)}
+                aria-expanded={showViewMenu}
+              >
+                VIEW WINDOWS
+              </button>
+              {showViewMenu ? (
+                <div className="si-view-menu" role="menu" aria-label="Toggle dashboard windows">
+                  {panelCatalog.map((panel) => (
+                    <label key={panel.id} className="si-view-menu-item">
+                      <input
+                        type="checkbox"
+                        checked={panelVisibility[panel.id] !== false}
+                        onChange={(event) => setPanelVisibility(panel.id, event.target.checked)}
+                      />
+                      <span>{panel.label}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            <button type="button" className="si-inline-action" onClick={resetPanelLayouts}>
+              RESET LAYOUT
             </button>
-            {showViewMenu ? (
-              <div className="si-view-menu" role="menu" aria-label="Toggle dashboard windows">
-                {panelCatalog.map((panel) => (
-                  <label key={panel.id} className="si-view-menu-item">
-                    <input
-                      type="checkbox"
-                      checked={panelVisibility[panel.id] !== false}
-                      onChange={(event) => setPanelVisibility(panel.id, event.target.checked)}
-                    />
-                    <span>{panel.label}</span>
-                  </label>
-                ))}
-              </div>
-            ) : null}
           </div>
-          <button type="button" className="si-inline-action" onClick={resetPanelLayouts}>
-            RESET LAYOUT
-          </button>
         </div>
-      </div>
-      {panelNodes.length ? (
-        <DraggableDashboardGrid panels={panelNodes} />
-      ) : (
-        <div className="si-dashboard-empty">No windows enabled. Open VIEW WINDOWS to add panels.</div>
-      )}
+      ) : null}
+      <WorkspaceErrorBoundary name="DASHBOARD">
+        {panelNodes.length ? (
+          <DraggableDashboardGrid panels={panelNodes} />
+        ) : (
+          <div className="si-dashboard-empty">No windows enabled. Open VIEW WINDOWS to add panels.</div>
+        )}
+      </WorkspaceErrorBoundary>
+      {isMobile && mobileOverlayId ? (
+        <PhoneOverlayShell title={mobileOverlayTitle} onClose={() => setMobileOverlayId(null)}>
+          {mobileOverlayBody}
+        </PhoneOverlayShell>
+      ) : null}
     </div>
   );
 }

@@ -872,7 +872,7 @@ export async function renderDisasterAlerts(
     map.set("disasters", handle);
   }
 
-  const dataSource = handle.dataSource;
+  const dataSource = handle.dataSource!;
   const entityById = handle.entityById ?? new Map<string, import("cesium").Entity>();
   handle.entityById = entityById;
   const incoming = new Set<string>();

@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { getPolymarketEvents } from "../../../../lib/server/news/providers/polymarket";
+import { STANDARD_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const cacheHeaders = {
     "Cache-Control": "public, max-age=30, stale-while-revalidate=120",
   };
@@ -21,3 +23,5 @@ export async function GET(request: Request) {
     { headers: cacheHeaders },
   );
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

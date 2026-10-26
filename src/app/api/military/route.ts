@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { Flight } from '../../../lib/providers/types';
 import { inferFlightCountry } from '../../../lib/geo/country';
+import { STANDARD_LIMITER } from '../../../lib/server/rateLimitPresets';
+import { withRateLimit } from '../../../lib/server/withRateLimit';
 
 export const dynamic = 'force-dynamic';
 
@@ -595,7 +597,7 @@ async function fetchMilByRegions(baseUrl: string, label: string): Promise<Flight
 
 // ── GET handler ─────────────────────────────────────────────────────────────
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const url = new URL(request.url);
   const live = url.searchParams.get('live') === '1';
   const phase = url.searchParams.get('phase'); // '1', '2', '3', or null (all)
@@ -706,3 +708,5 @@ export async function GET(request: Request) {
   console.warn('[api/military] all sources failed, serving mock data');
   return NextResponse.json(MOCK_MILITARY, { headers: { 'Cache-Control': 'public, max-age=60' } });
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);

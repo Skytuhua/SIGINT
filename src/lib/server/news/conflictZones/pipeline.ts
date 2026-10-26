@@ -181,7 +181,7 @@ export async function runConflictZonesPipeline(
           country: ev.country,
           admin1: ev.admin1,
           locationName: ev.locationName,
-          actors: [ev.actor1Name, ev.actor2Name].filter(Boolean),
+          actors: [ev.actor1Name, ev.actor2Name].filter((a): a is string => a !== null && a !== undefined),
           articleCount: 1,
           mentionCount: 1,
           severityWeight,

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { STANDARD_LIMITER } from "../../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../../lib/server/withRateLimit";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +11,7 @@ interface OPMLFeed {
   htmlUrl?: string;
 }
 
-export async function POST(request: NextRequest) {
+async function handler(request: NextRequest) {
   try {
     const body = await request.text();
     if (!body || !body.includes("<opml") && !body.includes("<outline")) {
@@ -95,3 +97,5 @@ function decodeEntities(s: string): string {
     .replace(/&#39;/g, "'")
     .replace(/&apos;/g, "'");
 }
+
+export const POST = withRateLimit(STANDARD_LIMITER, handler);

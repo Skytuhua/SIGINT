@@ -303,7 +303,8 @@ export class StreamStore {
 // ---------------------------------------------------------------------------
 
 function normalizeTitle(s: string): string {
-  return s.toLowerCase().replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").trim();
+  // Retain letters and marks from every script, not just ASCII word characters.
+  return s.normalize("NFC").toLowerCase().replace(/[^\p{L}\p{M}\p{N}_\s]/gu, " ").replace(/\s+/g, " ").trim();
 }
 
 function diceSimilarity(a: string, b: string): number {

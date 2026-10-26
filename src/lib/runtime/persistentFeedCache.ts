@@ -88,6 +88,11 @@ async function getDb(): Promise<IDBDatabase | null> {
       idbPending = null;
       resolve(null);
     };
+  }).catch(() => {
+    // Handle synchronous open failures after idbPending has been assigned,
+    // so unavailable storage falls back to memory without preventing retries.
+    idbPending = null;
+    return null;
   });
 
   return idbPending;

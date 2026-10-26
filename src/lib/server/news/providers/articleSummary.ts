@@ -494,19 +494,47 @@ async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: numbe
 }
 
 async function fetchArticleHtml(url: string): Promise<string> {
-  const response = await fetchWithTimeout(
-    url,
-    {
-      method: "GET",
-      redirect: "follow",
-      cache: "no-store",
-      headers: {
-        "User-Agent": "SIGINT/0.1 (article-summary)",
-        Accept: "text/html, application/xhtml+xml;q=0.9, */*;q=0.5",
+  const deadline = Date.now() + 8_000;
+  let currentUrl = url;
+  let response: Response;
+  for (let redirects = 0; ; redirects++) {
+    const remainingMs = deadline - Date.now();
+    if (remainingMs <= 0) throw new Error("fetch-timeout:8000");
+    response = await fetchWithTimeout(
+      currentUrl,
+      {
+        method: "GET",
+        redirect: "manual",
+        cache: "no-store",
+        headers: {
+          "User-Agent": "SIGINT/0.1 (article-summary)",
+          Accept: "text/html, application/xhtml+xml;q=0.9, */*;q=0.5",
+        },
       },
-    },
-    8_000
-  );
+      remainingMs
+    );
+    if (![301, 302, 303, 307, 308].includes(response.status)) break;
+
+    const location = response.headers.get("location");
+    await response.body?.cancel();
+    if (redirects >= 5) throw new Error("fetch-redirect-limit");
+    if (!location) throw new Error("fetch-redirect-location");
+    let target;
+    try {
+      target = parseAndValidateUrl(new URL(location, currentUrl).toString());
+    } catch {
+      throw new Error("fetch-redirect-invalid");
+    }
+    if (!target) throw new Error("fetch-redirect-invalid");
+    const hostname = target.parsed.hostname.toLowerCase().replace(/\.$/, "");
+    if (
+      UNSUPPORTED_DOMAINS.some((domain) => domainMatches(hostname, domain)) ||
+      await isBlockedHost(hostname)
+    ) {
+      throw new Error("fetch-redirect-blocked");
+    }
+    currentUrl = target.parsed.toString();
+  }
 
   if (!response.ok) {
     throw new Error(`fetch-status:${response.status}`);

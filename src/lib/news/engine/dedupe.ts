@@ -22,9 +22,7 @@ function bigrams(value: string): Set<string> {
   return set;
 }
 
-function diceSimilarity(a: string, b: string): number {
-  const aa = bigrams(a);
-  const bb = bigrams(b);
+function diceSimilarity(aa: Set<string>, bb: Set<string>): number {
   if (!aa.size || !bb.size) return 0;
   let overlap = 0;
   aa.forEach((token) => {
@@ -76,21 +74,34 @@ export function dedupeArticles(items: NewsArticle[], threshold = 0.9): NewsArtic
   const sorted = [...normalized].sort(compareItems);
   const seenUrl = new Set<string>();
   const output: NewsArticle[] = [];
+  // Call-local and lazy: URL/domain/time exclusions need no headline work.
+  const titleBigrams = new Map<string, Set<string>>();
+  const getBigrams = (headline: string): Set<string> => {
+    let grams = titleBigrams.get(headline);
+    if (!grams) {
+      grams = bigrams(headline);
+      titleBigrams.set(headline, grams);
+    }
+    return grams;
+  };
+  const byDomain = new Map<string, NewsArticle[]>();
 
   for (const item of sorted) {
     if (!item.canonicalUrl) continue;
     if (seenUrl.has(item.canonicalUrl)) continue;
 
-    const duplicate = output.some((existing) => {
-      if (existing.canonicalUrl === item.canonicalUrl) return true;
-      if (existing.domain !== item.domain) return false;
+    // URL uniqueness is global; headline candidates only share a domain.
+    const candidates = byDomain.get(item.domain) ?? [];
+    const duplicate = candidates.some((existing) => {
       if (Math.abs(existing.publishedAt - item.publishedAt) > 6 * 60 * 60_000) return false;
-      return diceSimilarity(existing.headline, item.headline) >= threshold;
+      return diceSimilarity(getBigrams(existing.headline), getBigrams(item.headline)) >= threshold;
     });
     if (duplicate) continue;
 
     seenUrl.add(item.canonicalUrl);
     output.push(item);
+    candidates.push(item);
+    byDomain.set(item.domain, candidates);
   }
 
   return output.sort(compareItems);

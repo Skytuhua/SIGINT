@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { geocodeNominatim, reverseGeocodeNominatim } from "../../../../lib/server/news/providers/nominatim";
+import { MODERATE_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const latRaw = searchParams.get("lat");
   const lonRaw = searchParams.get("lon");
@@ -55,3 +57,5 @@ export async function GET(request: Request) {
     { headers: { "Cache-Control": "public, max-age=604800" } }
   );
 }
+
+export const GET = withRateLimit(MODERATE_LIMITER, handler);

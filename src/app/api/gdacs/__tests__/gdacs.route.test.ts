@@ -43,7 +43,7 @@ describe("/api/gdacs route", () => {
     vi.spyOn(Date, "now").mockReturnValue(1_000_000);
 
     const { GET } = await import("../route");
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/gdacs"));
     const payload = await response.json();
 
     expect(payload.status).toBe("live");
@@ -76,10 +76,10 @@ describe("/api/gdacs route", () => {
     now.mockReturnValue(1_000_000);
 
     const { GET } = await import("../route");
-    await GET();
+    await GET(new Request("http://localhost/api/gdacs"));
 
     now.mockReturnValue(1_000_000 + 6 * 60_000 + 1);
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/gdacs"));
     const payload = await response.json();
 
     expect(payload.status).toBe("live");
@@ -108,10 +108,10 @@ describe("/api/gdacs route", () => {
     now.mockReturnValue(1_000_000);
 
     const { GET } = await import("../route");
-    await GET();
+    await GET(new Request("http://localhost/api/gdacs"));
 
     now.mockReturnValue(1_000_000 + 6 * 60_000 + 5);
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/gdacs"));
     const payload = await response.json();
 
     expect(payload.status).toBe("degraded");

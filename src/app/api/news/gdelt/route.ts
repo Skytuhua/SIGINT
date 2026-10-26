@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { getGdeltArticles } from "../../../../lib/server/news/providers/gdelt";
 import type { NewsCategory } from "../../../../lib/news/types";
+import { STANDARD_LIMITER } from "../../../../lib/server/rateLimitPresets";
+import { withRateLimit } from "../../../../lib/server/withRateLimit";
 
-export async function GET(request: Request) {
+async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const result = await getGdeltArticles({
     q: searchParams.get("q") ?? "",
@@ -29,4 +31,6 @@ export async function GET(request: Request) {
     { headers: { "Cache-Control": "public, max-age=180" } }
   );
 }
+
+export const GET = withRateLimit(STANDARD_LIMITER, handler);
 
