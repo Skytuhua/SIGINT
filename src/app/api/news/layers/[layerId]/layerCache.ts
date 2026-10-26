@@ -43,9 +43,10 @@ const STALE_MULTIPLIER = 10;
 
 // Query parameters each layer's payload actually depends on. Only listed
 // parameters become part of the cache key; every other layer is keyed by id
-// alone. Keep this aligned with getLayerPayload's query reads in route.ts.
+// alone. Keep this aligned with getLayerPayload and its downstream adapters.
 const LAYER_QUERY_PARAMS: Record<string, readonly string[]> = {
   "intel-hotspots": ["timeWindow"],
+  "conflict-zones": ["timeWindow", "mode", "verifiedOverlay", "west", "south", "east", "north"],
   "armed-conflict": ["timeWindow", "broad"],
   "ucdp-events": ["fromYear", "toYear", "countries", "violenceTypes", "minFatalities"],
 };
