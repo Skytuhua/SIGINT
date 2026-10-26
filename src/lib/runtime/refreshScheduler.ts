@@ -197,6 +197,7 @@ export class RefreshScheduler {
       task.abortController?.abort();
       task.abortController = null;
       task.inFlight = false;
+      task.supersede = false;
       task.attempt = 0;
       task.nextDueAt = 0;
       task.plannedDueAt = 0;
@@ -321,6 +322,7 @@ export class RefreshScheduler {
         now: Date.now(),
       });
 
+      if (this.tasks.get(key) !== task || task.abortController !== controller) return;
       task.attempt = 0;
       this.emit({
         taskKey: key,
@@ -330,6 +332,7 @@ export class RefreshScheduler {
         attempt: 0,
       });
     } catch (error) {
+      if (this.tasks.get(key) !== task || task.abortController !== controller) return;
       if (isAbortError(error)) {
         this.emit({
           taskKey: key,
@@ -352,10 +355,10 @@ export class RefreshScheduler {
       }
     } finally {
       if (releaseSlot) releaseSlot();
+      // A stopped or replaced run must not clear or reschedule a newer run.
+      if (this.tasks.get(key) !== task || task.abortController !== controller) return;
       task.inFlight = false;
-      if (task.abortController === controller) {
-        task.abortController = null;
-      }
+      task.abortController = null;
       if (!this.running || this.disposed) return;
       if (task.supersede) {
         task.supersede = false;
