@@ -67,7 +67,7 @@ function withTimeoutSignal(signal: AbortSignal, timeoutMs: number): AbortSignal 
   const controller = new AbortController();
   const onAbort = () => controller.abort(new DOMException("Aborted", "AbortError"));
   const timeout = setTimeout(() => {
-    controller.abort(new DOMException(`Timeout after ${timeoutMs}ms`, "AbortError"));
+    controller.abort(new DOMException(`Timeout after ${timeoutMs}ms`, "TimeoutError"));
   }, Math.max(100, timeoutMs));
 
   if (signal.aborted) {
