@@ -16,20 +16,16 @@ interface LayerRunState {
   unregister: (() => void) | null;
   health: LayerHealthState;
   circuitOpenUntil: number;
-  /** Quick fingerprint of the last emitted data to skip redundant onData calls. */
+  /** Full serialized payload of the last emission, used to skip identical data. */
   lastDataFingerprint: string;
 }
 
 const CIRCUIT_FAILURES = 3;
 const CIRCUIT_OPEN_MS = 5 * 60_000;
 
-/** Cheap fingerprint: feature count + first/last feature id + first feature ts. */
+/** Compare the full JSON payload: IDs/timestamps alone do not describe map content. */
 function dataFingerprint(data: LayerFeatureCollection): string {
-  const n = data.features.length;
-  if (n === 0) return "0";
-  const first = data.features[0];
-  const last = data.features[n - 1];
-  return `${n}:${first.id ?? ""}:${first.ts ?? 0}:${last.id ?? ""}:${last.ts ?? 0}`;
+  return JSON.stringify(data);
 }
 
 function initialHealth(): LayerHealthState {
