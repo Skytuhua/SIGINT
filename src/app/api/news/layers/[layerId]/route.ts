@@ -22,6 +22,7 @@ import {
   getUcdpMeta,
   getUcdpDefaultYear,
 } from "../../../../../lib/server/ucdp/ucdpGedStore";
+import { isValidUcdpYearRange } from "../../../../../lib/server/ucdp/yearRange";
 import { computeUcdpSeverity, severityLabel as ucdpSeverityLabel } from "../../../../../lib/server/ucdp/severity";
 import type { UcdpViolenceType } from "../../../../../lib/server/ucdp/types";
 
@@ -718,10 +719,30 @@ async function handler(request: Request, { params }: { params: { layerId: string
     return NextResponse.json({ error: "Invalid layer ID" }, { status: 400 });
   }
 
-  const origin = new URL(request.url).origin;
-  const cacheKey = buildLayerCacheKey(layerId, new URL(request.url).searchParams);
+  const url = new URL(request.url);
+  if (layerId === "ucdp-events" && !isValidUcdpYearRange(url.searchParams)) {
+    return NextResponse.json(
+      { error: "Invalid UCDP year range: use ordered four-digit years from 1989 through the current year" },
+      { status: 400, headers: { "Cache-Control": "no-store" } }
+    );
+  }
+  // Resolve one-sided filters against the loaded dataset, not the empty-store fallback.
+  if (layerId === "ucdp-events" && url.searchParams.has("fromYear") !== url.searchParams.has("toYear")) {
+    await ensureUcdpLoaded();
+    const defaultYear = String(getUcdpDefaultYear());
+    if (!url.searchParams.has("fromYear")) url.searchParams.set("fromYear", defaultYear);
+    if (!url.searchParams.has("toYear")) url.searchParams.set("toYear", defaultYear);
+    if (!isValidUcdpYearRange(url.searchParams)) {
+      return NextResponse.json(
+        { error: "Invalid UCDP year range after applying the dataset default" },
+        { status: 400, headers: { "Cache-Control": "no-store" } }
+      );
+    }
+  }
+  const origin = url.origin;
+  const cacheKey = buildLayerCacheKey(layerId, url.searchParams);
 
-  // Fresh cache hit — return immediately.
+  // Fresh cache hit
   if (isFresh(cacheKey)) {
     return NextResponse.json(getCached(cacheKey)!, {
       headers: { "Cache-Control": "no-store", "X-Cache": "hit" },
@@ -732,7 +753,7 @@ async function handler(request: Request, { params }: { params: { layerId: string
   // This eliminates perceived latency on every refresh cycle after the first cold load.
   const stale = getCached(cacheKey);
   if (stale) {
-    void getLayerPayload(layerId, cacheKey, origin, request.url)
+    void getLayerPayload(layerId, cacheKey, origin, url.toString())
       .then((payload) => { if (payload.features.length > 0) setCache(cacheKey, payload); })
       .catch(() => { /* keep existing stale entry */ });
     return NextResponse.json(stale, {
@@ -742,7 +763,7 @@ async function handler(request: Request, { params }: { params: { layerId: string
 
   // Cold start: no cache — must fetch synchronously.
   try {
-    const payload = await getLayerPayload(layerId, cacheKey, origin, request.url);
+    const payload = await getLayerPayload(layerId, cacheKey, origin, url.toString());
     const shouldCache = payload.features.length > 0;
     if (shouldCache) setCache(cacheKey, payload);
     return NextResponse.json(payload, {
