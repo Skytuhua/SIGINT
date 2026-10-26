@@ -28,7 +28,12 @@ interface NegativeEntry {
   error: Error;
 }
 
-const inFlight = new Map<string, Promise<unknown>>();
+interface InFlightEntry {
+  promise: Promise<unknown>;
+  signal?: AbortSignal;
+}
+
+const inFlight = new Map<string, InFlightEntry>();
 const negativeCache = new Map<string, NegativeEntry>();
 
 const DEFAULT_TIMEOUT_MS = 15_000;
@@ -176,14 +181,14 @@ export async function fetchJsonWithPolicy<T>(
     throw new Error(`cooldown:${key}:${negative.error.message}`);
   }
 
-  const existing = inFlight.get(key) as Promise<T> | undefined;
+  const existing = inFlight.get(key);
   if (existing) {
     try {
-      return await awaitWithSignal(existing, policy.signal);
+      return await awaitWithSignal(existing.promise as Promise<T>, policy.signal);
     } catch (err) {
-      // If the shared promise was aborted by its original caller but OUR
-      // signal is still active, retry — the inFlight map is now clean.
-      if (isAbortError(err) && !policy.signal?.aborted) {
+      // A caller's cancellation or deadline must not fail other live callers.
+      // An exhausted request timeout still propagates when its owner is active.
+      if ((isAbortError(err) || existing.signal?.aborted) && !policy.signal?.aborted) {
         return fetchJsonWithPolicy<T>(url, policy);
       }
       throw err;
@@ -230,11 +235,11 @@ export async function fetchJsonWithPolicy<T>(
     throw new Error(`retry-exhausted:${key}`);
   })();
 
-  inFlight.set(key, run as Promise<unknown>);
+  inFlight.set(key, { promise: run, signal: policy.signal });
   try {
     return await awaitWithSignal(run, policy.signal);
   } finally {
-    if (inFlight.get(key) === run) {
+    if (inFlight.get(key)?.promise === run) {
       inFlight.delete(key);
     }
   }
