@@ -11,7 +11,8 @@ interface Props {
   timeline?: Array<{ date: string; value: number }>;
   onClose: () => void;
   isBookmarked?: boolean;
-  onToggleBookmark?: (id: string) => void;
+  onToggleBookmark?: (article: NewsArticle) => void;
+  readingListWarning?: string | null;
 }
 
 type SummaryStatus = "idle" | "loading" | "ready" | "error" | "unsupported";
@@ -99,6 +100,7 @@ export default function NewsPopupModal({
   onClose,
   isBookmarked,
   onToggleBookmark,
+  readingListWarning,
 }: Props) {
   const [copied, setCopied] = useState(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -216,7 +218,7 @@ export default function NewsPopupModal({
           <h2 className="si-news-popup-title">STORY</h2>
           <div style={{ display: "flex", gap: 4, alignItems: "center", marginLeft: "auto" }}>
             {onToggleBookmark && article ? (
-              <button type="button" style={{ background: "none", border: "none", cursor: "pointer", color: isBookmarked ? "var(--si-amber)" : "var(--si-text-muted)", fontSize: 14 }} onClick={() => onToggleBookmark(article.id)} title={isBookmarked ? "Remove bookmark" : "Bookmark"}>
+              <button type="button" style={{ background: "none", border: "none", cursor: "pointer", color: isBookmarked ? "var(--si-amber)" : "var(--si-text-muted)", fontSize: 14 }} onClick={() => onToggleBookmark(article)} aria-label={isBookmarked ? "Remove bookmark" : "Bookmark"} aria-pressed={!!isBookmarked} title={isBookmarked ? "Remove bookmark" : "Bookmark"}>
                 {isBookmarked ? "\u2605" : "\u2606"}
               </button>
             ) : null}
@@ -236,6 +238,7 @@ export default function NewsPopupModal({
           </div>
         </div>
         <div className="si-news-popup-body">
+          {readingListWarning ? <div className="si-news-reading-list-warning" role="status">{readingListWarning}</div> : null}
           <div className="si-sv-header">
             <h4 className="si-sv-headline">
               <span className={`si-news-sentiment is-${classifySentiment(article.headline)}`} />

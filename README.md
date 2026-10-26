@@ -87,6 +87,7 @@ Three workspaces &mdash; OPS, NEWS, MARKET &mdash; unified in a single console f
 - Prediction markets (Polymarket)
 - AI article summarization (OpenAI)
 - Daily briefing modal
+- Durable local reading list via **SAVED** or the story popup bookmark: up to 200 independent article snapshots remain available after feed refreshes, workspace changes, and browser reloads. Snapshots include the headline, source link, snippet, and story metadata; full publisher pages are not downloaded. The list is stored only in this browser, with no account sync. Legacy bookmarks resolve when a matching story is observed and remain removable while unavailable. Storage failures show a warning and retain edits for the current session; at capacity, remove a story before saving another. Existing data is never silently evicted.
 
 ---
 

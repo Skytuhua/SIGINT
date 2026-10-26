@@ -41,6 +41,8 @@ import dynamic from "next/dynamic";
 import NewsDraggableGrid from "./NewsDraggableGrid";
 import NewsPopupModal from "./NewsPopupModal";
 import { useIsMobile } from "../../hooks/useIsMobile";
+import { useNewsReadingList } from "../../hooks/useNewsReadingList";
+import NewsSavedArticlesList from "./NewsSavedArticlesList";
 
 const NewsDailyBriefingModal = dynamic(() => import("./NewsDailyBriefingModal"), {
   ssr: false,
@@ -328,10 +330,10 @@ function extractRegion(item: NormalizedNewsItem): string {
   return "";
 }
 
-function isTypingTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return true;
-  return target.isContentEditable;
+function isInteractiveTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false;
+  if (target.closest("button, a[href], input, textarea, select, summary, [role='button'], [role='link'], [contenteditable]:not([contenteditable='false'])")) return true;
+  return target instanceof HTMLElement && target.isContentEditable;
 }
 
 function parseVideoId(input: string): string | null {
@@ -627,11 +629,10 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   const setNewsBackendHealth = useSIGINTStore((s) => s.setNewsBackendHealth);
   const setNewsLastUpdated = useSIGINTStore((s) => s.setNewsLastUpdated);
 
-  const [showBriefing, setShowBriefing] = useState(() =>
-    typeof window !== "undefined"
-      ? localStorage.getItem("si-news-briefing-disabled") !== "true"
-      : true
-  );
+  const [showBriefing, setShowBriefing] = useState(() => {
+    try { return typeof window === "undefined" || window.localStorage.getItem("si-news-briefing-disabled") !== "true"; }
+    catch { return true; }
+  });
   const [selectedRow, setSelectedRow] = useState(0);
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [geoMode, setGeoMode] = useState<"pointdata" | "country" | "adm1">("pointdata");
@@ -652,10 +653,8 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   const [panelMenuOpen, setPanelMenuOpen] = useState(false);
   const [searchResultsOpen, setSearchResultsOpen] = useState(false);
   const [topbarExpanded, setTopbarExpanded] = useState(false);
-  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(() => {
-    if (typeof window === "undefined") return new Set();
-    try { return new Set(JSON.parse(localStorage.getItem("si-news-bookmarks") || "[]")); } catch { return new Set(); }
-  });
+  const { entries: savedArticles, savedIds: bookmarkedIds, toggle: toggleBookmark, remove: removeBookmark,
+    reconcile: reconcileBookmarks, warning: readingListWarning } = useNewsReadingList();
   const [bookmarkPanelOpen, setBookmarkPanelOpen] = useState(false);
   const [timeRange, setTimeRange] = useState<string | null>(null);
   const [showStats, setShowStats] = useState(false);
@@ -690,16 +689,14 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
     geoMode: "pointdata" as "pointdata" | "country" | "adm1",
   });
 
-  const toggleBookmark = useCallback((id: string) => {
-    setBookmarkedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      localStorage.setItem("si-news-bookmarks", JSON.stringify(Array.from(next)));
-      return next;
-    });
-  }, []);
-
   const feedItems = news.feedItems as NormalizedNewsItem[];
+  useEffect(() => {
+    reconcileBookmarks(news.storyPopupArticle ? [...feedItems, news.storyPopupArticle] : feedItems);
+  }, [feedItems, news.storyPopupArticle, reconcileBookmarks]);
+  const openSavedArticle = useCallback((article: NewsArticle) => {
+    setStoryPopupArticle(article);
+    setBookmarkPanelOpen(false);
+  }, [setStoryPopupArticle]);
   const newsBackendHealth = news.backendHealth ?? {};
   const prevFeedLengthRef = useRef<number>(feedItems.length);
   useEffect(() => {
@@ -1666,8 +1663,8 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   useEffect(() => {
     if (!bookmarkPanelOpen) return;
     const onPointerDown = (event: MouseEvent) => {
-      if (!(event.target instanceof HTMLElement)) return;
-      if (event.target.closest(".si-news-bookmarks-popover") || event.target.closest("button")?.textContent?.startsWith("SAVED")) return;
+      if (!(event.target instanceof Element)) return;
+      if (event.target.closest("[data-news-saved-surface], [data-news-saved-toggle]")) return;
       setBookmarkPanelOpen(false);
     };
     const onEscape = (event: KeyboardEvent) => {
@@ -1887,12 +1884,13 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
   useEffect(() => {
     if (dashboardView !== "news") return;
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
       if (event.key === "Escape" && searchResultsOpen) {
         event.preventDefault();
         setSearchResultsOpen(false);
         return;
       }
-      if (isTypingTarget(event.target)) return;
+      if (isInteractiveTarget(event.target)) return;
       if (event.key === "/") {
         event.preventDefault();
         searchInputRef.current?.focus();
@@ -2181,35 +2179,13 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
               {topbarExpanded ? "LESS FILTERS" : "MORE FILTERS"}
             </button>
             <button type="button" onClick={() => setShowBriefing(true)}>DAILY BRIEFING</button>
-            <button type="button" onClick={() => setBookmarkPanelOpen((p) => !p)}>
+            <button type="button" data-news-saved-toggle={true} aria-expanded={bookmarkPanelOpen} onClick={() => setBookmarkPanelOpen((p) => !p)}>
               SAVED {bookmarkedIds.size > 0 ? `(${bookmarkedIds.size})` : ""}
             </button>
           </div>
           {bookmarkPanelOpen ? (
-            <div className="si-news-phone-saved-list">
-              {bookmarkedIds.size === 0 ? (
-                <div className="si-news-empty">No saved articles</div>
-              ) : (
-                Array.from(bookmarkedIds).map((id) => {
-                  const item = feedItems.find((f) => f.id === id);
-                  return (
-                    <div key={id} className="si-news-bookmark-row">
-                      <span
-                        className="si-news-bookmark-title"
-                        onClick={() => {
-                          if (item) {
-                            setStoryPopupArticle(item);
-                            setBookmarkPanelOpen(false);
-                          }
-                        }}
-                      >
-                        {item?.headline ?? id.slice(0, 30)}
-                      </span>
-                      <button type="button" onClick={() => toggleBookmark(id)} title="Remove">x</button>
-                    </div>
-                  );
-                })
-              )}
+            <div className="si-news-phone-saved-list" data-news-saved-surface={true}>
+              <NewsSavedArticlesList entries={savedArticles} onOpen={openSavedArticle} onRemove={removeBookmark} warning={readingListWarning} />
             </div>
           ) : null}
           {topbarExpanded ? (
@@ -2298,26 +2274,12 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
         <div className="si-toolbar-actions">
           <button type="button" onClick={() => setShowBriefing(true)}>DAILY BRIEFING</button>
           <div className="si-news-toolbar-panels">
-            <button type="button" onClick={() => setBookmarkPanelOpen((p) => !p)}>
+            <button type="button" data-news-saved-toggle={true} aria-expanded={bookmarkPanelOpen} onClick={() => setBookmarkPanelOpen((p) => !p)}>
               SAVED {bookmarkedIds.size > 0 ? `(${bookmarkedIds.size})` : ""}
             </button>
             {bookmarkPanelOpen ? (
-              <div className="si-news-panel-popover si-news-bookmarks-popover">
-                {bookmarkedIds.size === 0 ? (
-                  <div style={{ padding: 6, color: "var(--si-text-muted)", fontSize: 10 }}>No saved articles</div>
-                ) : (
-                  Array.from(bookmarkedIds).map((id) => {
-                    const item = feedItems.find((f) => f.id === id);
-                    return (
-                      <div key={id} className="si-news-bookmark-row">
-                        <span className="si-news-bookmark-title" onClick={() => { if (item) { setStoryPopupArticle(item); setBookmarkPanelOpen(false); } }}>
-                          {item?.headline ?? id.slice(0, 30)}
-                        </span>
-                        <button type="button" onClick={() => toggleBookmark(id)} title="Remove">x</button>
-                      </div>
-                    );
-                  })
-                )}
+              <div className="si-news-panel-popover si-news-bookmarks-popover" data-news-saved-surface={true}>
+                <NewsSavedArticlesList entries={savedArticles} onOpen={openSavedArticle} onRemove={removeBookmark} warning={readingListWarning} />
               </div>
             ) : null}
           </div>
@@ -2627,6 +2589,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
         </>
       ) : null}
 
+      {readingListWarning && !bookmarkPanelOpen ? <div className="si-news-reading-list-warning" role="status">{readingListWarning}</div> : null}
       <div className="si-news-grid-area">
         <NewsDraggableGrid
           panels={panelNodes.filter((panel) => news.panelVisibility[panel.id] !== false)}
@@ -2642,6 +2605,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           onClose={() => setStoryPopupArticle(null)}
           isBookmarked={bookmarkedIds.has(news.storyPopupArticle.id)}
           onToggleBookmark={toggleBookmark}
+          readingListWarning={readingListWarning}
         />
       ) : null}
 
@@ -2656,7 +2620,7 @@ export default function NewsWorkspace({ embedded = false }: { embedded?: boolean
           <button type="button" onClick={() => { useSIGINTStore.getState().muteNewsSource(contextItem.source, true); setContextItem(null); }}>
             Mute Source
           </button>
-          <button type="button" onClick={() => { toggleBookmark(contextItem.id); setContextItem(null); }}>
+          <button type="button" onClick={() => { toggleBookmark(contextItem); setContextItem(null); }}>
             {bookmarkedIds.has(contextItem.id) ? "Remove Bookmark" : "Bookmark"}
           </button>
           <button type="button" onClick={() => setContextItem(null)}>Close</button>
