@@ -63,7 +63,7 @@ export default function CategoryFeedPanel({ config, liveCutoffMs }: Props) {
   const [loading, setLoading] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
   const abortRef = useRef<AbortController | null>(null);
-  const hasFetchedRef = useRef(false);
+  const [hasFetched, setHasFetched] = useState(false);
   const [mainFeedSettled, setMainFeedSettled] = useState(false);
 
   useEffect(() => {
@@ -113,7 +113,8 @@ export default function CategoryFeedPanel({ config, liveCutoffMs }: Props) {
       return;
     }
 
-    if (abortRef.current) abortRef.current.abort();
+    // A poll must not cancel a search that is still within its timeout.
+    if (abortRef.current) return;
     const controller = new AbortController();
     abortRef.current = controller;
 
@@ -140,26 +141,28 @@ export default function CategoryFeedPanel({ config, liveCutoffMs }: Props) {
     } catch (err) {
       if (isAbortError(err)) return;
     } finally {
+      if (abortRef.current === controller) abortRef.current = null;
       if (!controller.signal.aborted) setLoading(false);
     }
   }, [config.category, config.categories, config.dedicatedFeeds, config.apiEndpoint, config.refreshMs]);
 
   useEffect(() => {
-    if (!needsDedicatedFetch || hasFetchedRef.current) return;
+    if (!needsDedicatedFetch || hasFetched) return;
     const stagger = getStaggerOffset(config.id);
     const timer = setTimeout(() => {
-      hasFetchedRef.current = true;
+      setHasFetched(true);
       void fetchDedicated();
     }, stagger);
     return () => clearTimeout(timer);
-  }, [needsDedicatedFetch, config.id, fetchDedicated]);
+  }, [needsDedicatedFetch, hasFetched, config.id, fetchDedicated]);
 
   useEffect(() => {
     if (!config.dedicatedFeeds?.length && !config.apiEndpoint) return;
-    if (dedicatedItems.length === 0) return;
+    // Keep retrying after the first attempt, including errors and empty responses.
+    if (!hasFetched) return;
     const interval = setInterval(fetchDedicated, config.refreshMs ?? 12_000);
     return () => clearInterval(interval);
-  }, [config.dedicatedFeeds, config.apiEndpoint, config.refreshMs, dedicatedItems.length, fetchDedicated]);
+  }, [config.dedicatedFeeds, config.apiEndpoint, config.refreshMs, hasFetched, fetchDedicated]);
 
   useEffect(() => {
     return () => { abortRef.current?.abort(); };
