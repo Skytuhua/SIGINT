@@ -1,60 +1,41 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cachedFetch, fetchJsonOrThrow, UpstreamHttpError, type UpstreamPolicy } from "../upstream";
+
+vi.mock("undici", () => ({ Agent: class {}, setGlobalDispatcher: vi.fn() }));
+import { cachedFetch, fetchJsonOrThrow, UpstreamHttpError } from "../upstream";
 
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
 
-const policy: UpstreamPolicy = {
-  key: "error-redaction-test",
-  ttlMs: 1_000,
-  timeoutMs: 1_000,
-  maxRetries: 0,
-  backoffBaseMs: 0,
-  circuitFailureThreshold: 10,
-  circuitOpenMs: 1_000,
-};
-
-describe("fetchJsonOrThrow HTTP error redaction", () => {
-  it.each([
-    ["https://www.googleapis.com/youtube/v3/search?key=test-only-secret&part=id", "https://www.googleapis.com/youtube/v3/search"],
-    ["https://test-user:test-password@provider.example:8443/api?token=test-only-token#test-fragment", "https://provider.example:8443/api"],
-    ["https://provider.example/api", "https://provider.example/api"],
-  ])("reports only the endpoint and status for %s", async (url, endpoint) => {
-    const fetchMock = vi.fn().mockResolvedValue(new Response("denied", { status: 403 }));
+describe("upstream HTTP diagnostics", () => {
+  it("keeps request URLs out of HTTP errors, logs and degraded results", async () => {
+    const url = "https://user:dummy-password@provider.example/private-path?apiKey=dummy-key#private-fragment";
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 401 }));
     vi.stubGlobal("fetch", fetchMock);
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const request = () => fetchJsonOrThrow(url, {}, 1000);
 
-    const error = await fetchJsonOrThrow(url, {}, 1_000).catch((err: unknown) => err);
-    expect(error).toBeInstanceOf(UpstreamHttpError);
-    expect(error).toMatchObject({ status: 403, message: `${endpoint} returned 403` });
+    await expect(request()).rejects.toMatchObject({
+      name: "UpstreamHttpError", status: 401, message: "Upstream returned HTTP 401",
+    });
+    const result = await cachedFetch({
+      cacheKey: "http-error-test",
+      policy: {
+        key: "http-error-test", ttlMs: 1000, timeoutMs: 1000, maxRetries: 0,
+        backoffBaseMs: 1, circuitFailureThreshold: 3, circuitOpenMs: 1000,
+      },
+      fallbackValue: [], request,
+    });
+    expect(result).toMatchObject({ degraded: true, error: "Upstream returned HTTP 401" });
+    expect(log).toHaveBeenCalledWith("[upstream:http-error-test] attempt 1 failed:", "Upstream returned HTTP 401");
     expect(fetchMock).toHaveBeenCalledWith(url, { cache: "no-store" });
   });
 
-  it("keeps the cached fallback error and server log free of URL secrets", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("denied", { status: 403 })));
-    const log = vi.spyOn(console, "error").mockImplementation(() => {});
-    const result = await cachedFetch({
-      policy,
-      cacheKey: "fallback",
-      request: () => fetchJsonOrThrow("https://provider.example/api?key=test-only-secret#test-fragment", {}, 1_000),
-      fallbackValue: { items: [] },
-    });
-    expect(result).toMatchObject({
-      data: { items: [] },
-      degraded: true,
-      cacheHit: "miss",
-      error: "https://provider.example/api returned 403",
-    });
-    expect(log).toHaveBeenCalledWith(
-      "[upstream:error-redaction-test] attempt 1 failed:",
-      "https://provider.example/api returned 403",
-    );
-  });
-
-  it("returns successful JSON unchanged", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ items: [{ id: "video" }] })));
-    await expect(fetchJsonOrThrow("https://provider.example/api?key=test-only-secret", {}, 1_000))
-      .resolves.toEqual({ items: [{ id: "video" }] });
+  it("preserves the typed HTTP status and successful JSON responses", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(new Response(null, { status: 503 }))
+      .mockResolvedValueOnce(Response.json({ ok: true })));
+    await expect(fetchJsonOrThrow("https://provider.example", {}, 1000)).rejects.toBeInstanceOf(UpstreamHttpError);
+    await expect(fetchJsonOrThrow("https://provider.example", {}, 1000)).resolves.toEqual({ ok: true });
   });
 });

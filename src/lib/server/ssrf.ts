@@ -31,19 +31,16 @@ function isIpV4Private(address: string): boolean {
 }
 
 function isIpV6Private(address: string): boolean {
-  const normalized = address.toLowerCase();
-  if (normalized === "::1" || normalized === "0:0:0:0:0:0:0:1") return true;
-  if (normalized === "::") return true;
-  if (normalized.startsWith("fc") || normalized.startsWith("fd")) return true;
-  if (
-    normalized.startsWith("fe8") ||
-    normalized.startsWith("fe9") ||
-    normalized.startsWith("fea") ||
-    normalized.startsWith("feb")
-  ) {
-    return true;
+  // net.isIP has validated the literal. Canonicalize equivalent compressed,
+  // expanded and dotted IPv4 forms before comparing address ranges.
+  const normalized = new URL(`http://[${address.split("%", 1)[0]}]/`).hostname.slice(1, -1);
+  if (normalized === "::1" || normalized === "::") return true;
+  if (normalized.startsWith("::ffff:")) {
+    const [high, low] = normalized.slice(7).split(":").map((part) => Number.parseInt(part, 16));
+    return isIpV4Private([high >> 8, high & 255, low >> 8, low & 255].join("."));
   }
-  return false;
+  const first = Number.parseInt(normalized.split(":", 1)[0], 16);
+  return (first & 0xfe00) === 0xfc00 || (first & 0xffc0) === 0xfe80;
 }
 
 export function isPrivateIp(address: string): boolean {
@@ -58,7 +55,9 @@ export function isPrivateIp(address: string): boolean {
  * Rejects localhost, private IPs, and hostnames that resolve to private IPs.
  */
 export async function isBlockedHost(hostname: string): Promise<boolean> {
-  const lower = hostname.toLowerCase().replace(/\.$/, "");
+  // WHATWG URL.hostname retains brackets around IPv6 literals; DNS and
+  // net.isIP expect the address without them.
+  const lower = hostname.toLowerCase().replace(/^\[|\]$/g, "").replace(/\.$/, "");
   if (LOCAL_HOSTS.has(lower) || lower.endsWith(".localhost")) return true;
   if (isPrivateIp(lower)) return true;
 
