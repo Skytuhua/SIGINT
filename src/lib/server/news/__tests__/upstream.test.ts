@@ -29,7 +29,7 @@ describe("upstream HTTP diagnostics", () => {
     });
     expect(result).toMatchObject({ degraded: true, error: "Upstream returned HTTP 401" });
     expect(log).toHaveBeenCalledWith("[upstream:http-error-test] attempt 1 failed:", "Upstream returned HTTP 401");
-    expect(fetchMock).toHaveBeenCalledWith(url, { cache: "no-store" });
+    expect(fetchMock).toHaveBeenCalledWith(url, { cache: "no-store", signal: expect.any(AbortSignal) });
   });
 
   it("preserves the typed HTTP status and successful JSON responses", async () => {

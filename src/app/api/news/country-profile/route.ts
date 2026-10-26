@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { toGdeltCountryCode } from "../../../../lib/news/countryCode";
 import { STRICT_LIMITER } from "../../../../lib/server/rateLimitPresets";
 import { withRateLimit } from "../../../../lib/server/withRateLimit";
 import { computeAcledInstabilityScore, getAcledCountryEvents } from "../../../../lib/server/news/providers/acled";
@@ -29,7 +30,7 @@ async function handler(request: Request) {
   const { searchParams } = new URL(request.url);
   const countryCode = searchParams.get("country")?.toUpperCase();
 
-  if (!countryCode || countryCode.length !== 2) {
+  if (!countryCode || countryCode.length !== 2 || !toGdeltCountryCode(countryCode)) {
     return NextResponse.json({ error: "Missing or invalid country ISO2 code" }, { status: 400 });
   }
 

@@ -1,4 +1,5 @@
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, rename, unlink } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 import type { LayerFeatureCollection, LayerHealthState } from "../../../newsLayers/types";
 import type {
@@ -17,6 +18,7 @@ const CACHE_TTL_MS = 24 * 60 * 60_000;
 
 let cachedResult: SanctionsDataResult | null = null;
 let cachedAt = 0;
+let refreshInFlight: Promise<SanctionsDataResult> | null = null;
 
 function entitiesToFeatureCollection(
   entities: SanctionsEntity[]
@@ -95,17 +97,22 @@ async function loadSnapshotFallback(): Promise<SanctionsDataResult | null> {
 }
 
 async function persistSnapshot(entities: SanctionsEntity[]): Promise<void> {
+  let temporaryFile: string | null = null;
   try {
     const dir = path.join(process.cwd(), "public", "data", "news-layers");
     await mkdir(dir, { recursive: true });
     const file = path.join(dir, "sanctions-entities.json");
+    temporaryFile = `${file}.${randomUUID()}.tmp`;
     await writeFile(
-      file,
+      temporaryFile,
       JSON.stringify({ entities: entities.slice(0, 50_000), ts: Date.now() }),
       "utf8"
     );
+    await rename(temporaryFile, file);
   } catch {
     // non-critical
+  } finally {
+    if (temporaryFile) await unlink(temporaryFile).catch(() => {});
   }
 }
 
@@ -114,7 +121,12 @@ export async function getSanctionsData(): Promise<SanctionsDataResult> {
   if (cachedResult && now - cachedAt < CACHE_TTL_MS) {
     return cachedResult;
   }
+  if (refreshInFlight) return refreshInFlight;
+  refreshInFlight = refreshSanctionsData(now).finally(() => { refreshInFlight = null; });
+  return refreshInFlight;
+}
 
+async function refreshSanctionsData(now: number): Promise<SanctionsDataResult> {
   const sourceStatus: SanctionsSourceStatusMap = {};
   const allEntities: SanctionsEntity[] = [];
 
@@ -163,12 +175,11 @@ export async function getSanctionsData(): Promise<SanctionsDataResult> {
       collection: { type: "FeatureCollection", features: [] },
       sourceStatus,
     };
-    cachedResult = empty;
-    cachedAt = now;
+    // An outage without a snapshot must be retried rather than cached for a day.
     return empty;
   }
 
-  persistSnapshot(allEntities).catch(() => {});
+  await persistSnapshot(allEntities);
 
   const result: SanctionsDataResult = {
     entities: allEntities,

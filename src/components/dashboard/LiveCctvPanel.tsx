@@ -164,8 +164,9 @@ export default function LiveCctvPanel({
 
   const advanceCycle = useCallback(() => {
     if (filteredCameras.length === 0) return;
-    setCycleIndex((prev) => (prev + DISPLAY_COUNT) % Math.max(1, filteredCameras.length));
-  }, [filteredCameras.length]);
+    const step = effectiveViewMode === "single" ? 1 : DISPLAY_COUNT;
+    setCycleIndex((prev) => (prev + step) % filteredCameras.length);
+  }, [filteredCameras.length, effectiveViewMode]);
 
   const handleNextSet = useCallback(() => {
     advanceCycle();

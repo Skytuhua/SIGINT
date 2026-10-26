@@ -62,7 +62,7 @@ interface ColumnMetaLike<TData> {
   align?: "left" | "right";
   heatAccessor?: (row: TData) => number;
   heatRange?: [number, number];
-  deltaAccessor?: (row: TData) => number;
+  deltaAccessor?: (row: TData) => number | null;
   sparkAccessor?: (row: TData) => number[];
 }
 
@@ -95,7 +95,7 @@ function dataCellStyle<TData>(meta: ColumnMetaLike<TData> | undefined, row: TDat
   };
 }
 
-function deltaLabel(delta: number | undefined): string | null {
+function deltaLabel(delta: number | null | undefined): string | null {
   if (delta == null || !Number.isFinite(delta)) return null;
   if (delta > 0) return `UP ${delta.toFixed(1)}`;
   if (delta < 0) return `DN ${Math.abs(delta).toFixed(1)}`;
@@ -175,6 +175,14 @@ export default function DataTable<TData extends RowData>({
   const table = useReactTable({
     data,
     columns,
+    // Every column uses a text input, including numeric accessors. Do not let
+    // TanStack infer a numeric range filter for a single text value.
+    defaultColumn: {
+      filterFn: (row, columnId, value) =>
+        String(row.getValue(columnId) ?? "")
+          .toLowerCase()
+          .includes(String(value ?? "").trim().toLowerCase()),
+    },
     state: {
       sorting,
       columnFilters,

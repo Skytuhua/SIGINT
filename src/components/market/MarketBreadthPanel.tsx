@@ -55,6 +55,8 @@ export default function MarketBreadthPanel({ style }: Props) {
   // If RSP is outperforming SPY, breadth is positive (broad participation)
   const rspChg = rspQ?.changePercent ?? 0;
   const spyChg = spyQ?.changePercent ?? 0;
+  const hasBreadth = Number.isFinite(rspQ?.changePercent) && Number.isFinite(spyQ?.changePercent);
+  const hasVix = Number.isFinite(vixQ?.price) && vixQ.price > 0;
   const breadthSpread = rspChg - spyChg;
 
   const advDecRatio = breadthSpread > 0.1 ? 1.8 : breadthSpread > -0.1 ? 1.2 : 0.8;
@@ -72,10 +74,11 @@ export default function MarketBreadthPanel({ style }: Props) {
         <span className="si-market-panel-title">Market Breadth</span>
         <span style={{ fontSize: 9, color: "var(--si-text-muted)" }}>NYSE · NASDAQ</span>
         <span className={`si-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
-          {isLive ? "PROXY" : "STATIC"}
+          {hasBreadth ? isLive ? "MODEL" : "STALE MODEL" : "UNAVAILABLE"}
         </span>
       </div>
       <div className="si-market-panel-body" style={{ padding: "8px 10px" }}>
+        <div style={{ fontSize: 9, color: "var(--si-text-muted)", marginBottom: 6 }}>SIMULATED reference counts · as-of unknown</div>
         {/* A/D table (static) */}
         <div style={{ marginBottom: 10 }}>
           <div className="si-breadth-table-head">
@@ -91,26 +94,27 @@ export default function MarketBreadthPanel({ style }: Props) {
         </div>
 
         {/* Gauges (derived from proxy data) */}
-        <div style={{ borderTop: "1px solid var(--si-line)", paddingTop: 8 }}>
+        {!hasBreadth && <div>Insufficient quote coverage · RSP and SPY required</div>}
+        {hasBreadth && <div style={{ borderTop: "1px solid var(--si-line)", paddingTop: 8 }}>
           <Gauge label={<><Term id="AD_RATIO">Adv/Dec Ratio</Term> (proxy)</>}  value={advDecRatio}  low={0.3}  high={3}    color={adColor} />
           <Gauge label={<><Term id="200MA">% Above 200-MA</Term> (est)</>}   value={pctAbove200}  low={20}   high={80}   color={pctAbove200 > 60 ? "#36b37e" : "#ff5a5f"} suffix="%" />
-          <Gauge label={<><Term id="PUT_CALL">Put/Call Ratio</Term> (est)</>}   value={putCallRatio} low={0.4}  high={1.4}  color={putCallRatio < 0.8 ? "#ffab40" : "#36b37e"} />
+          {hasVix ? <Gauge label={<><Term id="PUT_CALL">Put/Call Ratio</Term> (model)</>} value={putCallRatio} low={0.4} high={1.4} color={putCallRatio < 0.8 ? "#ffab40" : "#36b37e"} /> : <div>Put/Call model unavailable · VIX required</div>}
           <Gauge label={<><Term id="MCCLELLAN">McClellan Osc</Term> (est)</>}    value={mclellan}     low={-100} high={100}  color={mclellan > 0 ? "#36b37e" : "#ff5a5f"} />
           <Gauge label={<><Term id="TRIN">TRIN Arms</Term> (est)</>}        value={trin}         low={0.3}  high={2.5}  color={trin < 1 ? "#36b37e" : "#ff5a5f"} />
-        </div>
+        </div>}
 
         {/* Regime pill */}
-        <div style={{ marginTop: 8, display: "flex", gap: 6 }}>
+        {hasBreadth && <div style={{ marginTop: 8, display: "flex", gap: 6 }}>
           <div className={`si-breadth-regime-pill ${isBullish ? "is-bullish" : "is-bearish"}`}>
             {isBullish ? "BULLISH BREADTH" : "BEARISH BREADTH"}
           </div>
           <div style={{ fontSize: 9, color: "var(--si-text-muted)", alignSelf: "center" }}>
             A/D: {advDecRatio.toFixed(2)}x · TRIN: {trin.toFixed(2)}
           </div>
-        </div>
+        </div>}
       </div>
       <div className="si-market-panel-footer">
-        {isLive ? "RSP/SPY proxy · 5min refresh" : "Static approximation"}
+        {hasBreadth ? "RSP/SPY illustrative model · 5min refresh" : "Missing quote inputs"}
       </div>
     </div>
   );

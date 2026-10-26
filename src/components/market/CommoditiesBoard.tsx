@@ -119,12 +119,14 @@ export default function CommoditiesBoard({ style }: Props) {
                 const chgClass = chg > 0 ? "is-up" : chg < 0 ? "is-down" : "is-flat";
                 const sign = chg > 0 ? "+" : "";
 
-                let priceStr: string;
-                if (price >= 100) {
-                  priceStr = `$${price.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
-                } else {
-                  priceStr = `$${price.toFixed(price < 10 ? 3 : 2)}`;
-                }
+                const fmtP = (v: number) => {
+                  if (!Number.isFinite(v) || v <= 0) return "—";
+                  const number = v >= 100
+                    ? v.toLocaleString("en-US", { maximumFractionDigits: 2 })
+                    : v.toFixed(v < 10 ? 3 : 2);
+                  return item.unit.startsWith("¢") ? `${number}¢` : `$${number}`;
+                };
+                const priceStr = fmtP(price);
 
                 const dayLow = q?.dayLow ?? 0;
                 const dayHigh = q?.dayHigh ?? 0;
@@ -133,11 +135,7 @@ export default function CommoditiesBoard({ style }: Props) {
                 const w52Range = w52High - w52Low;
                 const w52Pct = w52Range > 0 ? ((price - w52Low) / w52Range) * 100 : 50;
 
-                const fmtP = (v: number) => {
-                  if (!v) return "—";
-                  if (v >= 100) return `$${v.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
-                  return `$${v.toFixed(v < 10 ? 2 : 2)}`;
-                };
+
 
                 return (
                   <div key={item.sym} className="si-market-commod-card">

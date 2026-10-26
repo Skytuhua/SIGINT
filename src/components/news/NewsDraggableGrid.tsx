@@ -249,13 +249,12 @@ export default function NewsDraggableGrid({ panels, emptyCategoryPanelIds = [] }
     const hiddenEmptyIds = new Set(emptyCategoryPanelIds);
     const panelById = new Map(panels.map((panel) => [panel.id, panel] as const));
     const mobilePanels = mobilePanelOrder
-      .filter((panelId) => !hiddenEmptyIds.has(panelId))
       .map((panelId) => panelById.get(panelId))
       .filter((panel): panel is GridPanel => Boolean(panel));
     return (
       <div className="si-mobile-dashboard-stack">
         {mobilePanels.map((panel) => (
-          <div key={panel.id} className="si-mobile-dashboard-panel">
+          <div key={panel.id} className="si-mobile-dashboard-panel" hidden={hiddenEmptyIds.has(panel.id)}>
             {panel.node}
           </div>
         ))}

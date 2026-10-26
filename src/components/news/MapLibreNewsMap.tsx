@@ -1,5 +1,7 @@
 "use client";
 
+import { readBrowserPreference, writeBrowserPreference } from "../../lib/browserStorage";
+
 // Pre-warm the maplibre-gl module so the dynamic import inside useEffect resolves
 // from cache rather than incurring the full network + parse cost at mount time.
 if (typeof window !== "undefined") {
@@ -466,6 +468,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const runtimeRef = useRef<NewsLayerRuntime | null>(null);
   const mountedLayersRef = useRef<Set<string>>(new Set());
+  const layerSyncGenerationRef = useRef(new Map<string, number>());
   const layerDataRef = useRef<Map<string, LayerFeatureCollection>>(new Map());
   const mapReadyRef = useRef(false);
   const mapDestroyedRef = useRef(false);
@@ -733,7 +736,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem("wv:intel-hotspots:timeWindow");
+    const stored = readBrowserPreference("wv:intel-hotspots:timeWindow");
     const value: HotspotTimeWindow = stored === "6h" || stored === "7d" ? stored : "24h";
     setIntelTimeWindow(value);
   }, []);
@@ -741,13 +744,13 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      const tw = window.localStorage.getItem("wv:conflict-zones:timeWindow");
+      const tw = readBrowserPreference("wv:conflict-zones:timeWindow");
       if (tw === "6h" || tw === "24h" || tw === "7d" || tw === "30d" || tw === "90d") {
         setConflictTimeWindow(tw);
       }
-      const mode = window.localStorage.getItem("wv:conflict-zones:mode");
+      const mode = readBrowserPreference("wv:conflict-zones:mode");
       if (mode === "broad") setConflictMode("broad");
-      const verified = window.localStorage.getItem("wv:conflict-zones:verifiedOverlay");
+      const verified = readBrowserPreference("wv:conflict-zones:verifiedOverlay");
       setConflictVerifiedOverlay(verified === "1" || verified === "true");
     } catch { /* ignore */ }
   }, []);
@@ -874,13 +877,23 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
       const map = mapRef.current as unknown as Parameters<typeof maplibreRenderer.mount>[1] | null;
       const runtime = runtimeRef.current;
       if (!layer || !map || !runtime) return;
+      enabled = enabled && (useSIGINTStore.getState().news.layerToggles[layerId] ?? layer.defaultEnabled);
+      let generation = layerSyncGenerationRef.current.get(layerId) ?? 0;
+      if (!enabled || !mountedLayersRef.current.has(layerId)) {
+        generation += 1;
+        layerSyncGenerationRef.current.set(layerId, generation);
+      }
 
       if (enabled) {
         if (!mountedLayersRef.current.has(layerId)) {
           maplibreRenderer.mount(layer, map);
           mountedLayersRef.current.add(layerId);
-          await runtime.primeFromCache(layerId);
-        runtime.enable(layerId);
+          const current = await runtime.primeFromCache(layerId);
+          if (!current || layerSyncGenerationRef.current.get(layerId) !== generation ||
+              runtimeRef.current !== runtime || mapRef.current !== map ||
+              !mountedLayersRef.current.has(layerId) ||
+              !(useSIGINTStore.getState().news.layerToggles[layerId] ?? layer.defaultEnabled)) return;
+          runtime.enable(layerId);
         }
         const cachedData = layerDataRef.current.get(layerId);
         if (cachedData) maplibreRenderer.updateData(layer, map, cachedData);
@@ -2147,9 +2160,9 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
             let mode: "strict" | "broad" = "strict";
             let verifiedOverlay = false;
             try {
-              const m = window.localStorage.getItem("wv:conflict-zones:mode");
+              const m = readBrowserPreference("wv:conflict-zones:mode");
               if (m === "broad") mode = "broad";
-              const v = window.localStorage.getItem("wv:conflict-zones:verifiedOverlay");
+              const v = readBrowserPreference("wv:conflict-zones:verifiedOverlay");
               verifiedOverlay = v === "1" || v === "true";
             } catch { /* ignore */ }
 
@@ -2388,12 +2401,14 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
           await Promise.all(
             priorityLayers.map((layer) => syncLayerMountedState(layer.id, true))
           );
+          if (cancelled || mapRef.current !== m) return;
 
           // Stagger user-toggled layers: yield to the renderer between each mount
           // so that priority layer paints and the country borders aren't starved.
           for (const layer of userToggledLayers) {
             if (cancelled) break;
             await new Promise<void>((r) => requestAnimationFrame(() => r()));
+            if (cancelled || mapRef.current !== m) return;
             await syncLayerMountedState(layer.id, true);
           }
 
@@ -2769,7 +2784,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                             if (next !== "6h" && next !== "24h" && next !== "7d") return;
                             setIntelTimeWindow(next);
                             try {
-                              window.localStorage.setItem("wv:intel-hotspots:timeWindow", next);
+                              writeBrowserPreference("wv:intel-hotspots:timeWindow", next);
                             } catch {
                               // no-op
                             }
@@ -2792,7 +2807,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                               if (next !== "6h" && next !== "24h" && next !== "7d" && next !== "30d" && next !== "90d") return;
                               setConflictTimeWindow(next);
                               try {
-                                window.localStorage.setItem("wv:conflict-zones:timeWindow", next);
+                                writeBrowserPreference("wv:conflict-zones:timeWindow", next);
                               } catch { /* no-op */ }
                               runtimeRef.current?.refresh("conflict-zones");
                             }}
@@ -2811,7 +2826,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
                               const next = conflictMode === "strict" ? "broad" : "strict";
                               setConflictMode(next);
                               try {
-                                window.localStorage.setItem("wv:conflict-zones:mode", next);
+                                writeBrowserPreference("wv:conflict-zones:mode", next);
                               } catch { /* no-op */ }
                               runtimeRef.current?.refresh("conflict-zones");
                             }}
@@ -3234,7 +3249,7 @@ export default function MapLibreNewsMap({ onReady, onFatalError }: MapLibreNewsM
               onTimeWindowChange={(next) => {
                 setIntelTimeWindow(next);
                 try {
-                  window.localStorage.setItem("wv:intel-hotspots:timeWindow", next);
+                  writeBrowserPreference("wv:intel-hotspots:timeWindow", next);
                 } catch {
                   // no-op
                 }

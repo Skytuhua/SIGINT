@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useIsMobile } from "../../hooks/useIsMobile";
+import { useMarketData } from "../../hooks/useMarketData";
+import type { QuotesResponse } from "../../lib/server/news/providers/marketTypes";
 import FundamentalsPanel from "./FundamentalsPanel";
 import OptionsChainPanel from "./OptionsChainPanel";
 import OrderTicketPanel from "./OrderTicketPanel";
 import { getFundamentals } from "./shared/staticFundamentals";
 import TradingViewWidget from "./shared/TradingViewWidget";
+import type { MarketAssetContext } from "./shared/assetIdentity";
 
-// Reference spot prices (used as base for options + order ticket)
+// Undated reference prices retained only for the explicitly simulated options model.
 export const TICKER_PRICES: Record<string, number> = {
   // Equities
   AAPL: 182.44, MSFT: 378.91, NVDA: 721.28, GOOGL: 140.52, META: 502.33,
@@ -23,8 +26,6 @@ export const TICKER_PRICES: Record<string, number> = {
   KO: 61.44, PEP: 172.33, MCD: 298.14, SBUX: 92.56, NKE: 92.17,
   // Indices / ETFs
   SPY: 482.50, QQQ: 408.22, DIA: 385.44, IWM: 196.78, GLD: 188.14,
-  // Crypto
-  BTC: 67420.0, ETH: 3521.0,
   // Commodities (per unit)
   GC: 2328.0, WTI: 79.42, NG: 2.18,
 };
@@ -32,11 +33,13 @@ export const TICKER_PRICES: Record<string, number> = {
 /** Map internal symbols to TradingView symbols */
 const TV_SYMBOL_MAP: Record<string, string> = {
   SPY: "AMEX:SPY", QQQ: "NASDAQ:QQQ", DIA: "AMEX:DIA", IWM: "AMEX:IWM",
-  GLD: "AMEX:GLD", BTC: "BITSTAMP:BTCUSD", ETH: "BITSTAMP:ETHUSD",
+  GLD: "AMEX:GLD",
   GC: "COMEX:GC1!", WTI: "NYMEX:CL1!", NG: "NYMEX:NG1!",
   VIX: "TVC:VIX", DXY: "TVC:DXY", TNX: "TVC:US10Y",
   ES: "CME_MINI:ES1!", NQ: "CME_MINI:NQ1!", RTY: "CME_MINI:RTY1!",
-  "2Y": "TVC:US02Y", "5Y": "TVC:US05Y", "10Y": "TVC:US10Y", "30Y": "TVC:US30Y",
+  // US03MY is the 3-month yield: everget/tradingview-pinescript-indicators
+  // 8385cc421888bbf31f36407195796bc0eabafb19/statistics/us_treasury_yields.pine ("3M, %").
+  "3M": "TVC:US03MY", "2Y": "TVC:US02Y", "5Y": "TVC:US05Y", "10Y": "TVC:US10Y", "30Y": "TVC:US30Y",
   EUR: "FX:EURUSD", USD: "FX:USDJPY", GBP: "FX:GBPUSD",
   XAU: "COMEX:GC1!", XAG: "COMEX:SI1!", HG: "COMEX:HG1!",
   BRT: "NYMEX:BB1!", SI: "COMEX:SI1!", PL: "NYMEX:PL1!",
@@ -52,6 +55,21 @@ const TV_SYMBOL_MAP: Record<string, string> = {
   EFA: "AMEX:EFA", VTI: "AMEX:VTI", VOO: "AMEX:VOO", AGG: "AMEX:AGG",
 };
 
+/** Internal display aliases must not be sent as similarly named Yahoo equities. */
+const QUOTE_SYMBOL_MAP: Record<string, string> = {
+  BRK: "BRK-B", ES: "ES=F", NQ: "NQ=F", RTY: "RTY=F", DAX: "^GDAXI", N225: "^N225",
+  VIX: "^VIX", DXY: "DX-Y.NYB", TNX: "^TNX", "3M": "^IRX", "5Y": "^FVX", "10Y": "^TNX", "30Y": "^TYX",
+  EUR: "EURUSD=X", USD: "JPY=X", GBP: "GBPUSD=X",
+  XAU: "GC=F", XAG: "SI=F", GC: "GC=F", WTI: "CL=F", NG: "NG=F", HG: "HG=F",
+  BRT: "BZ=F", SI: "SI=F", PL: "PL=F", ZC: "ZC=F", ZW: "ZW=F", ZS: "ZS=F", KC: "KC=F", RB: "RB=F",
+};
+interface SpotResponse extends Partial<QuotesResponse> {
+  markets?: { id: string; symbol: string; currentPrice: number }[];
+}
+const EMPTY_QUOTES: SpotResponse = { quotes: {}, markets: [], degraded: true, timestamp: "" };
+const CRYPTO_CHARTS: Record<string, string> = { bitcoin: "BITSTAMP:BTCUSD", ethereum: "BITSTAMP:ETHUSD" };
+const CRYPTO_REFERENCE_PRICES: Record<string, number> = { bitcoin: 67420, ethereum: 3521 };
+
 function getTvSymbol(sym: string): string {
   if (TV_SYMBOL_MAP[sym]) return TV_SYMBOL_MAP[sym];
   // Let TradingView resolve the exchange automatically
@@ -63,10 +81,11 @@ const OVERLAY_TABS: OverlayTab[] = ["CHART", "FUNDAMENTALS", "OPTIONS", "ORDER"]
 
 interface Props {
   sym: string;
+  assetContext?: MarketAssetContext;
   onClose: () => void;
 }
 
-export default function TickerDetailOverlay({ sym, onClose }: Props) {
+export default function TickerDetailOverlay({ sym, assetContext, onClose }: Props) {
   const isMobile = useIsMobile();
   const [tab, setTab] = useState<OverlayTab>("CHART");
 
@@ -79,11 +98,25 @@ export default function TickerDetailOverlay({ sym, onClose }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const basePrice = TICKER_PRICES[sym] ?? 100;
-  const fund = getFundamentals(sym);
-  const displayName = fund?.name ?? sym;
+  const isCrypto = assetContext?.kind === "crypto";
+  const quoteSymbol = QUOTE_SYMBOL_MAP[sym] ?? sym;
+  const { data, isLive } = useMarketData<SpotResponse>(
+    isCrypto ? "/api/news/coingecko?mode=markets&limit=15" : `/api/market/quotes?symbols=${encodeURIComponent(quoteSymbol)}`,
+    isCrypto ? 120_000 : 60_000, EMPTY_QUOTES,
+  );
+  const cryptoQuote = isCrypto ? data.markets?.find(coin => coin.id === assetContext.coinId && coin.symbol.toUpperCase() === sym.toUpperCase()) : undefined;
+  const quote = data.quotes?.[quoteSymbol];
+  const observedPrice = isCrypto ? cryptoQuote?.currentPrice : quote?.symbol === quoteSymbol ? quote.price : undefined;
+  const spotPrice = isLive && data.degraded !== true && observedPrice != null && Number.isFinite(observedPrice) && observedPrice > 0
+    ? observedPrice : null;
+  const spotSource = isCrypto ? `CoinGecko (${assetContext.coinId}) · 2min refresh` : `Yahoo Finance (${quoteSymbol}) · 60s refresh`;
+  const assetKey = isCrypto ? `crypto:${assetContext.coinId}` : `security:${sym}`;
+  const referencePrice = isCrypto ? CRYPTO_REFERENCE_PRICES[assetContext.coinId] : TICKER_PRICES[sym];
+  const optionBasePrice = spotPrice ?? referencePrice;
+  const fund = isCrypto ? null : getFundamentals(sym);
+  const displayName = isCrypto ? assetContext.coinId : fund?.name ?? sym;
 
-  const tvSymbol = getTvSymbol(sym);
+  const tvSymbol = isCrypto ? CRYPTO_CHARTS[assetContext.coinId] : getTvSymbol(sym);
 
   return (
     <div className="si-ticker-overlay">
@@ -116,7 +149,7 @@ export default function TickerDetailOverlay({ sym, onClose }: Props) {
 
       {/* Content */}
       <div className="si-ticker-overlay-content">
-        {tab === "CHART" && (
+        {tab === "CHART" && (tvSymbol ? (
           <TradingViewWidget
             scriptSrc="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js"
             config={{
@@ -141,10 +174,20 @@ export default function TickerDetailOverlay({ sym, onClose }: Props) {
             width="100%"
             style={{ minHeight: 500 }}
           />
-        )}
-        {tab === "FUNDAMENTALS" && <FundamentalsPanel sym={sym} />}
-        {tab === "OPTIONS" && <OptionsChainPanel sym={sym} spotPrice={basePrice} />}
-        {tab === "ORDER" && <OrderTicketPanel sym={sym} spotPrice={basePrice} />}
+        ) : <div style={{ padding: 14 }}>Chart unavailable for this crypto asset</div>)}
+        {tab === "FUNDAMENTALS" && (isCrypto ? <div style={{ padding: 14 }}>Company fundamentals unavailable for this crypto asset</div> : <FundamentalsPanel sym={sym} />)}
+        {tab === "OPTIONS" && (optionBasePrice != null ? (
+          <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+            <div role="note" style={{ padding: "4px 14px", fontSize: 10, color: "var(--si-text-muted)" }}>
+              Simulated options model · {spotPrice == null ? "reference spot, as-of unknown" : `spot via ${spotSource}`}
+            </div>
+            <div style={{ flex: 1, minHeight: 0 }}><OptionsChainPanel sym={sym} spotPrice={optionBasePrice} /></div>
+          </div>
+        ) : <div style={{ padding: 14 }}>Options model unavailable · no spot price</div>)}
+        {/* Keep pending orders evaluating while the user reads another detail tab. */}
+        <div hidden={tab !== "ORDER"} style={{ height: "100%" }}>
+          <OrderTicketPanel key={assetKey} sym={sym} spotPrice={spotPrice} spotSource={spotSource} />
+        </div>
       </div>
     </div>
   );

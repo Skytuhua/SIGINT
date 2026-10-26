@@ -101,6 +101,7 @@ function describeSourceHealthStatus(status: "live" | "cached" | "degraded" | "un
 
 export default function DashboardWorkspace({ embedded = false }: DashboardWorkspaceProps) {
   const liveData = useSIGINTStore((s) => s.liveData);
+  const filters = useSIGINTStore((s) => s.filters);
   const health = useSIGINTStore((s) => s.liveData.health);
   const sourceHealth = useSIGINTStore((s) => s.liveData.sourceHealth);
   const lastUpdated = useSIGINTStore((s) => s.liveData.lastUpdated);
@@ -120,7 +121,10 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
 
   const kpis = useMemo(() => selectKpiTiles(liveData), [liveData]);
   const flightRows = useMemo(() => selectFlightRows(liveData), [liveData]);
-  const quakeRows = useMemo(() => selectQuakeRows(liveData), [liveData]);
+  const quakeRows = useMemo(
+    () => selectQuakeRows(liveData, filters),
+    [liveData, filters.minMagnitude, filters.maxMagnitude]
+  );
   const satRows = useMemo(() => selectSatelliteRows(liveData), [liveData]);
   const feedItems = useMemo(() => selectFeedItems(liveData), [liveData]);
   const spaceWeatherItems = useMemo(
@@ -398,9 +402,11 @@ export default function DashboardWorkspace({ embedded = false }: DashboardWorksp
                   <div className="si-kpi-strip-main">
                     <span className="si-kpi-label">{tile.label}</span>
                     <span className="si-kpi-value">{tile.value}</span>
-                    <span className={`si-kpi-delta ${tile.delta >= 0 ? "is-up" : "is-down"}`}>
-                      {tile.delta >= 0 ? "UP" : "DOWN"} {Math.abs(tile.delta).toFixed(1)}%
-                    </span>
+                    {tile.delta !== null ? (
+                      <span className={`si-kpi-delta ${tile.delta >= 0 ? "is-up" : "is-down"}`}>
+                        {tile.delta >= 0 ? "UP" : "DOWN"} {Math.abs(tile.delta).toFixed(1)}%
+                      </span>
+                    ) : null}
                   </div>
                   <Sparkline values={tile.trend} width="100%" height={12} />
                 </article>

@@ -13,19 +13,14 @@ const ENDPOINT = `/api/market/quotes?symbols=${FX_SYMBOLS.join(",")}`;
 const EMPTY: QuotesResponse = { quotes: {}, degraded: true, timestamp: "" };
 
 // Map currency to its USD rate (how many USD per 1 unit of that currency)
-function buildRates(quotes: Record<string, { price?: number }>): Record<Ccy, number> {
-  const get = (sym: string) => quotes[sym]?.price ?? 0;
-
-  return {
-    USD: 1,
-    EUR: get("EURUSD=X") || 1.08,        // EURUSD: 1 EUR = X USD
-    GBP: get("GBPUSD=X") || 1.27,        // GBPUSD: 1 GBP = X USD
-    JPY: get("JPY=X") ? 1 / get("JPY=X") : 0.0067,  // USDJPY: 1 USD = X JPY → invert
-    CHF: get("CHF=X") ? 1 / get("CHF=X") : 1.12,     // USDCHF: 1 USD = X CHF → invert
-    CAD: get("CAD=X") ? 1 / get("CAD=X") : 0.74,     // USDCAD: 1 USD = X CAD → invert
-    AUD: get("AUDUSD=X") || 0.66,        // AUDUSD: 1 AUD = X USD
-    NZD: get("NZDUSD=X") || 0.61,        // NZDUSD: 1 NZD = X USD
+function buildRates(quotes: Record<string, { price?: number }>): Record<Ccy, number | null> {
+  const get = (sym: string) => {
+    const price = quotes[sym]?.price;
+    return typeof price === "number" && Number.isFinite(price) && price > 0 ? price : null;
   };
+  const inverse = (sym: string) => { const value = get(sym); return value == null ? null : 1 / value; };
+  return { USD: 1, EUR: get("EURUSD=X"), GBP: get("GBPUSD=X"), JPY: inverse("JPY=X"),
+    CHF: inverse("CHF=X"), CAD: inverse("CAD=X"), AUD: get("AUDUSD=X"), NZD: get("NZDUSD=X") };
 }
 
 interface Props {
@@ -49,7 +44,10 @@ export default function CurrencyConverterPanel({ style }: Props) {
     return amt * (fromRate / toRate);
   }, [amount, fromCcy, toCcy, rates]);
 
-  const effectiveRate = rates[fromCcy] && rates[toCcy] ? rates[fromCcy] / rates[toCcy] : null;
+  const fromRate = rates[fromCcy];
+  const toRate = rates[toCcy];
+  const effectiveRate = fromRate != null && toRate != null ? fromRate / toRate : null;
+  const selectedLive = isLive && effectiveRate != null && fromCcy !== toCcy;
 
   function swap() {
     setFromCcy(toCcy);
@@ -70,8 +68,8 @@ export default function CurrencyConverterPanel({ style }: Props) {
     <div className="si-market-panel" style={style}>
       <div className="si-market-panel-header">
         <span className="si-market-panel-title">Currency Converter</span>
-        <span className={`si-market-panel-badge ${isLive ? "is-live" : "is-static"}`}>
-          {isLive ? "LIVE" : "STATIC"}
+        <span className={`si-market-panel-badge ${selectedLive ? "is-live" : "is-static"}`}>
+          {effectiveRate == null ? "UNAVAILABLE" : selectedLive ? "LIVE" : fromCcy === toCcy ? "IDENTITY" : "STALE"}
         </span>
       </div>
       <div className="si-market-panel-body" style={{ padding: "12px 14px" }}>
@@ -147,13 +145,13 @@ export default function CurrencyConverterPanel({ style }: Props) {
             </>
           ) : (
             <div style={{ fontSize: 10, color: "var(--si-text-muted)", fontStyle: "italic" }}>
-              Enter an amount to convert
+              {effectiveRate == null ? "Rate unavailable for selected currencies" : "Enter an amount to convert"}
             </div>
           )}
         </div>
       </div>
       <div className="si-market-panel-footer">
-        {isLive ? "Rates via Yahoo Finance · 60s refresh" : "Using fallback rates"}
+        {effectiveRate == null ? "Missing quote for selected currency pair" : selectedLive ? "Rates via Yahoo Finance · 60s refresh" : fromCcy === toCcy ? "Same-currency conversion" : "Last received rates · stale"}
       </div>
     </div>
   );

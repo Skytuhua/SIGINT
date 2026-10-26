@@ -1,4 +1,5 @@
 import type { StreamItem } from "../../../../news/stream/types";
+import { abortable, requestDeadline } from "../../../fetchWithTimeout";
 
 const WM_STREAM_URL = "https://stream.wikimedia.org/v2/stream/recentchange";
 const ENABLED = process.env.NEWS_WIKIMEDIA_STREAM_ENABLED === "true";
@@ -110,42 +111,52 @@ export async function pollWikimediaFallback(): Promise<{ items: StreamItem[]; he
   if (!ENABLED) return { items: [], healthUpdate: { ok: true, count: 0 } };
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8_000);
-
+    const signal = requestDeadline(8_000);
     const res = await fetch(WM_STREAM_URL, {
-      signal: controller.signal,
+      signal,
       headers: { Accept: "text/event-stream" },
     });
-    clearTimeout(timeout);
 
     if (!res.ok || !res.body) {
+      void res.body?.cancel().catch(() => undefined);
       return { items: [], healthUpdate: { ok: false, count: 0, error: `WM ${res.status}` } };
     }
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     const items: StreamItem[] = [];
-    const deadline = Date.now() + 5_000;
+    const collectionDeadline = requestDeadline(5_000);
+    const readSignal = AbortSignal.any([signal, collectionDeadline]);
 
     let partial = "";
-    while (Date.now() < deadline && items.length < 50) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      partial += decoder.decode(value, { stream: true });
-      const lines = partial.split("\n");
-      partial = lines.pop() ?? "";
-      for (const line of lines) {
-        if (!line.startsWith("data: ")) continue;
+    try {
+      while (items.length < 50) {
+        let chunk;
         try {
-          const data: WikiRecentChange = JSON.parse(line.slice(6));
-          if (isSignificantEdit(data)) {
-            items.push(changeToStreamItem(data));
-          }
-        } catch { /* skip */ }
+          chunk = await abortable(reader.read(), readSignal);
+        } catch (error) {
+          if (collectionDeadline.aborted && !signal.aborted) break;
+          throw error;
+        }
+        const { value, done } = chunk;
+        if (done) break;
+        partial += decoder.decode(value, { stream: true });
+        const lines = partial.split("\n");
+        partial = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const data: WikiRecentChange = JSON.parse(line.slice(6));
+            if (isSignificantEdit(data)) {
+              items.push(changeToStreamItem(data));
+            }
+          } catch { /* skip */ }
+        }
       }
+    } finally {
+      void reader.cancel().catch(() => undefined);
+      reader.releaseLock();
     }
-    reader.cancel().catch(() => {});
 
     return {
       items,

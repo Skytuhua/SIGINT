@@ -190,7 +190,7 @@ interface CesiumGlobeProps {
   onCameraSnapshot?: (snapshot: CameraSnapshot | null) => void;
   /** When true, disables scroll/pinch zoom (e.g. for fixed-size news globe). */
   disableZoom?: boolean;
-   onReady?: () => void;
+  onReady?: () => void;
 }
 
 // ── CesiumGlobe ──
@@ -214,7 +214,7 @@ export default function CesiumGlobe({
   const trackFetchAbortRef = useRef<AbortController | null>(null);
   const flightRenderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingFlightsRef = useRef<Flight[] | null>(null);
-  const intervalsRef = useRef<ReturnType<typeof setInterval>[]>([]);
+  const focusAnimationRef = useRef<{ generation: number; cancel?: () => void }>({ generation: 0 });
   const fpsFrameRef = useRef({ lastTime: 0, frames: 0 });
   const currentSatsRef = useRef<PropagatedSat[]>([]);
   const currentFlightsRef = useRef<Flight[]>([]);
@@ -260,7 +260,14 @@ export default function CesiumGlobe({
   } | null>(null);
   const store = useSIGINTStore;
 
+  const cancelFocusAnimation = useCallback(() => {
+    focusAnimationRef.current.generation += 1;
+    focusAnimationRef.current.cancel?.();
+    focusAnimationRef.current.cancel = undefined;
+  }, []);
+
   const releaseOrbitFocus = useCallback(() => {
+    cancelFocusAnimation();
     followTrackedFlightRef.current = false;
     focusTargetRef.current = null;
     lookAtInitializedRef.current = false;
@@ -293,12 +300,15 @@ export default function CesiumGlobe({
     Cesium.Cartesian3.normalize(direction, direction);
     const up = ellipsoid.geodeticSurfaceNormal(pos, new Cesium.Cartesian3());
     viewer.camera.setView({ destination: pos, orientation: { direction, up } });
-  }, []);
+  }, [cancelFocusAnimation]);
 
   const focusFlightSelection = useCallback(async (viewer: Viewer, flight: Flight) => {
     if (!viewer || viewer.isDestroyed()) return;
+    cancelFocusAnimation();
+    const generation = focusAnimationRef.current.generation;
 
     const Cesium = cesiumRef.current ?? (await import("cesium"));
+    if (generation !== focusAnimationRef.current.generation || viewerRef.current !== viewer || viewer.isDestroyed()) return;
     cesiumRef.current = Cesium;
 
     const altM = Math.max(0, flight.altM ?? 0);
@@ -338,10 +348,15 @@ export default function CesiumGlobe({
     const startTime = Cesium.JulianDate.toDate(Cesium.JulianDate.now()).getTime();
 
     await new Promise<void>((resolve) => {
+      const finish = () => {
+        viewer.scene.postRender.removeEventListener(onFrame);
+        if (!viewer.isDestroyed()) viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+        if (focusAnimationRef.current.cancel === finish) focusAnimationRef.current.cancel = undefined;
+        resolve();
+      };
       const onFrame = () => {
         if (viewer.isDestroyed()) {
-          viewer.scene.postRender.removeEventListener(onFrame);
-          resolve();
+          finish();
           return;
         }
         const elapsed =
@@ -358,7 +373,7 @@ export default function CesiumGlobe({
         );
 
         if (t >= 1) {
-          viewer.scene.postRender.removeEventListener(onFrame);
+          finish();
           // Release lookAt constraint so the camera stops moving; otherwise Cesium
           // keeps the constraint and the view can drift or jump.
           viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
@@ -372,17 +387,20 @@ export default function CesiumGlobe({
             },
           });
           viewer.camera.cancelFlight();
-          resolve();
         }
       };
+      focusAnimationRef.current.cancel = finish;
       viewer.scene.postRender.addEventListener(onFrame);
     });
-  }, []);
+  }, [cancelFocusAnimation]);
 
   const focusSatelliteSelection = useCallback(async (viewer: Viewer, sat: PropagatedSat) => {
     if (!viewer || viewer.isDestroyed()) return;
+    cancelFocusAnimation();
+    const generation = focusAnimationRef.current.generation;
 
     const Cesium = cesiumRef.current ?? (await import("cesium"));
+    if (generation !== focusAnimationRef.current.generation || viewerRef.current !== viewer || viewer.isDestroyed()) return;
     cesiumRef.current = Cesium;
 
     const altM = Math.max(0, sat.altKm * 1000);
@@ -418,10 +436,15 @@ export default function CesiumGlobe({
     const startTime = Cesium.JulianDate.toDate(Cesium.JulianDate.now()).getTime();
 
     await new Promise<void>((resolve) => {
+      const finish = () => {
+        viewer.scene.postRender.removeEventListener(onFrame);
+        if (!viewer.isDestroyed()) viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+        if (focusAnimationRef.current.cancel === finish) focusAnimationRef.current.cancel = undefined;
+        resolve();
+      };
       const onFrame = () => {
         if (viewer.isDestroyed()) {
-          viewer.scene.postRender.removeEventListener(onFrame);
-          resolve();
+          finish();
           return;
         }
         const elapsed =
@@ -438,7 +461,7 @@ export default function CesiumGlobe({
         );
 
         if (t >= 1) {
-          viewer.scene.postRender.removeEventListener(onFrame);
+          finish();
           // Release lookAt constraint so the camera stops moving; otherwise Cesium
           // keeps the constraint and the view can drift or jump.
           viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
@@ -452,12 +475,12 @@ export default function CesiumGlobe({
             },
           });
           viewer.camera.cancelFlight();
-          resolve();
         }
       };
+      focusAnimationRef.current.cancel = finish;
       viewer.scene.postRender.addEventListener(onFrame);
     });
-  }, []);
+  }, [cancelFocusAnimation]);
 
   // ── Layer render helpers ──
 
@@ -706,6 +729,7 @@ export default function CesiumGlobe({
     async (dir: "N" | "S" | "E" | "W") => {
       const viewer = viewerRef.current;
       if (!viewer || viewer.isDestroyed()) return;
+      cancelFocusAnimation();
       const cartographic = viewer.camera.positionCartographic;
       const lat = toDegrees(cartographic.latitude);
       const lon = toDegrees(cartographic.longitude);
@@ -736,12 +760,13 @@ export default function CesiumGlobe({
         0.35
       );
     },
-    []
+    [cancelFocusAnimation]
   );
 
   const setNorthUp = useCallback(() => {
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
+    cancelFocusAnimation();
     viewer.camera.flyTo({
       destination: viewer.camera.positionWC,
       orientation: {
@@ -751,11 +776,12 @@ export default function CesiumGlobe({
       },
       duration: 0.8,
     });
-  }, []);
+  }, [cancelFocusAnimation]);
 
   const setTopDown = useCallback(() => {
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
+    cancelFocusAnimation();
     viewer.camera.flyTo({
       destination: viewer.camera.positionWC,
       orientation: {
@@ -765,11 +791,12 @@ export default function CesiumGlobe({
       },
       duration: 0.8,
     });
-  }, []);
+  }, [cancelFocusAnimation]);
 
   const setOblique = useCallback(() => {
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
+    cancelFocusAnimation();
     viewer.camera.flyTo({
       destination: viewer.camera.positionWC,
       orientation: {
@@ -779,25 +806,28 @@ export default function CesiumGlobe({
       },
       duration: 0.8,
     });
-  }, []);
+  }, [cancelFocusAnimation]);
 
   const zoomIn = useCallback(() => {
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
+    cancelFocusAnimation();
     const amount = Math.max(80, viewer.camera.positionCartographic.height * 0.16);
     viewer.camera.zoomIn(amount);
-  }, []);
+  }, [cancelFocusAnimation]);
 
   const zoomOut = useCallback(() => {
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
+    cancelFocusAnimation();
     const amount = Math.max(80, viewer.camera.positionCartographic.height * 0.16);
     viewer.camera.zoomOut(amount);
-  }, []);
+  }, [cancelFocusAnimation]);
 
   const gotoHome = useCallback(async () => {
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
+    cancelFocusAnimation();
     const home = homeViewRef.current;
     await flyToScene(
       viewer,
@@ -807,7 +837,7 @@ export default function CesiumGlobe({
       home.heading,
       home.pitch
     );
-  }, []);
+  }, [cancelFocusAnimation]);
 
   const setHomeFromCurrent = useCallback(() => {
     const snapshot = cameraSnapshot;
@@ -872,7 +902,18 @@ export default function CesiumGlobe({
   const setupClickHandler = useCallback(
     async (viewer: Viewer) => {
       const Cesium = await import("cesium");
+      if (viewerRef.current !== viewer || viewer.isDestroyed()) return;
       cesiumRef.current = Cesium;
+      // User camera gestures supersede an in-progress selection animation.
+      for (const eventType of [
+        Cesium.ScreenSpaceEventType.LEFT_DOWN,
+        Cesium.ScreenSpaceEventType.RIGHT_DOWN,
+        Cesium.ScreenSpaceEventType.MIDDLE_DOWN,
+        Cesium.ScreenSpaceEventType.WHEEL,
+        Cesium.ScreenSpaceEventType.PINCH_START,
+      ]) {
+        viewer.screenSpaceEventHandler.setInputAction(cancelFocusAnimation, eventType);
+      }
       viewer.screenSpaceEventHandler.setInputAction(
         (click: { position: import("cesium").Cartesian2 }) => {
           const picked = viewer.scene.pick(click.position);
@@ -1023,7 +1064,6 @@ export default function CesiumGlobe({
           if (entityData.type === "news") {
             return;
           }
-          store.getState().selectEntity(entityData);
           if (entityData.type === "satellite") {
             const sat = entityData.data as PropagatedSat;
             const noradId = entityData.id;
@@ -1080,6 +1120,9 @@ export default function CesiumGlobe({
             trackFetchAbortRef.current = null;
             store.getState().setTrackedFlightId(null);
           }
+          // Selection subscribers start the new camera animation synchronously.
+          // Finish releasing the old target and tracking state before starting it.
+          store.getState().selectEntity(entityData);
         },
         Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK
       );
@@ -1088,6 +1131,7 @@ export default function CesiumGlobe({
       focusFlightSelection,
       focusSatelliteSelection,
       getInterpolatedPosition,
+      cancelFocusAnimation,
       releaseOrbitFocus,
       store,
     ]
@@ -1102,11 +1146,12 @@ export default function CesiumGlobe({
           const scenes = store.getState().scenes;
           const scene = scenes[idx];
           if (!scene) return;
+          cancelFocusAnimation();
           flyToScene(viewer, scene.lat, scene.lon, scene.altM, scene.heading, scene.pitch);
         }
       );
     },
-    [store]
+    [store, cancelFocusAnimation]
   );
 
   // ── Style preset subscription ──
@@ -1124,7 +1169,15 @@ export default function CesiumGlobe({
             showBloom: params.showBloom,
           });
         },
-        { equalityFn: (a, b) => a.preset === b.preset }
+        {
+          equalityFn: (a, b) => a.preset === b.preset &&
+            a.params.crtDistortion === b.params.crtDistortion &&
+            a.params.crtInstability === b.params.crtInstability &&
+            a.params.nvgBrightness === b.params.nvgBrightness &&
+            a.params.flirContrast === b.params.flirContrast &&
+            a.params.sharpen === b.params.sharpen &&
+            a.params.showBloom === b.params.showBloom,
+        }
       );
     },
     [store]
@@ -1559,9 +1612,14 @@ export default function CesiumGlobe({
   // ── Main initialization effect ──
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
       if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
+        e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey ||
+        !store.getState().dashboard.hotkeysEnabled ||
+        !viewerRef.current || viewerRef.current.isDestroyed() ||
+        !target || !containerRef.current?.contains(target) ||
+        /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(target.tagName) ||
+        target.isContentEditable || target.closest?.('[contenteditable="true"], [role="textbox"], [role="combobox"]')
       ) {
         return;
       }
@@ -1635,6 +1693,11 @@ export default function CesiumGlobe({
   useEffect(() => {
     if (!containerRef.current) return;
     let destroyed = false;
+    let ownedViewer: Viewer | null = null;
+    let ownedWorker: Worker | null = null;
+    const intervals: ReturnType<typeof setInterval>[] = [];
+    const initAbort = new AbortController();
+    const isCurrent = () => !destroyed && !initAbort.signal.aborted;
     const unsubscribers: Array<() => void> = [];
 
     async function init() {
@@ -1642,26 +1705,34 @@ export default function CesiumGlobe({
       const { initViewer } = await import("../lib/cesium/viewer");
       if (destroyed || !containerRef.current) return;
 
-      const viewer = await initViewer(containerRef.current);
+      const viewer = await initViewer(containerRef.current, initAbort.signal);
+      if (!isCurrent()) {
+        if (!viewer.isDestroyed()) viewer.destroy();
+        return;
+      }
+      ownedViewer = viewer;
       viewerRef.current = viewer;
       if (disableZoom) {
         viewer.scene.screenSpaceCameraController.enableZoom = false;
       }
       updateCameraSnapshot();
-      intervalsRef.current.push(setInterval(updateCameraSnapshot, 250));
+      intervals.push(setInterval(updateCameraSnapshot, 250));
 
       // Apply initial style preset
       const { ui } = store.getState();
       await applyStylePreset(viewer, ui.stylePreset, ui);
+      if (!isCurrent()) return;
 
       // ── Satellite worker ──
       const satWorker = new Worker(
         new URL("../workers/satellite.worker.ts", import.meta.url)
       );
+      ownedWorker = satWorker;
       satWorkerRef.current = satWorker;
+      lastTleSignatureRef.current = "";
 
       satWorker.onmessage = async (e: MessageEvent<SatWorkerOutMessage>) => {
-        if (viewer.isDestroyed()) return;
+        if (!isCurrent() || viewer.isDestroyed()) return;
         if (e.data.type === "POSITIONS" && e.data.positions) {
           currentSatsRef.current = e.data.positions;
           store.getState().setLiveSatellites(e.data.positions);
@@ -1669,6 +1740,7 @@ export default function CesiumGlobe({
           if (store.getState().layers.satellites) {
             await renderSatsIfEnabled(e.data.positions);
           }
+          if (!isCurrent()) return;
           const total =
             e.data.positions.length +
             currentFlightsRef.current.length +
@@ -1691,108 +1763,85 @@ export default function CesiumGlobe({
         }
       };
 
-      // Initial TLE load for worker boot.
-      const seededCatalog = store.getState().liveData.satelliteCatalog ?? [];
-      if (seededCatalog.length > 0) {
-        postCatalogToSatelliteWorker(seededCatalog as Satellite[]);
-      } else {
-        try {
-          const tles = await fetchJsonWithPolicy<Satellite[]>("/api/satellites", {
-            key: "globe:satellites:init",
-            timeoutMs: 20_000,
-            retries: 1,
-            negativeTtlMs: 3_000,
-          });
-          postCatalogToSatelliteWorker(tles);
-        } catch (err) {
-          if (!isAbortError(err)) {
-            console.warn("[globe] satellite TLE fetch error:", err);
-          }
-        }
-      }
-
-      // Keep worker TLEs synced with dashboard feed updates.
-      unsubscribers.push(
-        store.subscribe(
-          (s) => s.liveData.satelliteCatalog,
-          (catalog) => {
-            postCatalogToSatelliteWorker(catalog as Satellite[]);
-          }
-        )
-      );
-
-      // ── Traffic worker ──
-      // ── Polling intervals ──
-      const seededLiveData = store.getState().liveData;
-      applyLiveFlights(
-        (seededLiveData.flights as Flight[]) ?? [],
-        (seededLiveData.military as Flight[]) ?? []
-      );
-      currentDisastersRef.current = (seededLiveData.disasters as DisasterAlert[]) ?? [];
-      try { await renderDisastersIfEnabled(currentDisastersRef.current); } catch (err) { console.warn("[globe] disaster render error:", err); }
-      try { const milSeed = currentFlightsRef.current.filter((f) => f.isMilitary); await renderGpsJamIfEnabled(currentFlightsRef.current, milSeed); } catch (err) { console.warn("[globe] gps jam render error:", err); }
-      try {
-        const civ = currentFlightsRef.current.filter((f) => !f.isMilitary);
-        const mil = currentFlightsRef.current.filter((f) => f.isMilitary);
-        await renderAnomaliesIfEnabled(civ, mil);
-      } catch (err) { console.warn("[globe] airspace anomaly render error:", err); }
-
-      // ── Load CCTV cameras ──
-      try {
-        const cameras = await fetchAllCctvCameras();
-        store.getState().setCameras(cameras);
-        store.getState().setLiveCctv(cameras);
-        store.getState().markFeedUpdated("cctv");
-        if (store.getState().layers.cctv) {
-          const { cctv } = store.getState();
-          const camerasForGlobe = sampleCctvForGlobe(cameras, cctv.brokenIds);
-          const { calibrations } = cctv;
-          renderCctv(viewer, camerasForGlobe, calibrations);
-        }
-      } catch (err) {
-        console.warn("[globe] CCTV load error:", err);
-      }
-
-      // Load static GeoJSON layers (volcanoes, nuclear sites, military bases, country borders)
-      try {
-        const results = await Promise.allSettled([
-          fetch('/data/news-layers/volcanoes.geojson').then(r => r.json()),
-          fetch('/data/news-layers/nuclear-sites.geojson').then(r => r.json()),
-          fetch('/data/news-layers/military-bases.geojson').then(r => r.json()),
-          fetch('/data/news-layers/country-borders.geojson').then(r => r.json()),
-        ]);
-        const [volcResult, nukeResult, milBaseResult, borderResult] = results;
-        if (volcResult.status === 'fulfilled') volcanoDataRef.current = volcResult.value.features ?? [];
-        else console.warn("[globe] volcanoes.geojson failed:", volcResult.reason);
-        if (nukeResult.status === 'fulfilled') nuclearSitesDataRef.current = nukeResult.value.features ?? [];
-        else console.warn("[globe] nuclear-sites.geojson failed:", nukeResult.reason);
-        if (milBaseResult.status === 'fulfilled') militaryBasesDataRef.current = milBaseResult.value.features ?? [];
-        else console.warn("[globe] military-bases.geojson failed:", milBaseResult.reason);
-        if (borderResult.status === 'fulfilled') countryBordersDataRef.current = borderResult.value.features ?? [];
-        else console.warn("[globe] country-borders.geojson failed:", borderResult.reason);
-        const currentLayers = store.getState().layers;
-        if (currentLayers.volcanoes) await renderVolcanoes(viewer, volcanoDataRef.current);
-        if (currentLayers.nuclearSites) await renderNuclearSites(viewer, nuclearSitesDataRef.current);
-        if (currentLayers.militaryBases) await renderMilitaryBases(viewer, militaryBasesDataRef.current);
-        if (currentLayers.countryBorders) await renderCountryBorders(viewer, countryBordersDataRef.current);
-      } catch (err) {
-        console.warn("[globe] static GeoJSON layer load error:", err);
-      }
-
-      // ── Load scenes ──
-      try {
-        const scenes = await fetchJsonWithPolicy<Scene[]>("/data/scenes.json", {
-          key: "globe:scenes",
-          timeoutMs: 8_000,
-          retries: 1,
-          negativeTtlMs: 4_000,
+      // Optional feeds never gate click handling, controls or core readiness.
+      // Each task belongs to this mount and stops writing after cleanup.
+      const runOptional = (task: () => Promise<void>) => {
+        void task().catch((error) => {
+          if (isCurrent() && !isAbortError(error)) console.warn("[globe] optional layer load error:", error);
         });
-        store.getState().setScenes(scenes);
-        store.getState().setLiveScenes(scenes);
-        store.getState().markFeedUpdated("scenes");
-      } catch {
-        // Scenes optional
-      }
+      };
+      const startOptionalLoads = () => {
+        const seededCatalog = store.getState().liveData.satelliteCatalog ?? [];
+        if (seededCatalog.length) postCatalogToSatelliteWorker(seededCatalog as Satellite[]);
+        else runOptional(async () => {
+          const tles = await fetchJsonWithPolicy<Satellite[]>("/api/satellites", {
+            key: "globe:satellites:init", signal: initAbort.signal,
+            timeoutMs: 20_000, retries: 1, negativeTtlMs: 3_000,
+          });
+          if (isCurrent()) postCatalogToSatelliteWorker(tles);
+        });
+
+        const seededLiveData = store.getState().liveData;
+        applyLiveFlights(seededLiveData.flights ?? [], seededLiveData.military ?? []);
+        currentDisastersRef.current = seededLiveData.disasters ?? [];
+        runOptional(() => renderDisastersIfEnabled(currentDisastersRef.current));
+        const military = currentFlightsRef.current.filter((f) => f.isMilitary);
+        runOptional(() => renderGpsJamIfEnabled(currentFlightsRef.current, military));
+        runOptional(() => renderAnomaliesIfEnabled(currentFlightsRef.current.filter((f) => !f.isMilitary), military));
+
+        runOptional(async () => {
+          const cameras = await fetchAllCctvCameras({ signal: initAbort.signal });
+          if (!isCurrent()) return;
+          store.getState().setCameras(cameras);
+          store.getState().setLiveCctv(cameras);
+          store.getState().markFeedUpdated("cctv");
+          if (store.getState().layers.cctv) {
+            const { cctv } = store.getState();
+            await renderCctv(viewer, sampleCctvForGlobe(cameras, cctv.brokenIds), cctv.calibrations);
+          }
+        });
+
+        runOptional(async () => {
+          const names = ["volcanoes", "nuclear-sites", "military-bases", "country-borders"];
+          const results = await Promise.allSettled(names.map((name) =>
+            fetchJsonWithPolicy<{ features?: unknown[] }>(`/data/news-layers/${name}.geojson`, {
+              key: `globe:static:${name}`, signal: initAbort.signal,
+              timeoutMs: 8_000, retries: 0, negativeTtlMs: 0,
+            })
+          ));
+          if (!isCurrent()) return;
+          const [volcResult, nukeResult, milBaseResult, borderResult] = results;
+          if (volcResult.status === "fulfilled") volcanoDataRef.current = (volcResult.value.features ?? []) as typeof volcanoDataRef.current;
+          if (nukeResult.status === "fulfilled") nuclearSitesDataRef.current = (nukeResult.value.features ?? []) as typeof nuclearSitesDataRef.current;
+          if (milBaseResult.status === "fulfilled") militaryBasesDataRef.current = (milBaseResult.value.features ?? []) as typeof militaryBasesDataRef.current;
+          if (borderResult.status === "fulfilled") countryBordersDataRef.current = (borderResult.value.features ?? []) as typeof countryBordersDataRef.current;
+          const renderers = [
+            ["volcanoes", () => renderVolcanoes(viewer, volcanoDataRef.current)],
+            ["nuclearSites", () => renderNuclearSites(viewer, nuclearSitesDataRef.current)],
+            ["militaryBases", () => renderMilitaryBases(viewer, militaryBasesDataRef.current)],
+            ["countryBorders", () => renderCountryBorders(viewer, countryBordersDataRef.current)],
+          ] as const;
+          for (const [layer, render] of renderers) {
+            if (!isCurrent()) return;
+            if (store.getState().layers[layer]) await render();
+          }
+        });
+
+        runOptional(async () => {
+          const scenes = await fetchJsonWithPolicy<Scene[]>("/data/scenes.json", {
+            key: "globe:scenes", signal: initAbort.signal,
+            timeoutMs: 8_000, retries: 1, negativeTtlMs: 4_000,
+          });
+          if (!isCurrent()) return;
+          store.getState().setScenes(scenes);
+          store.getState().setLiveScenes(scenes);
+          store.getState().markFeedUpdated("scenes");
+        });
+      };
+      unsubscribers.push(store.subscribe(
+        (s) => s.liveData.satelliteCatalog,
+        (catalog) => { if (isCurrent()) postCatalogToSatelliteWorker(catalog as Satellite[]); }
+      ));
 
       // ── Subscriptions ──
       unsubscribers.push(setupFpsTracking(viewer));
@@ -1800,21 +1849,23 @@ export default function CesiumGlobe({
       try {
         if (store.getState().layers.tradeRoutes) {
           const sel = store.getState().tradeRouteSelection;
-          await renderTradeRoutesLayer(viewer, {
+          void renderTradeRoutesLayer(viewer, {
             categoryFilters: sel.categoryFilters,
             selectedRouteId: sel.selectedRouteId,
             hoveredRouteId: sel.hoveredRouteId,
             selectedNodeId: sel.selectedNodeId,
             hoveredNodeId: sel.hoveredNodeId,
-          });
+          }).catch((err) => { if (isCurrent()) console.warn("[globe] trade routes render error:", err); });
         }
       } catch (err) { console.warn("[globe] trade routes render error:", err); }
       unsubscribers.push(setupSceneSubscription(viewer));
       unsubscribers.push(setupPresetSubscription(viewer));
-      try { await setupClickHandler(viewer); } catch (err) { console.warn("[globe] click handler setup error:", err); }
+      try { await setupClickHandler(viewer); } catch (err) { if (isCurrent()) console.warn("[globe] click handler setup error:", err); }
+      if (!isCurrent()) return;
 
       // ── Flight camera tracking (postRender for smooth 60fps follow) ──
       const CesiumMod = await import("cesium");
+      if (!isCurrent()) return;
       cesiumRef.current = CesiumMod;
 
       // Update flight and highlight positions before each frame (sync in preRender so they are visible)
@@ -1938,8 +1989,8 @@ export default function CesiumGlobe({
           (s) => s.selection.selectedEntity,
           (entity) => {
             if (entity) return;
-            if (!focusTargetRef.current) return;
-            releaseOrbitFocus();
+            cancelFocusAnimation();
+            if (focusTargetRef.current) releaseOrbitFocus();
           }
         )
       );
@@ -1949,6 +2000,7 @@ export default function CesiumGlobe({
         store.subscribe(
           (s) => s.selection.selectedEntity,
           (entity) => {
+            cancelFocusAnimation();
             if (!entity || !viewer || viewer.isDestroyed()) return;
             if (entity.type === "flight") {
               const flight = entity.data as Flight;
@@ -1965,18 +2017,20 @@ export default function CesiumGlobe({
         )
       );
 
-      if (!destroyed) {
+      if (isCurrent()) {
         onReady?.();
+        if (isCurrent()) startOptionalLoads();
       }
     }
 
-    init().catch(console.error);
+    void init().catch((error) => { if (isCurrent()) console.error(error); });
 
     return () => {
       destroyed = true;
+      initAbort.abort();
+      cancelFocusAnimation();
       unsubscribers.forEach((u) => u());
-      intervalsRef.current.forEach(clearInterval);
-      intervalsRef.current = [];
+      intervals.forEach(clearInterval);
       if (flightRenderTimeoutRef.current) {
         clearTimeout(flightRenderTimeoutRef.current);
         flightRenderTimeoutRef.current = null;
@@ -1984,10 +2038,10 @@ export default function CesiumGlobe({
       pendingFlightsRef.current = null;
       trackFetchAbortRef.current?.abort();
       trackFetchAbortRef.current = null;
-      satWorkerRef.current?.terminate();
-      if (viewerRef.current && !viewerRef.current.isDestroyed()) {
-        viewerRef.current.destroy();
-      }
+      ownedWorker?.terminate();
+      if (satWorkerRef.current === ownedWorker) satWorkerRef.current = null;
+      if (viewerRef.current === ownedViewer) viewerRef.current = null;
+      if (ownedViewer && !ownedViewer.isDestroyed()) ownedViewer.destroy();
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -1995,6 +2049,9 @@ export default function CesiumGlobe({
     <div style={{ width: "100%", height: "100%", position: "absolute", inset: 0 }}>
       <div
         ref={containerRef}
+        tabIndex={0}
+        role="region"
+        aria-label="Interactive globe. Focus to use map keyboard shortcuts."
         style={{ width: "100%", height: "100%", position: "absolute", inset: 0 }}
       />
       {hoverNewsTip ? (

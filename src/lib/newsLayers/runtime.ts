@@ -13,6 +13,7 @@ interface RuntimeCallbacks {
 }
 
 interface LayerRunState {
+  generation: number;
   unregister: (() => void) | null;
   health: LayerHealthState;
   circuitOpenUntil: number;
@@ -44,11 +45,13 @@ export class NewsLayerRuntime {
   private readonly states = new Map<string, LayerRunState>();
 
   private readonly callbacks: RuntimeCallbacks;
+  private disposed = false;
 
   constructor(layers: LayerRegistryEntry[], callbacks: RuntimeCallbacks) {
     for (const layer of layers) {
       this.registry.set(layer.id, layer);
       this.states.set(layer.id, {
+        generation: 0,
         unregister: null,
         health: initialHealth(),
         circuitOpenUntil: 0,
@@ -62,13 +65,15 @@ export class NewsLayerRuntime {
     return this.states.get(layerId)?.health ?? initialHealth();
   }
 
-  async primeFromCache(layerId: string): Promise<void> {
+  async primeFromCache(layerId: string): Promise<boolean> {
     const layer = this.registry.get(layerId);
     const state = this.states.get(layerId);
-    if (!layer || !state) return;
+    if (!layer || !state || this.disposed) return false;
+    const generation = state.generation;
 
     const payload = await loadLayerFromCache(layer);
-    if (!payload) return;
+    if (this.disposed || state.generation !== generation) return false;
+    if (!payload) return true;
 
     const fp = dataFingerprint(payload);
     const nextHealth: LayerHealthState = {
@@ -82,12 +87,14 @@ export class NewsLayerRuntime {
       state.lastDataFingerprint = fp;
       this.callbacks.onData(layerId, payload, nextHealth);
     }
+    return true;
   }
 
   enable(layerId: string): void {
     const layer = this.registry.get(layerId);
     const state = this.states.get(layerId);
-    if (!layer || !state || state.unregister) return;
+    if (!layer || !state || state.unregister || this.disposed) return;
+    const generation = state.generation;
 
     state.unregister = globalRefreshRuntime.register({
       pool: "news",
@@ -98,7 +105,7 @@ export class NewsLayerRuntime {
         runOnStart: true,
         timeoutMs: layer.dataSource.timeoutMs ?? 20_000,
         run: async ({ signal }) => {
-          await this.runLayer(layer, state, signal);
+          await this.runLayer(layer, state, signal, generation);
         },
       },
     });
@@ -107,22 +114,28 @@ export class NewsLayerRuntime {
   disable(layerId: string): void {
     const state = this.states.get(layerId);
     if (!state) return;
+    state.generation += 1;
     state.unregister?.();
     state.unregister = null;
   }
 
   refresh(layerId: string): void {
+    if (this.disposed) return;
     globalRefreshRuntime.trigger(`news-layer:${layerId}`);
   }
 
   dispose(): void {
+    this.disposed = true;
     this.states.forEach((state) => {
+      state.generation += 1;
       state.unregister?.();
       state.unregister = null;
     });
   }
 
-  private async runLayer(layer: LayerRegistryEntry, state: LayerRunState, signal: AbortSignal): Promise<void> {
+  private async runLayer(layer: LayerRegistryEntry, state: LayerRunState, signal: AbortSignal, generation: number): Promise<void> {
+    const isCurrent = () => !this.disposed && !signal.aborted && state.generation === generation;
+    if (!isCurrent()) return;
     const now = Date.now();
     if (state.circuitOpenUntil > now) {
       const degraded: LayerHealthState = {
@@ -137,6 +150,7 @@ export class NewsLayerRuntime {
 
     try {
       const result = await runLayerPipeline(layer, signal, state.health);
+      if (!isCurrent()) return;
       state.health = result.health;
 
       if (result.health.consecutiveFailures >= CIRCUIT_FAILURES) {
@@ -162,6 +176,7 @@ export class NewsLayerRuntime {
         this.callbacks.onHealth(layer.id, state.health);
       }
     } catch (error) {
+      if (!isCurrent()) return;
       if (isAbortError(error)) return;
       const failureCount = state.health.consecutiveFailures + 1;
       const unavailable: LayerHealthState = {

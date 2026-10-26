@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import MarketTickerBar from "./MarketTickerBar";
+import type { MarketAssetContext } from "./shared/assetIdentity";
 import DailyLineupModal from "./DailyLineupModal";
 import MarketOverviewTab from "./tabs/MarketOverviewTab";
 import MarketEquitiesTab from "./tabs/MarketEquitiesTab";
@@ -39,7 +40,8 @@ export default function MarketWorkspace() {
   const [showLineup, setShowLineup] = useState(false);
   const [activeTab, setActiveTab] = useState<MarketTab>("OVERVIEW");
   const [scenario, setScenario] = useState<Scenario>("BASELINE");
-  const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
+  const [selectedTicker, setSelectedTicker] = useState<{ sym: string; assetContext?: MarketAssetContext } | null>(null);
+  const selectTicker = (sym: string, assetContext?: MarketAssetContext) => setSelectedTicker({ sym, assetContext });
   const [showGlossary, setShowGlossary] = useState(false);
   const [showScenarioSheet, setShowScenarioSheet] = useState(false);
   const tabRefs = useRef<Partial<Record<MarketTab, HTMLButtonElement | null>>>({});
@@ -56,17 +58,19 @@ export default function MarketWorkspace() {
   }, [activeTab, visibleTabs]);
 
   useEffect(() => {
-    if (!isMobile) {
-      setShowLineup(true);
-      return;
-    }
     try {
+      if (window.localStorage.getItem("si-daily-lineup-disabled") === "true") {
+        setShowLineup(false);
+        return;
+      }
+      if (!isMobile) {
+        setShowLineup(true);
+        return;
+      }
       const today = getLocalDateKey();
       const lastOpened = window.localStorage.getItem(PHONE_LINEUP_KEY);
       setShowLineup(lastOpened !== today);
-      if (lastOpened !== today) {
-        window.localStorage.setItem(PHONE_LINEUP_KEY, today);
-      }
+      if (lastOpened !== today) window.localStorage.setItem(PHONE_LINEUP_KEY, today);
     } catch {
       setShowLineup(true);
     }
@@ -173,17 +177,18 @@ export default function MarketWorkspace() {
       </div>
 
       <div className="si-market-tab-content" style={{ position: "relative" }}>
-        {activeTab === "OVERVIEW" && <MarketOverviewTab scenario={scenario} onTickerClick={setSelectedTicker} />}
-        {activeTab === "EQUITIES" && <MarketEquitiesTab onTickerClick={setSelectedTicker} />}
+        {activeTab === "OVERVIEW" && <MarketOverviewTab scenario={scenario} onTickerClick={selectTicker} />}
+        {activeTab === "EQUITIES" && <MarketEquitiesTab onTickerClick={selectTicker} />}
         {activeTab === "RATES" && <MarketRatesTab />}
-        {activeTab === "FX" && <MarketFxTab onTickerClick={setSelectedTicker} />}
+        {activeTab === "FX" && <MarketFxTab onTickerClick={selectTicker} />}
         {activeTab === "COMMODITIES" && <MarketCommoditiesTab />}
-        {activeTab === "CRYPTO" && <MarketCryptoTab onTickerClick={setSelectedTicker} />}
-        {activeTab === "SCREENER" && <MarketScreenerTab onTickerClick={setSelectedTicker} />}
+        {activeTab === "CRYPTO" && <MarketCryptoTab onTickerClick={selectTicker} />}
+        {activeTab === "SCREENER" && <MarketScreenerTab onTickerClick={selectTicker} />}
 
         {selectedTicker ? (
           <TickerDetailOverlay
-            sym={selectedTicker}
+            sym={selectedTicker.sym}
+            assetContext={selectedTicker.assetContext}
             onClose={() => setSelectedTicker(null)}
           />
         ) : null}

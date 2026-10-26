@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { STANDARD_LIMITER } from "../../../../../lib/server/rateLimitPresets";
 import { withRateLimit } from "../../../../../lib/server/withRateLimit";
+import { fetchWithTimeout } from "../../../../../lib/server/fetchWithTimeout";
 import crypto from "node:crypto";
 import { buildLayerCacheKey, getCached, isFresh, setCache } from "./layerCache";
 import type { Earthquake, Flight } from "../../../../../lib/providers/types";
@@ -390,16 +391,11 @@ async function fetchArmedConflictDirect(
   url.searchParams.set("maxrecords", String(Math.min(250, maxrecords)));
   url.searchParams.set("timespan", timeWindow);
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), ARMED_CONFLICT_TIMEOUT_MS);
-
   try {
-    const res = await fetch(url.toString(), {
-      signal: controller.signal,
+    const res = await fetchWithTimeout(url.toString(), {
       headers: { "User-Agent": "SIGINT/0.1 (research)" },
       cache: "no-store",
-    });
-    clearTimeout(timer);
+    }, ARMED_CONFLICT_TIMEOUT_MS);
     if (!res.ok) return { points: [], degraded: true };
 
     const json = (await res.json()) as Record<string, unknown>;
@@ -428,7 +424,6 @@ async function fetchArmedConflictDirect(
     }
     return { points, degraded: false };
   } catch {
-    clearTimeout(timer);
     return { points: [], degraded: true };
   }
 }
@@ -486,7 +481,11 @@ async function loadSnapshot(layerId: string): Promise<GenericFeatureCollection> 
 
 // ── Dispatch ─────────────────────────────────────────────────────────────────
 
-async function getLayerPayload(layerId: string, cacheKey: string, origin: string, requestUrl: string): Promise<GenericFeatureCollection> {
+// Internal cache metadata is removed before storing or returning GeoJSON.
+// Undefined retains the existing nonempty-only policy for other layers.
+type LayerPayload = GenericFeatureCollection & { authoritative?: boolean };
+
+async function getLayerPayload(layerId: string, cacheKey: string, origin: string, requestUrl: string): Promise<LayerPayload> {
   if (layerId === "intel-hotspots") {
     const url = new URL(requestUrl);
     const tw = (url.searchParams.get("timeWindow") ?? "24h") as TimeWindow;
@@ -567,8 +566,7 @@ async function getLayerPayload(layerId: string, cacheKey: string, origin: string
 
   if (layerId === "ucdp-events") {
     const url = new URL(requestUrl);
-    // Load UCDP data BEFORE reading the default year, since getUcdpDefaultYear()
-    // falls back to currentYear-1 when the store is empty (which may not match the dataset).
+    // Prefer the loaded coverage year; an unavailable store uses the release's year.
     await ensureUcdpLoaded();
     const defaultYear = getUcdpDefaultYear();
     const fromYear = parseInt(url.searchParams.get("fromYear") ?? String(defaultYear), 10) || defaultYear;
@@ -581,8 +579,9 @@ async function getLayerPayload(layerId: string, cacheKey: string, origin: string
       ? (vtRaw.split(",").map((v) => v.trim()).filter((v) => VALID_VT.has(v)) as UcdpViolenceType[])
       : undefined;
     const minFatalities = Math.max(1, parseInt(url.searchParams.get("minFatalities") ?? "1", 10) || 1);
+    const unavailableYears = new Set<number>();
     for (let y = fromYear; y <= toYear; y++) {
-      await loadAdditionalYear(y);
+      if (!await loadAdditionalYear(y)) unavailableYears.add(y);
     }
 
     const events = queryUcdpEvents({
@@ -624,12 +623,24 @@ async function getLayerPayload(layerId: string, cacheKey: string, origin: string
     });
 
     const fc = toFeatureCollection(features);
-    // If the live API returned 0 events (e.g. 401 auth error, API down), fall back
-    // to the static snapshot so the layer at least shows historical data.
-    if (fc.features.length === 0) {
-      try { return await loadSnapshot(layerId); } catch { /* no snapshot */ }
+    // Successful empty years stay empty. Only fill unavailable query years from
+    // the snapshot, preserving both the active filters and any live-year results.
+    if (unavailableYears.size > 0) {
+      try {
+        const snapshot = await loadSnapshot(layerId);
+        const fallbackFeatures = snapshot.features.filter((feature) => {
+          const props = feature.properties;
+          const year = Number(props?.year);
+          const fatalities = Number(props?.fatalities_best);
+          return unavailableYears.has(year)
+            && (!countries.length || countries.includes(String(props?.country)))
+            && (!violenceTypes?.length || violenceTypes.includes(props?.violenceType as UcdpViolenceType))
+            && fatalities >= minFatalities;
+        });
+        return { ...toFeatureCollection([...features, ...fallbackFeatures].slice(0, 5000)), authoritative: false };
+      } catch { /* no snapshot */ }
     }
-    return fc;
+    return { ...fc, authoritative: unavailableYears.size === 0 };
   }
 
   if (layerId === "sanctions-entities") {
@@ -711,8 +722,8 @@ async function getLayerPayload(layerId: string, cacheKey: string, origin: string
   return loadSnapshot(layerId);
 }
 
-async function handler(request: Request, { params }: { params: { layerId: string } }) {
-  const layerId = params.layerId;
+async function handler(request: Request, { params }: { params: Promise<{ layerId: string }> }) {
+  const { layerId } = await params;
 
   // Path traversal protection: only allow lowercase alphanumeric + hyphens
   if (!/^[a-z0-9][a-z0-9-]*$/.test(layerId)) {
@@ -754,7 +765,9 @@ async function handler(request: Request, { params }: { params: { layerId: string
   const stale = getCached(cacheKey);
   if (stale) {
     void getLayerPayload(layerId, cacheKey, origin, url.toString())
-      .then((payload) => { if (payload.features.length > 0) setCache(cacheKey, payload); })
+      .then(({ authoritative, ...payload }) => {
+        if (authoritative ?? payload.features.length > 0) setCache(cacheKey, payload);
+      })
       .catch(() => { /* keep existing stale entry */ });
     return NextResponse.json(stale, {
       headers: { "Cache-Control": "no-store", "X-Cache": "stale" },
@@ -763,8 +776,10 @@ async function handler(request: Request, { params }: { params: { layerId: string
 
   // Cold start: no cache — must fetch synchronously.
   try {
-    const payload = await getLayerPayload(layerId, cacheKey, origin, url.toString());
-    const shouldCache = payload.features.length > 0;
+    const { authoritative, ...payload } = await getLayerPayload(layerId, cacheKey, origin, url.toString());
+    // A cold outage can seed its nonempty snapshot; only available query years
+    // can establish an authoritative empty cache entry.
+    const shouldCache = authoritative === true || payload.features.length > 0;
     if (shouldCache) setCache(cacheKey, payload);
     return NextResponse.json(payload, {
       headers: { "Cache-Control": "no-store", "X-Cache": "miss" },

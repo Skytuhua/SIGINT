@@ -104,7 +104,9 @@ export default function StockComparisonPanel({ onTickerClick }: Props) {
             </span>
           ))}
           {selected.length < 3 && (
-            <div style={{ position: "relative" }}>
+            <div style={{ position: "relative" }} onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setShowSuggestions(false);
+            }}>
               <input
                 className="si-order-input"
                 placeholder="Add ticker..."
@@ -112,7 +114,6 @@ export default function StockComparisonPanel({ onTickerClick }: Props) {
                 value={searchInput}
                 onChange={(e) => { setSearchInput(e.target.value.toUpperCase()); setShowSuggestions(true); }}
                 onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               />
               {showSuggestions && suggestions.length > 0 && (
                 <div style={{
@@ -122,17 +123,20 @@ export default function StockComparisonPanel({ onTickerClick }: Props) {
                   boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
                 }}>
                   {suggestions.map((r) => (
-                    <div
+                    <button
+                      type="button"
+                      aria-label={`Add ${r.sym}`}
                       key={r.sym}
                       style={{
                         padding: "5px 8px", cursor: "pointer", fontSize: 10,
+                        width: "100%", border: "none", background: "transparent", textAlign: "left",
                         display: "flex", justifyContent: "space-between",
                       }}
-                      onMouseDown={() => addTicker(r.sym)}
+                      onClick={() => addTicker(r.sym)}
                     >
                       <span style={{ color: "#89e5ff", fontWeight: 700 }}>{r.sym}</span>
                       <span style={{ color: "var(--si-text-muted)", maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}

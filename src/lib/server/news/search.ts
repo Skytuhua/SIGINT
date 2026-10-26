@@ -72,6 +72,20 @@ function sortDeterministic(a: Pick<NewsArticle, "publishedAt" | "score" | "id">,
   return a.id.localeCompare(b.id);
 }
 
+function publicationDateFilter(ast: QueryAST, now: number): (item: NewsArticle) => boolean {
+  const dayMs = 24 * 60 * 60_000;
+  // Explicit calendar bounds take precedence over the relative time selector.
+  const from = ast.fromDate ? Date.parse(`${ast.fromDate}T00:00:00.000Z`) : undefined;
+  const to = ast.toDate ? Date.parse(`${ast.toDate}T00:00:00.000Z`) + dayMs - 1 : undefined;
+  const timespanDays = ast.timespan === "24h" ? 1 : ast.timespan === "7d" ? 7 : ast.timespan === "30d" ? 30 : undefined;
+  const hasCalendarBounds = from !== undefined || to !== undefined;
+  const start = hasCalendarBounds ? from : timespanDays ? now - timespanDays * dayMs : undefined;
+  const end = hasCalendarBounds ? to : timespanDays ? now : undefined;
+  return (item) =>
+    (start === undefined || item.publishedAt >= start) &&
+    (end === undefined || item.publishedAt <= end);
+}
+
 function toNewsArticle(article: GdeltArticle): NewsArticle {
   const publishedAt = parseGdeltDate(article.seendate);
   const cat = categorizeArticle({
@@ -315,6 +329,7 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
 
   let ast = parseQuery(rawQ);
   ast = applyUrlParamOverrides(ast, searchParams);
+  const matchesPublicationDate = publicationDateFilter(ast, Date.now());
   const normalizedQuery = stringifyQueryAst(ast);
   const rawQueryTerms = [ast.sym, ast.place, ...ast.freeText].filter(Boolean);
   const stopwordTerms = new Set(["news"]);
@@ -619,7 +634,7 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
         confidence: 0.95,
       },
     })),
-  ];
+  ].filter(matchesPublicationDate);
 
   const searchStopwords = new Set(["news"]);
   const searchTerms = [ast.sym, ast.place, ...ast.freeText]
@@ -769,7 +784,8 @@ export async function executeNewsSearch(searchParams: URLSearchParams): Promise<
     items = youtubeResult.data.items.slice(0, 40).map((stream: YouTubeLive) => toYoutubeNewsArticle(stream, "fallback"));
   }
 
-  items = [...items].sort(sortDeterministic);
+  // Video fallback is inserted after the merged text sources, so constrain it too.
+  items = items.filter(matchesPublicationDate).sort(sortDeterministic);
   const facets = buildFacets(items);
   const markers = items.map(newsToMarker).filter((marker): marker is GeoMarker => Boolean(marker));
   const paged = items.slice(offset, offset + limit);

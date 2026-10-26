@@ -5,7 +5,7 @@
   "description": "Real-time geospatial intelligence platform — OPS, NEWS, and MARKET workspaces in a unified console",
   "license": "MIT",
   "engines": {
-    "node": ">=20.18.1"
+    "node": ">=22.23.4 <23"
   },
   "repository": {
     "type": "git",
@@ -13,14 +13,30 @@
   },
   "pnpm": {
     "overrides": {
-      "dompurify": "3.3.2"
+      "dompurify": "3.4.17",
+      "protobufjs": "7.6.5",
+      "@protobufjs/utf8": "1.1.1",
+      "fast-xml-builder": "1.1.7",
+      "vite": "7.3.7",
+      "esbuild": "0.28.1",
+      "yaml": "2.8.3",
+      "postcss": "8.5.31",
+      "nanoid@^3": "3.3.18",
+      "browserslist": "4.28.7",
+      "baseline-browser-mapping": "2.11.0",
+      "source-map-js": "1.2.2",
+      "picomatch@^2": "2.3.2",
+      "picomatch@^4": "4.0.4",
+      "postcss-selector-parser@^6": "6.1.5",
+      "postcss-selector-parser@^7": "7.1.6",
+      "protocol-buffers-schema": "3.6.1"
     }
   },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "tsc --noEmit",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "postinstall": "node scripts/copy-cesium.js"
@@ -32,18 +48,18 @@
     "@mlc-ai/web-llm": "^0.2.81",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.19",
-    "@types/node": "20.16.0",
+    "@types/node": "22.20.5",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
     "@vercel/speed-insights": "^2.0.0",
     "autoprefixer": "10.4.20",
     "cesium": "1.120.0",
-    "fast-xml-parser": "5.5.7",
+    "fast-xml-parser": "5.7.0",
     "hls.js": "^1.6.15",
     "leaflet": "^1.9.4",
-    "maplibre-gl": "^5.19.0",
-    "next": "14.2.35",
-    "postcss": "8.4.41",
+    "maplibre-gl": "6.4.1",
+    "next": "15.5.28",
+    "postcss": "8.5.31",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-grid-layout": "^2.2.2",
@@ -52,8 +68,8 @@
     "satellite.js": "5.0.0",
     "tailwindcss": "3.4.7",
     "typescript": "5.5.4",
-    "undici": "7.24.0",
-    "zod": "3.23.8",
+    "undici": "7.30.1",
+    "zod": "4.6.7",
     "zustand": "4.5.4"
   },
   "devDependencies": {
@@ -61,6 +77,7 @@
     "@types/react-test-renderer": "18.3.1",
     "@types/react-window": "^2.0.0",
     "react-test-renderer": "18.3.1",
-    "vitest": "^4.0.18"
+    "vite": "7.3.7",
+    "vitest": "4.1.12"
   }
 }

@@ -21,6 +21,7 @@ export async function applyStylePreset(
   params: PresetParams = {}
 ): Promise<void> {
   const Cesium = await import('cesium');
+  if (viewer.isDestroyed()) return;
 
   // Remove all previously added custom stages
   for (const stage of activeStages) {

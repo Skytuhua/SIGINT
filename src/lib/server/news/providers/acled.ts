@@ -1,4 +1,5 @@
 import { cachedFetch, fetchJsonOrThrow, type CachedFetchResult, type UpstreamPolicy } from "../upstream";
+import { toGdeltCountryCode } from "../../../news/countryCode";
 
 const GDELT_DOC_BASE = "https://api.gdeltproject.org/api/v2/doc/doc";
 
@@ -94,12 +95,18 @@ interface GdeltDocArticle {
   tone?: number;
 }
 
+function buildCountryQuery(country: string, expression: string): string {
+  const countryCode = toGdeltCountryCode(country);
+  if (!countryCode) throw new RangeError("Unknown country ISO2 code or name");
+  return `${expression} sourcecountry:${countryCode}`;
+}
+
 async function fetchGdeltConflictCount(
   country: string,
   theme: string,
   timespan: string,
 ): Promise<number> {
-  const query = `${theme} sourcecountry:${country}`;
+  const query = buildCountryQuery(country, theme);
   const url = `${GDELT_DOC_BASE}?query=${encodeURIComponent(query)}&timespan=${timespan}&mode=timelinevol&format=json`;
   try {
     const resp = await fetchJsonOrThrow<{ timeline?: Array<{ data: GdeltTimelineEntry[] }> }>(
@@ -118,7 +125,7 @@ async function fetchGdeltConflictArticles(
   country: string,
   timespan: string,
 ): Promise<GdeltDocArticle[]> {
-  const query = `(conflict OR protest OR military OR violence OR attack OR bombing) sourcecountry:${country}`;
+  const query = buildCountryQuery(country, "(conflict OR protest OR military OR violence OR attack OR bombing)");
   const url = `${GDELT_DOC_BASE}?query=${encodeURIComponent(query)}&timespan=${timespan}&mode=artlist&maxrecords=50&format=json`;
   try {
     const resp = await fetchJsonOrThrow<{ articles?: GdeltDocArticle[] }>(
@@ -151,6 +158,8 @@ export async function getAcledCountryEvents(
   country: string,
   days = 30,
 ): Promise<CachedFetchResult<AcledCountrySummary>> {
+  const countryCode = toGdeltCountryCode(country);
+  if (!countryCode) throw new RangeError("Unknown country ISO2 code or name");
   const empty: AcledCountrySummary = {
     totalEvents: 0,
     totalFatalities: 0,
@@ -164,7 +173,7 @@ export async function getAcledCountryEvents(
   };
 
   return cachedFetch({
-    cacheKey: `conflict-gdelt-${country.toLowerCase()}-${days}d`,
+    cacheKey: `conflict-gdelt-fips-v2-${countryCode}-${days}d`,
     policy: POLICY,
     fallbackValue: empty,
     request: async () => {

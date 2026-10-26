@@ -34,6 +34,7 @@ async function handler(request: Request) {
     headline: headline || undefined,
     source: source || undefined,
     backend: backend || undefined,
+    signal: request.signal,
   });
 
   return NextResponse.json(

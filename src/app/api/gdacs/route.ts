@@ -1,3 +1,4 @@
+import { fetchWithTimeout as fetchUpstream } from "../../../lib/server/fetchWithTimeout";
 import { NextResponse } from "next/server";
 import { XMLParser } from "fast-xml-parser";
 import type { DisasterAlert } from "../../../lib/providers/types";
@@ -74,13 +75,7 @@ function toRawItems(xml: string): GdacsRawItem[] {
 }
 
 async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    return await fetch(url, { ...init, signal: controller.signal, cache: "no-store" });
-  } finally {
-    clearTimeout(timer);
-  }
+  return fetchUpstream(url, { ...init, cache: "no-store" }, FETCH_TIMEOUT_MS);
 }
 
 function toResponse(payload: GdacsRouteResponse): NextResponse<GdacsRouteResponse> {

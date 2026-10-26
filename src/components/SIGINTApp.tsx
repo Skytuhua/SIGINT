@@ -1,5 +1,7 @@
 "use client";
 
+import { readBrowserPreference, writeBrowserPreference } from "../lib/browserStorage";
+
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useSIGINTStore } from "../store";
@@ -53,7 +55,7 @@ export default function SIGINTApp() {
   const opsLayerSnapshotRef = useRef<Record<string, boolean> | null>(null);
   const [globeHeightVh, setGlobeHeightVh] = useState(() => {
     if (typeof window === "undefined") return DEFAULT_GLOBE_HEIGHT_VH;
-    const raw = window.localStorage.getItem(GLOBE_HEIGHT_KEY);
+    const raw = readBrowserPreference(GLOBE_HEIGHT_KEY);
     if (!raw) return DEFAULT_GLOBE_HEIGHT_VH;
     const parsed = Number.parseFloat(raw);
     if (!Number.isFinite(parsed)) return DEFAULT_GLOBE_HEIGHT_VH;
@@ -75,7 +77,7 @@ export default function SIGINTApp() {
     if (typeof window === "undefined") return;
     // Skip the first render to avoid overwriting the stored value with the initial state
     if (!globeHeightInitRef.current) { globeHeightInitRef.current = true; return; }
-    window.localStorage.setItem(GLOBE_HEIGHT_KEY, globeHeightVh.toFixed(2));
+    writeBrowserPreference(GLOBE_HEIGHT_KEY, globeHeightVh.toFixed(2));
   }, [globeHeightVh]);
 
   useEffect(() => {

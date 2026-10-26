@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../../../../../../lib/server/ucdp/ucdpGedStore", () => ({
   ensureUcdpLoaded: vi.fn(async () => undefined),
-  loadAdditionalYear: vi.fn(async () => undefined),
+  loadAdditionalYear: vi.fn(async () => true),
   getUcdpDefaultYear: () => 2024,
   getUcdpMeta: () => ({ datasetVersion: "25.1" }),
   queryUcdpEvents: vi.fn(() => [{
@@ -16,7 +16,7 @@ import { ensureUcdpLoaded, loadAdditionalYear } from "../../../../../../lib/serv
 
 function request(query: string) {
   return GET(new Request(`http://localhost/api/news/layers/ucdp-events?${query}`), {
-    params: { layerId: "ucdp-events" },
+    params: Promise.resolve({ layerId: "ucdp-events" }),
   });
 }
 

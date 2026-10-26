@@ -27,7 +27,7 @@ function MetricCard({ label, value }: { label: React.ReactNode; value: string })
   );
 }
 
-function FundRow({ label, values, years, isBold }: { label: string; values: number[]; years: number[]; isBold?: boolean }) {
+function FundRow({ label, values, years, isBold, formatter = fmtM }: { label: string; values: number[]; years: number[]; isBold?: boolean; formatter?: (value: number) => string }) {
   const up = values[values.length - 1] >= values[0];
   const nonZero = values.some((v) => v !== 0);
   if (!nonZero) return null;
@@ -35,7 +35,7 @@ function FundRow({ label, values, years, isBold }: { label: string; values: numb
     <tr className={`si-fund-tr${isBold ? " is-bold" : ""}`}>
       <td className="si-fund-td-label">{label}</td>
       {values.map((v, i) => (
-        <td key={i} className="si-fund-td-val">{fmtM(v)}</td>
+        <td key={i} className="si-fund-td-val">{formatter(v)}</td>
       ))}
       <td className="si-fund-td-spark">
         <MiniSparkline prices={values} up={up} width={40} height={12} />
@@ -109,7 +109,7 @@ export default function FundamentalsPanel({ sym }: Props) {
           <table className="si-fund-table">
             <thead>
               <tr>
-                <th className="si-fund-th">($M)</th>
+                <th className="si-fund-th">($M, except EPS)</th>
                 {fund.income.years.map((y) => <th key={y} className="si-fund-th">{y}</th>)}
                 <th className="si-fund-th">TREND</th>
               </tr>
@@ -119,7 +119,7 @@ export default function FundamentalsPanel({ sym }: Props) {
               <FundRow label="Gross Profit"      values={fund.income.grossProfit}      years={fund.income.years} />
               <FundRow label="Operating Income"  values={fund.income.operatingIncome}  years={fund.income.years} />
               <FundRow label="Net Income"        values={fund.income.netIncome}        years={fund.income.years} isBold />
-              <FundRow label="EPS (Diluted)"     values={fund.income.eps}              years={fund.income.years} />
+              <FundRow formatter={(value) => `$${value.toFixed(2)}`} label="EPS (Diluted, $/share)"     values={fund.income.eps}              years={fund.income.years} />
               {/* EPS term is explained via the glossary sidebar */}
             </tbody>
           </table>

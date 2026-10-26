@@ -84,15 +84,6 @@ const AI_SUMMARIES = [
   },
 ];
 
-const STATIC_HEADLINES = [
-  "U.S. Navy intercepts Iranian drone swarm near Strait of Hormuz",
-  "Fed officials signal no rush on rate cuts as labor market stays firm",
-  "NVIDIA beats estimates as data center demand stays hot",
-  "EU unveils large defense spending package amid NATO tensions",
-  "China PMI rebounds and lifts regional risk sentiment",
-  "Brent crude jumps on Gulf shipping insurance surcharges",
-  "Bitcoin holds gains as ETF flows remain strong",
-];
 
 const IMPACT_DOT: Record<Impact, string> = { high: "#ff5a5f", med: "#ffab40", low: "#36b37e" };
 
@@ -144,22 +135,6 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
   const feedItems = useSIGINTStore((state) => state.news.feedItems);
   const [turnOff, setTurnOff] = useState(false);
   const [aiPage, setAiPage] = useState(0);
-  const [utc, setUtc] = useState("");
-
-  useEffect(() => {
-    const tick = () => {
-      const now = new Date();
-      setUtc(
-        `${String(now.getUTCHours()).padStart(2, "0")}:${String(now.getUTCMinutes()).padStart(2, "0")}:${String(
-          now.getUTCSeconds()
-        ).padStart(2, "0")}`
-      );
-    };
-    tick();
-    const id = setInterval(tick, 1_000);
-    return () => clearInterval(id);
-  }, []);
-
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") handleClose();
@@ -170,21 +145,18 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
   }, [turnOff]);
 
   function handleClose() {
-    if (turnOff) localStorage.setItem("si-daily-lineup-disabled", "true");
+    try {
+      if (turnOff) localStorage.setItem("si-daily-lineup-disabled", "true");
+    } catch { /* Storage may be blocked; closing remains available. */ }
     onClose();
   }
 
   const headlines = useMemo(
-    () => (feedItems.length > 0 ? feedItems.slice(0, 12).map((item) => item.headline) : STATIC_HEADLINES),
+    () => (feedItems.slice(0, 12).map((item) => item.headline)),
     [feedItems]
   );
 
-  const dateLabel = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  }).toUpperCase();
+  const dateLabel = "SIMULATED REFERENCE · as-of unknown";
 
   const baseText: React.CSSProperties = {
     fontFamily: mono,
@@ -194,7 +166,8 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
 
   const content = (
     <div style={{ display: "grid", gap: 12, ...baseText }}>
-      <Section title="World Markets" isMobile={isMobile}>
+      <div role="note">SIMULATED REFERENCE · as-of unknown. Market quotes, calendars, analyst activity and summaries below are illustrative fixtures. Headlines come from the news feed.</div>
+      <Section title="World Markets · SIMULATED" isMobile={isMobile}>
         <div
           style={{
             display: "grid",
@@ -262,16 +235,16 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
       </Section>
 
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-        <Section title="Market Briefing" isMobile={isMobile}>
+        <Section title="Market Briefing · SIMULATED" isMobile={isMobile}>
           <p style={{ lineHeight: 1.7, color: "#8da3b8", margin: 0, fontSize: 11 }}>
             Equities regained footing as energy stabilized and leadership returned to large-cap growth. Yields eased,
             volatility compressed, and cross-asset behavior tilted back toward risk-on, but the market still looks
             vulnerable to labor-data surprises, Fed repricing, and any renewed shipping or oil shock headlines.
           </p>
-          <div style={{ marginTop: 8, fontSize: 9, color: "#5f7488", letterSpacing: 1 }}>source / freshness / state</div>
+          <div style={{ marginTop: 8, fontSize: 9, color: "#5f7488", letterSpacing: 1 }}>Illustrative narrative · as-of unknown</div>
         </Section>
 
-        <Section title="Analyst Activity" isMobile={isMobile}>
+        <Section title="Analyst Activity · SIMULATED" isMobile={isMobile}>
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 9, color: "#6e849d", letterSpacing: 1, marginBottom: 6 }}>
               <Term id="OW">Upgrades</Term>
@@ -324,7 +297,7 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-        <Section title="Economic Calendar" isMobile={isMobile}>
+        <Section title="Economic Calendar · SIMULATED" isMobile={isMobile}>
           <div style={{ display: "grid", gap: 8 }}>
             {ECON_EVENTS.map((event, index) => (
               <div
@@ -398,6 +371,7 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))", gap: 12 }}>
         <Section title="Top Headlines" isMobile={isMobile}>
           <div style={{ display: "grid", gap: 6 }}>
+            {headlines.length === 0 && <p>No headlines available</p>}
             {headlines.map((headline, index) => (
               <div
                 key={`${headline}-${index}`}
@@ -417,9 +391,9 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
           </div>
         </Section>
 
-        <Section title="AI Summaries" isMobile={isMobile}>
+        <Section title="AI Summaries · SIMULATED" isMobile={isMobile}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-            <span style={{ fontSize: 9, color: "#6e849d", letterSpacing: 1 }}>Daily Overview</span>
+            <span style={{ fontSize: 9, color: "#6e849d", letterSpacing: 1 }}>Reference overview</span>
             <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
               <button
                 type="button"
@@ -564,7 +538,7 @@ export default function DailyLineupModal({ onClose, onOpenGlossary }: Props) {
           <span style={{ color: "#7fa8c4", fontWeight: 700, fontSize: 10, letterSpacing: 2 }}>SIGINT | DAILY LINEUP</span>
           <span style={{ fontSize: 9, color: "#5f7488", letterSpacing: 1 }}>NORTH AMERICAN EDITION</span>
           <span style={{ fontSize: 9, color: "#8da3b8", marginLeft: "auto" }}>{dateLabel}</span>
-          <span style={{ fontSize: 10, color: "#7fa8c4", letterSpacing: 1 }}>UTC {utc}</span>
+          <span style={{ fontSize: 10, color: "#7fa8c4", letterSpacing: 1 }}>REFERENCE</span>
           <button
             type="button"
             onClick={handleClose}

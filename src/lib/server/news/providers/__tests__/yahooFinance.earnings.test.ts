@@ -21,6 +21,24 @@ async function calendar(now: string, dates: string[]) {
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe("earnings calendar ordering", () => {
+  it("leaves quarterly EPS unknown when quotes only provide annual metrics", async () => {
+    vi.resetModules();
+    vi.spyOn(Date, "now").mockReturnValue(Date.parse("2026-10-26T00:00:00Z"));
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (url === "https://fc.yahoo.com") return new Response(null);
+      if (url.includes("/getcrumb")) return new Response("test-crumb");
+      return Response.json({ quoteResponse: { result: [{ symbol: "AAPL", shortName: "Apple",
+        earningsTimestamp: Date.parse("2026-10-25T16:00:00Z") / 1000,
+        epsTrailingTwelveMonths: 4, epsForward: 5, epsCurrentYear: 4.5,
+      }] } });
+    }));
+    const { getEarningsCalendar } = await import("../yahooFinance");
+    const entry = (await getEarningsCalendar()).data.recent[0];
+    expect(entry.epsEst).toBe("—");
+    expect(entry.epsAct).toBeUndefined();
+    expect(entry.surprise).toBeUndefined();
+  });
+
   it("orders upcoming events chronologically across months and day digits", async () => {
     const data = await calendar("2026-09-01T00:00:00Z", [
       "2026-10-02T16:00:00Z", "2026-09-30T16:00:00Z", "2026-09-10T16:00:00Z", "2026-09-02T16:00:00Z",

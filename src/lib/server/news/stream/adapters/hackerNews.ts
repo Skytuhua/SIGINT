@@ -1,5 +1,6 @@
 import type { StreamItem } from "../../../../news/stream/types";
 import { makeDuplicateGroupId } from "../normalize";
+import { fetchWithTimeout } from "../../../fetchWithTimeout";
 
 const HN_ALGOLIA_URL = "https://hn.algolia.com/api/v1/search_by_date";
 
@@ -46,14 +47,9 @@ export async function pollHackerNews(): Promise<{ items: StreamItem[]; healthUpd
       params.set("numericFilters", `created_at_i>${lastCursor}`);
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10_000);
-
-    const res = await fetch(`${HN_ALGOLIA_URL}?${params}`, {
-      signal: controller.signal,
+    const res = await fetchWithTimeout(`${HN_ALGOLIA_URL}?${params}`, {
       headers: { Accept: "application/json" },
     });
-    clearTimeout(timeout);
 
     if (!res.ok) {
       return { items: [], healthUpdate: { ok: false, count: 0, error: `HN ${res.status}` } };

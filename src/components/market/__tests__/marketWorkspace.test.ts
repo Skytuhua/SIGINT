@@ -1,0 +1,26 @@
+import React from "react";
+import { act, create, type ReactTestRenderer } from "react-test-renderer";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
+const device = vi.hoisted(() => ({ mobile: false }));
+vi.mock("../../../hooks/useIsMobile", () => ({ useIsMobile: () => device.mobile }));
+vi.mock("../MarketTickerBar", () => ({ default: () => null }));
+vi.mock("../DailyLineupModal", () => ({ default: () => React.createElement("div", { "data-lineup": true }) }));
+vi.mock("../tabs/MarketOverviewTab", () => ({ default: () => null }));
+vi.mock("../tabs/MarketEquitiesTab", () => ({ default: () => null }));
+vi.mock("../tabs/MarketRatesTab", () => ({ default: () => null }));
+vi.mock("../tabs/MarketFxTab", () => ({ default: () => null }));
+vi.mock("../tabs/MarketCommoditiesTab", () => ({ default: () => null }));
+vi.mock("../tabs/MarketCryptoTab", () => ({ default: () => null }));
+vi.mock("../tabs/MarketScreenerTab", () => ({ default: () => null }));
+vi.mock("../TickerDetailOverlay", () => ({ default: () => null }));
+vi.mock("../GlossaryPanel", () => ({ default: () => null }));
+import MarketWorkspace from "../MarketWorkspace";
+let tree: ReactTestRenderer;
+beforeEach(() => vi.stubGlobal("window", { localStorage: { getItem: (key: string) => key === "si-daily-lineup-disabled" ? "true" : null, setItem() {} } }));
+afterEach(() => { if (tree) act(() => tree.unmount()); vi.unstubAllGlobals(); });
+it.each([false, true])("honors disabled auto-open on mobile=%s and retains manual briefing access", mobile => {
+  device.mobile = mobile; act(() => { tree = create(React.createElement(MarketWorkspace)); });
+  expect(tree.root.findAllByProps({ "data-lineup": true })).toHaveLength(0);
+  const open = tree.root.findAllByType("button").find(b => /Daily|LINEUP|BRIEF/i.test(b.children.join("")) || /Daily/i.test(b.props.title ?? ""));
+  expect(open).toBeDefined(); act(() => open!.props.onClick()); expect(tree.root.findAllByProps({ "data-lineup": true })).toHaveLength(1);
+});

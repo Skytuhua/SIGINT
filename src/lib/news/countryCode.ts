@@ -1,4 +1,4 @@
-import { GDELT_FIPS_TO_ISO2 } from "../../config/newsConfig";
+import { GDELT_FIPS_TO_ISO2, ISO2_TO_GDELT_FIPS, ISO2_COUNTRY_CODES } from "./gdeltCountryCodes";
 
 const COUNTRY_NAME_TO_ISO2: Record<string, string> = {
   "united states": "US",
@@ -133,9 +133,6 @@ export function normalizeCountryCode(rawCountry?: string | null): string | null 
   if (!raw) return null;
 
   const upper = raw.toUpperCase();
-  const fipsMapped = GDELT_FIPS_TO_ISO2[upper];
-  if (fipsMapped) return fipsMapped;
-
   if (/^[A-Z]{2}$/.test(upper)) return upper;
 
   const iso3Mapped = ISO3_TO_ISO2[upper];
@@ -148,6 +145,36 @@ export function normalizeCountryCode(rawCountry?: string | null): string | null 
     .trim();
 
   return COUNTRY_NAME_TO_ISO2[normalizedName] ?? null;
+}
+
+/** Use only for raw GDELT FIPS input; application country codes are ISO2. */
+export function normalizeGdeltCountryCode(rawCountry?: string | null): string | null {
+  const upper = rawCountry?.trim().toUpperCase();
+  if (!upper) return null;
+  return GDELT_FIPS_TO_ISO2[upper] ?? normalizeCountryCode(rawCountry);
+}
+
+let providerCountryNames: Map<string, string> | null = null;
+
+function isoCountryFromName(country: string): string | null {
+  if (!providerCountryNames) {
+    providerCountryNames = new Map();
+    try {
+      const displayNames = new Intl.DisplayNames(["en"], { type: "region" });
+      for (const iso2 of ISO2_COUNTRY_CODES) {
+        const name = displayNames.of(iso2);
+        if (name) providerCountryNames.set(name.toLowerCase(), iso2);
+      }
+    } catch {
+      // The established explicit country-name aliases remain available.
+    }
+  }
+  return providerCountryNames.get(country.trim().toLowerCase()) ?? null;
+}
+
+export function toGdeltCountryCode(isoCountry: string): string | null {
+  const iso2 = normalizeCountryCode(isoCountry) ?? isoCountryFromName(isoCountry);
+  return iso2 && ISO2_COUNTRY_CODES.has(iso2) ? ISO2_TO_GDELT_FIPS[iso2] ?? iso2 : null;
 }
 
 export function isCountryMatch(rawCountry: string | null | undefined, iso2: string): boolean {
